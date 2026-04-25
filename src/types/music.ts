@@ -40,6 +40,10 @@ export interface Song {
   };
   image: ImageQuality[];
   downloadUrl: DownloadUrl[];
+  audioUrl?: string;        // Resolved YouTube audio URL (set lazily on play)
+  deezerTrackId?: number;   // Original Deezer track ID for reference
+  preview?: string;         // Deezer 30s preview URL
+  youtubeId?: string;       // Resolved YouTube video ID
 }
 
 export interface Album {

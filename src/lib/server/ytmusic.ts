@@ -23,11 +23,6 @@ type SearchArtistResult = {
   image: Array<{ quality: string; url: string }>;
 };
 
-type PipedAudioStream = {
-  url?: string;
-  mimeType?: string;
-  bitrate?: number;
-};
 
 let ytmusicClientPromise: Promise<YTMusic> | null = null;
 
@@ -188,38 +183,5 @@ export function mapYtArtistToSearchArtist(artist: YTMusicArtist): SearchArtistRe
   };
 }
 
-export async function resolveBestAudioStream(videoId: string): Promise<string | null> {
-  const ytUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
-  try {
-    const res = await fetch("https://api.cobalt.tools/api/json", {
-      method: "POST",
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        url: ytUrl,
-        isAudioOnly: true,
-        aFormat: "mp3"
-      }),
-      cache: 'no-store'
-    });
 
-    if (!res.ok) {
-      console.error(`Cobalt API Error: ${res.status} ${await res.text()}`);
-      return null;
-    }
-
-    const data = await res.json();
-
-    if (data && data.url) {
-      return data.url;
-    }
-
-    return null;
-  } catch (error) {
-    console.error("Gagal ngambil audio dari Cobalt:", error);
-    return null;
-  }
-}

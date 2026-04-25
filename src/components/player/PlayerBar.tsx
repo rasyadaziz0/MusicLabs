@@ -14,7 +14,8 @@ import {
   VolumeX, 
   Mic2, 
   ListMusic, 
-  Maximize2 
+  Maximize2,
+  Loader2 
 } from 'lucide-react';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
@@ -24,6 +25,8 @@ export default function PlayerBar() {
   const { 
     currentTrack, 
     isPlaying, 
+    isResolving,
+    isPreview,
     togglePlay, 
     nextTrack, 
     prevTrack, 
@@ -68,6 +71,7 @@ export default function PlayerBar() {
               src={getBestImageUrl(currentTrack.image)}
               alt={currentTrack.name}
               fill
+              sizes="56px"
               className="object-cover group-hover:scale-110 transition-transform duration-500"
             />
             <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -75,8 +79,13 @@ export default function PlayerBar() {
             </div>
           </div>
           <div className="overflow-hidden">
-            <h4 className="font-bold text-sm truncate hover:underline">
+            <h4 className="font-bold text-sm truncate hover:underline flex items-center gap-2">
               {currentTrack.name}
+              {isPreview && (
+                <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-white/10 text-muted uppercase tracking-wider border border-white/5 flex-shrink-0">
+                  Preview 30s
+                </span>
+              )}
             </h4>
             <p className="text-xs text-muted truncate hover:underline">
               {currentTrack.artists.primary.map(a => a.name).join(', ')}
@@ -98,9 +107,16 @@ export default function PlayerBar() {
           </button>
           <button 
             onClick={togglePlay}
-            className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition-transform shadow-lg"
+            disabled={isResolving}
+            className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition-transform shadow-lg disabled:opacity-50"
           >
-            {isPlaying ? <Pause size={20} fill="black" /> : <Play size={20} fill="black" className="ml-1" />}
+            {isResolving ? (
+              <Loader2 size={20} className="animate-spin text-black" />
+            ) : isPlaying ? (
+              <Pause size={20} fill="black" />
+            ) : (
+              <Play size={20} fill="black" className="ml-1" />
+            )}
           </button>
           <button 
             onClick={nextTrack}

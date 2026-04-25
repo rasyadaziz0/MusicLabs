@@ -56,6 +56,8 @@ export default function RootLayout({
           <AuthProvider>
             <PlayerProvider>
               {children}
+              {/* Hidden YouTube Player Container */}
+              <div id="youtube-player-container" className="fixed bottom-0 right-0 w-[1px] h-[1px] opacity-0 pointer-events-none -z-50" />
             </PlayerProvider>
           </AuthProvider>
         </QueryProvider>

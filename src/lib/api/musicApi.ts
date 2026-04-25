@@ -1,24 +1,7 @@
 import { Song, ImageQuality } from '@/types/music';
 
-const BASE =
-  process.env.NEXT_PUBLIC_YTMUSIC_API_URL
-  || process.env.NEXT_PUBLIC_MUSIC_API_URL
-  || '';
+// ── Internal API fetch (hits our own Next.js routes) ───────────────
 
-// Helper
-async function apiFetch<T>(path: string): Promise<T> {
-  if (!BASE) {
-    throw new Error('Missing API base URL. Set NEXT_PUBLIC_YTMUSIC_API_URL in your environment.');
-  }
-
-  const baseUrl = BASE.endsWith('/') ? BASE.slice(0, -1) : BASE;
-  const res = await fetch(`${baseUrl}${path}`, { next: { revalidate: 300 } });
-  if (!res.ok) throw new Error(`API error: ${path}`);
-  const json = await res.json();
-  return json.data as T;
-}
-
-// Internal helper for Next.js route handlers under /api/*
 async function apiFetchInternal<T>(path: string): Promise<T> {
   const res = await fetch(path, { next: { revalidate: 60 } });
   if (!res.ok) throw new Error(`API error: ${path}`);
@@ -26,7 +9,8 @@ async function apiFetchInternal<T>(path: string): Promise<T> {
   return (json?.data ?? json) as T;
 }
 
-// Search
+// ── Search ─────────────────────────────────────────────────────────
+
 export const searchSongs = (q: string, page = 1) =>
   apiFetchInternal<any>(`/api/search/songs?query=${encodeURIComponent(q)}&page=${page}&limit=20`);
 
@@ -36,26 +20,58 @@ export const searchArtists = (q: string, page = 1) =>
 export const searchAll = (q: string) =>
   apiFetchInternal<any>(`/api/search?q=${encodeURIComponent(q)}`);
 
-// Songs
-export const getSong = (id: string) => apiFetch<Song[]>(`/api/songs?id=${id}`);
-export const getSongLyrics = (id: string) => apiFetch<any>(`/api/songs/${id}/lyrics`);
-export const getSuggestions = (id: string) => apiFetch<Song[]>(`/api/songs/${id}/suggestions`);
+// ── Home feed (Deezer chart) ───────────────────────────────────────
 
-// Albums & Artists
-export const getAlbum = (id: string) => apiFetch<any>(`/api/albums?id=${id}`);
-export const getArtist = (id: string) => apiFetch<any>(`/api/artists?id=${id}`);
-export const getArtistSongs = (id: string, page = 1) =>
-  apiFetch<any>(`/api/artists/${id}/songs?page=${page}&sortBy=popularity&sortOrder=desc`);
+export const getHomeFeed = () =>
+  apiFetchInternal<any>(`/api/home`);
 
-// Home feed
-export const getHomeFeed = (lang = 'hindi,english') => apiFetch<any>(`/api/modules?language=${lang}`);
+// ── Artist songs ───────────────────────────────────────────────────
 
-// Playlist YouTube Music
-export const getYoutubeMusicPlaylist = (id: string) => apiFetch<any>(`/api/playlists?id=${id}`);
+export const getArtistSongs = (artistId: string, page = 1) => {
+  // Extract numeric Deezer ID from prefixed format (e.g., "dz-artist-123" → "123")
+  const numericId = artistId.replace(/^dz-artist-/, '');
+  return apiFetchInternal<any>(
+    `/api/artists/${numericId}/top?page=${page}&limit=20`
+  );
+};
 
-// Helper: ambil URL audio kualitas terbaik
+// ── Lyrics (stub — Deezer doesn't provide lyrics) ─────────────────
+
+export const getSongLyrics = async (_trackId: string): Promise<{ lyrics: string } | null> => {
+  // Deezer API doesn't expose lyrics publicly.
+  // Lyrics are fetched from Supabase (LRC format) in useLyrics hook.
+  // This stub exists as a fallback that gracefully returns null.
+  return null;
+};
+
+// ── Audio resolve ──────────────────────────────────────────────────
+
+export async function resolveAudioUrl(title: string, artist: string): Promise<{
+  audioUrl: string;
+  videoId: string;
+} | null> {
+  try {
+    const res = await fetch(
+      `/api/audio/resolve?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}`
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.audioUrl ? data : null;
+  } catch {
+    return null;
+  }
+}
+
+// ── Helpers ────────────────────────────────────────────────────────
+
+/** Get best available audio URL from downloadUrl array */
 export function getBestAudioUrl(song: Song): string {
+  // Kalau audioUrl sudah di-resolve sebelumnya, pakai itu
+  if (song.audioUrl) return song.audioUrl;
+
   const urls = song.downloadUrl;
+  if (!urls || urls.length === 0) return '';
+
   const preferred = ['320kbps', '160kbps', '96kbps', '48kbps', '12kbps'];
   for (const quality of preferred) {
     const found = urls.find(u => u.quality === quality);
@@ -64,7 +80,7 @@ export function getBestAudioUrl(song: Song): string {
   return urls[urls.length - 1]?.url ?? '';
 }
 
-// Helper: ambil cover art terbaik
+/** Get best cover art image URL */
 export function getBestImageUrl(images: ImageQuality[]): string {
   return images.find(i => i.quality === '500x500')?.url
     ?? images.find(i => i.quality === '150x150')?.url

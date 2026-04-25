@@ -7,7 +7,11 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'c.saavncdn.com',
+        hostname: '*.dzcdn.net',  // Deezer CDN — covers cdn-images, e-cdns-images, etc.
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.deezer.com',            // Deezer API image redirects
       },
       {
         protocol: 'https',

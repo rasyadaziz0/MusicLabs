@@ -15,7 +15,7 @@ export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { data: homeData, isLoading } = useQuery({
     queryKey: ['homeFeed'],
-    queryFn: () => getHomeFeed('english,hindi'),
+    queryFn: () => getHomeFeed(),
   });
 
   const { playTrack } = usePlayer();
@@ -69,6 +69,7 @@ export default function Home() {
                   src={getBestImageUrl(song.image)} 
                   alt={song.name}
                   fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
                   className="object-cover transition-transform duration-700 group-hover:scale-110"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-void via-void/20 to-transparent opacity-80" />
@@ -103,6 +104,7 @@ export default function Home() {
                     src={getBestImageUrl(song.image)} 
                     alt={song.name}
                     fill
+                    sizes="(max-width: 768px) 50vw, (max-width: 1024px) 25vw, 16vw"
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">

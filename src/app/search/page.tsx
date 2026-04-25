@@ -255,6 +255,7 @@ export default function SearchPage() {
                             src={getBestImageUrl(song.image)}
                             alt={song.name}
                             fill
+                            sizes="40px"
                             className="object-cover"
                           />
                         </div>
