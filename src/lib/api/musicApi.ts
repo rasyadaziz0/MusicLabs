@@ -35,6 +35,18 @@ export const getArtistSongs = (artistId: string, page = 1) => {
   );
 };
 
+export const getSong = (trackId: string) => {
+  const normalizedTrackId = trackId.replace(/^dz-/, '');
+  return apiFetchInternal<Song>(`/api/tracks/${normalizedTrackId}`);
+};
+
+export const getSongsByIds = async (trackIds: string[]) => {
+  const results = await Promise.allSettled(trackIds.map((trackId) => getSong(trackId)));
+  return results
+    .filter((result): result is PromiseFulfilledResult<Song> => result.status === 'fulfilled')
+    .map((result) => result.value);
+};
+
 // ── Lyrics (stub — Deezer doesn't provide lyrics) ─────────────────
 
 export const getSongLyrics = async (_trackId: string): Promise<{ lyrics: string } | null> => {

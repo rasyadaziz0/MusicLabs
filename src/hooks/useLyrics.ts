@@ -1,72 +1,71 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase/client';
-import { parseLRC, LrcLine } from '@/lib/utils/lrcParser';
-import { getSongLyrics } from '@/lib/api/musicApi';
+import { parseLRC, LrcLine, addInstrumentalPlaceholders } from '@/lib/utils/lrcParser';
+import { Song } from '@/types/music';
 
-export function useLyrics(trackId: string | null, currentTime: number) {
+export function useLyrics(currentTrack: Song | null) {
   const [lines, setLines] = useState<LrcLine[]>([]);
-  const [activeIndex, setActiveIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isSynced, setIsSynced] = useState(false);
 
   useEffect(() => {
-    if (!trackId) {
+    if (!currentTrack) {
       setLines([]);
+      setIsSynced(false);
+      setIsLoading(false);
       return;
     }
+
+    const artistName = currentTrack.artists.primary[0]?.name ?? '';
+    const duration = Math.round(currentTrack.duration);
+    if (!currentTrack.name || !artistName || !Number.isFinite(duration) || duration <= 0) {
+      setLines([]);
+      setIsSynced(false);
+      setIsLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
 
     const fetchLyrics = async () => {
       setIsLoading(true);
       try {
-        // 1. Try to fetch LRC from Supabase
-        const { data, error } = await supabase
-          .from('track_lyrics')
-          .select('lyrics_lrc')
-          .eq('track_id', trackId)
-          .single();
+        const res = await fetch(
+          `/api/lyrics?track_name=${encodeURIComponent(currentTrack.name)}&artist_name=${encodeURIComponent(artistName)}&duration=${duration}`,
+          { signal: controller.signal },
+        );
 
-        if (data?.lyrics_lrc) {
-          setLines(parseLRC(data.lyrics_lrc));
+        if (!res.ok) {
+          setLines([]);
+          setIsSynced(false);
+          return;
+        }
+
+        const data: { lyrics?: string; synced?: boolean } = await res.json();
+
+        if (data.lyrics && data.synced) {
+          const parsedLines = parseLRC(data.lyrics);
+          setLines(addInstrumentalPlaceholders(parsedLines));
           setIsSynced(true);
         } else {
-          // 2. Fallback: fetch plain lyrics from YouTube Music API
-          const lyricsData = await getSongLyrics(trackId);
-          if (lyricsData?.lyrics) {
-            // Plain text as a single line at time 0
-            setLines([{ time: 0, text: lyricsData.lyrics }]);
-            setIsSynced(false);
-          } else {
-            setLines([]);
-          }
+          setLines([]);
+          setIsSynced(false);
         }
       } catch (err) {
-        console.error('Error fetching lyrics:', err);
+        if ((err as Error).name === 'AbortError') return;
+        console.error('Gagal ambil lirik:', err);
         setLines([]);
+        setIsSynced(false);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchLyrics();
-  }, [trackId]);
 
-  useEffect(() => {
-    if (lines.length === 0 || !isSynced) return;
+    return () => controller.abort();
+  }, [currentTrack]);
 
-    // Binary search for active line
-    let lo = 0, hi = lines.length - 1;
-    while (lo < hi) {
-      const mid = Math.floor((lo + hi + 1) / 2);
-      if (lines[mid].time <= currentTime) {
-        lo = mid;
-      } else {
-        hi = mid - 1;
-      }
-    }
-    setActiveIndex(lo);
-  }, [currentTime, lines, isSynced]);
-
-  return { lines, activeIndex, isLoading, isSynced };
+  return { lines, isLoading, isSynced };
 }

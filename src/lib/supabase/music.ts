@@ -1,0 +1,184 @@
+import { Song } from '@/types/music';
+import { getSongsByIds } from '@/lib/api/musicApi';
+import { supabase } from './client';
+
+export interface PlaylistRecord {
+  id: string;
+  user_id: string;
+  name: string;
+  description: string | null;
+  cover_url: string | null;
+  created_at?: string;
+}
+
+interface PlaylistTrackRow {
+  playlist_id: string;
+  track_id: string;
+  position: number;
+}
+
+interface LikedSongRow {
+  track_id: string;
+  liked_at?: string;
+}
+
+export async function getUserPlaylists(userId: string) {
+  const { data, error } = await supabase
+    .from('playlists')
+    .select('id, user_id, name, description, cover_url, created_at')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []) as PlaylistRecord[];
+}
+
+export async function getPlaylistById(playlistId: string) {
+  const { data, error } = await supabase
+    .from('playlists')
+    .select('id, user_id, name, description, cover_url, created_at')
+    .eq('id', playlistId)
+    .single();
+
+  if (error) throw error;
+  return data as PlaylistRecord;
+}
+
+export async function createPlaylist(input: {
+  userId: string;
+  name: string;
+  description?: string;
+  coverUrl?: string;
+}) {
+  const payload = {
+    user_id: input.userId,
+    name: input.name.trim(),
+    description: input.description?.trim() || null,
+    cover_url: input.coverUrl?.trim() || null,
+  };
+
+  const { data, error } = await supabase
+    .from('playlists')
+    .insert(payload)
+    .select('id, user_id, name, description, cover_url, created_at')
+    .single();
+
+  if (error) throw error;
+  return data as PlaylistRecord;
+}
+
+export async function getPlaylistTrackIds(playlistId: string) {
+  const { data, error } = await supabase
+    .from('playlist_tracks')
+    .select('playlist_id, track_id, position')
+    .eq('playlist_id', playlistId)
+    .order('position', { ascending: true });
+
+  if (error) throw error;
+  return (data ?? []) as PlaylistTrackRow[];
+}
+
+export async function getPlaylistTracks(playlistId: string): Promise<Song[]> {
+  const rows = await getPlaylistTrackIds(playlistId);
+  const trackIds = rows.map((row) => row.track_id);
+  if (trackIds.length === 0) return [];
+  return getSongsByIds(trackIds);
+}
+
+export async function addTrackToPlaylist(playlistId: string, trackId: string) {
+  const { data: existingRow, error: existingError } = await supabase
+    .from('playlist_tracks')
+    .select('playlist_id')
+    .eq('playlist_id', playlistId)
+    .eq('track_id', trackId)
+    .maybeSingle();
+
+  if (existingError) throw existingError;
+  if (existingRow) return false;
+
+  const { data: lastRow, error: positionError } = await supabase
+    .from('playlist_tracks')
+    .select('position')
+    .eq('playlist_id', playlistId)
+    .order('position', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (positionError) throw positionError;
+
+  const { error } = await supabase.from('playlist_tracks').insert({
+    playlist_id: playlistId,
+    track_id: trackId,
+    position: (lastRow?.position ?? -1) + 1,
+  });
+
+  if (error) throw error;
+  return true;
+}
+
+export async function removeTrackFromPlaylist(playlistId: string, trackId: string) {
+  const { error } = await supabase
+    .from('playlist_tracks')
+    .delete()
+    .eq('playlist_id', playlistId)
+    .eq('track_id', trackId);
+
+  if (error) throw error;
+}
+
+export async function getLikedSongs(userId: string) {
+  const { data, error } = await supabase
+    .from('liked_tracks')
+    .select('track_id, liked_at')
+    .eq('user_id', userId)
+    .order('liked_at', { ascending: false });
+
+  if (error) throw error;
+  return (data ?? []) as LikedSongRow[];
+}
+
+export async function getLikedSongIds(userId: string) {
+  const rows = await getLikedSongs(userId);
+  return rows.map((row) => row.track_id);
+}
+
+export async function getLikedSongsWithDetails(userId: string): Promise<Song[]> {
+  const trackIds = await getLikedSongIds(userId);
+  if (trackIds.length === 0) return [];
+  return getSongsByIds(trackIds);
+}
+
+export async function isTrackLiked(userId: string, trackId: string) {
+  const { data, error } = await supabase
+    .from('liked_tracks')
+    .select('track_id')
+    .eq('user_id', userId)
+    .eq('track_id', trackId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return Boolean(data);
+}
+
+export async function toggleLikedSong(userId: string, trackId: string) {
+  const liked = await isTrackLiked(userId, trackId);
+
+  if (liked) {
+    const { error } = await supabase
+      .from('liked_tracks')
+      .delete()
+      .eq('user_id', userId)
+      .eq('track_id', trackId);
+
+    if (error) throw error;
+    return false;
+  }
+
+  const { error } = await supabase.from('liked_tracks').insert({
+    user_id: userId,
+    track_id: trackId,
+  });
+
+  if (error) throw error;
+  return true;
+}

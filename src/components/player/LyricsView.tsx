@@ -4,14 +4,34 @@ import { usePlayer } from '@/context/PlayerContext';
 import { useLyrics } from '@/hooks/useLyrics';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
+
+const LYRICS_SYNC_DELAY_SEC = 0.4;
 
 export default function LyricsView({ onClose }: { onClose?: () => void }) {
   const { currentTrack, currentTime, seek } = usePlayer();
-  const { lines, activeIndex, isSynced, isLoading } = useLyrics(currentTrack?.id || null, currentTime);
+  const { lines, isSynced, isLoading } = useLyrics(currentTrack);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const activeIndex = useMemo(() => {
+    if (!isSynced || lines.length === 0) return -1;
+    const lyricTime = Math.max(0, currentTime - LYRICS_SYNC_DELAY_SEC);
+    if (lyricTime < lines[0].time) return -1;
+
+    let lo = 0;
+    let hi = lines.length - 1;
+    while (lo < hi) {
+      const mid = Math.floor((lo + hi + 1) / 2);
+      if (lines[mid].time <= lyricTime) {
+        lo = mid;
+      } else {
+        hi = mid - 1;
+      }
+    }
+    return lo;
+  }, [currentTime, lines, isSynced]);
 
   useEffect(() => {
+    if (activeIndex < 0) return;
     if (scrollRef.current) {
       const activeLine = scrollRef.current.children[activeIndex] as HTMLElement;
       if (activeLine) {
@@ -26,58 +46,61 @@ export default function LyricsView({ onClose }: { onClose?: () => void }) {
   if (!currentTrack) return null;
 
   return (
-    <div className="flex flex-col h-full w-full max-w-4xl mx-auto px-6 py-10">
-      <div className="flex items-center justify-between mb-12">
-        <div className="flex items-center gap-6">
-          <div className="relative w-20 h-20 rounded-2xl overflow-hidden shadow-2xl border border-white/10">
-            <img 
-              src={currentTrack.image.find(i => i.quality === '500x500')?.url || currentTrack.image[0]?.url} 
-              alt={currentTrack.name}
-              className="object-cover w-full h-full"
-            />
-          </div>
-          <div>
-            <h2 className="text-3xl font-bold mb-1 tracking-tight">{currentTrack.name}</h2>
-            <p className="text-lg text-muted">{currentTrack.artists.primary.map(a => a.name).join(', ')}</p>
+    <div className="flex h-full w-full px-6 py-10">
+      <div className="ml-auto flex h-full w-full max-w-[980px] flex-col md:w-[58%]">
+        <div className="mb-12 flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <div className="relative h-20 w-20 overflow-hidden rounded-2xl border border-white/10 shadow-2xl">
+              <img
+                src={currentTrack.image.find(i => i.quality === '500x500')?.url || currentTrack.image[0]?.url}
+                alt={currentTrack.name}
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <div>
+              <h2 className="mb-1 text-3xl font-bold tracking-tight">{currentTrack.name}</h2>
+              <p className="text-lg text-muted">{currentTrack.artists.primary.map(a => a.name).join(', ')}</p>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div 
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto pr-4 space-y-8 scrollbar-hide mask-gradient"
-      >
-        {isLoading ? (
-          <div className="flex flex-col gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-10 bg-white/5 rounded-lg animate-pulse w-full" style={{ opacity: 1 - i * 0.15 }} />
-            ))}
-          </div>
-        ) : lines.length > 0 ? (
-          lines.map((line, index) => (
-            <motion.div
-              key={`${index}-${line.time}`}
-              initial={{ opacity: 0.3, y: 10 }}
-              animate={{ 
-                opacity: activeIndex === index ? 1 : 0.4,
-                scale: activeIndex === index ? 1.05 : 1,
-                y: 0
-              }}
-              transition={{ duration: 0.4 }}
-              className={cn(
-                "text-3xl md:text-5xl font-bold cursor-pointer transition-all duration-300 origin-left leading-tight",
-                activeIndex === index ? "text-white" : "text-white/40 hover:text-white/60"
-              )}
-              onClick={() => isSynced && seek(line.time)}
-            >
-              {line.text}
-            </motion.div>
-          ))
-        ) : (
-          <div className="flex items-center justify-center h-full text-2xl text-muted font-medium">
-            No lyrics available for this track
-          </div>
-        )}
+        <div
+          ref={scrollRef}
+          className="mask-gradient scrollbar-hide flex-1 space-y-8 overflow-y-auto pr-2 md:pr-4"
+        >
+          {isLoading ? (
+            <div className="flex flex-col gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="h-10 w-full animate-pulse rounded-lg bg-white/5" style={{ opacity: 1 - i * 0.15 }} />
+              ))}
+            </div>
+          ) : lines.length > 0 ? (
+            lines.map((line, index) => (
+              <motion.div
+                key={`${index}-${line.time}`}
+                initial={{ opacity: 0.3, y: 10 }}
+                animate={{
+                  opacity: activeIndex === index ? 1 : 0.4,
+                  scale: activeIndex === index ? 1.05 : 1,
+                  y: 0
+                }}
+                transition={{ duration: 0.4 }}
+                className={cn(
+                  "origin-left text-2xl font-bold leading-tight transition-all duration-300 md:text-4xl",
+                  isSynced && !line.isPlaceholder ? 'cursor-pointer' : 'cursor-default',
+                  activeIndex === index ? "text-white" : "text-white/40 hover:text-white/60"
+                )}
+                onClick={() => isSynced && !line.isPlaceholder && seek(line.time)}
+              >
+                {line.text}
+              </motion.div>
+            ))
+          ) : (
+            <div className="flex h-full items-center justify-center text-2xl font-medium text-muted">
+              No lyrics available for this track
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

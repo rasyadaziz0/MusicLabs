@@ -1,6 +1,5 @@
 'use client';
 
-import MainLayout from '@/components/layout/MainLayout';
 import { getArtistSongs, searchArtists, searchSongs } from '@/lib/api/musicApi';
 import { Song } from '@/types/music';
 import { useQuery } from '@tanstack/react-query';
@@ -11,6 +10,8 @@ import { usePlayer } from '@/context/PlayerContext';
 import { getBestImageUrl } from '@/lib/api/musicApi';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { decodeQuery, encodeQuery } from '@/lib/utils/searchEncode';
+import TrackLikeButton from '@/components/library/TrackLikeButton';
+import AddToPlaylistButton from '@/components/library/AddToPlaylistButton';
 
 function normalizeSearchText(value: string) {
   return value.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim();
@@ -167,7 +168,7 @@ export default function SearchPage() {
   const genreGradients = ['#2F2FE4', '#162E93', '#1A1953'];
 
   return (
-    <MainLayout>
+    <>
       <div className="mb-10">
         <h1 className="text-4xl font-display font-bold mb-8">Search</h1>
         <div className="relative group max-w-2xl">
@@ -205,7 +206,7 @@ export default function SearchPage() {
               {rankedArtists.length > 0 && (
                 <div className="mb-8">
                   <h2 className="text-lg font-bold mb-3">Artists</h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3">
                     {rankedArtists.map((artist: SearchArtistResult) => (
                       <div
                         key={artist.id}
@@ -234,17 +235,19 @@ export default function SearchPage() {
               )}
               {displayedSongs.length > 0 && (
                 <>
-                  <div className="grid grid-cols-[auto_1fr_1fr_auto] gap-4 px-4 py-2 text-sm font-bold text-muted uppercase tracking-widest border-b border-white/5 mb-4">
+                  <div className="grid grid-cols-[auto_1fr_auto] md:grid-cols-[auto_1fr_1fr_auto_auto_auto] gap-2 md:gap-4 px-2 md:px-4 py-2 text-sm font-bold text-muted uppercase tracking-widest border-b border-white/5 mb-4">
                     <span className="w-8 text-center">#</span>
                     <span>Title</span>
                     <span className="hidden md:block">Album</span>
+                    <span className="hidden sm:flex w-20 justify-center">Save</span>
+                    <span className="hidden lg:flex w-20 justify-center">List</span>
                     <span className="w-12 flex justify-end"><Clock size={16} /></span>
                   </div>
                   {displayedSongs.map((song: Song, index: number) => (
                     <div
                       key={song.id}
                       onClick={() => playTrack(song, displayedSongs)}
-                      className="grid grid-cols-[auto_1fr_1fr_auto] gap-4 px-4 py-3 rounded-xl hover:bg-white/5 transition-colors group cursor-pointer items-center"
+                      className="grid grid-cols-[auto_1fr_auto] md:grid-cols-[auto_1fr_1fr_auto_auto_auto] gap-2 md:gap-4 px-2 md:px-4 py-3 rounded-xl hover:bg-white/5 transition-colors group cursor-pointer items-center"
                     >
                       <span className="w-8 text-center text-muted group-hover:text-white font-medium">
                         {index + 1}
@@ -266,6 +269,12 @@ export default function SearchPage() {
                       </div>
                       <div className="hidden md:block text-sm text-muted truncate">
                         {song.album.name}
+                      </div>
+                      <div className="hidden justify-center sm:flex">
+                        <TrackLikeButton track={song} />
+                      </div>
+                      <div className="hidden justify-center lg:flex">
+                        <AddToPlaylistButton track={song} />
                       </div>
                       <div className="w-12 text-right text-xs text-muted font-medium">
                         {Math.floor(song.duration / 60)}:{(song.duration % 60).toString().padStart(2, '0')}
@@ -290,7 +299,7 @@ export default function SearchPage() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
           {genres.map((genre, index) => (
             <div 
               key={genre}
@@ -305,6 +314,6 @@ export default function SearchPage() {
           ))}
         </div>
       )}
-    </MainLayout>
+    </>
   );
 }

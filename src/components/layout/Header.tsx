@@ -13,6 +13,8 @@ export default function Header() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [searchInput, setSearchInput] = useState('');
+  const avatarUrlRaw = user?.user_metadata?.avatar_url as string | undefined;
+  const avatarUrl = avatarUrlRaw?.trim().replace(/^`+|`+$/g, '');
 
   useEffect(() => {
     if (pathname !== '/search') return;
@@ -28,9 +30,9 @@ export default function Header() {
   };
 
   return (
-    <header className="h-16 flex items-center justify-between px-8 sticky top-0 z-30 bg-void/50 backdrop-blur-md border-b border-white/5">
+    <header className="h-16 flex items-center justify-between px-4 md:px-8 sticky top-0 z-30 bg-void/50 backdrop-blur-md border-b border-white/5">
       <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
+        <div className="hidden sm:flex items-center gap-2">
           <button 
             onClick={() => router.back()}
             className="w-8 h-8 rounded-full bg-black/40 flex items-center justify-center hover:bg-black/60 transition-colors"
@@ -66,11 +68,12 @@ export default function Header() {
         {user ? (
           <div className="flex items-center gap-3 bg-white/5 pl-1 pr-3 py-1 rounded-full border border-white/5 hover:bg-white/10 transition-colors cursor-pointer group">
             <div className="relative w-8 h-8 rounded-full overflow-hidden border border-white/10">
-              {user.user_metadata?.avatar_url ? (
+              {avatarUrl ? (
                 <Image 
-                  src={user.user_metadata.avatar_url} 
+                  src={avatarUrl} 
                   alt={user.user_metadata.name || 'User'} 
                   fill
+                  sizes="32px"
                   className="object-cover"
                 />
               ) : (

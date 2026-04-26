@@ -193,3 +193,8 @@ export async function getDeezerArtistTopTracks(artistId: number, limit = 20): Pr
   );
   return (data.data || []).map(mapDeezerTrackToSong);
 }
+
+export async function getDeezerTrack(trackId: number): Promise<Song> {
+  const track = await deezerFetch<DeezerTrack>(`/track/${trackId}`);
+  return mapDeezerTrackToSong(track);
+}
