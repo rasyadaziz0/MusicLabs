@@ -5,7 +5,7 @@ import { Song } from '@/types/music';
 import { useQuery } from '@tanstack/react-query';
 import { Search as SearchIcon, Clock } from 'lucide-react';
 import Image from 'next/image';
-import { useMemo, useState } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import { usePlayer } from '@/context/PlayerContext';
 import { getBestImageUrl } from '@/lib/api/musicApi';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -60,7 +60,7 @@ interface RawSearchArtistResult {
 const EMPTY_SONGS: Song[] = [];
 const EMPTY_ARTISTS: SearchArtistResult[] = [];
 
-export default function SearchPage() {
+function SearchPageContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -315,5 +315,13 @@ export default function SearchPage() {
         </div>
       )}
     </>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={null}>
+      <SearchPageContent />
+    </Suspense>
   );
 }
