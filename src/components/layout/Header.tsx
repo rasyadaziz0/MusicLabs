@@ -13,7 +13,8 @@ export default function Header() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const currentQuery = pathname === '/search' ? decodeQuery(searchParams.get('q') ?? '') : '';
+  const isSearchPage = pathname === '/search';
+  const currentQuery = isSearchPage ? decodeQuery(searchParams.get('q') ?? '') : '';
   const avatarUrlRaw = user?.user_metadata?.avatar_url as string | undefined;
   const avatarUrl = avatarUrlRaw?.trim().replace(/^`+|`+$/g, '');
 
@@ -42,20 +43,22 @@ export default function Header() {
           </button>
         </div>
         
-        <form onSubmit={handleSearchSubmit} className="relative group hidden md:block">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-white transition-colors" size={18} />
-          <input 
-            key={`${pathname}:${searchParams.get('q') ?? ''}`}
-            ref={searchInputRef}
-            type="text"
-            defaultValue={currentQuery}
-            placeholder="Search for songs, artists, or albums"
-            className="bg-white/5 border border-white/5 rounded-full py-2 pl-10 pr-4 w-80 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 focus:bg-white/10 transition-all"
-            suppressHydrationWarning
-            data-lpignore="true"
-            data-1p-ignore
-          />
-        </form>
+        {!isSearchPage && (
+          <form onSubmit={handleSearchSubmit} className="relative group hidden md:block">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-white transition-colors" size={18} />
+            <input 
+              key={`${pathname}:${searchParams.get('q') ?? ''}`}
+              ref={searchInputRef}
+              type="text"
+              defaultValue={currentQuery}
+              placeholder="Search for songs, artists, or albums"
+              className="bg-white/5 border border-white/5 rounded-full py-2 pl-10 pr-4 w-80 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 focus:bg-white/10 transition-all"
+              suppressHydrationWarning
+              data-lpignore="true"
+              data-1p-ignore
+            />
+          </form>
+        )}
       </div>
 
       <div className="flex items-center gap-4">

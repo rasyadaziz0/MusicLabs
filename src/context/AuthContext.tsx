@@ -20,6 +20,21 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+function mapAuthErrorMessage(action: 'login' | 'register' | 'google' | 'logout') {
+  switch (action) {
+    case 'login':
+      return 'Login gagal. Cek email/password lalu coba lagi.';
+    case 'register':
+      return 'Daftar akun gagal. Coba lagi beberapa saat lagi.';
+    case 'google':
+      return 'Login Google belum berhasil. Coba ulang lagi.';
+    case 'logout':
+      return 'Logout gagal. Coba ulang lagi.';
+    default:
+      return 'Terjadi gangguan autentikasi. Coba lagi.';
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -27,11 +42,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const setData = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error) throw error;
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
+      try {
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+
+        if (error) {
+          console.error('Auth getSession gagal:', error);
+          setSession(null);
+          setUser(null);
+          return;
+        }
+
+        setSession(session);
+        setUser(session?.user ?? null);
+      } catch (error) {
+        console.error('Auth getSession error tidak terduga:', error);
+        setSession(null);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
     };
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -58,13 +90,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         redirectTo: callbackUrl.toString(),
       },
     });
-
-    return { error: error?.message ?? null };
+    if (error) {
+      console.error('Auth signInWithGoogle gagal:', error);
+      return { error: mapAuthErrorMessage('google') };
+    }
+    return { error: null };
   };
 
   const signInWithPassword = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error?.message ?? null };
+    if (error) {
+      console.error('Auth signInWithPassword gagal:', error);
+      return { error: mapAuthErrorMessage('login') };
+    }
+    return { error: null };
   };
 
   const signUpWithPassword = async (email: string, password: string, fullName: string) => {
@@ -75,12 +114,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         data: { full_name: fullName },
       },
     });
-    return { error: error?.message ?? null };
+    if (error) {
+      console.error('Auth signUpWithPassword gagal:', error);
+      return { error: mapAuthErrorMessage('register') };
+    }
+    return { error: null };
   };
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
-    return { error: error?.message ?? null };
+    if (error) {
+      console.error('Auth signOut gagal:', error);
+      return { error: mapAuthErrorMessage('logout') };
+    }
+    return { error: null };
   };
 
   return (

@@ -3,7 +3,7 @@
 import { useMemo, useRef, useEffect } from 'react';
 import { LrcLine } from '@/lib/utils/lrcParser';
 
-const LYRICS_SYNC_DELAY_SEC = 0.35;
+const LYRICS_SYNC_DELAY_SEC = 0 ;
 
 interface UseLyricsScrollOptions {
   lines: LrcLine[];

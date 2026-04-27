@@ -16,6 +16,8 @@ export default function ImportSpotifyPage() {
   const callbackMessage = callbackError
     ? [callbackErrorCode, callbackErrorDescription].filter(Boolean).join(' - ')
     : '';
+  const friendlyConnectError =
+    'Gagal connect ke Spotify sekarang. Coba lagi beberapa saat lagi.';
 
   const handleConnectSpotify = async () => {
     setErrorMessage('');
@@ -31,9 +33,8 @@ export default function ImportSpotifyPage() {
     });
 
     if (error) {
-      console.error('Gagal connect:', error.message);
-      alert('Gagal connect Spotify: ' + error.message);
-      setErrorMessage(error.message);
+      console.error('Gagal connect Spotify:', error);
+      setErrorMessage(friendlyConnectError);
       setLoading(false);
     }
   };

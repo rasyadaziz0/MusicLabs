@@ -15,6 +15,8 @@ export default function CreatePlaylistPage() {
     coverUrl: '',
   });
   const [errorMessage, setErrorMessage] = useState('');
+  const friendlyCreatePlaylistError =
+    'Playlist belum bisa dibuat sekarang. Coba lagi sebentar lagi.';
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -31,7 +33,8 @@ export default function CreatePlaylistPage() {
         router.push(`/playlist/${playlist.id}`);
       },
       onError: (error: Error) => {
-        setErrorMessage(error.message || 'Gagal bikin playlist.');
+        console.error('Create playlist gagal:', error);
+        setErrorMessage(friendlyCreatePlaylistError);
       },
     });
   };

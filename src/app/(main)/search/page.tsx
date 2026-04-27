@@ -5,7 +5,7 @@ import { Song } from '@/types/music';
 import { useQuery } from '@tanstack/react-query';
 import { Search as SearchIcon, Clock } from 'lucide-react';
 import Image from 'next/image';
-import { Suspense, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState } from 'react';
 import { usePlayer } from '@/context/PlayerContext';
 import { getBestImageUrl } from '@/lib/api/musicApi';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -60,14 +60,50 @@ interface RawSearchArtistResult {
 const EMPTY_SONGS: Song[] = [];
 const EMPTY_ARTISTS: SearchArtistResult[] = [];
 
+function useDebouncedValue<T>(value: T, delayMs: number): T {
+  const [debounced, setDebounced] = useState(value);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebounced(value);
+    }, delayMs);
+
+    return () => clearTimeout(timeout);
+  }, [value, delayMs]);
+
+  return debounced;
+}
+
 function SearchPageContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const rawQuery = searchParams.get('q') ?? '';
-  const query = decodeQuery(rawQuery);
+  const queryFromUrl = decodeQuery(rawQuery);
+  const [inputValue, setInputValue] = useState(queryFromUrl);
+  const debouncedQuery = useDebouncedValue(inputValue, 500);
+  const query = debouncedQuery.trim();
   const [selectedArtistId, setSelectedArtistId] = useState<string | null>(null);
   const { playTrack } = usePlayer();
+
+  useEffect(() => {
+    setInputValue(queryFromUrl);
+  }, [queryFromUrl]);
+
+  useEffect(() => {
+    const currentQuery = queryFromUrl.trim();
+    if (query === currentQuery) return;
+
+    const params = new URLSearchParams(searchParams.toString());
+    if (query) {
+      params.set('q', encodeQuery(query));
+    } else {
+      params.delete('q');
+    }
+
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname);
+  }, [query, queryFromUrl, searchParams, pathname, router]);
 
   const { data: searchResults, isLoading } = useQuery({
     queryKey: ['search', query],
@@ -175,17 +211,9 @@ function SearchPageContent() {
           <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-white transition-colors" size={24} />
           <input 
             type="text" 
-            value={query}
+            value={inputValue}
             onChange={(e) => {
-              const value = e.target.value;
-              const params = new URLSearchParams(searchParams.toString());
-              if (value.trim()) {
-                params.set('q', encodeQuery(value));
-              } else {
-                params.delete('q');
-              }
-              const qs = params.toString();
-              router.replace(qs ? `${pathname}?${qs}` : pathname);
+              setInputValue(e.target.value);
             }}
             placeholder="What do you want to listen to?"
             className="bg-white/5 border border-white/10 rounded-2xl py-4 pl-14 pr-6 w-full text-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white/10 transition-all shadow-2xl"

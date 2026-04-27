@@ -11,7 +11,7 @@ import {
 } from '@/hooks/useMusicLibrary';
 import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react';
 
-const LYRICS_SYNC_OFFSET_SEC = 0.3;
+const LYRICS_SYNC_OFFSET_SEC = 0.1;
 
 export function useNowPlaying(isOpen: boolean) {
   const {

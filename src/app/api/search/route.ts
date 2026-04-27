@@ -1,9 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { searchDeezerTracks, searchDeezerArtists } from '@/lib/server/deezerApi';
+import { checkRateLimit, getRequestIp } from '@/lib/server/rateLimit';
 
 export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
+  const ip = getRequestIp(request);
+  const limiter = checkRateLimit(ip, {
+    limit: 40,
+    windowMs: 60_000,
+    keyPrefix: 'search:combined',
+  });
+
+  if (!limiter.allowed) {
+    return NextResponse.json(
+      {
+        error: 'Too many requests. Please wait before trying again.',
+      },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(limiter.resetInSeconds),
+          'X-RateLimit-Limit': String(limiter.limit),
+          'X-RateLimit-Remaining': String(limiter.remaining),
+          'X-RateLimit-Reset': String(limiter.resetInSeconds),
+        },
+      }
+    );
+  }
+
   const query = request.nextUrl.searchParams.get('q') || request.nextUrl.searchParams.get('query');
 
   if (!query?.trim()) {
@@ -16,12 +41,21 @@ export async function GET(request: NextRequest) {
       searchDeezerArtists(query.trim(), 5),
     ]);
 
-    return NextResponse.json({
-      data: {
-        songs,
-        artists,
+    return NextResponse.json(
+      {
+        data: {
+          songs,
+          artists,
+        },
       },
-    });
+      {
+        headers: {
+          'X-RateLimit-Limit': String(limiter.limit),
+          'X-RateLimit-Remaining': String(limiter.remaining),
+          'X-RateLimit-Reset': String(limiter.resetInSeconds),
+        },
+      }
+    );
   } catch (error) {
     console.error('Deezer combined search failed:', error);
     return NextResponse.json({ error: 'Gagal nyari lagu' }, { status: 500 });

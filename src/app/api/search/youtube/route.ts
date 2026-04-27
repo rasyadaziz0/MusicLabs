@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { checkRateLimit, getRequestIp } from '@/lib/server/rateLimit';
 
 export const runtime = 'edge';
 
@@ -93,6 +94,30 @@ function scoreCandidate(item: any, expectedTitle: string, expectedArtist: string
  * Menggunakan Edge Runtime untuk performa maksimal.
  */
 export async function GET(request: NextRequest) {
+  const ip = getRequestIp(request);
+  const limiter = checkRateLimit(ip, {
+    limit: 20,
+    windowMs: 60_000,
+    keyPrefix: 'search:youtube',
+  });
+
+  if (!limiter.allowed) {
+    return NextResponse.json(
+      {
+        error: 'Too many requests. Please wait before trying again.',
+      },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': String(limiter.resetInSeconds),
+          'X-RateLimit-Limit': String(limiter.limit),
+          'X-RateLimit-Remaining': String(limiter.remaining),
+          'X-RateLimit-Reset': String(limiter.resetInSeconds),
+        },
+      }
+    );
+  }
+
   const title = request.nextUrl.searchParams.get('title')?.trim() ?? '';
   const artist = request.nextUrl.searchParams.get('artist')?.trim() ?? '';
   const query = request.nextUrl.searchParams.get('q');
@@ -136,7 +161,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'No video found' }, { status: 404 });
     }
 
-    return NextResponse.json({ videoId });
+    return NextResponse.json(
+      { videoId },
+      {
+        headers: {
+          'X-RateLimit-Limit': String(limiter.limit),
+          'X-RateLimit-Remaining': String(limiter.remaining),
+          'X-RateLimit-Reset': String(limiter.resetInSeconds),
+        },
+      }
+    );
   } catch (error: any) {
     console.error('YouTube search failed:', error.message);
     return NextResponse.json({ error: 'Failed to search YouTube' }, { status: 500 });
