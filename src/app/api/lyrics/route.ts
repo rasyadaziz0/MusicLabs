@@ -5,43 +5,72 @@ export const runtime = 'edge';
 interface LrcLibTrack {
   syncedLyrics?: string | null;
   plainLyrics?: string | null;
+  duration?: number | string | null;
 }
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const trackName = searchParams.get('track_name')?.trim();
-  const artistName = searchParams.get('artist_name')?.trim();
-  const durationParam = searchParams.get('duration')?.trim();
-  const duration = durationParam ? Number(durationParam) : NaN;
+  const title = searchParams.get('title');
+  const artist = searchParams.get('artist');
+  const durationParam = searchParams.get('duration');
 
-  if (!trackName || !artistName || !Number.isFinite(duration) || duration <= 0) {
-    return NextResponse.json({ error: 'Butuh track_name, artist_name, dan duration valid' }, { status: 400 });
+  if (!title || !artist) {
+    return NextResponse.json({ error: 'Butuh judul dan artis' }, { status: 400 });
   }
 
-  try {
-    const url = `https://lrclib.net/api/get?artist_name=${encodeURIComponent(artistName)}&track_name=${encodeURIComponent(trackName)}&duration=${Math.round(duration)}`;
-    const res = await fetch(url);
+  const cleanTitle = title.replace(/\(.*?\)|\[.*?\]/g, '').trim();
+  const cleanArtist = artist.replace(/\(.*?\)|\[.*?\]/g, '').trim();
 
-    if (res.status === 404) {
+  try {
+    const url = `https://lrclib.net/api/search?track_name=${encodeURIComponent(cleanTitle)}&artist_name=${encodeURIComponent(cleanArtist)}`;
+    const res = await fetch(url);
+    const data = (await res.json()) as LrcLibTrack[];
+
+    if (!data || data.length === 0) {
       return NextResponse.json({ error: 'Lirik gak ketemu' }, { status: 404 });
     }
 
-    if (!res.ok) {
-      throw new Error(`LRCLIB request failed with status ${res.status}`);
+    let bestMatch: LrcLibTrack | undefined;
+
+    // Filter hanya track yang punya synced lyrics
+    const syncedTracks = data.filter(
+      (track) => track.syncedLyrics !== null && track.syncedLyrics !== undefined && track.syncedLyrics !== ''
+    );
+
+    if (syncedTracks.length > 0) {
+      if (durationParam) {
+        const targetDuration = Number.parseInt(durationParam, 10);
+        if (Number.isFinite(targetDuration)) {
+          // Cari yang durasinya paling dekat dengan target (bukan sekedar ±3s first match)
+          let closestDiff = Infinity;
+          for (const track of syncedTracks) {
+            const trackDuration = Number(track.duration);
+            if (!Number.isFinite(trackDuration)) continue;
+            const diff = Math.abs(trackDuration - targetDuration);
+            // Hanya accept kalau dalam ±5s, prioritas yang paling dekat
+            if (diff <= 5 && diff < closestDiff) {
+              closestDiff = diff;
+              bestMatch = track;
+            }
+          }
+        }
+      }
+
+      // Kalau nggak ada duration match yang cukup dekat, skip daripada kasih lirik yang salah
+      // (jangan fallback ke random syncedLyrics tanpa mempertimbangkan durasi)
     }
 
-    const data = (await res.json()) as LrcLibTrack;
-    if (typeof data.syncedLyrics === 'string' && data.syncedLyrics.trim().length > 0) {
+    if (bestMatch?.syncedLyrics) {
       return NextResponse.json({
         synced: true,
-        lyrics: data.syncedLyrics,
+        lyrics: bestMatch.syncedLyrics,
       });
     }
 
-    if (typeof data.plainLyrics === 'string' && data.plainLyrics.trim().length > 0) {
+    if (data[0]?.plainLyrics) {
       return NextResponse.json({
         synced: false,
-        lyrics: data.plainLyrics,
+        lyrics: data[0].plainLyrics,
       });
     }
 

@@ -50,7 +50,7 @@ export default function LikedSongsPage() {
             <p className="text-muted">Setelah login, lagu yang kamu like bakal otomatis muncul di sini.</p>
             <button
               type="button"
-              onClick={signInWithGoogle}
+              onClick={() => signInWithGoogle()}
               className="mt-5 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black"
             >
               Login with Google

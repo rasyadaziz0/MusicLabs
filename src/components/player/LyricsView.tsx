@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useMemo, useRef } from 'react';
 
-const LYRICS_SYNC_DELAY_SEC = 0.4;
+const LYRICS_SYNC_DELAY_SEC = 0.35;
 
 export default function LyricsView({ onClose }: { onClose?: () => void }) {
   const { currentTrack, currentTime, seek } = usePlayer();

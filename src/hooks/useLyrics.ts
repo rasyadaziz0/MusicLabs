@@ -18,13 +18,14 @@ export function useLyrics(currentTrack: Song | null) {
     }
 
     const artistName = currentTrack.artists.primary[0]?.name ?? '';
-    const duration = Math.round(currentTrack.duration);
-    if (!currentTrack.name || !artistName || !Number.isFinite(duration) || duration <= 0) {
+    if (!currentTrack.name || !artistName) {
       setLines([]);
       setIsSynced(false);
       setIsLoading(false);
       return;
     }
+
+    const durationInSeconds = currentTrack.duration ? Math.floor(currentTrack.duration) : 0;
 
     const controller = new AbortController();
 
@@ -32,7 +33,7 @@ export function useLyrics(currentTrack: Song | null) {
       setIsLoading(true);
       try {
         const res = await fetch(
-          `/api/lyrics?track_name=${encodeURIComponent(currentTrack.name)}&artist_name=${encodeURIComponent(artistName)}&duration=${duration}`,
+          `/api/lyrics?title=${encodeURIComponent(currentTrack.name)}&artist=${encodeURIComponent(artistName)}&duration=${durationInSeconds}`,
           { signal: controller.signal },
         );
 

@@ -5,6 +5,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { PlayerProvider } from "@/context/PlayerContext";
 import QueryProvider from "@/context/QueryProvider";
 import PWARegistration from "@/components/PWARegistration";
+import YouTubePlayerMount from "@/components/YouTubePlayerMount";
 
 const syne = Syne({
   variable: "--font-display",
@@ -50,14 +51,13 @@ export default function RootLayout({
       lang="en"
       className={`${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable} h-full antialiased dark`}
     >
-      <body className="min-h-full bg-void text-white selection:bg-primary/30">
+      <body className="min-h-full bg-void text-white selection:bg-primary/30" suppressHydrationWarning>
         <PWARegistration />
         <QueryProvider>
           <AuthProvider>
             <PlayerProvider>
               {children}
-              {/* Hidden YouTube Player Container */}
-              <div id="youtube-player-container" className="fixed bottom-0 right-0 w-[1px] h-[1px] opacity-0 pointer-events-none -z-50" />
+              <YouTubePlayerMount />
             </PlayerProvider>
           </AuthProvider>
         </QueryProvider>

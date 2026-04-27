@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useMemo } from 'react';
-import { Library, Heart, PlusSquare, ArrowRight } from 'lucide-react';
+import { Library, Heart, PlusSquare, ArrowRight, Download } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useLibraryPlaylists, useLikedSongsIndex } from '@/hooks/useMusicLibrary';
 
@@ -46,17 +46,26 @@ export default function LibraryPage() {
               </p>
             </div>
             {user ? (
-              <Link
-                href="/playlist/create"
-                className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition-transform hover:scale-[1.02]"
-              >
-                <PlusSquare size={16} />
-                Create Playlist
-              </Link>
+              <div className="flex flex-wrap items-center gap-3">
+                <Link
+                  href="/import/spotify"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/20 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+                >
+                  <Download size={16} />
+                  Import Spotify
+                </Link>
+                <Link
+                  href="/playlist/create"
+                  className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition-transform hover:scale-[1.02]"
+                >
+                  <PlusSquare size={16} />
+                  Create Playlist
+                </Link>
+              </div>
             ) : (
               <button
                 type="button"
-                onClick={signInWithGoogle}
+                onClick={() => signInWithGoogle()}
                 className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-black transition-transform hover:scale-[1.02]"
               >
                 Login to Start

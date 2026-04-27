@@ -2,21 +2,24 @@
 
 import { useEffect } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function AuthCallback() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     const handleAuth = async () => {
+      const nextPath = searchParams.get('next');
+      const safeNextPath = nextPath?.startsWith('/') ? nextPath : '/';
       const { error } = await supabase.auth.getSession();
       if (!error) {
-        router.push('/');
+        router.push(safeNextPath);
       }
     };
 
     handleAuth();
-  }, [router]);
+  }, [router, searchParams]);
 
   return (
     <div className="flex h-screen items-center justify-center bg-void">

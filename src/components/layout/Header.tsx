@@ -4,27 +4,22 @@ import { useAuth } from '@/context/AuthContext';
 import { Search, Bell, User as UserIcon, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useRef } from 'react';
 import { decodeQuery, encodeQuery } from '@/lib/utils/searchEncode';
 
 export default function Header() {
-  const { user, signInWithGoogle, signOut } = useAuth();
+  const { user, signOut } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [searchInput, setSearchInput] = useState('');
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const currentQuery = pathname === '/search' ? decodeQuery(searchParams.get('q') ?? '') : '';
   const avatarUrlRaw = user?.user_metadata?.avatar_url as string | undefined;
   const avatarUrl = avatarUrlRaw?.trim().replace(/^`+|`+$/g, '');
 
-  useEffect(() => {
-    if (pathname !== '/search') return;
-    const rawQuery = searchParams.get('q') ?? '';
-    setSearchInput(decodeQuery(rawQuery));
-  }, [pathname, searchParams]);
-
   const handleSearchSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const q = searchInput.trim();
+    const q = searchInputRef.current?.value.trim() ?? '';
     if (!q) return;
     router.push(`/search?q=${encodeQuery(q)}`);
   };
@@ -50,11 +45,15 @@ export default function Header() {
         <form onSubmit={handleSearchSubmit} className="relative group hidden md:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-white transition-colors" size={18} />
           <input 
-            type="text" 
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            key={`${pathname}:${searchParams.get('q') ?? ''}`}
+            ref={searchInputRef}
+            type="text"
+            defaultValue={currentQuery}
             placeholder="Search for songs, artists, or albums"
             className="bg-white/5 border border-white/5 rounded-full py-2 pl-10 pr-4 w-80 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50 focus:bg-white/10 transition-all"
+            suppressHydrationWarning
+            data-lpignore="true"
+            data-1p-ignore
           />
         </form>
       </div>
@@ -98,10 +97,10 @@ export default function Header() {
           </div>
         ) : (
           <button 
-            onClick={signInWithGoogle}
+            onClick={() => router.push('/login')}
             className="px-6 py-2 bg-white text-black font-bold rounded-full hover:scale-105 transition-transform text-sm"
           >
-            Login with Google
+            Login
           </button>
         )}
       </div>

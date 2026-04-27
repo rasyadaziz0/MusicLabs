@@ -53,7 +53,7 @@ export default function CreatePlaylistPage() {
             <p className="mt-2 text-muted">Playlist bakal disimpan ke akun Supabase kamu.</p>
             <button
               type="button"
-              onClick={signInWithGoogle}
+              onClick={() => signInWithGoogle()}
               className="mt-5 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black"
             >
               Login with Google

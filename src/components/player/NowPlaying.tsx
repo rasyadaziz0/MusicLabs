@@ -37,7 +37,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react';
 
-const LYRICS_SYNC_DELAY_SEC = 0.5;
+// Berapa detik SETELAH timestamp LRC baru highlight pindah ke baris berikutnya.
+// Nilai positif = lirik muncul sedikit "terlambat" dari LRC timestamp (lebih natural).
+// Nilai negatif = lirik highlight duluan sebelum waktunya (bikin kesan kecepetan).
+const LYRICS_SYNC_OFFSET_SEC = 0.15;
 
 export default function NowPlaying({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const {
@@ -71,7 +74,7 @@ export default function NowPlaying({ isOpen, onClose }: { isOpen: boolean, onClo
 
   const activeIndex = useMemo(() => {
     if (!isSynced || lines.length === 0) return -1;
-    const lyricTime = Math.max(0, currentTime - LYRICS_SYNC_DELAY_SEC);
+    const lyricTime = Math.max(0, currentTime - LYRICS_SYNC_OFFSET_SEC);
     if (lyricTime < lines[0].time) return -1;
 
     let lo = 0;
