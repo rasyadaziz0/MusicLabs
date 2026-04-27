@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 
+const SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token';
+const SPOTIFY_PLAYLIST_API_BASE = 'https://api.spotify.com/v1/playlists';
+
 async function getSpotifyToken() {
   const clientId = process.env.SPOTIFY_CLIENT_ID;
   const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
@@ -13,8 +16,7 @@ async function getSpotifyToken() {
     body: 'grant_type=client_credentials',
   };
 
-  // URL ASLI SPOTIFY (Pastikan tulisannya persis begini)
-  const res = await fetch('https://accounts.spotify.com/api/token', authOptions);
+  const res = await fetch(SPOTIFY_TOKEN_URL, authOptions);
 
   if (!res.ok) {
     console.error('Gagal dapet token', await res.text());
@@ -36,8 +38,7 @@ export async function POST(request: Request) {
     const playlistId = match[1];
     const token = await getSpotifyToken();
 
-    // URL ASLI SPOTIFY BUAT NARIK PLAYLIST
-    const res = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}`, {
+    const res = await fetch(`${SPOTIFY_PLAYLIST_API_BASE}/${playlistId}`, {
       headers: { Authorization: 'Bearer ' + token },
     });
 
