@@ -23,8 +23,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MusicLabs - Spotify Clone",
-  description: "Your personal music streaming app built with Next.js and Supabase",
+  title: "MusicLabs",
+  description: "Temukan musik favoritmu dengan mudah!",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

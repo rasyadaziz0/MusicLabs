@@ -33,48 +33,30 @@ export async function GET(request: NextRequest) {
     const youtube = await getYt();
     
     // Step 1: Search for the track
-    // Kita pakai search() dengan filter 'song' (music) jika memungkinkan, 
-    // tapi search biasa juga oke.
-    const searchResults = await youtube.search(query, { type: 'video' });
+    // Gunakan youtube.music.search dengan filter 'song' agar hanya mendapatkan lagu official
+    // dan menghindari hasil berupa playlist atau music video panjang.
+    const searchResults = await youtube.music.search(query, { type: 'song' });
     
-    if (!searchResults.videos || searchResults.videos.length === 0) {
-      return NextResponse.json({ error: 'No results found on YouTube' }, { status: 404 });
+    if (!searchResults.songs || !searchResults.songs.contents || searchResults.songs.contents.length === 0) {
+      return NextResponse.json({ error: 'No song results found on YouTube Music' }, { status: 404 });
     }
 
-    // Ambil video pertama (biasanya paling relevan)
-    // Filter out shorts or live streams if possible, tapi biasanya hasil pertama sudah pas.
-    const firstVideo = searchResults.videos[0];
-    // Pastikan ini adalah object Video (punya video_id)
-    if (!('id' in firstVideo)) {
+    // Ambil lagu pertama (paling relevan dari YouTube Music)
+    const firstSong = searchResults.songs.contents[0];
+    
+    // Pastikan ini adalah object yang punya id
+    if (!('id' in firstSong) || !firstSong.id) {
       return NextResponse.json({ error: 'Invalid search result format' }, { status: 404 });
     }
 
-    const videoId = firstVideo.id;
+    const videoId = firstSong.id as string;
 
-    // Step 2: Get stream info
-    const info = await youtube.getInfo(videoId);
-    
-    // Pilih format audio saja dengan bitrate terbaik
-    // format.url adalah direct link ke audio stream
-    const format = info.chooseFormat({ type: 'audio', quality: 'best' });
-
-    if (!format || !format.decipher(youtube.session.player)) {
-        // Jika format.url tidak ada, kita coba ambil langsung
-    }
-    
-    const audioUrl = format.decipher(youtube.session.player);
-
-    if (!audioUrl) {
-      return NextResponse.json({ error: 'Could not generate playable audio URL' }, { status: 404 });
-    }
-
+    // Kembalikan videoId dan metadata dasar langsung (tanpa getInfo yang lambat)
     return NextResponse.json({
-      audioUrl,
       videoId,
-      title: info.basic_info.title,
-      artist: info.basic_info.author,
-      duration: info.basic_info.duration,
-      quality: format.audio_track?.audio_is_default ? 'high' : 'standard',
+      title: firstSong.title,
+      artist: typeof firstSong.artists === 'string' ? firstSong.artists : firstSong.author,
+      duration: firstSong.duration?.text,
     });
 
   } catch (error: any) {

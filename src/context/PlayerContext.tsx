@@ -42,7 +42,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [volume, setVolumeState] = useState(1);
   const [queue, setQueue] = useState<Song[]>([]);
   const [queueIndex, setQueueIndex] = useState(-1);
-  const nextTrackRef = useRef<() => void>(() => {});
+  const nextTrackRef = useRef<() => void>(() => { });
 
   // Engines
   const ytPlayerRef = useRef<any>(null);
@@ -81,7 +81,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
             }
           },
           onError: () => {
-            console.error('YouTube Player Error. Falling back to preview.');
+            console.error('Player Error. Falling back to preview.');
             playPreviewFallback();
           }
         },
@@ -113,7 +113,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     const handleEnded = () => nextTrackRef.current();
     const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
-    
+
     audio.addEventListener('ended', handleEnded);
     audio.addEventListener('play', handlePlay);
     audio.addEventListener('pause', handlePause);
@@ -155,10 +155,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const playPreviewFallback = useCallback((track?: Song) => {
     const fallbackTrack = track ?? currentTrack;
     if (!fallbackTrack?.preview || !previewAudioRef.current) return;
-    
+
     setIsPreview(true);
     setIsResolving(false);
-    
+
     // Stop YouTube
     if (ytPlayerRef.current && typeof ytPlayerRef.current.stopVideo === 'function') {
       ytPlayerRef.current.stopVideo();
@@ -195,7 +195,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         ytPlayerRef.current.loadVideoById(videoId);
         setIsResolving(false);
       } else {
-        console.warn('Could not resolve to YouTube. Playing preview.');
+        console.warn('Cloud Music sedang eror');
         playPreviewFallback(track);
       }
     } catch (err) {

@@ -2,37 +2,36 @@ import React, { ReactNode, Suspense } from 'react';
 import Header from '../Header';
 import PlayerBar from '../../player/PlayerBar';
 
-export interface ILayoutProps {
+export interface IMainLayoutProps {
   children: ReactNode;
+  renderNavigation: () => ReactNode;
+  isMobile: boolean;
 }
 
-export abstract class BaseLayout extends React.Component<ILayoutProps> {
-  // Abstraction: subclasses must implement these methods (Polymorphism)
-  protected abstract renderSidebar(): ReactNode;
-  protected abstract renderMobileNav(): ReactNode;
+export default function BaseLayout({
+  children,
+  renderNavigation,
+  isMobile,
+}: IMainLayoutProps) {
+  return (
+    <div className="flex h-screen overflow-hidden bg-void">
+      {!isMobile && renderNavigation()}
 
-  // Encapsulation: the core layout structure is hidden and reused
-  render() {
-    return (
-      <div className="flex h-screen overflow-hidden bg-void">
-        {this.renderSidebar()}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        <Suspense fallback={null}>
+          <Header />
+        </Suspense>
 
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          <Suspense fallback={null}>
-            <Header />
-          </Suspense>
+        <main className="flex-1 overflow-y-auto gradient-mesh pb-36 md:pb-0 relative z-0">
+          <div className="p-4 md:p-8 max-w-[1600px] mx-auto pb-6 md:pb-8">
+            {children}
+          </div>
+        </main>
 
-          <main className="flex-1 overflow-y-auto gradient-mesh pb-36 md:pb-0 relative z-0">
-            <div className="p-4 md:p-8 max-w-[1600px] mx-auto pb-6 md:pb-8">
-              {this.props.children}
-            </div>
-          </main>
+        <PlayerBar />
 
-          <PlayerBar />
-
-          {this.renderMobileNav()}
-        </div>
+        {isMobile && renderNavigation()}
       </div>
-    );
-  }
+    </div>
+  );
 }

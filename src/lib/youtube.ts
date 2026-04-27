@@ -3,7 +3,7 @@
  * Uses localStorage to cache results and reduce API calls.
  */
 
-const CACHE_KEY_PREFIX = 'yt_resolve_v3_';
+const CACHE_KEY_PREFIX = 'yt_resolve_v4_';
 
 export async function resolveToYoutubeId(title: string, artist: string, trackId: string): Promise<string | null> {
   const cacheKey = `${CACHE_KEY_PREFIX}${trackId}`;
@@ -13,14 +13,13 @@ export async function resolveToYoutubeId(title: string, artist: string, trackId:
   if (cached) return cached;
 
   try {
-    // 2. Fetch dari internal Edge function (strict topic-first resolver)
-    const query = `${title} ${artist} topic -lyric`.trim();
+    // 2. Fetch dari internal NodeJS API endpoint yang menggunakan youtube.music.search
     const res = await fetch(
-      `/api/search/youtube?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}&q=${encodeURIComponent(query)}`
+      `/api/audio/resolve?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}`
     );
     
     if (!res.ok) {
-      console.warn(`YouTube resolve failed for: ${query}`);
+      console.warn(`YouTube resolve failed for: ${title} - ${artist}`);
       return null;
     }
 

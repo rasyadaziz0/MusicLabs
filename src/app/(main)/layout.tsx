@@ -1,5 +1,5 @@
-import MainLayout from '@/components/layout/MainLayout';
+import LayoutContainer from '@/components/layout/MainLayout/LayoutContainer';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <MainLayout>{children}</MainLayout>;
+  return <LayoutContainer>{children}</LayoutContainer>;
 }

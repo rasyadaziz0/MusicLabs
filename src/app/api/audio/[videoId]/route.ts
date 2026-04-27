@@ -30,21 +30,20 @@ export async function GET(
   try {
     const youtube = await getYt();
     const info = await youtube.getInfo(videoId);
-    
+
     const format = info.chooseFormat({ type: 'audio', quality: 'best' });
     const audioUrl = format ? await format.decipher(youtube.session.player) : null;
 
     if (!audioUrl) {
-      return new NextResponse('No playable audio stream found for videoId: ' + videoId, {
+      return new NextResponse('No playable audio stream found for this music', {
         status: 404,
       });
     }
 
-    // Redirect ke direct audio stream URL dari YouTube
     return NextResponse.redirect(audioUrl);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Audio proxy error with youtubei.js:', message);
+    console.error('Audio proxy error', message);
     return new NextResponse('Failed to resolve audio: ' + message, {
       status: 500,
     });

@@ -18,7 +18,6 @@ import { useEffect } from 'react';
  */
 export default function YouTubePlayerMount() {
   useEffect(() => {
-    // Check if already mounted (strict mode / hot reload guard)
     if (document.getElementById('youtube-player-container')) return;
 
     const container = document.createElement('div');
@@ -26,11 +25,7 @@ export default function YouTubePlayerMount() {
     container.style.cssText =
       'position:fixed;bottom:0;right:0;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-50;';
     document.body.appendChild(container);
-
-    // No cleanup — we intentionally leave this node alive for the lifetime
-    // of the app so the YouTube player persists across navigations.
   }, []);
 
-  // Renders nothing into the React tree
   return null;
 }
