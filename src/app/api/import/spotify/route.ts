@@ -1,30 +1,47 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+
 const SPOTIFY_PLAYLIST_API_BASE = 'https://api.spotify.com/v1/playlists';
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
+    const authHeader = request.headers.get('authorization');
+    if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const token = authHeader.replace('Bearer ', '');
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
+
+    const {
+      data: { session },
+      error: sessionError,
+    } = await supabase.auth.getSession();
+
+    if (sessionError || !session) {
+      return NextResponse.json({ error: 'Sesi lu nggak valid.' }, { status: 401 });
+    }
+
+    const spotifyToken = session.provider_token;
+    if (!spotifyToken) {
+      return NextResponse.json({ error: 'Lu belum Connect Spotify!' }, { status: 403 });
+    }
+
     const { url } = await request.json();
 
-    // Ngambil ID Playlist (Bisa nerima format URL panjang dari share Spotify)
     const match = url.match(/playlist\/([a-zA-Z0-9]+)/);
     if (!match) return NextResponse.json({ error: 'Link Spotify nggak valid' }, { status: 400 });
 
     const playlistId = match[1];
-    const token = request.cookies.get('spotify_token')?.value;
-    if (!token) {
-      return NextResponse.json({ error: 'Spotify belum diconnect!' }, { status: 401 });
-    }
-
     const res = await fetch(`${SPOTIFY_PLAYLIST_API_BASE}/${playlistId}`, {
-      headers: { Authorization: 'Bearer ' + token },
+      headers: { Authorization: `Bearer ${spotifyToken}` },
     });
 
-    // Kalo Spotify nolak (misal karena playlist private)
-    if (res.status === 403) {
-      return NextResponse.json(
-        { error: 'Playlist di-Private! Tolong ubah jadi Public dulu di Spotify lu.' },
-        { status: 403 }
-      );
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.error?.message || 'Gagal narik playlist dari Spotify');
     }
 
     const data = await res.json();

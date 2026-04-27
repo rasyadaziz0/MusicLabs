@@ -1,13 +1,41 @@
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/lib/supabase/client';
 
 export default function ImportSpotifyPage() {
   const { user, signInWithGoogle } = useAuth();
-  const [errorMessage] = useState('');
-  const connectSpotify = () => {
-    window.location.href = '/api/auth/spotify/login';
+  const searchParams = useSearchParams();
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const callbackError = searchParams.get('error');
+  const callbackErrorCode = searchParams.get('error_code');
+  const callbackErrorDescription = searchParams.get('error_description');
+  const callbackMessage = callbackError
+    ? [callbackErrorCode, callbackErrorDescription].filter(Boolean).join(' - ')
+    : '';
+
+  const handleConnectSpotify = async () => {
+    setErrorMessage('');
+    setLoading(true);
+
+    const { error } = await supabase.auth.linkIdentity({
+      provider: 'spotify',
+      options: {
+        scopes:
+          'user-read-email user-read-private playlist-read-private playlist-read-collaborative',
+        redirectTo: `${window.location.origin}/import/spotify`,
+      },
+    });
+
+    if (error) {
+      console.error('Gagal connect:', error.message);
+      alert('Gagal connect Spotify: ' + error.message);
+      setErrorMessage(error.message);
+      setLoading(false);
+    }
   };
 
   return (
@@ -34,14 +62,20 @@ export default function ImportSpotifyPage() {
         </div>
       ) : (
         <div className="space-y-5 rounded-3xl border border-white/10 bg-white/5 p-8">
+          {callbackMessage && (
+            <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+              Gagal connect Spotify. {callbackMessage}
+            </div>
+          )}
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
             <p className="text-sm text-muted">Connect akun Spotify dulu untuk kasih akses playlist dari akun kamu.</p>
             <button
               type="button"
-              onClick={connectSpotify}
-              className="rounded-full bg-green-500 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-black"
+              onClick={handleConnectSpotify}
+              disabled={loading}
+              className="rounded-full bg-green-500 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-black disabled:cursor-not-allowed disabled:opacity-70"
             >
-              Connect with Spotify
+              {loading ? 'Connecting...' : 'Connect with Spotify'}
             </button>
           </div>
           {errorMessage && (
