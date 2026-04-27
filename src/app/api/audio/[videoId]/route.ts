@@ -3,15 +3,6 @@ import { Innertube } from 'youtubei.js';
 
 export const runtime = 'nodejs';
 
-let yt: Innertube | null = null;
-
-async function getYt() {
-  if (!yt) {
-    yt = await Innertube.create();
-  }
-  return yt;
-}
-
 /**
  * GET /api/audio/{videoId}
  * 
@@ -28,7 +19,7 @@ export async function GET(
   }
 
   try {
-    const youtube = await getYt();
+    const youtube = await Innertube.create();
     const info = await youtube.getInfo(videoId);
 
     const format = info.chooseFormat({ type: 'audio', quality: 'best' });

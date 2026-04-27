@@ -5,7 +5,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import {
   addTrackToPlaylist,
-  createPlaylist,
   getLikedSongIds,
   getLikedSongsWithDetails,
   getPlaylistTracks,
@@ -76,18 +75,32 @@ export function useToggleLikedSong() {
 }
 
 export function useCreatePlaylist() {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: { name: string; description?: string; coverUrl?: string }) => {
-      if (!user?.id) throw new Error('Please sign in first.');
-      return createPlaylist({
-        userId: user.id,
-        name: payload.name,
-        description: payload.description,
-        coverUrl: payload.coverUrl,
+    mutationFn: async (payload: { name: string; description?: string; coverUrl?: string }) => {
+      if (!user?.id || !session?.access_token) throw new Error('Please sign in first.');
+
+      const response = await fetch('/api/playlists', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          name: payload.name,
+          description: payload.description,
+          coverUrl: payload.coverUrl,
+        }),
       });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        throw new Error(data?.error ?? 'Failed to create playlist');
+      }
+
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['library-playlists', user?.id] });

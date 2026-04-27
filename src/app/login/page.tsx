@@ -13,7 +13,10 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const nextPath = useMemo(() => {
     const raw = searchParams.get('next');
-    return raw?.startsWith('/') ? raw : '/';
+    if (raw && raw.startsWith('/') && !raw.startsWith('//')) {
+      return raw;
+    }
+    return '/';
   }, [searchParams]);
 
   const [email, setEmail] = useState('');

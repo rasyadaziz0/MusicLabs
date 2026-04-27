@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Search, Library, PlusSquare, Heart, Music2, Download } from 'lucide-react';
+import { Home, Search, Library, PlusSquare, Heart, Music2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLibraryPlaylists } from '@/hooks/useMusicLibrary';
 import { useAuth } from '@/context/AuthContext';
@@ -15,7 +15,6 @@ const navItems = [
 
 const secondaryItems = [
   { icon: PlusSquare, label: 'Create Playlist', href: '/playlist/create' },
-  { icon: Download, label: 'Import Spotify', href: '/import/spotify' },
   { icon: Heart, label: 'Liked Songs', href: '/library/liked' },
 ];
 
