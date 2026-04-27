@@ -64,11 +64,20 @@ export default function ImportSpotifyPage() {
         <div className="space-y-5 rounded-3xl border border-white/10 bg-white/5 p-8">
           {callbackMessage && (
             <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-              Gagal connect Spotify. {callbackMessage}
+              Gagal connect Spotify😓😓. Bantu support developer buat upgrade akun premium Spotify Developer. bantu suport  {' '}
+              <a
+                href="https://tako.id/Acadlabs"
+                target="_blank"
+                rel="noreferrer"
+                className="font-semibold text-red-100 underline underline-offset-2"
+              >
+                Di sini🙏🙏
+              </a>
+              .
             </div>
           )}
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-3">
-            <p className="text-sm text-muted">Connect akun Spotify dulu untuk kasih akses playlist dari akun kamu.</p>
+            <p className="text-sm text-muted">Silahkan Login Spotify</p>
             <button
               type="button"
               onClick={handleConnectSpotify}
