@@ -1,33 +1,7 @@
-import { NextResponse } from 'next/server';
-
-const SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token';
+import { NextRequest, NextResponse } from 'next/server';
 const SPOTIFY_PLAYLIST_API_BASE = 'https://api.spotify.com/v1/playlists';
 
-async function getSpotifyToken() {
-  const clientId = process.env.SPOTIFY_CLIENT_ID;
-  const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
-
-  const authOptions = {
-    method: 'POST',
-    headers: {
-      Authorization: 'Basic ' + Buffer.from(clientId + ':' + clientSecret).toString('base64'),
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: 'grant_type=client_credentials',
-  };
-
-  const res = await fetch(SPOTIFY_TOKEN_URL, authOptions);
-
-  if (!res.ok) {
-    console.error('Gagal dapet token', await res.text());
-    throw new Error('Gagal Auth Spotify');
-  }
-
-  const data = await res.json();
-  return data.access_token;
-}
-
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const { url } = await request.json();
 
@@ -36,7 +10,10 @@ export async function POST(request: Request) {
     if (!match) return NextResponse.json({ error: 'Link Spotify nggak valid' }, { status: 400 });
 
     const playlistId = match[1];
-    const token = await getSpotifyToken();
+    const token = request.cookies.get('spotify_token')?.value;
+    if (!token) {
+      return NextResponse.json({ error: 'Spotify belum diconnect!' }, { status: 401 });
+    }
 
     const res = await fetch(`${SPOTIFY_PLAYLIST_API_BASE}/${playlistId}`, {
       headers: { Authorization: 'Bearer ' + token },
