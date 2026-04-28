@@ -390,7 +390,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         title: currentTrack.name,
         artist: currentTrack.artists.primary.map(a => a.name).join(', '),
         album: currentTrack.album.name,
-        artwork: [{ src: getBestImageUrl(currentTrack.image), sizes: '512x512', type: 'image/jpeg' }]
+        artwork: [{ src: getBestImageUrl(currentTrack.image) ?? '', sizes: '512x512', type: 'image/jpeg' }]
       });
       navigator.mediaSession.setActionHandler('play', togglePlay);
       navigator.mediaSession.setActionHandler('pause', togglePlay);
