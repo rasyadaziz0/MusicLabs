@@ -3,12 +3,53 @@ import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 import { enforceCors } from '@/lib/server/cors';
 
-const PROTECTED_PATHS = ['/api/audio/resolve'];
-const LIMITER_WINDOW = '1 m';
-const LIMITER_MAX_REQUESTS = 10;
+// ─── Rate limit buckets per route category ───────────────────────────────────
+// Tighter limit for expensive/quota-bound endpoints, looser for general reads.
+const RATE_LIMIT_CONFIGS: { prefix: string; prefix_key: string; max: number; window: string }[] = [
+  {
+    prefix: '/api/audio/resolve',
+    prefix_key: 'musiclabs:edge:audio-resolve',
+    max: 10,
+    window: '1 m',
+  },
+  {
+    prefix: '/api/search',
+    prefix_key: 'musiclabs:edge:search',
+    max: 30,
+    window: '1 m',
+  },
+];
 
-let edgeLimiter: Ratelimit | null = null;
+// Fallback config — applied to every other /api/* route
+const DEFAULT_RATE_LIMIT = {
+  prefix_key: 'musiclabs:edge:general',
+  max: 60,
+  window: '1 m',
+};
 
+// ─── Limiter cache (one instance per prefix_key to avoid re-instantiation) ───
+const limiterCache = new Map<string, Ratelimit>();
+
+function getLimiter(prefixKey: string, max: number, window: string): Ratelimit {
+  if (limiterCache.has(prefixKey)) return limiterCache.get(prefixKey)!;
+  const limiter = new Ratelimit({
+    redis: Redis.fromEnv(),
+    limiter: Ratelimit.slidingWindow(max, window as Parameters<typeof Ratelimit.slidingWindow>[1]),
+    analytics: true,
+    prefix: prefixKey,
+  });
+  limiterCache.set(prefixKey, limiter);
+  return limiter;
+}
+
+function getRateLimitConfig(pathname: string) {
+  const match = RATE_LIMIT_CONFIGS.find((cfg) => pathname.startsWith(cfg.prefix));
+  return match
+    ? { prefix_key: match.prefix_key, max: match.max, window: match.window }
+    : DEFAULT_RATE_LIMIT;
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 function getRequestIp(request: NextRequest): string | null {
   const xForwardedFor = request.headers.get('x-forwarded-for');
   if (xForwardedFor) return xForwardedFor.split(',')[0]?.trim() || null;
@@ -21,39 +62,22 @@ function getRequestIp(request: NextRequest): string | null {
   return fallbackIp?.trim() || null;
 }
 
-function isProtectedPath(pathname: string) {
-  return PROTECTED_PATHS.some((path) => pathname.startsWith(path));
-}
-
 function hasUpstashConfig() {
   return Boolean(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
 }
 
-function getLimiter() {
-  if (edgeLimiter) return edgeLimiter;
-  edgeLimiter = new Ratelimit({
-    redis: Redis.fromEnv(),
-    limiter: Ratelimit.slidingWindow(LIMITER_MAX_REQUESTS, LIMITER_WINDOW),
-    analytics: true,
-    prefix: 'musiclabs:edge:audio-resolve',
-  });
-  return edgeLimiter;
-}
-
+// ─── Main proxy handler ───────────────────────────────────────────────────────
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  if (!isProtectedPath(pathname)) {
-    return NextResponse.next();
-  }
 
+  // 1. CORS — semua route /api/* WAJIB lewat guard ini, bukan cuma yang "protected"
   const cors = enforceCors(request, {
     allowedMethods: ['GET', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
-  if (cors.response) {
-    return cors.response;
-  }
+  if (cors.response) return cors.response;
 
+  // 2. Skip rate limiter jika Upstash belum dikonfigurasi (dev mode toleran)
   if (!hasUpstashConfig()) {
     if (process.env.NODE_ENV === 'production') {
       return NextResponse.json(
@@ -68,14 +92,18 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
+  // 3. Wajib ada IP di production
   const requestIp = getRequestIp(request);
   if (!requestIp && process.env.NODE_ENV === 'production') {
     return NextResponse.json({ error: 'Forbidden: missing client IP' }, { status: 403 });
   }
 
-  const limiter = getLimiter();
+  // 4. Pilih bucket rate limit berdasarkan route
+  const { prefix_key, max, window } = getRateLimitConfig(pathname);
+  const limiter = getLimiter(prefix_key, max, window);
   const identifier = `${requestIp ?? 'dev-local'}:${pathname}`;
   const result = await limiter.limit(identifier);
+
   if (!result.success) {
     const retryAfter = Math.max(Math.ceil((result.reset - Date.now()) / 1000), 1);
     return NextResponse.json(
@@ -92,6 +120,7 @@ export async function proxy(request: NextRequest) {
     );
   }
 
+  // 5. Inject CORS + rate limit headers ke response
   const response = NextResponse.next();
   Object.entries(cors.corsHeaders).forEach(([key, value]) => {
     response.headers.set(key, value);
