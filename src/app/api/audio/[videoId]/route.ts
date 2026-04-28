@@ -26,17 +26,19 @@ export async function GET(
     const audioUrl = format ? await format.decipher(youtube.session.player) : null;
 
     if (!audioUrl) {
-      return new NextResponse('No playable audio stream found for this music', {
-        status: 404,
-      });
+      return NextResponse.json(
+        { error: 'No playable audio stream found for this music' },
+        { status: 404 }
+      );
     }
 
     return NextResponse.redirect(audioUrl);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('Audio proxy error', message);
-    return new NextResponse('Failed to resolve audio: ' + message, {
-      status: 500,
-    });
+    return NextResponse.json(
+      { error: 'Failed to resolve audio: ' + message },
+      { status: 500 }
+    );
   }
 }
