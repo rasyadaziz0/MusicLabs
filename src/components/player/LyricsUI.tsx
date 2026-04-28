@@ -30,14 +30,20 @@ export default function LyricsUI({
         <div className="mb-12 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <div className="relative h-20 w-20 overflow-hidden rounded-2xl border border-white/10 shadow-2xl">
-              <img
-                src={
+              {(() => {
+                const imgUrl =
                   currentTrack.image.find((i) => i.quality === '500x500')?.url ||
-                  currentTrack.image[0]?.url
-                }
-                alt={currentTrack.name}
-                className="h-full w-full object-cover"
-              />
+                  currentTrack.image[0]?.url;
+                return imgUrl ? (
+                  <img
+                    src={imgUrl}
+                    alt={currentTrack.name}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="h-full w-full bg-gradient-to-br from-primary/40 to-void" />
+                );
+              })()}
             </div>
             <div>
               <h2 className="mb-1 text-3xl font-bold tracking-tight">{currentTrack.name}</h2>

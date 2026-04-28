@@ -83,13 +83,17 @@ export default function LikedSongsPage() {
                 <span className="w-8 text-center text-muted">{index + 1}</span>
                 <div className="flex min-w-0 items-center gap-4">
                   <div className="relative h-11 w-11 overflow-hidden rounded-lg">
-                    <Image
-                      src={getBestImageUrl(song.image)}
-                      alt={song.name}
-                      fill
-                      sizes="44px"
-                      className="object-cover"
-                    />
+                    {getBestImageUrl(song.image) ? (
+                      <Image
+                        src={getBestImageUrl(song.image)!}
+                        alt={song.name}
+                        fill
+                        sizes="44px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-primary/40 to-void" />
+                    )}
                   </div>
                   <div className="min-w-0">
                     <p className="truncate font-semibold">{song.name}</p>

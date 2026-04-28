@@ -83,12 +83,14 @@ export function NowPlayingUI({
           className="fixed inset-0 z-[70] bg-void overflow-hidden"
         >
           <div className="absolute inset-0">
-            <Image
-              src={getBestImageUrl(currentTrack.image)}
-              alt="bg"
-              fill
-              className="object-cover"
-            />
+            {getBestImageUrl(currentTrack.image) && (
+              <Image
+                src={getBestImageUrl(currentTrack.image)!}
+                alt="bg"
+                fill
+                className="object-cover"
+              />
+            )}
             <div className="absolute inset-0 bg-[#171722]/70" />
             <div className="absolute inset-0 bg-gradient-to-r from-[#3f3638]/65 via-[#3e3842]/62 to-[#4f453a]/62" />
           </div>
@@ -107,12 +109,16 @@ export function NowPlayingUI({
                 <div className="w-full max-w-[400px] mx-auto">
                   <div className="bg-white/8 border border-white/10 rounded-2xl p-3 shadow-2xl">
                     <div className="relative aspect-square w-full rounded-xl overflow-hidden">
-                      <Image
-                        src={getBestImageUrl(currentTrack.image)}
-                        alt={currentTrack.name}
-                        fill
-                        className="object-cover"
-                      />
+                      {getBestImageUrl(currentTrack.image) ? (
+                        <Image
+                          src={getBestImageUrl(currentTrack.image)!}
+                          alt={currentTrack.name}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-primary/40 to-void" />
+                      )}
                       {isPreview ? (
                         <span className="absolute right-2 top-2 px-2 py-1 rounded-full text-[10px] uppercase tracking-wide font-semibold bg-black/45 border border-white/25">
                           Preview

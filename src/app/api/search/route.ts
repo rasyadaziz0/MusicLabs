@@ -6,7 +6,7 @@ export const runtime = 'nodejs';
 
 export async function GET(request: NextRequest) {
   const ip = getRequestIp(request);
-  const limiter = checkRateLimit(ip, {
+  const limiter = await checkRateLimit(ip, {
     limit: 40,
     windowMs: 60_000,
     keyPrefix: 'search:combined',

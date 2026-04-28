@@ -138,7 +138,7 @@ function scoreCandidate(item: any, expectedTitle: string, expectedArtist: string
  */
 export async function GET(request: NextRequest) {
   const ip = getRequestIp(request);
-  const limiter = checkRateLimit(ip, {
+  const limiter = await checkRateLimit(ip, {
     limit: 20,
     windowMs: 60_000,
     keyPrefix: 'search:youtube',

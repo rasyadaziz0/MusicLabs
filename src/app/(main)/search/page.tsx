@@ -282,13 +282,17 @@ function SearchPageContent() {
                       </span>
                       <div className="flex items-center gap-4 min-w-0">
                         <div className="relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
-                          <Image
-                            src={getBestImageUrl(song.image)}
-                            alt={song.name}
-                            fill
-                            sizes="40px"
-                            className="object-cover"
-                          />
+                          {getBestImageUrl(song.image) ? (
+                            <Image
+                              src={getBestImageUrl(song.image)!}
+                              alt={song.name}
+                              fill
+                              sizes="40px"
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-primary/40 to-void" />
+                          )}
                         </div>
                         <div className="min-w-0">
                           <p className="font-bold truncate">{song.name}</p>

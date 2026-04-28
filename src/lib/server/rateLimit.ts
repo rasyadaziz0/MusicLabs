@@ -1,4 +1,6 @@
 import { NextRequest } from 'next/server';
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
 
 type RateLimitConfig = {
   limit: number;
@@ -18,8 +20,15 @@ type Bucket = {
   resetAt: number;
 };
 
+type RateLimiterInstance = {
+  key: string;
+  limiter: Ratelimit;
+};
+
 const GLOBAL_STORE_KEY = '__MUSICLABS_RATE_LIMIT_STORE__';
+const GLOBAL_LIMITER_STORE_KEY = '__MUSICLABS_RATE_LIMITERS__';
 const store = getStore();
+const limiterStore = getLimiterStore();
 
 function getStore(): Map<string, Bucket> {
   const globalObj = globalThis as typeof globalThis & {
@@ -31,6 +40,26 @@ function getStore(): Map<string, Bucket> {
   }
 
   return globalObj[GLOBAL_STORE_KEY]!;
+}
+
+function getLimiterStore(): Map<string, RateLimiterInstance> {
+  const globalObj = globalThis as typeof globalThis & {
+    [GLOBAL_LIMITER_STORE_KEY]?: Map<string, RateLimiterInstance>;
+  };
+
+  if (!globalObj[GLOBAL_LIMITER_STORE_KEY]) {
+    globalObj[GLOBAL_LIMITER_STORE_KEY] = new Map<string, RateLimiterInstance>();
+  }
+
+  return globalObj[GLOBAL_LIMITER_STORE_KEY]!;
+}
+
+function hasUpstashConfig() {
+  return Boolean(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
+}
+
+function shouldUseLocalFallback() {
+  return process.env.NODE_ENV !== 'production';
 }
 
 export function getRequestIp(request: NextRequest): string {
@@ -47,7 +76,7 @@ export function getRequestIp(request: NextRequest): string {
   );
 }
 
-export function checkRateLimit(
+function checkLocalRateLimit(
   identifier: string,
   { limit, windowMs, keyPrefix = 'api' }: RateLimitConfig
 ): RateLimitResult {
@@ -74,5 +103,54 @@ export function checkRateLimit(
     limit,
     remaining,
     resetInSeconds: Math.max(Math.ceil((existing.resetAt - now) / 1000), 1),
+  };
+}
+
+function getRatelimiter({ limit, windowMs, keyPrefix = 'api' }: RateLimitConfig): Ratelimit {
+  const windowSeconds = Math.max(Math.ceil(windowMs / 1000), 1);
+  const limiterKey = `${keyPrefix}:${limit}:${windowSeconds}`;
+  const existing = limiterStore.get(limiterKey);
+
+  if (existing) return existing.limiter;
+
+  const limiter = new Ratelimit({
+    redis: Redis.fromEnv(),
+    limiter: Ratelimit.slidingWindow(limit, `${windowSeconds} s`),
+    analytics: true,
+    prefix: `musiclabs:${keyPrefix}`,
+  });
+
+  limiterStore.set(limiterKey, { key: limiterKey, limiter });
+  return limiter;
+}
+
+export async function checkRateLimit(
+  identifier: string,
+  config: RateLimitConfig
+): Promise<RateLimitResult> {
+  const { limit } = config;
+
+  if (hasUpstashConfig()) {
+    const limiter = getRatelimiter(config);
+    const result = await limiter.limit(identifier);
+    const resetInSeconds = Math.max(Math.ceil((result.reset - Date.now()) / 1000), 1);
+
+    return {
+      allowed: result.success,
+      limit: result.limit,
+      remaining: result.remaining,
+      resetInSeconds,
+    };
+  }
+
+  if (shouldUseLocalFallback()) {
+    return checkLocalRateLimit(identifier, config);
+  }
+
+  return {
+    allowed: false,
+    limit,
+    remaining: 0,
+    resetInSeconds: 60,
   };
 }

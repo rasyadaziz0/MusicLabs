@@ -5,7 +5,16 @@
 
 const CACHE_KEY_PREFIX = 'yt_resolve_v4_';
 
-export async function resolveToYoutubeId(title: string, artist: string, trackId: string): Promise<string | null> {
+type ResolveOptions = {
+  signal?: AbortSignal;
+};
+
+export async function resolveToYoutubeId(
+  title: string,
+  artist: string,
+  trackId: string,
+  options: ResolveOptions = {}
+): Promise<string | null> {
   const cacheKey = `${CACHE_KEY_PREFIX}${trackId}`;
   
   // 1. Cek cache localStorage
@@ -15,7 +24,8 @@ export async function resolveToYoutubeId(title: string, artist: string, trackId:
   try {
     // 2. Fetch dari internal NodeJS API endpoint yang menggunakan youtube.music.search
     const res = await fetch(
-      `/api/audio/resolve?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}`
+      `/api/audio/resolve?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}`,
+      { signal: options.signal }
     );
     
     if (!res.ok) {
@@ -34,6 +44,9 @@ export async function resolveToYoutubeId(title: string, artist: string, trackId:
 
     return null;
   } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      return null;
+    }
     console.error('Error resolving YouTube ID:', error);
     return null;
   }

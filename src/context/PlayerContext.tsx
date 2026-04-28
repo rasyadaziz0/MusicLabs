@@ -23,10 +23,41 @@ interface PlayerContextType {
   setVolume: (volume: number) => void;
 }
 
+type YouTubePlayerEvent = {
+  data: number;
+};
+
+type YouTubePlayer = {
+  getDuration: () => number;
+  getPlayerState: () => number;
+  getCurrentTime: () => number;
+  loadVideoById: (videoId: string) => void;
+  stopVideo: () => void;
+  destroy: () => void;
+  pauseVideo: () => void;
+  playVideo: () => void;
+  seekTo: (seconds: number, allowSeekAhead: boolean) => void;
+  setVolume: (volume: number) => void;
+};
+
 declare global {
   interface Window {
     onYouTubeIframeAPIReady: () => void;
-    YT: any;
+    YT: {
+      Player?: new (
+        elementId: string,
+        options: {
+          height: string;
+          width: string;
+          videoId: string;
+          playerVars: Record<string, number>;
+          events: {
+            onStateChange: (event: YouTubePlayerEvent) => void;
+            onError: (event: YouTubePlayerEvent) => void;
+          };
+        }
+      ) => YouTubePlayer;
+    };
   }
 }
 
@@ -45,10 +76,39 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const nextTrackRef = useRef<() => void>(() => { });
 
   // Engines
-  const ytPlayerRef = useRef<any>(null);
+  const ytPlayerRef = useRef<YouTubePlayer | null>(null);
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const hasInitializedYTRef = useRef(false);
+  const currentTrackRef = useRef<Song | null>(null);
+  const resolveAbortRef = useRef<AbortController | null>(null);
+  const fallbackAttemptedTrackRef = useRef<string | null>(null);
+
+  const getFallbackCacheKey = useCallback((trackId: string) => `fallback_yt_${trackId}`, []);
+
+  const abortPendingResolve = useCallback(() => {
+    if (resolveAbortRef.current) {
+      resolveAbortRef.current.abort();
+      resolveAbortRef.current = null;
+    }
+  }, []);
+
+  const playPreviewFallback = useCallback((track?: Song) => {
+    const fallbackTrack = track ?? currentTrackRef.current;
+    if (!fallbackTrack?.preview || !previewAudioRef.current) return;
+
+    setIsPreview(true);
+    setIsResolving(false);
+
+    // Stop YouTube
+    if (ytPlayerRef.current && typeof ytPlayerRef.current.stopVideo === 'function') {
+      ytPlayerRef.current.stopVideo();
+    }
+
+    const audio = previewAudioRef.current;
+    audio.src = fallbackTrack.preview;
+    audio.play().catch(console.error);
+  }, []);
 
   // Initialize YouTube API
   useEffect(() => {
@@ -70,19 +130,72 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
           modestbranding: 1,
         },
         events: {
-          onStateChange: (event: any) => {
+          onStateChange: (event: YouTubePlayerEvent) => {
             // YT.PlayerState.PLAYING = 1
             if (event.data === 1) {
               setIsPlaying(true);
-              setDuration(ytPlayerRef.current.getDuration());
+              if (ytPlayerRef.current) {
+                setDuration(ytPlayerRef.current.getDuration());
+              }
             } else if (event.data === 2 || event.data === 0) {
               setIsPlaying(false);
               if (event.data === 0) nextTrackRef.current(); // Auto-next
             }
           },
-          onError: () => {
-            console.error('Player Error. Falling back to preview.');
-            playPreviewFallback();
+          onError: (event: YouTubePlayerEvent) => {
+            const blockedEmbedCode = event?.data;
+            const activeTrack = currentTrackRef.current;
+
+            if (
+              activeTrack &&
+              (blockedEmbedCode === 101 || blockedEmbedCode === 150) &&
+              fallbackAttemptedTrackRef.current !== activeTrack.id
+            ) {
+              fallbackAttemptedTrackRef.current = activeTrack.id;
+              setIsResolving(true);
+              void (async () => {
+                abortPendingResolve();
+                const controller = new AbortController();
+                resolveAbortRef.current = controller;
+
+                try {
+                  const artistName = activeTrack.artists.primary[0]?.name || '';
+                  const response = await fetch(
+                    `/api/audio/resolve?title=${encodeURIComponent(activeTrack.name)}&artist=${encodeURIComponent(artistName)}&trackId=${encodeURIComponent(activeTrack.id)}&fallback=1`,
+                    { signal: controller.signal }
+                  );
+
+                  if (!response.ok) {
+                    throw new Error(`Fallback resolve failed with status ${response.status}`);
+                  }
+
+                  const data = await response.json();
+                  const fallbackVideoId = data?.videoId as string | undefined;
+
+                  if (!fallbackVideoId || currentTrackRef.current?.id !== activeTrack.id) {
+                    return;
+                  }
+
+                  localStorage.setItem(getFallbackCacheKey(activeTrack.id), fallbackVideoId);
+                  if (ytPlayerRef.current && typeof ytPlayerRef.current.loadVideoById === 'function') {
+                    ytPlayerRef.current.loadVideoById(fallbackVideoId);
+                  }
+                  setIsResolving(false);
+                } catch (error) {
+                  if (error instanceof DOMException && error.name === 'AbortError') return;
+                  console.error('Fallback resolve on embed block failed:', error);
+                  playPreviewFallback(activeTrack);
+                } finally {
+                  if (resolveAbortRef.current === controller) {
+                    resolveAbortRef.current = null;
+                  }
+                }
+              })();
+              return;
+            }
+
+            console.error('Player Error. Falling back to preview.', blockedEmbedCode);
+            playPreviewFallback(activeTrack ?? undefined);
           }
         },
       });
@@ -139,6 +252,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       audio.removeEventListener('pause', handlePause);
       audio.pause();
       audio.src = '';
+      abortPendingResolve();
 
       if (ytPlayerRef.current && typeof ytPlayerRef.current.destroy === 'function') {
         ytPlayerRef.current.destroy();
@@ -150,26 +264,11 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         window.onYouTubeIframeAPIReady = prevReady;
       }
     };
-  }, []);
-
-  const playPreviewFallback = useCallback((track?: Song) => {
-    const fallbackTrack = track ?? currentTrack;
-    if (!fallbackTrack?.preview || !previewAudioRef.current) return;
-
-    setIsPreview(true);
-    setIsResolving(false);
-
-    // Stop YouTube
-    if (ytPlayerRef.current && typeof ytPlayerRef.current.stopVideo === 'function') {
-      ytPlayerRef.current.stopVideo();
-    }
-
-    const audio = previewAudioRef.current;
-    audio.src = fallbackTrack.preview;
-    audio.play().catch(console.error);
-  }, [currentTrack]);
+  }, [abortPendingResolve, getFallbackCacheKey, playPreviewFallback]);
 
   const playTrack = useCallback(async (track: Song, newQueue?: Song[]) => {
+    abortPendingResolve();
+
     if (newQueue) {
       setQueue(newQueue);
       const index = newQueue.findIndex((s) => s.id === track.id);
@@ -177,9 +276,11 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     }
 
     setCurrentTrack(track);
+    currentTrackRef.current = track;
     setIsResolving(true);
     setIsPreview(false);
     setCurrentTime(0);
+    fallbackAttemptedTrackRef.current = null;
 
     // Stop existing engines
     if (previewAudioRef.current) {
@@ -189,7 +290,22 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const artistName = track.artists.primary[0]?.name || '';
-      const videoId = await resolveToYoutubeId(track.name, artistName, track.id);
+      const cachedFallback = localStorage.getItem(getFallbackCacheKey(track.id));
+      if (cachedFallback && ytPlayerRef.current && typeof ytPlayerRef.current.loadVideoById === 'function') {
+        ytPlayerRef.current.loadVideoById(cachedFallback);
+        setIsResolving(false);
+        return;
+      }
+
+      const controller = new AbortController();
+      resolveAbortRef.current = controller;
+      const videoId = await resolveToYoutubeId(track.name, artistName, track.id, {
+        signal: controller.signal,
+      });
+
+      if (currentTrackRef.current?.id !== track.id) {
+        return;
+      }
 
       if (videoId && ytPlayerRef.current && typeof ytPlayerRef.current.loadVideoById === 'function') {
         ytPlayerRef.current.loadVideoById(videoId);
@@ -199,10 +315,15 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         playPreviewFallback(track);
       }
     } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return;
       console.error('Playback setup failed:', err);
       playPreviewFallback(track);
+    } finally {
+      if (resolveAbortRef.current?.signal.aborted || currentTrackRef.current?.id === track.id) {
+        resolveAbortRef.current = null;
+      }
     }
-  }, [playPreviewFallback]);
+  }, [abortPendingResolve, getFallbackCacheKey, playPreviewFallback]);
 
   const togglePlay = useCallback(() => {
     if (isPreview && previewAudioRef.current) {
@@ -216,6 +337,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   }, [isPlaying, isPreview]);
 
   const nextTrack = useCallback(() => {
+    abortPendingResolve();
     if (queue.length === 0 || queueIndex === -1) return;
     const nextIdx = queueIndex + 1;
     if (nextIdx >= queue.length) {
@@ -230,18 +352,19 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     }
     setQueueIndex(nextIdx);
     playTrack(queue[nextIdx]);
-  }, [queue, queueIndex, playTrack]);
+  }, [abortPendingResolve, queue, queueIndex, playTrack]);
 
   useEffect(() => {
     nextTrackRef.current = nextTrack;
   }, [nextTrack]);
 
   const prevTrack = useCallback(() => {
+    abortPendingResolve();
     if (queue.length === 0 || queueIndex === -1) return;
     const prevIdx = (queueIndex - 1 + queue.length) % queue.length;
     setQueueIndex(prevIdx);
     playTrack(queue[prevIdx]);
-  }, [queue, queueIndex, playTrack]);
+  }, [abortPendingResolve, queue, queueIndex, playTrack]);
 
   const seek = useCallback((time: number) => {
     if (isPreview && previewAudioRef.current) {

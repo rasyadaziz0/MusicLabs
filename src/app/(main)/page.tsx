@@ -202,13 +202,15 @@ export default function Home() {
                 className="group relative flex-shrink-0 w-[240px] md:w-[280px] aspect-[4/5] rounded-[24px] overflow-hidden snap-start cursor-pointer shadow-lg"
                 onClick={() => playTrack(song, trendingSongs)}
               >
-                <Image
-                  src={getBestImageUrl(song.image)}
-                  alt={song.name}
-                  fill
-                  sizes="(max-width: 768px) 240px, 280px"
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
-                />
+                {getBestImageUrl(song.image) && (
+                  <Image
+                    src={getBestImageUrl(song.image)!}
+                    alt={song.name}
+                    fill
+                    sizes="(max-width: 768px) 240px, 280px"
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                )}
 
                 {/* Gradient overlay for text readability */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
@@ -240,13 +242,15 @@ export default function Home() {
                 onClick={() => playTrack(song, recentlyPlayedSongs)}
               >
                 <div className="relative aspect-square rounded-2xl overflow-hidden mb-3">
-                  <Image
-                    src={getBestImageUrl(song.image)}
-                    alt={song.name}
-                    fill
-                    sizes="170px"
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
+                  {getBestImageUrl(song.image) && (
+                    <Image
+                      src={getBestImageUrl(song.image)!}
+                      alt={song.name}
+                      fill
+                      sizes="170px"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  )}
                 </div>
                 <p className="text-white font-semibold text-sm line-clamp-1">{song.name}</p>
                 <p className="text-white/60 text-xs line-clamp-1">
@@ -294,13 +298,15 @@ export default function Home() {
                 className="group relative flex-shrink-0 w-[220px] aspect-[4/3] rounded-2xl overflow-hidden text-left"
                 onClick={() => playTrack(song, moodSongs)}
               >
-                <Image
-                  src={getBestImageUrl(song.image)}
-                  alt={song.name}
-                  fill
-                  sizes="220px"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                />
+                {getBestImageUrl(song.image) && (
+                  <Image
+                    src={getBestImageUrl(song.image)!}
+                    alt={song.name}
+                    fill
+                    sizes="220px"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                 <div className="absolute bottom-0 left-0 p-4 w-full">
                   <p className="text-white/80 text-[11px] uppercase tracking-wider mb-1">{selectedMoodConfig.label}</p>
@@ -323,13 +329,15 @@ export default function Home() {
                 className="group rounded-2xl bg-white/5 hover:bg-white/10 transition-colors p-3 text-left"
               >
                 <div className="relative aspect-square rounded-xl overflow-hidden mb-3">
-                  <Image
-                    src={getBestImageUrl(album.image)}
-                    alt={album.name}
-                    fill
-                    sizes="(max-width: 768px) 50vw, 25vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
+                  {getBestImageUrl(album.image) && (
+                    <Image
+                      src={getBestImageUrl(album.image)!}
+                      alt={album.name}
+                      fill
+                      sizes="(max-width: 768px) 50vw, 25vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  )}
                 </div>
                 <p className="text-white font-semibold text-sm line-clamp-1">{album.name}</p>
                 <p className="text-white/60 text-xs line-clamp-1">

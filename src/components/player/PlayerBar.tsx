@@ -68,13 +68,17 @@ export default function PlayerBar() {
           onClick={() => setIsNowPlayingOpen(true)}
         >
           <div className="relative w-11 h-11 rounded-lg overflow-hidden flex-shrink-0 shadow-md">
-            <Image
-              src={getBestImageUrl(currentTrack.image)}
-              alt={currentTrack.name}
-              fill
-              sizes="44px"
-              className="object-cover"
-            />
+            {getBestImageUrl(currentTrack.image) ? (
+              <Image
+                src={getBestImageUrl(currentTrack.image)!}
+                alt={currentTrack.name}
+                fill
+                sizes="44px"
+                className="object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-primary/40 to-void" />
+            )}
           </div>
           <div className="flex-1 min-w-0 overflow-hidden flex flex-col justify-center">
             <p className="text-[9px] text-white/60 font-medium uppercase tracking-wider mb-0.5">
@@ -121,13 +125,17 @@ export default function PlayerBar() {
           onClick={() => setIsNowPlayingOpen(true)}
         >
           <div className="relative w-14 h-14 rounded-lg overflow-hidden shadow-lg flex-shrink-0">
-            <Image
-              src={getBestImageUrl(currentTrack.image)}
-              alt={currentTrack.name}
-              fill
-              sizes="56px"
-              className="object-cover group-hover:scale-110 transition-transform duration-500"
-            />
+            {getBestImageUrl(currentTrack.image) ? (
+              <Image
+                src={getBestImageUrl(currentTrack.image)!}
+                alt={currentTrack.name}
+                fill
+                sizes="56px"
+                className="object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-primary/40 to-void" />
+            )}
             <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               <Maximize2 size={16} />
             </div>

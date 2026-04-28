@@ -92,9 +92,11 @@ export function getBestAudioUrl(song: Song): string {
   return urls[urls.length - 1]?.url ?? '';
 }
 
-/** Get best cover art image URL */
-export function getBestImageUrl(images: ImageQuality[]): string {
-  return images.find(i => i.quality === '500x500')?.url
-    ?? images.find(i => i.quality === '150x150')?.url
-    ?? images[0]?.url ?? '';
+/** Get best cover art image URL. Returns undefined when no valid URL is available. */
+export function getBestImageUrl(images: ImageQuality[]): string | undefined {
+  const url =
+    images.find(i => i.quality === '500x500')?.url ??
+    images.find(i => i.quality === '150x150')?.url ??
+    images[0]?.url;
+  return url || undefined;
 }

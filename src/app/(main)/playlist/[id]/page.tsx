@@ -95,12 +95,14 @@ export default function PlaylistPage() {
             </span>
             <div className="flex items-center gap-4 min-w-0">
               <div className="relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
-                <Image 
-                  src={song.image.find(i => i.quality === '150x150')?.url || song.image[0].url} 
-                  alt={song.name} 
-                  fill 
-                  className="object-cover" 
-                />
+                {(() => {
+                  const imgUrl = song.image.find(i => i.quality === '150x150')?.url || song.image[0]?.url;
+                  return imgUrl ? (
+                    <Image src={imgUrl} alt={song.name} fill className="object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-primary/40 to-void" />
+                  );
+                })()}
               </div>
               <div className="min-w-0">
                 <p className="font-bold truncate">{song.name}</p>
