@@ -3,6 +3,25 @@ import { checkRateLimit, getRequestIp } from '@/lib/server/rateLimit';
 
 export const runtime = 'edge';
 
+type YoutubeApiError = {
+  error?: {
+    message?: string;
+    errors?: Array<{ reason?: string }>;
+  };
+};
+
+const QUOTA_ERROR_REASONS = new Set([
+  'quotaExceeded',
+  'dailyLimitExceeded',
+  'rateLimitExceeded',
+  'userRateLimitExceeded',
+]);
+
+const KEY_EXHAUST_COOLDOWN_MS = 60 * 60 * 1000;
+
+let activeKeyIndex = 0;
+const exhaustedKeyUntil: Record<number, number> = {};
+
 const HARD_EXCLUDED_TERMS = [
   'official music video',
   'music video',
@@ -42,6 +61,30 @@ function sanitizeTitle(text: string) {
 function isTopicChannel(channelTitle: string) {
   const normalized = normalizeText(channelTitle).trim();
   return normalized.endsWith(' topic') || normalized.includes(' - topic');
+}
+
+function getYoutubeApiKeys() {
+  const keys = [
+    process.env.YOUTUBE_API_KEY1,
+    process.env.YOUTUBE_API_KEY2,
+    process.env.YOUTUBE_API_KEY3,
+    process.env.YOUTUBE_API_KEY, // backward compatibility
+  ].filter((value, index, arr): value is string => Boolean(value) && arr.indexOf(value) === index);
+
+  return keys;
+}
+
+function isQuotaError(status: number, payload: YoutubeApiError) {
+  if (status !== 403 && status !== 429) return false;
+
+  const reasons = payload.error?.errors?.map((entry) => entry.reason).filter(Boolean) ?? [];
+  if (reasons.length === 0) return true;
+
+  return reasons.some((reason) => QUOTA_ERROR_REASONS.has(reason as string));
+}
+
+function getSearchUrl(searchQuery: string, apiKey: string) {
+  return `https://www.googleapis.com/youtube/v3/search?part=id,snippet&maxResults=12&q=${encodeURIComponent(searchQuery)}&type=video&videoCategoryId=10&key=${apiKey}`;
 }
 
 function scoreCandidate(item: any, expectedTitle: string, expectedArtist: string) {
@@ -126,26 +169,54 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Query or title is required' }, { status: 400 });
   }
 
-  const API_KEY = process.env.YOUTUBE_API_KEY;
+  const apiKeys = getYoutubeApiKeys();
   
-  if (!API_KEY) {
-    console.error('YOUTUBE_API_KEY is missing');
+  if (apiKeys.length === 0) {
+    console.error('YouTube API keys are missing');
     return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
   }
 
   try {
     const searchQuery = query?.trim() || `${title} ${artist} topic`.trim();
-    const url = `https://www.googleapis.com/youtube/v3/search?part=id,snippet&maxResults=12&q=${encodeURIComponent(searchQuery)}&type=video&videoCategoryId=10&key=${API_KEY}`;
-    
-    const res = await fetch(url);
-    const data = await res.json();
 
-    if (data.error) {
-      console.error('YouTube API Error:', data.error);
-      return NextResponse.json({ error: data.error.message }, { status: 500 });
+    const now = Date.now();
+    let firstErrorStatus = 500;
+    let searchData: any = null;
+
+    for (let i = activeKeyIndex; i < apiKeys.length; i++) {
+      const exhaustedUntil = exhaustedKeyUntil[i] ?? 0;
+      if (now < exhaustedUntil) continue;
+
+      const key = apiKeys[i];
+      const res = await fetch(getSearchUrl(searchQuery, key));
+      const data = (await res.json()) as YoutubeApiError & { items?: any[] };
+
+      if (res.ok && !data.error) {
+        activeKeyIndex = i;
+        searchData = data;
+        break;
+      }
+
+      if (isQuotaError(res.status, data)) {
+        exhaustedKeyUntil[i] = now + KEY_EXHAUST_COOLDOWN_MS;
+        if (i === activeKeyIndex) activeKeyIndex = Math.min(i + 1, apiKeys.length - 1);
+      }
+
+      if (!data.error?.message) continue;
+      if (firstErrorStatus === 500) {
+        firstErrorStatus = res.status || 500;
+      }
     }
 
-    const items = Array.isArray(data.items) ? data.items : [];
+    if (!searchData) {
+      const status = firstErrorStatus >= 400 && firstErrorStatus < 600 ? firstErrorStatus : 503;
+      return NextResponse.json(
+        { error: 'YouTube service unavailable, please try again later' },
+        { status }
+      );
+    }
+
+    const items = Array.isArray(searchData.items) ? searchData.items : [];
     const ranked = items
       .map((item: any) => ({ item, score: scoreCandidate(item, title, artist) }))
       .filter((entry: { item: any; score: number }) => entry.score > -999)
