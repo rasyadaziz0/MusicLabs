@@ -1,11 +1,11 @@
 'use client';
 
-import { getHomeFeed } from '@/lib/api/musicApi';
-import { searchSongs } from '@/lib/api/musicApi';
+import { getHomeFeed, getBestImageUrl, searchSongs } from '@/lib/api/musicApi';
 import { useQuery } from '@tanstack/react-query';
 import Image from 'next/image';
+import { useAuth } from '@/context/AuthContext';
+import { getRecentPlays } from '@/lib/supabase/music';
 import { usePlayer } from '@/context/PlayerContext';
-import { getBestImageUrl } from '@/lib/api/musicApi';
 import { Song } from '@/types/music';
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
@@ -110,10 +110,16 @@ function dedupeSongs(songs: Song[]) {
 
 export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
   const [selectedMood, setSelectedMood] = useState<MoodKey>('fokus');
   const { data: homeData, isLoading } = useQuery({
     queryKey: ['homeFeed'],
     queryFn: () => getHomeFeed(),
+  });
+  const { data: dbRecentPlays, isLoading: isRecentLoading } = useQuery({
+    queryKey: ['recentPlays', user?.id],
+    queryFn: () => getRecentPlays(user!.id),
+    enabled: !!user?.id,
   });
   const selectedMoodConfig =
     MOOD_PLAYLISTS.find((mood) => mood.key === selectedMood) ?? MOOD_PLAYLISTS[0];
@@ -181,7 +187,9 @@ export default function Home() {
 
   const trendingSongs = homeData?.trending?.songs || [];
   const newReleaseAlbums = homeData?.albums || [];
-  const recentlyPlayedSongs = getSongWindow(trendingSongs, 2, 12);
+  const recentlyPlayedSongs = user && dbRecentPlays && dbRecentPlays.length > 0 
+    ? dbRecentPlays 
+    : getSongWindow(trendingSongs, 2, 12);
   const moodSongs: Song[] = moodSongsData?.slice(0, 12) ?? [];
 
   return (
@@ -234,30 +242,41 @@ export default function Home() {
         <section className="px-2">
           <h2 className="text-[22px] font-bold text-white mb-4">Diputar Baru-Baru Ini</h2>
           <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
-            {recentlyPlayedSongs.map((song: Song, index: number) => (
-              <button
-                key={`${song.id}-recent-${index}`}
-                type="button"
-                className="group flex-shrink-0 w-[170px] text-left"
-                onClick={() => playTrack(song, recentlyPlayedSongs)}
-              >
-                <div className="relative aspect-square rounded-2xl overflow-hidden mb-3">
-                  {getBestImageUrl(song.image) && (
-                    <Image
-                      src={getBestImageUrl(song.image)!}
-                      alt={song.name}
-                      fill
-                      sizes="170px"
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  )}
-                </div>
-                <p className="text-white font-semibold text-sm line-clamp-1">{song.name}</p>
-                <p className="text-white/60 text-xs line-clamp-1">
-                  {song.artists.primary.map(a => a.name).join(', ')}
-                </p>
-              </button>
-            ))}
+            {isRecentLoading ? (
+              [...Array(6)].map((_, i) => (
+                <div
+                  key={`recent-loading-${i}`}
+                  className="flex-shrink-0 w-[170px] aspect-square rounded-2xl bg-white/10 animate-pulse"
+                />
+              ))
+            ) : recentlyPlayedSongs.length > 0 ? (
+              recentlyPlayedSongs.map((song: Song, index: number) => (
+                <button
+                  key={`${song.id}-recent-${index}`}
+                  type="button"
+                  className="group flex-shrink-0 w-[170px] text-left"
+                  onClick={() => playTrack(song, recentlyPlayedSongs)}
+                >
+                  <div className="relative aspect-square rounded-2xl overflow-hidden mb-3">
+                    {getBestImageUrl(song.image) && (
+                      <Image
+                        src={getBestImageUrl(song.image)!}
+                        alt={song.name}
+                        fill
+                        sizes="170px"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    )}
+                  </div>
+                  <p className="text-white font-semibold text-sm line-clamp-1">{song.name}</p>
+                  <p className="text-white/60 text-xs line-clamp-1">
+                    {song.artists.primary.map(a => a.name).join(', ')}
+                  </p>
+                </button>
+              ))
+            ) : (
+              <p className="text-sm text-white/60">Belum ada lagu yang diputar.</p>
+            )}
           </div>
         </section>
 
@@ -271,11 +290,10 @@ export default function Home() {
                   key={mood.key}
                   type="button"
                   onClick={() => setSelectedMood(mood.key)}
-                  className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
-                    isActive
+                  className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${isActive
                       ? 'bg-white text-black'
                       : 'bg-white/10 text-white hover:bg-white/20'
-                  }`}
+                    }`}
                 >
                   {mood.label}
                 </button>

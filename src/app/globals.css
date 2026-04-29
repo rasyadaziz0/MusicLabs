@@ -1,62 +1,73 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #2F2FE4;
-  --color-deep: #162E93;
-  --color-dark-navy: #1A1953;
-  --color-void: #080616;
-  --color-surface: #0F0D2E;
-  --color-muted: #8888BB;
+  --color-primary: #fa233b;
+  --color-deep: #1c1c1e;
+  --color-dark-navy: #2c2c2e;
+  --color-void: #000000;
+  --color-surface: #1e1e1e;
+  --color-muted: #8e8e93;
 
-  --font-display: "Syne", "Space Grotesk", sans-serif;
-  --font-body: "DM Sans", "Manrope", sans-serif;
-  --font-mono: "JetBrains Mono", monospace;
+  --font-display: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", sans-serif;
+  --font-mono: "SF Mono", Menlo, Consolas, monospace;
 }
 
 :root {
-  --background: #080616;
+  --background: #121212;
   --foreground: #ffffff;
-  --primary: #2F2FE4;
-  --deep: #162E93;
-  --dark-navy: #1A1953;
-  --surface: #0F0D2E;
-  --muted: #8888BB;
+  --primary: #fa233b;
+  --deep: #1c1c1e;
+  --dark-navy: #2c2c2e;
+  --surface: #1e1e1e;
+  --muted: #8e8e93;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: "DM Sans", "Manrope", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", sans-serif;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Custom scrollbar */
+/* macOS-style Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 14px;
+  height: 14px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  border: 4px solid rgba(0, 0, 0, 0);
+  background-clip: padding-box;
+  border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.4);
+  border: 4px solid rgba(0, 0, 0, 0);
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 .glass {
-  background: rgba(15, 13, 46, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(30, 30, 30, 0.65);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
 }
 
 .gradient-mesh {
-  background-color: #080616;
+  background-color: #121212;
   background-image: 
-    radial-gradient(at 0% 0%, hsla(240, 78%, 54%, 0.15) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, hsla(230, 74%, 33%, 0.15) 0px, transparent 50%);
+    radial-gradient(at 0% 0%, rgba(250, 35, 59, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(250, 35, 59, 0.05) 0px, transparent 50%);
 }
 
 .mask-gradient {

@@ -9,6 +9,7 @@ import { Suspense, useEffect, useMemo, useState } from 'react';
 import { usePlayer } from '@/context/PlayerContext';
 import { getBestImageUrl } from '@/lib/api/musicApi';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { decodeQuery, encodeQuery } from '@/lib/utils/searchEncode';
 import TrackLikeButton from '@/components/library/TrackLikeButton';
 import AddToPlaylistButton from '@/components/library/AddToPlaylistButton';
@@ -236,20 +237,14 @@ function SearchPageContent() {
                   <h2 className="text-lg font-bold mb-3">Artists</h2>
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-3">
                     {rankedArtists.map((artist: SearchArtistResult) => (
-                      <div
+                      <Link
                         key={artist.id}
-                        onClick={() =>
-                          setSelectedArtistId((prev) => (prev === artist.id ? null : artist.id))
-                        }
-                        className={`rounded-xl border p-3 cursor-pointer transition-colors ${
-                          selectedArtist?.id === artist.id
-                            ? 'border-primary/60 bg-primary/10'
-                            : 'border-white/10 bg-white/5 hover:bg-white/10'
-                        }`}
+                        href={`/artist/${artist.id}`}
+                        className="rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 p-3 cursor-pointer transition-colors"
                       >
                         <p className="font-semibold truncate">{artist.title}</p>
                         <p className="text-xs text-muted truncate">{artist.description || 'Artist'}</p>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 </div>
@@ -296,7 +291,20 @@ function SearchPageContent() {
                         </div>
                         <div className="min-w-0">
                           <p className="font-bold truncate">{song.name}</p>
-                          <p className="text-xs text-muted truncate">{song.artists.primary.map(a => a.name).join(', ')}</p>
+                          <div className="text-xs text-muted truncate flex items-center gap-1">
+                            {song.artists.primary.map((a, i) => (
+                              <span key={a.id}>
+                                <Link
+                                  href={`/artist/${a.id}`}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="hover:underline hover:text-white transition-colors"
+                                >
+                                  {a.name}
+                                </Link>
+                                {i < song.artists.primary.length - 1 && ', '}
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       </div>
                       <div className="hidden md:block text-sm text-muted truncate">

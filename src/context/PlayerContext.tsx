@@ -4,6 +4,8 @@ import { createContext, useContext, useEffect, useRef, useState, useCallback } f
 import { Song } from '@/types/music';
 import { getBestImageUrl } from '@/lib/api/musicApi';
 import { resolveToYoutubeId } from '@/lib/youtube';
+import { useAuth } from './AuthContext';
+import { recordRecentPlay } from '@/lib/supabase/music';
 
 interface PlayerContextType {
   currentTrack: Song | null;
@@ -64,6 +66,7 @@ declare global {
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 
 export function PlayerProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
   const [currentTrack, setCurrentTrack] = useState<Song | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isResolving, setIsResolving] = useState(false);
@@ -74,6 +77,15 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [queue, setQueue] = useState<Song[]>([]);
   const [queueIndex, setQueueIndex] = useState(-1);
   const nextTrackRef = useRef<() => void>(() => { });
+  const lastRecordedTrackRef = useRef<string | null>(null);
+
+  // Record playback history
+  useEffect(() => {
+    if (user && currentTrack && lastRecordedTrackRef.current !== currentTrack.id) {
+      lastRecordedTrackRef.current = currentTrack.id;
+      recordRecentPlay(user.id, currentTrack.id).catch(console.error);
+    }
+  }, [user, currentTrack]);
 
   // Engines
   const ytPlayerRef = useRef<YouTubePlayer | null>(null);
@@ -424,6 +436,6 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
 export const usePlayer = () => {
   const context = useContext(PlayerContext);
-  if (!context) throw new Error('usePlayer must be used within a PlayerProvider');
+  if (!context) throw new Error('Player must be used within a PlayerProvider');
   return context;
 };

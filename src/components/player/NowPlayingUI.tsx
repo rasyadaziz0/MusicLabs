@@ -130,9 +130,23 @@ export function NowPlayingUI({
                   <div className="pt-4 flex items-start justify-between gap-3">
                     <div className="min-w-0 pr-2">
                       <h2 className="truncate text-[38px] font-bold leading-tight">{currentTrack.name}</h2>
-                      <p className="mt-1 truncate text-[18px] font-semibold text-white/70">
-                        {currentTrack.artists.primary.map((artist) => artist.name).join(', ')}
-                      </p>
+                      <div className="mt-1 truncate text-[18px] font-semibold text-white/70 flex items-center gap-1">
+                        {currentTrack.artists.primary.map((artist, i) => (
+                          <span key={artist.id}>
+                            <Link
+                              href={`/artist/${artist.id}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onClose();
+                              }}
+                              className="hover:underline hover:text-white transition-colors"
+                            >
+                              {artist.name}
+                            </Link>
+                            {i < currentTrack.artists.primary.length - 1 && ', '}
+                          </span>
+                        ))}
+                      </div>
                     </div>
 
                     <div className="flex flex-shrink-0 items-center gap-2 pt-1">
@@ -372,7 +386,7 @@ export function NowPlayingUI({
                           </button>
                         ))
                       ) : (
-                        <div className="text-white/65 text-2xl">Lirik belum tersedia untuk lagu ini.</div>
+                        <div className="text-white/65 text-2xl">Lirik sedang di muat.</div>
                       )}
                     </div>
                   </div>

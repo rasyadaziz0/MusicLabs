@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils';
 import { LrcLine } from '@/lib/utils/lrcParser';
 import { Song } from '@/types/music';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 interface LyricsUIProps {
   currentTrack: Song;
@@ -25,11 +26,12 @@ export default function LyricsUI({
   onLineClick,
 }: LyricsUIProps) {
   return (
-    <div className="flex h-full w-full px-6 py-10">
+    <div className="flex h-full w-full px-8 py-8">
       <div className="ml-auto flex h-full w-full max-w-[980px] flex-col md:w-[58%]">
-        <div className="mb-12 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <div className="relative h-20 w-20 overflow-hidden rounded-2xl border border-white/10 shadow-2xl">
+        {/* Track header — compact, Apple Music style */}
+        <div className="mb-8 flex items-center justify-between">
+          <div className="flex items-center gap-5">
+            <div className="relative h-16 w-16 overflow-hidden rounded-xl shadow-2xl shadow-black/50 flex-shrink-0">
               {(() => {
                 const imgUrl =
                   currentTrack.image.find((i) => i.quality === '500x500')?.url ||
@@ -41,57 +43,80 @@ export default function LyricsUI({
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <div className="h-full w-full bg-gradient-to-br from-primary/40 to-void" />
+                  <div className="h-full w-full bg-gradient-to-br from-white/10 to-white/5" />
                 );
               })()}
             </div>
             <div>
-              <h2 className="mb-1 text-3xl font-bold tracking-tight">{currentTrack.name}</h2>
-              <p className="text-lg text-muted">
-                {currentTrack.artists.primary.map((a) => a.name).join(', ')}
-              </p>
+              <h2 className="mb-0.5 text-xl font-bold tracking-tight text-white/95">{currentTrack.name}</h2>
+              <div className="text-sm text-white/40 flex items-center gap-1">
+                {currentTrack.artists.primary.map((a, i) => (
+                  <span key={a.id}>
+                    <Link
+                      href={`/artist/${a.id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="hover:underline hover:text-white/60 transition-colors"
+                    >
+                      {a.name}
+                    </Link>
+                    {i < currentTrack.artists.primary.length - 1 && ', '}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </div>
 
+        {/* Lyrics scroll area */}
         <div
           ref={scrollRef}
-          className="mask-gradient scrollbar-hide flex-1 space-y-8 overflow-y-auto pr-2 md:pr-4"
+          className="mask-gradient scrollbar-hide flex-1 space-y-6 overflow-y-auto pr-2 md:pr-6"
         >
           {isLoading ? (
             <div className="flex flex-col gap-6">
               {[...Array(6)].map((_, i) => (
                 <div
                   key={i}
-                  className="h-10 w-full animate-pulse rounded-lg bg-white/5"
+                  className="h-10 w-3/4 animate-pulse rounded-lg bg-white/5"
                   style={{ opacity: 1 - i * 0.15 }}
                 />
               ))}
             </div>
           ) : lines.length > 0 ? (
-            lines.map((line, index) => (
-              <motion.div
-                key={`${index}-${line.time}`}
-                initial={{ opacity: 0.3, y: 10 }}
-                animate={{
-                  opacity: activeIndex === index ? 1 : 0.4,
-                  scale: activeIndex === index ? 1.05 : 1,
-                  y: 0,
-                }}
-                transition={{ duration: 0.4 }}
-                className={cn(
-                  'origin-left text-2xl font-bold leading-tight transition-all duration-300 md:text-4xl',
-                  isSynced && !line.isPlaceholder ? 'cursor-pointer' : 'cursor-default',
-                  activeIndex === index ? 'text-white' : 'text-white/40 hover:text-white/60',
-                )}
-                onClick={() => onLineClick(line.time, line.isPlaceholder)}
-              >
-                {line.text}
-              </motion.div>
-            ))
+            lines.map((line, index) => {
+              const isActive = activeIndex === index;
+              const distance = Math.abs(index - activeIndex);
+
+              return (
+                <motion.div
+                  key={`${index}-${line.time}`}
+                  initial={{ opacity: 0.15, y: 10 }}
+                  animate={{
+                    opacity: isActive ? 1 : Math.max(0.15, 0.35 - distance * 0.04),
+                    scale: isActive ? 1 : 0.98,
+                    y: 0,
+                    filter: isActive ? 'blur(0px)' : `blur(${Math.min(2.5, 1 + distance * 0.3)}px)`,
+                  }}
+                  transition={{
+                    duration: 0.5,
+                    ease: [0.25, 0.1, 0.25, 1],
+                  }}
+                  className={cn(
+                    'origin-left text-[28px] font-extrabold leading-[1.25] tracking-tight md:text-[36px]',
+                    isSynced && !line.isPlaceholder ? 'cursor-pointer' : 'cursor-default',
+                    isActive
+                      ? 'text-white'
+                      : 'text-white/30 hover:text-white/50',
+                  )}
+                  onClick={() => onLineClick(line.time, line.isPlaceholder)}
+                >
+                  {line.text}
+                </motion.div>
+              );
+            })
           ) : (
-            <div className="flex h-full items-center justify-center text-2xl font-medium text-muted">
-              Lirik sedang di muat
+            <div className="flex h-full items-center justify-center text-xl font-medium text-white/30">
+              Lirik tidak tersedia.
             </div>
           )}
         </div>

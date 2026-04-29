@@ -182,3 +182,31 @@ export async function toggleLikedSong(userId: string, trackId: string) {
   if (error) throw error;
   return true;
 }
+
+export async function recordRecentPlay(userId: string, trackId: string) {
+  const { error } = await supabase.from('recent_plays').insert({
+    user_id: userId,
+    track_id: trackId,
+  });
+
+  if (error) {
+    console.error('Failed to record recent play:', error);
+  }
+}
+
+export async function getRecentPlays(userId: string): Promise<Song[]> {
+  const { data, error } = await supabase
+    .from('recent_plays')
+    .select('track_id')
+    .eq('user_id', userId)
+    .order('played_at', { ascending: false })
+    .limit(30);
+
+  if (error) throw error;
+
+  const rawIds = (data ?? []).map((row) => row.track_id);
+  const uniqueIds = Array.from(new Set(rawIds)).slice(0, 15);
+
+  if (uniqueIds.length === 0) return [];
+  return getSongsByIds(uniqueIds);
+}
