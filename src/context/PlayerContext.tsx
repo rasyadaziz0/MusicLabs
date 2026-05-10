@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useRef, useState, useCallback } f
 import { Song } from '@/types/music';
 import { getBestImageUrl } from '@/lib/api/musicApi';
 import { resolveToYoutubeId } from '@/lib/youtube';
+import { supabase } from '@/lib/supabase/client';
 import { useAuth } from './AuthContext';
 import { recordRecentPlay } from '@/lib/supabase/music';
 
@@ -98,10 +99,12 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const repeatModeRef = useRef(repeatMode);
   const isShuffledRef = useRef(isShuffled);
   const lastRecordedTrackRef = useRef<string | null>(null);
+  const userRef = useRef(user);
 
   // Keep refs in sync with state
   useEffect(() => { repeatModeRef.current = repeatMode; }, [repeatMode]);
   useEffect(() => { isShuffledRef.current = isShuffled; }, [isShuffled]);
+  useEffect(() => { userRef.current = user; }, [user]);
 
   const toggleShuffle = useCallback(() => setIsShuffled(prev => !prev), []);
   const cycleRepeatMode = useCallback(() => {
@@ -244,9 +247,15 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
                 try {
                   const artistName = activeTrack.artists.primary[0]?.name || '';
+                  const { data: { session } } = await supabase.auth.getSession();
+                  const headers: Record<string, string> = {};
+                  if (session?.access_token) {
+                    headers['Authorization'] = `Bearer ${session.access_token}`;
+                  }
+
                   const response = await fetch(
                     `/api/audio/resolve?title=${encodeURIComponent(activeTrack.name)}&artist=${encodeURIComponent(artistName)}&trackId=${encodeURIComponent(activeTrack.id)}&fallback=1`,
-                    { signal: controller.signal }
+                    { signal: controller.signal, headers }
                   );
 
                   if (!response.ok) {
@@ -452,7 +461,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     stopRadio();
 
     // Guest mode: skip YouTube, force 30s Deezer preview
-    if (!user) {
+    // Use ref to avoid stale closure — user state may lag behind auth change
+    if (!userRef.current) {
       setIsResolving(false);
       setIsGuestPreview(true);
       playPreviewFallback(track);
@@ -492,7 +502,13 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
         if (videoId && previewAudioRef.current) {
           // Fetch direct audio URL from our proxy API
-          const audioRes = await fetch(`/api/audio/${videoId}`);
+          const { data: { session } } = await supabase.auth.getSession();
+          const headers: Record<string, string> = {};
+          if (session?.access_token) {
+            headers['Authorization'] = `Bearer ${session.access_token}`;
+          }
+
+          const audioRes = await fetch(`/api/audio/${videoId}`, { headers });
           if (!audioRes.ok) throw new Error(`Audio stream API returned ${audioRes.status}`);
           const audioData = await audioRes.json();
           if (!audioData.url) throw new Error('No audio URL in response');
@@ -510,8 +526,34 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (err) {
         if (err instanceof DOMException && err.name === 'AbortError') return;
-        console.error('Mobile playback failed:', err);
-        playPreviewFallback(track);
+        console.error('Mobile HTML5 playback failed, falling back to YouTube IFrame:', err);
+
+        try {
+          const artistName = track.artists.primary[0]?.name || '';
+          let fallbackVideoId: string | null = localStorage.getItem(getFallbackCacheKey(track.id));
+
+          if (!fallbackVideoId) {
+            const controller = new AbortController();
+            resolveAbortRef.current = controller;
+            fallbackVideoId = await resolveToYoutubeId(track.name, artistName, track.id, {
+              signal: controller.signal,
+            });
+          }
+
+          if (currentTrackRef.current?.id !== track.id) return;
+
+          if (fallbackVideoId && ytPlayerRef.current && typeof ytPlayerRef.current.loadVideoById === 'function') {
+            activeEngineRef.current = 'youtube';
+            ytPlayerRef.current.loadVideoById(fallbackVideoId);
+            setIsResolving(false);
+          } else {
+            playPreviewFallback(track);
+          }
+        } catch (fallbackErr) {
+          if (fallbackErr instanceof DOMException && fallbackErr.name === 'AbortError') return;
+          console.error('Mobile IFrame fallback failed:', fallbackErr);
+          playPreviewFallback(track);
+        }
       } finally {
         if (resolveAbortRef.current?.signal.aborted || currentTrackRef.current?.id === track.id) {
           resolveAbortRef.current = null;
@@ -545,8 +587,34 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         activeEngineRef.current = 'youtube';
         ytPlayerRef.current.loadVideoById(videoId);
         setIsResolving(false);
+      } else if (videoId && previewAudioRef.current) {
+        // YT IFrame not ready — try HTML5 Audio with direct stream (same as mobile path)
+        console.warn('YT IFrame not ready, trying HTML5 Audio stream for desktop');
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          const headers: Record<string, string> = {};
+          if (session?.access_token) {
+            headers['Authorization'] = `Bearer ${session.access_token}`;
+          }
+
+          const audioRes = await fetch(`/api/audio/${videoId}`, { headers });
+          if (!audioRes.ok) throw new Error(`Audio stream API returned ${audioRes.status}`);
+          const audioData = await audioRes.json();
+          if (!audioData.url) throw new Error('No audio URL in response');
+
+          if (currentTrackRef.current?.id !== track.id) return;
+
+          activeEngineRef.current = 'html5';
+          setIsPreview(false);
+          previewAudioRef.current.src = audioData.url;
+          previewAudioRef.current.play().catch(console.error);
+          setIsResolving(false);
+        } catch (html5Err) {
+          console.error('Desktop HTML5 fallback also failed:', html5Err);
+          playPreviewFallback(track);
+        }
       } else {
-        console.warn('Cloud Music sedang eror');
+        console.warn('No video ID resolved for playback');
         playPreviewFallback(track);
       }
     } catch (err) {
@@ -558,7 +626,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         resolveAbortRef.current = null;
       }
     }
-  }, [user, abortPendingResolve, getFallbackCacheKey, playPreviewFallback, playRadioStream, stopRadio]);
+  }, [abortPendingResolve, getFallbackCacheKey, playPreviewFallback, playRadioStream, stopRadio]);
 
   const togglePlay = useCallback(() => {
     const engine = activeEngineRef.current;

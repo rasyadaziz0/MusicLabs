@@ -1,21 +1,45 @@
 'use client';
 
-import { Suspense, useEffect } from 'react';
+import { Suspense, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 function AuthCallbackInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const hasRun = useRef(false);
 
   useEffect(() => {
+    if (hasRun.current) return;
+    hasRun.current = true;
+
     const handleAuth = async () => {
       const nextPath = searchParams.get('next');
       const safeNextPath = (nextPath?.startsWith('/') && !nextPath.startsWith('//')) ? nextPath : '/';
-      const { error } = await supabase.auth.getSession();
-      if (!error) {
-        router.push(safeNextPath);
+
+      // Wait for Supabase to detect & process the session from the URL hash/code.
+      // onAuthStateChange fires SIGNED_IN once the implicit-flow tokens are ingested.
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          subscription.unsubscribe();
+          router.replace(safeNextPath);
+        }
+      });
+
+      // Fallback: if the session is already available (e.g. page refresh),
+      // redirect immediately instead of waiting for an event that won't fire.
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (!error && session) {
+        subscription.unsubscribe();
+        router.replace(safeNextPath);
+        return;
       }
+
+      // Safety timeout — if nothing happens within 8s, redirect anyway
+      setTimeout(() => {
+        subscription.unsubscribe();
+        router.replace(safeNextPath);
+      }, 8000);
     };
 
     handleAuth();

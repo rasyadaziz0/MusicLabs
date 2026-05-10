@@ -125,25 +125,25 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  const query = artist?.trim() 
+  const query = artist?.trim()
     ? `${title.trim()} ${artist.trim()}`
     : title.trim();
 
   try {
     const youtube = await getYt();
-    
+
     // Step 1: Search for the track
     // Gunakan youtube.music.search dengan filter 'song' agar hanya mendapatkan lagu official
     // dan menghindari hasil berupa playlist atau music video panjang.
     const searchResults = await youtube.music.search(query, { type: 'song' });
-    
+
     if (!searchResults.songs || !searchResults.songs.contents || searchResults.songs.contents.length === 0) {
       return NextResponse.json({ error: 'No song results found on YouTube Music' }, { status: 404 });
     }
 
     // Ambil lagu pertama (paling relevan dari YouTube Music)
     const firstSong = searchResults.songs.contents[0];
-    
+
     // Pastikan ini adalah object yang punya id
     if (!('id' in firstSong) || !firstSong.id) {
       return NextResponse.json({ error: 'Invalid search result format' }, { status: 404 });

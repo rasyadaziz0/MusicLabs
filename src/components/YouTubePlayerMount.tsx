@@ -23,7 +23,7 @@ export default function YouTubePlayerMount() {
     const container = document.createElement('div');
     container.id = 'youtube-player-container';
     container.style.cssText =
-      'position:fixed;bottom:0;right:0;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-50;';
+      'position:absolute;top:-9999px;left:-9999px;width:200px;height:200px;opacity:0.01;pointer-events:none;z-index:-50;';
     document.body.appendChild(container);
   }, []);
 

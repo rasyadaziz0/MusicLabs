@@ -1,33 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
-import { enforceCors } from '@/lib/server/cors';
+import { enforceCors } from './lib/server/cors';
+import { updateSession } from './lib/supabase/middleware';
 
-// ─── Rate limit buckets per route category ───────────────────────────────────
-// Tighter limit for expensive/quota-bound endpoints, looser for general reads.
-const RATE_LIMIT_CONFIGS: { prefix: string; prefix_key: string; max: number; window: string }[] = [
-  {
-    prefix: '/api/audio/resolve',
-    prefix_key: 'acadmusic:edge:audio-resolve',
-    max: 10,
-    window: '1 m',
-  },
-  {
-    prefix: '/api/search',
-    prefix_key: 'acadmusic:edge:search',
-    max: 30,
-    window: '1 m',
-  },
+const RATE_LIMIT_CONFIGS = [
+  { prefix: '/api/audio/resolve', prefix_key: 'acadmusic:edge:audio-resolve', max: 10, window: '1 m' },
+  { prefix: '/api/search', prefix_key: 'acadmusic:edge:search', max: 30, window: '1 m' },
 ];
 
-// Fallback config — applied to every other /api/* route
-const DEFAULT_RATE_LIMIT = {
-  prefix_key: 'acadmusic:edge:general',
-  max: 60,
-  window: '1 m',
-};
+const DEFAULT_RATE_LIMIT = { prefix_key: 'acadmusic:edge:general', max: 60, window: '1 m' };
 
-// ─── Limiter cache (one instance per prefix_key to avoid re-instantiation) ───
 const limiterCache = new Map<string, Ratelimit>();
 
 function getLimiter(prefixKey: string, max: number, window: string): Ratelimit {
@@ -49,37 +32,33 @@ function getRateLimitConfig(pathname: string) {
     : DEFAULT_RATE_LIMIT;
 }
 
-// ─── Auth-required routes (protect expensive / quota-bound endpoints) ────────
-const AUTH_REQUIRED_PREFIXES = [
-  '/api/audio/',      // YouTube resolve/streaming — expensive, burns API quota
-  '/api/import/',     // Spotify import — requires user session
-];
+const AUTH_REQUIRED_PREFIXES = ['/api/audio/', '/api/import/'];
 
 function routeRequiresAuth(pathname: string) {
   return AUTH_REQUIRED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 }
 
 function hasAuthCookie(request: NextRequest) {
-  // Supabase stores auth in cookies; check for auth-token cookie presence
   const cookies = request.cookies.getAll();
-  return cookies.some(
+  const hasCookie = cookies.some(
     (c) => c.name.includes('auth-token') || c.name.includes('sb-') 
   );
+  if (hasCookie) return true;
+
+  const authHeader = request.headers.get('Authorization');
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return true;
+  }
+
+  return false;
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
 function getRequestIp(request: NextRequest): string | null {
-  // Prefer Vercel-set header (cannot be spoofed by client)
   const vercelIp = request.headers.get('x-vercel-forwarded-for');
   if (vercelIp) return vercelIp.split(',')[0]?.trim() || null;
-
   const xForwardedFor = request.headers.get('x-forwarded-for');
   if (xForwardedFor) return xForwardedFor.split(',')[0]?.trim() || null;
-
-  const fallbackIp =
-    request.headers.get('x-real-ip') ||
-    request.headers.get('cf-connecting-ip');
-
+  const fallbackIp = request.headers.get('x-real-ip') || request.headers.get('cf-connecting-ip');
   return fallbackIp?.trim() || null;
 }
 
@@ -87,82 +66,126 @@ function hasUpstashConfig() {
   return Boolean(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
 }
 
-// ─── Main proxy handler ───────────────────────────────────────────────────────
 export async function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  try {
+    const { pathname } = request.nextUrl;
 
-  // 1. CORS — semua route /api/* WAJIB lewat guard ini, bukan cuma yang "protected"
-  const cors = enforceCors(request, {
-    allowedMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  });
-  if (cors.response) return cors.response;
-
-  // 1b. Auth gate — block unauthenticated access to expensive/sensitive routes
-  if (routeRequiresAuth(pathname) && !hasAuthCookie(request)) {
-    return NextResponse.json(
-      { error: 'Authentication required' },
-      { status: 401, headers: cors.corsHeaders }
-    );
-  }
-
-  // 2. Skip rate limiter jika Upstash belum dikonfigurasi (dev mode toleran)
-  if (!hasUpstashConfig()) {
-    if (process.env.NODE_ENV === 'production') {
-      return NextResponse.json(
-        { error: 'Rate limiter is not configured' },
-        { status: 503 }
-      );
+    // Only run on API routes
+    if (!pathname.startsWith('/api/')) {
+      return NextResponse.next();
     }
-    const response = NextResponse.next();
+
+    // 1. Update Supabase session (refreshes HTTP-only cookie if needed)
+    let response: NextResponse;
+    try {
+      response = await updateSession(request);
+    } catch {
+      // If Supabase config is missing or session refresh fails, continue gracefully
+      response = NextResponse.next({ request });
+    }
+
+    // 2. CORS enforcement
+    const cors = enforceCors(request, {
+      allowedMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+    });
+
+    // For OPTIONS preflight, return CORS response but preserve Set-Cookie
+    if (cors.response) {
+      response.headers.getSetCookie().forEach((cookie) => {
+        cors.response!.headers.append('Set-Cookie', cookie);
+      });
+      return cors.response;
+    }
+
+    // 3. Auth gate — block unauthenticated access to expensive routes
+    if (routeRequiresAuth(pathname) && !hasAuthCookie(request)) {
+      const errRes = NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401, headers: cors.corsHeaders }
+      );
+      response.headers.getSetCookie().forEach((cookie) => {
+        errRes.headers.append('Set-Cookie', cookie);
+      });
+      return errRes;
+    }
+
+    // 4. Rate limiting
+    if (!hasUpstashConfig()) {
+      if (process.env.NODE_ENV === 'production') {
+        const errRes = NextResponse.json(
+          { error: 'Rate limiter is not configured' },
+          { status: 503 }
+        );
+        response.headers.getSetCookie().forEach((cookie) => {
+          errRes.headers.append('Set-Cookie', cookie);
+        });
+        return errRes;
+      }
+      // Dev mode: skip rate limiting, just set CORS headers
+      Object.entries(cors.corsHeaders).forEach(([key, value]) => {
+        response.headers.set(key, value);
+      });
+      return response;
+    }
+
+    const requestIp = getRequestIp(request);
+    if (!requestIp && process.env.NODE_ENV === 'production') {
+      const errRes = NextResponse.json(
+        { error: 'Forbidden: missing client IP' },
+        { status: 403 }
+      );
+      response.headers.getSetCookie().forEach((cookie) => {
+        errRes.headers.append('Set-Cookie', cookie);
+      });
+      return errRes;
+    }
+
+    const { prefix_key, max, window } = getRateLimitConfig(pathname);
+    const limiter = getLimiter(prefix_key, max, window);
+    const identifier = `${requestIp ?? 'dev-local'}:${pathname}`;
+    const result = await limiter.limit(identifier);
+
+    if (!result.success) {
+      const retryAfter = Math.max(Math.ceil((result.reset - Date.now()) / 1000), 1);
+      const errRes = NextResponse.json(
+        { error: 'Too many requests' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(retryAfter),
+            'X-RateLimit-Limit': String(result.limit),
+            'X-RateLimit-Remaining': String(result.remaining),
+            'X-RateLimit-Reset': String(retryAfter),
+          },
+        }
+      );
+      response.headers.getSetCookie().forEach((cookie) => {
+        errRes.headers.append('Set-Cookie', cookie);
+      });
+      return errRes;
+    }
+
+    // 5. Inject CORS + rate limit headers into the success response
     Object.entries(cors.corsHeaders).forEach(([key, value]) => {
       response.headers.set(key, value);
     });
-    return response;
-  }
-
-  // 3. Wajib ada IP di production
-  const requestIp = getRequestIp(request);
-  if (!requestIp && process.env.NODE_ENV === 'production') {
-    return NextResponse.json({ error: 'Forbidden: missing client IP' }, { status: 403 });
-  }
-
-  // 4. Pilih bucket rate limit berdasarkan route
-  const { prefix_key, max, window } = getRateLimitConfig(pathname);
-  const limiter = getLimiter(prefix_key, max, window);
-  const identifier = `${requestIp ?? 'dev-local'}:${pathname}`;
-  const result = await limiter.limit(identifier);
-
-  if (!result.success) {
-    const retryAfter = Math.max(Math.ceil((result.reset - Date.now()) / 1000), 1);
-    return NextResponse.json(
-      { error: 'Too many requests' },
-      {
-        status: 429,
-        headers: {
-          'Retry-After': String(retryAfter),
-          'X-RateLimit-Limit': String(result.limit),
-          'X-RateLimit-Remaining': String(result.remaining),
-          'X-RateLimit-Reset': String(retryAfter),
-        },
-      }
+    response.headers.set('X-RateLimit-Limit', String(result.limit));
+    response.headers.set('X-RateLimit-Remaining', String(result.remaining));
+    response.headers.set(
+      'X-RateLimit-Reset',
+      String(Math.max(Math.ceil((result.reset - Date.now()) / 1000), 1))
     );
-  }
 
-  // 5. Inject CORS + rate limit headers ke response
-  const response = NextResponse.next();
-  Object.entries(cors.corsHeaders).forEach(([key, value]) => {
-    response.headers.set(key, value);
-  });
-  response.headers.set('X-RateLimit-Limit', String(result.limit));
-  response.headers.set('X-RateLimit-Remaining', String(result.remaining));
-  response.headers.set(
-    'X-RateLimit-Reset',
-    String(Math.max(Math.ceil((result.reset - Date.now()) / 1000), 1))
-  );
-  return response;
+    return response;
+  } catch (error) {
+    console.error('Proxy error:', error);
+    return NextResponse.json({ error: String(error) }, { status: 500 });
+  }
 }
 
 export const config = {
-  matcher: ['/api/:path*'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 };
