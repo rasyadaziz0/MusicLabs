@@ -127,6 +127,18 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const resolveAbortRef = useRef<AbortController | null>(null);
   const fallbackAttemptedTrackRef = useRef<string | null>(null);
 
+  // Mobile detection — route playback through HTML5 Audio instead of YT IFrame
+  const isMobileRef = useRef(false);
+  useEffect(() => {
+    isMobileRef.current = typeof window !== 'undefined' && (
+      /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+      (navigator.maxTouchPoints > 0 && window.innerWidth < 768)
+    );
+  }, []);
+
+  // Active audio engine tracking: determines which engine togglePlay/seek/timer uses
+  const activeEngineRef = useRef<'youtube' | 'html5' | 'radio' | 'none'>('none');
+
   const getFallbackCacheKey = useCallback((trackId: string) => `fallback_yt_${trackId}`, []);
 
   const abortPendingResolve = useCallback(() => {
@@ -161,6 +173,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
     setIsPreview(true);
     setIsResolving(false);
+    activeEngineRef.current = 'html5';
     stopRadio();
 
     // Stop YouTube
@@ -312,7 +325,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       }
       if (previewAudioRef.current && !previewAudioRef.current.paused) {
         setCurrentTime(previewAudioRef.current.currentTime);
-        setDuration(previewAudioRef.current.duration || 30);
+        const audioDuration = previewAudioRef.current.duration;
+        if (audioDuration && isFinite(audioDuration)) {
+          setDuration(audioDuration);
+        }
       }
     }, 50);
 
@@ -353,6 +369,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     stopRadio();
 
     setIsRadio(true);
+    activeEngineRef.current = 'radio';
     setIsPreview(false);
     setIsGuestPreview(false);
     setIsResolving(false);
@@ -450,10 +467,65 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       previewAudioRef.current.src = '';
     }
 
+    // ─── Mobile: use HTML5 Audio with direct stream ───
+    // YouTube IFrame embed is unreliable on mobile (error 101/150 blocks).
+    // HTML5 Audio also enables background playback via Media Session API.
+    if (isMobileRef.current) {
+      if (ytPlayerRef.current && typeof ytPlayerRef.current.stopVideo === 'function') {
+        ytPlayerRef.current.stopVideo();
+      }
+
+      try {
+        const artistName = track.artists.primary[0]?.name || '';
+        const cachedFallback = localStorage.getItem(getFallbackCacheKey(track.id));
+
+        let videoId: string | null = cachedFallback;
+        if (!videoId) {
+          const controller = new AbortController();
+          resolveAbortRef.current = controller;
+          videoId = await resolveToYoutubeId(track.name, artistName, track.id, {
+            signal: controller.signal,
+          });
+        }
+
+        if (currentTrackRef.current?.id !== track.id) return;
+
+        if (videoId && previewAudioRef.current) {
+          // Fetch direct audio URL from our proxy API
+          const audioRes = await fetch(`/api/audio/${videoId}`);
+          if (!audioRes.ok) throw new Error(`Audio stream API returned ${audioRes.status}`);
+          const audioData = await audioRes.json();
+          if (!audioData.url) throw new Error('No audio URL in response');
+
+          if (currentTrackRef.current?.id !== track.id) return;
+
+          activeEngineRef.current = 'html5';
+          setIsPreview(false);
+          previewAudioRef.current.src = audioData.url;
+          previewAudioRef.current.play().catch(console.error);
+          setIsResolving(false);
+        } else {
+          console.warn('Mobile: no video ID resolved, falling back to preview');
+          playPreviewFallback(track);
+        }
+      } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') return;
+        console.error('Mobile playback failed:', err);
+        playPreviewFallback(track);
+      } finally {
+        if (resolveAbortRef.current?.signal.aborted || currentTrackRef.current?.id === track.id) {
+          resolveAbortRef.current = null;
+        }
+      }
+      return;
+    }
+
+    // ─── Desktop: YouTube IFrame embed ───
     try {
       const artistName = track.artists.primary[0]?.name || '';
       const cachedFallback = localStorage.getItem(getFallbackCacheKey(track.id));
       if (cachedFallback && ytPlayerRef.current && typeof ytPlayerRef.current.loadVideoById === 'function') {
+        activeEngineRef.current = 'youtube';
         ytPlayerRef.current.loadVideoById(cachedFallback);
         setIsResolving(false);
         return;
@@ -470,6 +542,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (videoId && ytPlayerRef.current && typeof ytPlayerRef.current.loadVideoById === 'function') {
+        activeEngineRef.current = 'youtube';
         ytPlayerRef.current.loadVideoById(videoId);
         setIsResolving(false);
       } else {
@@ -488,26 +561,28 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   }, [user, abortPendingResolve, getFallbackCacheKey, playPreviewFallback, playRadioStream, stopRadio]);
 
   const togglePlay = useCallback(() => {
-    if (isRadio && radioAudioRef.current) {
+    const engine = activeEngineRef.current;
+    if (engine === 'radio' && radioAudioRef.current) {
       if (isPlaying) radioAudioRef.current.pause();
       else radioAudioRef.current.play().catch(console.error);
-    } else if (isPreview && previewAudioRef.current) {
+    } else if (engine === 'html5' && previewAudioRef.current) {
       if (isPlaying) previewAudioRef.current.pause();
-      else previewAudioRef.current.play();
-    } else if (ytPlayerRef.current && typeof ytPlayerRef.current.getPlayerState === 'function') {
+      else previewAudioRef.current.play().catch(console.error);
+    } else if (engine === 'youtube' && ytPlayerRef.current && typeof ytPlayerRef.current.getPlayerState === 'function') {
       const state = ytPlayerRef.current.getPlayerState();
       if (state === 1) ytPlayerRef.current.pauseVideo();
       else ytPlayerRef.current.playVideo();
     }
-  }, [isPlaying, isPreview, isRadio]);
+  }, [isPlaying]);
 
   const nextTrack = useCallback(() => {
     abortPendingResolve();
     if (queue.length === 0 || queueIndex === -1) return;
 
-    // Repeat one: replay current track (for preview/audio engine)
+    // Repeat one: replay current track
     if (repeatModeRef.current === 'one') {
-      if (isPreview && previewAudioRef.current) {
+      const engine = activeEngineRef.current;
+      if (engine === 'html5' && previewAudioRef.current) {
         previewAudioRef.current.currentTime = 0;
         previewAudioRef.current.play().catch(console.error);
       }
@@ -547,7 +622,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     }
     setQueueIndex(nextIdx);
     playTrack(queue[nextIdx]);
-  }, [abortPendingResolve, queue, queueIndex, playTrack, isPreview]);
+  }, [abortPendingResolve, queue, queueIndex, playTrack]);
 
   useEffect(() => {
     nextTrackRef.current = nextTrack;
@@ -562,15 +637,15 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   }, [abortPendingResolve, queue, queueIndex, playTrack]);
 
   const seek = useCallback((time: number) => {
-    // Seeking is not supported for radio streams
-    if (isRadio) return;
-    if (isPreview && previewAudioRef.current) {
+    const engine = activeEngineRef.current;
+    if (engine === 'radio') return;
+    if (engine === 'html5' && previewAudioRef.current) {
       previewAudioRef.current.currentTime = time;
-    } else if (ytPlayerRef.current && typeof ytPlayerRef.current.seekTo === 'function') {
+    } else if (engine === 'youtube' && ytPlayerRef.current && typeof ytPlayerRef.current.seekTo === 'function') {
       ytPlayerRef.current.seekTo(time, true);
     }
     setCurrentTime(time);
-  }, [isPreview, isRadio]);
+  }, []);
 
   const setVolume = useCallback((v: number) => {
     setVolumeState(v);

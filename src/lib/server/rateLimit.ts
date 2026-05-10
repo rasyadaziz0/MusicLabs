@@ -25,8 +25,8 @@ type RateLimiterInstance = {
   limiter: Ratelimit;
 };
 
-const GLOBAL_STORE_KEY = '__MUSICLABS_RATE_LIMIT_STORE__';
-const GLOBAL_LIMITER_STORE_KEY = '__MUSICLABS_RATE_LIMITERS__';
+const GLOBAL_STORE_KEY = '__ACADMUSIC_RATE_LIMIT_STORE__';
+const GLOBAL_LIMITER_STORE_KEY = '__ACADMUSIC_RATE_LIMITERS__';
 const store = getStore();
 const limiterStore = getLimiterStore();
 
@@ -117,7 +117,7 @@ function getRatelimiter({ limit, windowMs, keyPrefix = 'api' }: RateLimitConfig)
     redis: Redis.fromEnv(),
     limiter: Ratelimit.slidingWindow(limit, `${windowSeconds} s`),
     analytics: true,
-    prefix: `musiclabs:${keyPrefix}`,
+    prefix: `acadmusic:${keyPrefix}`,
   });
 
   limiterStore.set(limiterKey, { key: limiterKey, limiter });

@@ -44,7 +44,7 @@ export function useLyricsScroll({
   useEffect(() => {
     if (activeIndex < 0 || !scrollRef.current) return;
     if (lines[activeIndex]?.isPlaceholder) return;
-    const activeLine = scrollRef.current.children[activeIndex] as HTMLElement;
+    const activeLine = scrollRef.current.querySelector(`[data-lyric-index="${activeIndex}"]`) as HTMLElement;
     if (activeLine) {
       activeLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }

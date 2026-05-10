@@ -23,13 +23,13 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MusicLabs",
+  title: "AcadMusic",
   description: "Temukan musik favoritmu dengan mudah!",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "MusicLabs",
+    title: "AcadMusic",
   },
 };
 

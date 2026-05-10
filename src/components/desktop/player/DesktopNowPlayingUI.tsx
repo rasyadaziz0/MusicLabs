@@ -52,7 +52,7 @@ export default function DesktopNowPlayingUI(props: NowPlayingUIProps) {
 
           {/* ── BG: blurred album art ── */}
           <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
-            {coverUrl && <Image src={coverUrl} alt="bg" fill style={{ objectFit: 'cover' }} />}
+            {coverUrl && <Image src={coverUrl} alt="bg" fill sizes="100vw" style={{ objectFit: 'cover' }} />}
             <div style={{ position: 'absolute', inset: 0, backdropFilter: 'blur(72px)', WebkitBackdropFilter: 'blur(72px)', background: 'rgba(20,18,28,0.5)' }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(160deg, rgba(80,60,110,0.45) 0%, rgba(60,50,80,0.4) 50%, rgba(90,70,55,0.4) 100%)' }} />
           </div>
@@ -67,10 +67,10 @@ export default function DesktopNowPlayingUI(props: NowPlayingUIProps) {
 
             {/* ══ LEFT: Album + Controls ══ */}
             <div className="w-full max-w-[50vh] md:max-w-md mx-auto lg:mr-0 flex flex-col justify-center pt-8 md:pt-0 pb-16 md:pb-0 px-4 md:px-0 z-10 relative">
-              {/* Album art — no card wrapper, MusicLabs style */}
+              {/* Album art — no card wrapper, AcadMusic style */}
               <motion.div style={{ position: 'relative', aspectRatio: '1', width: '100%', borderRadius: 12, overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.55), 0 8px 24px rgba(0,0,0,0.3)', background: '#1a1a2a' }}>
                 {coverUrl ? (
-                  <Image src={coverUrl} alt={currentTrack.name} fill style={{ objectFit: 'cover' }} />
+                  <Image src={coverUrl} alt={currentTrack.name} fill sizes="64px" style={{ objectFit: 'cover' }} />
                 ) : (
                   <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, rgba(120,80,160,0.4), rgba(20,20,40,1))' }} />
                 )}

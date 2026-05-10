@@ -49,7 +49,7 @@ export function GuestNowPlayingUI(props: NowPlayingUIProps) {
 
           {/* ── BG: blurred album art ── */}
           <div style={{ position: 'absolute', inset: '-20px', zIndex: 0 }}>
-            {coverUrl && <Image src={coverUrl} alt="bg" fill style={{ objectFit: 'cover', transform: 'scale(1.15)' }} />}
+            {coverUrl && <Image src={coverUrl} alt="bg" fill sizes="100vw" style={{ objectFit: 'cover', transform: 'scale(1.15)' }} />}
             <div style={{ position: 'absolute', inset: 0, backdropFilter: 'blur(80px) saturate(180%)', WebkitBackdropFilter: 'blur(80px) saturate(180%)', background: 'rgba(0,0,0,0.35)' }} />
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.55) 100%)' }} />
           </div>
@@ -68,7 +68,7 @@ export function GuestNowPlayingUI(props: NowPlayingUIProps) {
                   {/* Album art */}
                   <div style={{ position: 'relative', aspectRatio: '1', width: '100%', borderRadius: 16, overflow: 'hidden', boxShadow: '0 24px 72px rgba(0,0,0,0.6), 0 12px 32px rgba(0,0,0,0.4)', background: '#1a1a2a' }}>
                     {coverUrl ? (
-                      <Image src={coverUrl} alt={currentTrack.name} fill style={{ objectFit: 'cover' }} />
+                      <Image src={coverUrl} alt={currentTrack.name} fill sizes="64px" style={{ objectFit: 'cover' }} />
                     ) : (
                       <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, rgba(120,80,160,0.4), rgba(20,20,40,1))' }} />
                     )}
@@ -198,7 +198,7 @@ export function GuestNowPlayingUI(props: NowPlayingUIProps) {
                   transition={{ type: 'spring', damping: 20, stiffness: 200, mass: 0.8 }}
                   style={{ position: 'relative', width: '100%', maxWidth: 360, aspectRatio: '1', borderRadius: 12, overflow: 'hidden', background: '#1a1a2a', boxShadow: '0 24px 64px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.3)' }}
                 >
-                  {coverUrl ? <Image src={coverUrl} alt={currentTrack.name} fill style={{ objectFit: 'cover' }} priority /> : null}
+                  {coverUrl ? <Image src={coverUrl} alt={currentTrack.name} fill sizes="300px" style={{ objectFit: 'cover' }} priority /> : null}
                   {isPreview && (
                     <span style={{ position: 'absolute', top: 12, right: 12, padding: '4px 12px', borderRadius: 999, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: 700, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.15)' }}>Preview</span>
                   )}

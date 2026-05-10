@@ -201,7 +201,7 @@ export default function Home() {
     : getSongWindow(trendingSongs, 2, 12);
   const moodSongs: Song[] = moodSongsData?.slice(0, 12) ?? [];
 
-  // MusicLabs style solid gradients
+  // AcadMusic style solid gradients
   const topPicksGradients = [
     'linear-gradient(135deg, #FA243C, #FF6275)',
     'linear-gradient(135deg, #E6D02A, #C8B625)',
@@ -268,9 +268,9 @@ export default function Home() {
                   onClick={() => playTrack(song, trendingSongs)}
                   style={{ background: bgGradient }}
                 >
-                  {/* Subtle MusicLabs Logo in top right */}
+                  {/* Subtle AcadMusic Logo in top right */}
                   <div className="absolute top-4 right-4 flex items-center gap-1 opacity-80">
-                    <span className="text-[12px] font-bold text-white tracking-tight">MusicLabs</span>
+                    <span className="text-[12px] font-bold text-white tracking-tight">AcadMusic</span>
                   </div>
 
                   {/* Optional centered image collage effect for variety */}

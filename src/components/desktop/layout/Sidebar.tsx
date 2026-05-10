@@ -49,7 +49,7 @@ export default function Sidebar() {
     <div className="hidden md:flex w-64 bg-[#1c1c1e] h-full flex-col border-r border-white/5 pt-4 pb-4">
       {/* Logo */}
       <div className="px-6 mb-6 flex items-center gap-1.5">
-        <span className="text-[20px] font-bold tracking-tight text-white mb-[2px]">MusicLabs</span>
+        <span className="text-[20px] font-bold tracking-tight text-white mb-[2px]">AcadMusic</span>
       </div>
 
       {/* Navigation */}
@@ -146,7 +146,7 @@ export default function Sidebar() {
         <div className="flex items-center gap-3 px-4 group">
           <div className="w-8 h-8 rounded-full overflow-hidden bg-white/10 relative flex-shrink-0">
             {user.user_metadata?.avatar_url ? (
-              <Image src={user.user_metadata.avatar_url.trim().replace(/^`+|`+$/g, '')} alt="User" fill className="object-cover" />
+              <Image src={user.user_metadata.avatar_url.trim().replace(/^`+|`+$/g, '')} alt="User" fill sizes="36px" className="object-cover" />
             ) : (
               <div className="w-full h-full bg-[#FA243C]" />
             )}

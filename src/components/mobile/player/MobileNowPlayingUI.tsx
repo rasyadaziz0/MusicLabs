@@ -219,7 +219,7 @@ export default function MobileNowPlayingUI(props: NowPlayingUIProps) {
                     background: '#1a1a2a',
                     boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
                   }}>
-                    {coverUrl && <Image src={coverUrl} alt={currentTrack.name} fill style={{ objectFit: 'cover' }} />}
+                    {coverUrl && <Image src={coverUrl} alt={currentTrack.name} fill sizes="300px" style={{ objectFit: 'cover' }} />}
                   </div>
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <div style={{

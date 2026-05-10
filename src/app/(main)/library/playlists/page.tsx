@@ -63,7 +63,7 @@ export default function AllPlaylistsPage() {
               <p className="text-[13px] font-medium text-white/90 truncate flex items-center gap-1">
                 Favourite Songs <span className="text-[#FA243C] text-[10px]">★</span>
               </p>
-              <p className="text-[12px] text-white/50 truncate">MusicLabs</p>
+              <p className="text-[12px] text-white/50 truncate">AcadMusic</p>
             </div>
           </Link>
 
@@ -80,7 +80,7 @@ export default function AllPlaylistsPage() {
                 </div>
                 <div className="mt-1 px-0.5">
                   <p className="text-[13px] font-medium text-white/90 truncate">{playlist.name}</p>
-                  <p className="text-[12px] text-white/50 truncate">{user?.user_metadata?.name || 'MusicLabs'}</p>
+                  <p className="text-[12px] text-white/50 truncate">{user?.user_metadata?.name || 'AcadMusic'}</p>
                 </div>
               </Link>
             );

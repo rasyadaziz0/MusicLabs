@@ -203,9 +203,9 @@ function SearchPageContent() {
       ? rankedSongs
       : songs;
   const categories = [
-    { title: 'MusicLabs Radio', bg: '#FA243C' },
+    { title: 'AcadMusic Radio', bg: '#FA243C' },
     { title: 'Sleep', bg: '#29326D' },
-    { title: 'MusicLabs Radio', bg: '#FA243C' },
+    { title: 'AcadMusic Radio', bg: '#FA243C' },
     { title: 'New in Electronic', bg: '#D3286E' },
     { title: 'K-Pop', bg: '#FF6275' },
     { title: 'Pop', bg: '#FA58B6' },
@@ -233,9 +233,9 @@ function SearchPageContent() {
           />
         </div>
 
-        {/* Toggle MusicLabs / Your Library */}
+        {/* Toggle AcadMusic / Your Library */}
         <div className="hidden md:flex bg-white/[0.06] rounded-[6px] p-[2px] border border-white/[0.04]">
-          <button className="px-5 py-1 text-[13px] font-medium rounded-[4px] bg-white/20 text-white shadow-sm">MusicLabs</button>
+          <button className="px-5 py-1 text-[13px] font-medium rounded-[4px] bg-white/20 text-white shadow-sm">AcadMusic</button>
           <button className="px-5 py-1 text-[13px] font-medium rounded-[4px] text-white/60 hover:text-white transition-colors">Your Library</button>
         </div>
       </div>

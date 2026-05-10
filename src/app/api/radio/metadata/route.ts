@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
     const res = await fetch(streamUrl, {
       headers: {
         'Icy-MetaData': '1',
-        'User-Agent': 'Mozilla/5.0 (compatible; MusicLabsRadio/1.0)',
+        'User-Agent': 'Mozilla/5.0 (compatible; AcadMusicRadio/1.0)',
       },
       signal: controller.signal,
     });

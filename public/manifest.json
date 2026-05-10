@@ -1,6 +1,6 @@
 {
-  "name": "MusicLabs",
-  "short_name": "MusicLabs",
+  "name": "AcadMusic",
+  "short_name": "AcadMusic",
   "description": "Your personal music streaming app built with Next.js and Supabase",
   "start_url": "/",
   "display": "standalone",

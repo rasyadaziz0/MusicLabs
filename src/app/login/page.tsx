@@ -81,7 +81,7 @@ function LoginForm() {
     <main className="min-h-screen gradient-mesh flex items-center justify-center px-4 py-10">
       <section className="w-full max-w-md rounded-3xl border border-white/10 bg-surface/80 backdrop-blur-xl p-8 shadow-2xl">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold tracking-tight text-white">Masuk ke MusicLabs</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-white">Masuk ke AcadMusic</h1>
           <p className="mt-2 text-sm text-muted">Pindah sini aja, di sini gak ada iklan nya.</p>
         </div>
 

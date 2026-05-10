@@ -42,7 +42,13 @@ export async function GET(
       );
     }
 
-    return NextResponse.redirect(audioUrl);
+    // If ?redirect=1, redirect directly (legacy behavior)
+    if (request.nextUrl.searchParams.get('redirect') === '1') {
+      return NextResponse.redirect(audioUrl);
+    }
+
+    // Default: return URL as JSON so client can set audio.src directly
+    return NextResponse.json({ url: audioUrl });
   } catch (error: unknown) {
     console.error('Audio proxy error:', error instanceof Error ? error.message : error);
     return NextResponse.json(
