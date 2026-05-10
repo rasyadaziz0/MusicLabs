@@ -35,6 +35,13 @@ export const getArtistSongs = (artistId: string, page = 1) => {
   );
 };
 
+export const getArtistAlbums = (artistId: string, limit = 50) => {
+  const numericId = artistId.replace(/^dz-artist-/, '');
+  return apiFetchInternal<any[]>(
+    `/api/artists/${numericId}/albums?limit=${limit}`
+  );
+};
+
 export const getSong = (trackId: string) => {
   const normalizedTrackId = trackId.replace(/^dz-/, '');
   return apiFetchInternal<Song>(`/api/tracks/${normalizedTrackId}`);
@@ -50,9 +57,6 @@ export const getSongsByIds = async (trackIds: string[]) => {
 // ── Lyrics (stub — Deezer doesn't provide lyrics) ─────────────────
 
 export const getSongLyrics = async (_trackId: string): Promise<{ lyrics: string } | null> => {
-  // Deezer API doesn't expose lyrics publicly.
-  // Lyrics are fetched from Supabase (LRC format) in useLyrics hook.
-  // This stub exists as a fallback that gracefully returns null.
   return null;
 };
 

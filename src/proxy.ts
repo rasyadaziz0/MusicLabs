@@ -49,15 +49,36 @@ function getRateLimitConfig(pathname: string) {
     : DEFAULT_RATE_LIMIT;
 }
 
+// ─── Auth-required routes (protect expensive / quota-bound endpoints) ────────
+const AUTH_REQUIRED_PREFIXES = [
+  '/api/audio/',      // YouTube resolve/streaming — expensive, burns API quota
+  '/api/import/',     // Spotify import — requires user session
+];
+
+function routeRequiresAuth(pathname: string) {
+  return AUTH_REQUIRED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+}
+
+function hasAuthCookie(request: NextRequest) {
+  // Supabase stores auth in cookies; check for auth-token cookie presence
+  const cookies = request.cookies.getAll();
+  return cookies.some(
+    (c) => c.name.includes('auth-token') || c.name.includes('sb-') 
+  );
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 function getRequestIp(request: NextRequest): string | null {
+  // Prefer Vercel-set header (cannot be spoofed by client)
+  const vercelIp = request.headers.get('x-vercel-forwarded-for');
+  if (vercelIp) return vercelIp.split(',')[0]?.trim() || null;
+
   const xForwardedFor = request.headers.get('x-forwarded-for');
   if (xForwardedFor) return xForwardedFor.split(',')[0]?.trim() || null;
 
   const fallbackIp =
     request.headers.get('x-real-ip') ||
-    request.headers.get('cf-connecting-ip') ||
-    request.headers.get('x-vercel-forwarded-for');
+    request.headers.get('cf-connecting-ip');
 
   return fallbackIp?.trim() || null;
 }
@@ -72,10 +93,18 @@ export async function proxy(request: NextRequest) {
 
   // 1. CORS — semua route /api/* WAJIB lewat guard ini, bukan cuma yang "protected"
   const cors = enforceCors(request, {
-    allowedMethods: ['GET', 'OPTIONS'],
+    allowedMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
   if (cors.response) return cors.response;
+
+  // 1b. Auth gate — block unauthenticated access to expensive/sensitive routes
+  if (routeRequiresAuth(pathname) && !hasAuthCookie(request)) {
+    return NextResponse.json(
+      { error: 'Authentication required' },
+      { status: 401, headers: cors.corsHeaders }
+    );
+  }
 
   // 2. Skip rate limiter jika Upstash belum dikonfigurasi (dev mode toleran)
   if (!hasUpstashConfig()) {

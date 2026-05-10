@@ -62,6 +62,7 @@ export interface DeezerAlbum {
     name: string;
     picture: string;
   };
+  release_date?: string;
 }
 
 // ── Deezer fetch helper ────────────────────────────────────────────
@@ -192,6 +193,20 @@ export async function getDeezerArtistTopTracks(artistId: number, limit = 20): Pr
     `/artist/${artistId}/top?limit=${limit}`
   );
   return (data.data || []).map(mapDeezerTrackToSong);
+}
+
+export async function getDeezerArtistAlbums(artistId: number, limit = 50): Promise<DeezerAlbum[]> {
+  const data = await deezerFetch<{ data: DeezerAlbum[] }>(
+    `/artist/${artistId}/albums?limit=${limit}`
+  );
+  
+  const albums = data.data || [];
+  // Sort by release date descending
+  return albums.sort((a, b) => {
+    if (!a.release_date) return 1;
+    if (!b.release_date) return -1;
+    return new Date(b.release_date).getTime() - new Date(a.release_date).getTime();
+  });
 }
 
 export async function getDeezerTrack(trackId: number): Promise<Song> {

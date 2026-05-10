@@ -3,6 +3,16 @@ import { Innertube } from 'youtubei.js';
 
 export const runtime = 'nodejs';
 
+// Singleton Innertube instance — avoids creating a new client per request
+let ytInstance: Innertube | null = null;
+
+async function getYt() {
+  if (!ytInstance) {
+    ytInstance = await Innertube.create();
+  }
+  return ytInstance;
+}
+
 /**
  * GET /api/audio/{videoId}
  * 
@@ -14,12 +24,12 @@ export async function GET(
 ) {
   const { videoId } = await params;
 
-  if (!videoId) {
-    return NextResponse.json({ error: 'Missing videoId' }, { status: 400 });
+  if (!videoId || !/^[A-Za-z0-9_-]{10,12}$/.test(videoId)) {
+    return NextResponse.json({ error: 'Invalid videoId format' }, { status: 400 });
   }
 
   try {
-    const youtube = await Innertube.create();
+    const youtube = await getYt();
     const info = await youtube.getInfo(videoId);
 
     const format = info.chooseFormat({ type: 'audio', quality: 'best' });
@@ -34,10 +44,9 @@ export async function GET(
 
     return NextResponse.redirect(audioUrl);
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error('Audio proxy error', message);
+    console.error('Audio proxy error:', error instanceof Error ? error.message : error);
     return NextResponse.json(
-      { error: 'Failed to resolve audio: ' + message },
+      { error: 'Failed to resolve audio stream' },
       { status: 500 }
     );
   }

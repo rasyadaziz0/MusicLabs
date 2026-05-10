@@ -11,7 +11,7 @@ function AuthCallbackInner() {
   useEffect(() => {
     const handleAuth = async () => {
       const nextPath = searchParams.get('next');
-      const safeNextPath = nextPath?.startsWith('/') ? nextPath : '/';
+      const safeNextPath = (nextPath?.startsWith('/') && !nextPath.startsWith('//')) ? nextPath : '/';
       const { error } = await supabase.auth.getSession();
       if (!error) {
         router.push(safeNextPath);

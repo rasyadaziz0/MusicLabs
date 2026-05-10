@@ -63,8 +63,9 @@ export function addInstrumentalPlaceholders(
     if (!next) continue;
     const gap = next.time - current.time;
     if (gap > gapThreshold) {
+      const placeholderTime = current.time + Math.min(gap * 0.4, 5);
       result.push({
-        time: current.time + 0.75,
+        time: placeholderTime,
         text: '...',
         isPlaceholder: true,
       });

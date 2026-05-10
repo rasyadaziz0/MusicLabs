@@ -11,6 +11,8 @@ import {
   getUserPlaylists,
   removeTrackFromPlaylist,
   toggleLikedSong,
+  togglePinPlaylist,
+  deletePlaylist,
 } from '@/lib/supabase/music';
 
 export function useLibraryPlaylists() {
@@ -108,6 +110,41 @@ export function useCreatePlaylist() {
   });
 }
 
+export function useUpdatePlaylist() {
+  const { user, session } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, payload }: { id: string, payload: { name: string; description?: string; coverUrl?: string } }) => {
+      if (!user?.id || !session?.access_token) throw new Error('Please sign in first.');
+
+      const response = await fetch(`/api/playlists/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          name: payload.name,
+          description: payload.description,
+          coverUrl: payload.coverUrl,
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        throw new Error(data?.error ?? 'Failed to update playlist');
+      }
+
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['playlist', data.id] });
+      queryClient.invalidateQueries({ queryKey: ['library-playlists', user?.id] });
+    },
+  });
+}
+
 export function useAddTrackToPlaylist() {
   const queryClient = useQueryClient();
 
@@ -128,6 +165,32 @@ export function useRemoveTrackFromPlaylist() {
       removeTrackFromPlaylist(playlistId, trackId),
     onSuccess: (_result, variables) => {
       queryClient.invalidateQueries({ queryKey: ['playlist-tracks', variables.playlistId] });
+    },
+  });
+}
+
+export function useTogglePinPlaylist() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: ({ playlistId, currentPinStatus }: { playlistId: string, currentPinStatus: boolean }) =>
+      togglePinPlaylist(playlistId, currentPinStatus),
+    onSuccess: (_result, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['playlist', variables.playlistId] });
+      queryClient.invalidateQueries({ queryKey: ['library-playlists', user?.id] });
+    },
+  });
+}
+
+export function useDeletePlaylist() {
+  const queryClient = useQueryClient();
+  const { user } = useAuth();
+
+  return useMutation({
+    mutationFn: (playlistId: string) => deletePlaylist(playlistId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['library-playlists', user?.id] });
     },
   });
 }

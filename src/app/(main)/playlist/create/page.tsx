@@ -4,6 +4,8 @@ import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useCreatePlaylist } from '@/hooks/useMusicLibrary';
+import { Music, AlertCircle } from 'lucide-react';
+import Image from 'next/image';
 
 export default function CreatePlaylistPage() {
   const router = useRouter();
@@ -40,102 +42,130 @@ export default function CreatePlaylistPage() {
   };
 
   return (
-    <>
-      <div className="mx-auto max-w-3xl space-y-8">
-        <section className="rounded-[2rem] border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent p-8">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-muted">Create</p>
-          <h1 className="text-4xl font-display font-bold">New Playlist</h1>
-          <p className="mt-3 text-muted">
-            Bikin playlist pribadi kamu, terus isi dari search, liked songs, atau player bar.
-          </p>
-        </section>
-
-        {!user ? (
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-center">
-            <h2 className="text-2xl font-bold">Login dulu buat bikin playlist</h2>
-            <p className="mt-2 text-muted">Playlist bakal disimpan ke akun Supabase kamu.</p>
+    <div className="mx-auto max-w-4xl pt-10 px-6 pb-24">
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-[28px] font-bold tracking-tight text-white">New Playlist</h1>
+        {user && (
+          <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={() => signInWithGoogle()}
-              className="mt-5 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black"
+              onClick={() => router.back()}
+              className="px-4 py-1.5 text-[13px] font-semibold text-[#FA243C] hover:bg-[#FA243C]/10 rounded-md transition-colors"
             >
-              Login with Google
+              Cancel
+            </button>
+            <button
+              type="submit"
+              form="create-playlist-form"
+              disabled={createPlaylistMutation.isPending || !form.name.trim()}
+              className="px-4 py-1.5 text-[13px] font-semibold bg-[#FA243C] text-white rounded-md hover:bg-[#FA243C]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {createPlaylistMutation.isPending ? 'Creating...' : 'Create'}
             </button>
           </div>
-        ) : (
-          <form
-            onSubmit={handleSubmit}
-            className="space-y-6 rounded-3xl border border-white/10 bg-white/5 p-8"
+        )}
+      </div>
+
+      {!user ? (
+        <div className="flex flex-col items-center justify-center text-center py-24 bg-[#1c1c1e] rounded-xl border border-white/5">
+          <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-6">
+            <Music size={32} className="text-[#FA243C]" />
+          </div>
+          <h2 className="text-xl font-bold text-white mb-2">Create Your Playlist</h2>
+          <p className="text-white/60 text-[14px] max-w-sm mb-6">
+            Sign in to create custom playlists, save your favorite tracks, and build your music library.
+          </p>
+          <button
+            type="button"
+            onClick={() => signInWithGoogle()}
+            className="px-6 py-2.5 rounded-lg bg-[#FA243C] text-white text-[14px] font-semibold hover:bg-[#FA243C]/90 transition-colors"
           >
-            <div>
-              <label htmlFor="name" className="mb-2 block text-sm font-medium text-white">
-                Nama Playlist
-              </label>
+            Sign In with Google
+          </button>
+        </div>
+      ) : (
+        <div className="bg-[#1c1c1e] border border-white/5 rounded-xl p-6 sm:p-8 shadow-2xl">
+          <form
+            id="create-playlist-form"
+            onSubmit={handleSubmit}
+            className="flex flex-col sm:flex-row gap-8"
+          >
+            {/* Left: Cover Image Area */}
+            <div className="flex-shrink-0 flex flex-col gap-4 items-center sm:items-start w-full sm:w-auto">
+              <div className="w-48 h-48 sm:w-56 sm:h-56 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden relative shadow-md group">
+                {form.coverUrl ? (
+                  <Image
+                    src={form.coverUrl}
+                    alt="Cover Preview"
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center text-white/20">
+                    <Music size={64} strokeWidth={1} />
+                  </div>
+                )}
+                
+                {/* Image Overlay */}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                  <span className="text-white/90 text-xs font-semibold tracking-wider">PREVIEW</span>
+                </div>
+              </div>
               <input
-                id="name"
-                value={form.name}
-                onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
-                placeholder="Contoh: Late Night Drive"
-                className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none transition-colors focus:border-primary/50"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="description" className="mb-2 block text-sm font-medium text-white">
-                Deskripsi
-              </label>
-              <textarea
-                id="description"
-                value={form.description}
-                onChange={(event) =>
-                  setForm((current) => ({ ...current, description: event.target.value }))
-                }
-                rows={4}
-                placeholder="Mood, genre, atau kegunaan playlist ini..."
-                className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none transition-colors focus:border-primary/50"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="coverUrl" className="mb-2 block text-sm font-medium text-white">
-                Cover URL
-              </label>
-              <input
-                id="coverUrl"
+                type="text"
                 value={form.coverUrl}
                 onChange={(event) =>
                   setForm((current) => ({ ...current, coverUrl: event.target.value }))
                 }
-                placeholder="https://..."
-                className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none transition-colors focus:border-primary/50"
+                placeholder="Paste Image URL here..."
+                className="w-full sm:w-56 text-[13px] bg-white/5 border border-white/10 rounded-md px-3 py-2 text-white placeholder:text-white/30 focus:outline-none focus:border-[#FA243C]/50 focus:bg-white/10 transition-colors"
               />
             </div>
 
-            {errorMessage && (
-              <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-                {errorMessage}
+            {/* Right: Info Inputs */}
+            <div className="flex-1 space-y-6">
+              <div>
+                <label htmlFor="name" className="block text-[11px] font-semibold text-white/50 uppercase tracking-wider mb-2 ml-1">
+                  Name
+                </label>
+                <input
+                  id="name"
+                  autoFocus
+                  value={form.name}
+                  onChange={(event) =>
+                    setForm((current) => ({ ...current, name: event.target.value }))
+                  }
+                  placeholder="Give your playlist a name"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-[15px] font-medium text-white placeholder:text-white/30 focus:outline-none focus:border-[#FA243C] focus:bg-white/10 transition-colors"
+                />
               </div>
-            )}
 
-            <div className="flex items-center gap-3">
-              <button
-                type="submit"
-                disabled={createPlaylistMutation.isPending}
-                className="rounded-full bg-primary px-5 py-3 text-sm font-semibold text-white disabled:opacity-60"
-              >
-                {createPlaylistMutation.isPending ? 'Creating...' : 'Create Playlist'}
-              </button>
-              <button
-                type="button"
-                onClick={() => router.push('/library')}
-                className="rounded-full border border-white/10 px-5 py-3 text-sm font-semibold text-white"
-              >
-                Cancel
-              </button>
+              <div>
+                <label htmlFor="description" className="block text-[11px] font-semibold text-white/50 uppercase tracking-wider mb-2 ml-1">
+                  Description
+                </label>
+                <textarea
+                  id="description"
+                  value={form.description}
+                  onChange={(event) =>
+                    setForm((current) => ({ ...current, description: event.target.value }))
+                  }
+                  rows={4}
+                  placeholder="What's this playlist about?"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-[14px] text-white placeholder:text-white/30 focus:outline-none focus:border-[#FA243C] focus:bg-white/10 transition-colors resize-none"
+                />
+              </div>
+
+              {errorMessage && (
+                <div className="flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-[13px] text-red-200">
+                  <AlertCircle size={16} />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
             </div>
           </form>
-        )}
-      </div>
-    </>
+        </div>
+      )}
+    </div>
   );
 }

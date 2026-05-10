@@ -3,12 +3,13 @@
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { usePlayer } from '@/context/PlayerContext';
-import { getBestImageUrl } from '@/lib/api/musicApi';
+import { getBestImageUrl, getArtistAlbums } from '@/lib/api/musicApi';
 import { Song } from '@/types/music';
 import Image from 'next/image';
-import { Play, Clock, Shuffle } from 'lucide-react';
+import { Play, MoreHorizontal, Plus } from 'lucide-react';
 import TrackLikeButton from '@/components/library/TrackLikeButton';
 import AddToPlaylistButton from '@/components/library/AddToPlaylistButton';
+import AddToQueueButton from '@/components/library/AddToQueueButton';
 
 interface ArtistInfo {
   id: number;
@@ -37,12 +38,6 @@ async function fetchArtistTopTracks(numericId: string): Promise<Song[]> {
   return json.data?.songs ?? [];
 }
 
-function formatFans(count: number): string {
-  if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M`;
-  if (count >= 1_000) return `${(count / 1_000).toFixed(0)}K`;
-  return count.toLocaleString();
-}
-
 export default function ArtistPage() {
   const params = useParams();
   const rawId = params.id as string;
@@ -63,16 +58,15 @@ export default function ArtistPage() {
     enabled: !!numericId,
   });
 
+  const { data: albums = [] } = useQuery({
+    queryKey: ['artist-albums', numericId],
+    queryFn: () => getArtistAlbums(numericId, 50),
+    enabled: !!numericId,
+  });
+
   const handlePlayAll = () => {
     if (topTracks.length > 0) {
       playTrack(topTracks[0], topTracks);
-    }
-  };
-
-  const handleShuffle = () => {
-    if (topTracks.length > 0) {
-      const shuffled = [...topTracks].sort(() => Math.random() - 0.5);
-      playTrack(shuffled[0], shuffled);
     }
   };
 
@@ -101,164 +95,196 @@ export default function ArtistPage() {
   const heroImage = artist.picture_xl || artist.picture_big || artist.picture;
 
   return (
-    <div className="-mt-8 -mx-8">
+    <div className="pb-12">
       {/* ───── Hero Section ───── */}
-      <div className="relative h-[380px] overflow-hidden">
-        {/* Background image with blur */}
+      <div className="relative h-[320px] md:h-[420px] overflow-hidden -mx-6 md:-mx-8 -mt-8">
+        {/* Background image */}
         {heroImage && (
           <Image
             src={heroImage}
             alt={artist.name}
             fill
             sizes="100vw"
-            className="object-cover scale-110 blur-sm"
+            className="object-cover object-center"
             priority
           />
         )}
 
         {/* Gradient overlays for depth */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/50 to-void" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1C1C1E] via-[#1C1C1E]/40 to-transparent" />
+        <div className="absolute inset-0 bg-black/10" />
 
         {/* Content over hero */}
-        <div className="absolute bottom-0 left-0 right-0 px-8 pb-8 flex items-end gap-7">
-          {/* Circular artist photo */}
-          <div className="relative w-[180px] h-[180px] rounded-full overflow-hidden border-[3px] border-white/20 shadow-2xl shadow-black/60 flex-shrink-0">
-            {heroImage ? (
-              <Image
-                src={heroImage}
-                alt={artist.name}
-                fill
-                sizes="180px"
-                className="object-cover"
-                priority
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-primary/40 to-void" />
-            )}
-          </div>
-
-          {/* Name + Meta */}
-          <div className="flex-1 min-w-0 pb-2">
-            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/50 mb-1">
-              Artist
-            </p>
-            <h1 className="text-5xl md:text-6xl font-extrabold text-white tracking-tight leading-[1.1] mb-3 drop-shadow-lg">
-              {artist.name}
-            </h1>
-            <div className="flex items-center gap-4 text-[13px] text-white/50">
-              <span>{formatFans(artist.nb_fan)} fans</span>
-              <span className="w-1 h-1 rounded-full bg-white/30" />
-              <span>{artist.nb_album} albums</span>
-            </div>
-          </div>
+        <div className="absolute bottom-6 md:bottom-10 left-6 md:left-8 right-8 flex items-center gap-5">
+          <button
+            onClick={handlePlayAll}
+            disabled={topTracks.length === 0}
+            className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-[#FA243C] flex items-center justify-center text-white hover:scale-105 transition-transform disabled:opacity-50 shadow-lg shadow-black/20 flex-shrink-0"
+          >
+            <Play fill="currentColor" size={24} className="ml-1" />
+          </button>
+          
+          <h1 className="text-5xl md:text-[80px] font-bold text-white tracking-tight drop-shadow-md leading-none">
+            {artist.name}
+          </h1>
         </div>
       </div>
 
-      {/* ───── Action Buttons ───── */}
-      <div className="px-8 py-6 flex items-center gap-4">
-        <button
-          onClick={handlePlayAll}
-          disabled={topTracks.length === 0}
-          className="flex items-center gap-2.5 px-7 py-3 bg-primary rounded-full text-white font-bold text-[14px] hover:bg-primary/85 transition-colors shadow-lg shadow-primary/25 disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <Play size={18} fill="currentColor" />
-          Play
-        </button>
-        <button
-          onClick={handleShuffle}
-          disabled={topTracks.length === 0}
-          className="flex items-center gap-2.5 px-7 py-3 bg-white/[0.07] rounded-full text-white/80 font-bold text-[14px] hover:bg-white/[0.12] transition-colors border border-white/[0.06] disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <Shuffle size={16} />
-          Shuffle
-        </button>
-      </div>
-
-      {/* ───── Top Tracks ───── */}
-      <div className="px-8 pb-12">
-        <h2 className="text-xl font-bold text-white mb-4">Top Songs</h2>
-
-        {isTracksLoading ? (
-          <div className="space-y-3">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="h-[56px] bg-white/5 rounded-xl animate-pulse" />
-            ))}
-          </div>
-        ) : topTracks.length === 0 ? (
-          <p className="text-muted py-10 text-center">No tracks available for this artist.</p>
-        ) : (
-          <>
-            {/* Table header */}
-            <div className="grid grid-cols-[auto_1fr_auto] md:grid-cols-[auto_1fr_1fr_auto_auto_auto] gap-2 md:gap-4 px-3 py-2 text-[11px] font-bold text-white/30 uppercase tracking-widest border-b border-white/[0.06] mb-2">
-              <span className="w-8 text-center">#</span>
-              <span>Title</span>
-              <span className="hidden md:block">Album</span>
-              <span className="hidden sm:flex w-16 justify-center">Save</span>
-              <span className="hidden lg:flex w-16 justify-center">List</span>
-              <span className="w-12 flex justify-end"><Clock size={14} /></span>
-            </div>
-
-            {/* Track rows */}
-            {topTracks.map((song: Song, index: number) => (
-              <div
-                key={song.id}
-                onClick={() => playTrack(song, topTracks)}
-                className="grid grid-cols-[auto_1fr_auto] md:grid-cols-[auto_1fr_1fr_auto_auto_auto] gap-2 md:gap-4 px-3 py-2.5 rounded-lg hover:bg-white/[0.04] transition-colors group cursor-pointer items-center"
-              >
-                {/* Track number */}
-                <span className="w-8 text-center text-[13px] text-white/30 group-hover:text-white/70 font-medium tabular-nums">
-                  {index + 1}
-                </span>
-
-                {/* Cover + Title + Artist */}
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="relative w-10 h-10 rounded-md overflow-hidden flex-shrink-0">
-                    {getBestImageUrl(song.image) ? (
-                      <Image
-                        src={getBestImageUrl(song.image)!}
-                        alt={song.name}
-                        fill
-                        sizes="40px"
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-white/10 to-white/5" />
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[14px] font-semibold text-white/90 truncate group-hover:text-white transition-colors">
-                      {song.name}
-                    </p>
-                    <p className="text-[12px] text-white/35 truncate">
-                      {song.artists.primary.map(a => a.name).join(', ')}
-                    </p>
-                  </div>
+      <div className="mt-8 md:mt-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14">
+          {/* ───── Latest Release ───── */}
+          <div>
+            <h2 className="text-[17px] font-semibold text-white mb-4">Latest Release</h2>
+            {albums.length > 0 ? (
+              <div className="flex gap-5">
+                <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-lg overflow-hidden flex-shrink-0 shadow-lg shadow-black/40 bg-white/5">
+                  <Image
+                    src={albums[0].cover_xl || albums[0].cover_big || albums[0].cover}
+                    alt={albums[0].title}
+                    fill
+                    sizes="160px"
+                    className="object-cover"
+                  />
                 </div>
-
-                {/* Album */}
-                <div className="hidden md:block text-[13px] text-white/30 truncate group-hover:text-white/50 transition-colors">
-                  {song.album.name}
-                </div>
-
-                {/* Like */}
-                <div className="hidden sm:flex justify-center" onClick={(e) => e.stopPropagation()}>
-                  <TrackLikeButton track={song} />
-                </div>
-
-                {/* Add to playlist */}
-                <div className="hidden lg:flex justify-center" onClick={(e) => e.stopPropagation()}>
-                  <AddToPlaylistButton track={song} />
-                </div>
-
-                {/* Duration */}
-                <div className="w-12 text-right text-[12px] text-white/30 font-medium tabular-nums">
-                  {Math.floor(song.duration / 60)}:{(song.duration % 60).toString().padStart(2, '0')}
+                <div className="flex flex-col justify-center">
+                  <p className="text-[11px] font-medium text-white/50 uppercase tracking-wider mb-2">
+                    {albums[0].release_date 
+                      ? new Date(albums[0].release_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase() 
+                      : 'LATEST'}
+                  </p>
+                  <p className="text-[17px] font-semibold text-white leading-tight mb-1">{albums[0].title}</p>
+                  <p className="text-[13px] text-white/50 mb-4">{albums[0].nb_tracks || 1} {albums[0].nb_tracks > 1 ? 'songs' : 'song'}</p>
+                  
+                  <button className="flex items-center justify-center gap-1.5 px-4 py-1 bg-white/[0.08] hover:bg-white/[0.12] rounded-full text-[13px] font-medium text-[#FA243C] transition-colors w-max border border-white/[0.04]">
+                    <Plus size={16} /> Add
+                  </button>
                 </div>
               </div>
+            ) : (
+              <div className="h-32 flex items-center text-white/30 text-[13px]">No releases available</div>
+            )}
+          </div>
+
+          {/* ───── Top Songs ───── */}
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-[17px] font-semibold text-white cursor-pointer hover:text-[#FA243C] transition-colors inline-flex items-center group">
+                Top Songs <span className="text-white/40 ml-1.5 group-hover:text-[#FA243C] text-[15px]">&gt;</span>
+              </h2>
+            </div>
+            
+            <div className="flex flex-col">
+              {isTracksLoading ? (
+                [...Array(4)].map((_, i) => (
+                  <div key={i} className="flex items-center gap-3 p-2 animate-pulse">
+                    <div className="w-11 h-11 bg-white/5 rounded" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3.5 bg-white/5 rounded w-1/2" />
+                      <div className="h-3 bg-white/5 rounded w-1/3" />
+                    </div>
+                  </div>
+                ))
+              ) : topTracks.length === 0 ? (
+                <p className="text-white/30 py-4 text-[13px]">No top songs available.</p>
+              ) : (
+                topTracks.slice(0, 5).map((song: Song, index: number) => (
+                  <div
+                    key={song.id}
+                    onClick={() => playTrack(song, topTracks)}
+                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 cursor-pointer group transition-colors border-b border-transparent hover:border-white/5"
+                  >
+                    <div className="relative w-[46px] h-[46px] rounded-[4px] flex-shrink-0 overflow-hidden shadow-sm">
+                      {getBestImageUrl(song.image) ? (
+                        <Image
+                          src={getBestImageUrl(song.image)!}
+                          alt={song.name}
+                          fill
+                          sizes="46px"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-white/10" />
+                      )}
+                    </div>
+                    
+                    <div className="flex-1 min-w-0 pr-4">
+                      <p className="text-[14px] font-medium text-white truncate">{song.name}</p>
+                      <p className="text-[12px] text-white/50 truncate mt-[1px]">
+                        {song.artists.primary.map(a => a.name).join(', ')} &mdash; {song.album.name}
+                      </p>
+                    </div>
+                    
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                      <TrackLikeButton track={song} />
+                      <AddToQueueButton track={song} />
+                      <AddToPlaylistButton track={song} />
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+        
+        {/* ───── Albums Grid ───── */}
+        <div className="mt-14 mb-8">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-[17px] font-semibold text-white cursor-pointer hover:text-[#FA243C] transition-colors inline-flex items-center group">
+              Albums <span className="text-white/40 ml-1.5 group-hover:text-[#FA243C] text-[15px]">&gt;</span>
+            </h2>
+          </div>
+          
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-8">
+            {albums.length > 0 ? (
+              albums.map((album: any) => (
+                <div key={album.id} className="flex flex-col group cursor-pointer">
+                  <div className="relative aspect-square w-full rounded-lg overflow-hidden mb-3 shadow-[0_4px_12px_rgba(0,0,0,0.5)] bg-white/5">
+                    <Image
+                      src={album.cover_xl || album.cover_big || album.cover_medium || album.cover}
+                      alt={album.title}
+                      fill
+                      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 16vw"
+                      className="object-cover"
+                    />
+                  </div>
+                  <p className="text-[13px] font-medium text-white truncate leading-tight group-hover:underline">{album.title}</p>
+                  <p className="text-[13px] text-white/50 truncate mt-[2px]">
+                    {album.release_date ? new Date(album.release_date).getFullYear() : 'Album'}
+                  </p>
+                </div>
+              ))
+            ) : (
+              [...Array(6)].map((_, i) => (
+                <div key={i} className="flex flex-col animate-pulse">
+                  <div className="aspect-square w-full bg-white/5 rounded-lg mb-3" />
+                  <div className="h-3 w-3/4 bg-white/5 rounded mb-1" />
+                  <div className="h-3 w-1/2 bg-white/5 rounded" />
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+        
+        {/* ───── Music Videos Placeholder ───── */}
+        <div className="mt-14 mb-4">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-[17px] font-semibold text-white cursor-pointer hover:text-[#FA243C] transition-colors inline-flex items-center group">
+              Music Videos <span className="text-white/40 ml-1.5 group-hover:text-[#FA243C] text-[15px]">&gt;</span>
+            </h2>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="flex flex-col group cursor-pointer">
+                <div className="relative aspect-video w-full rounded-lg overflow-hidden mb-3 bg-white/5 flex items-center justify-center">
+                   <Play size={32} className="text-white/10 group-hover:text-white/30 transition-colors" />
+                </div>
+                <div className="h-3 w-3/4 bg-white/5 rounded mt-1"></div>
+                <div className="h-3 w-1/2 bg-white/5 rounded mt-2"></div>
+              </div>
             ))}
-          </>
-        )}
+          </div>
+        </div>
       </div>
     </div>
   );

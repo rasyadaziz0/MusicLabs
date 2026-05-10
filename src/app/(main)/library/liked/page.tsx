@@ -2,13 +2,15 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Play, Heart, Clock } from 'lucide-react';
+import { Heart, MoreHorizontal } from 'lucide-react';
 import { usePlayer } from '@/context/PlayerContext';
-import { getBestImageUrl } from '@/lib/api/musicApi';
-import TrackLikeButton from '@/components/library/TrackLikeButton';
-import AddToPlaylistButton from '@/components/library/AddToPlaylistButton';
 import { useAuth } from '@/context/AuthContext';
 import { useLikedSongs } from '@/hooks/useMusicLibrary';
+import { AppleMusicHeader } from '@/components/ui/AppleMusicHeader';
+import { AppleMusicTrackList } from '@/components/ui/AppleMusicTrackList';
+import TrackLikeButton from '@/components/library/TrackLikeButton';
+import AddToQueueButton from '@/components/library/AddToQueueButton';
+import AddToPlaylistButton from '@/components/library/AddToPlaylistButton';
 
 export default function LikedSongsPage() {
   const { user, signInWithGoogle } = useAuth();
@@ -18,28 +20,29 @@ export default function LikedSongsPage() {
   return (
     <>
       <div className="space-y-8">
-        <section className="rounded-[2rem] bg-gradient-to-br from-fuchsia-500/30 via-primary/20 to-transparent p-8">
-          <div className="flex flex-col gap-6 md:flex-row items-center md:items-end text-center md:text-left md:justify-between mt-4 md:mt-0">
-            <div>
-              <p className="mb-3 text-sm font-semibold uppercase tracking-[0.25em] text-muted">
-                Playlist
-              </p>
-              <h1 className="text-4xl font-display font-bold md:text-6xl">Liked Songs</h1>
-              <p className="mt-3 text-sm text-white/80">
-                {user ? `${likedSongs.length} lagu yang sudah kamu simpan.` : 'Login untuk melihat lagu favorit kamu.'}
-              </p>
-            </div>
-            {likedSongs.length > 0 && (
-              <button
-                type="button"
-                onClick={() => playTrack(likedSongs[0], likedSongs)}
-                className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary text-white shadow-xl transition-transform hover:scale-105"
-              >
-                <Play size={24} fill="currentColor" className="ml-1" />
-              </button>
-            )}
-          </div>
-        </section>
+        <AppleMusicHeader
+          title={<>Favourite Songs <span className="text-[#FF2D55] text-xl ml-1">★</span></>}
+          description="Updated Today"
+          cover={
+            <>
+              <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent opacity-50"></div>
+              <div className="w-48 h-48 md:w-56 md:h-56 bg-[#f5f5f7] rounded-xl flex items-center justify-center shadow-inner relative z-10">
+                <svg viewBox="0 0 24 24" fill="#FF2D55" className="w-32 h-32 drop-shadow-md">
+                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+              </div>
+            </>
+          }
+          onPlay={() => likedSongs.length > 0 && playTrack(likedSongs[0], likedSongs)}
+          onShuffle={() => { /* shuffle logic */ }}
+          isSaved={true}
+          backHref="/library"
+          topRightActions={
+            <button className="w-10 h-10 rounded-full border border-white/20 hover:bg-white/10 flex items-center justify-center transition-colors text-white">
+              <MoreHorizontal size={18} />
+            </button>
+          }
+        />
 
         {!user ? (
           <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-center">
@@ -63,56 +66,23 @@ export default function LikedSongsPage() {
             ))}
           </div>
         ) : likedSongs.length > 0 ? (
-          <section className="space-y-1">
-            <div className="grid grid-cols-[auto_1fr_auto] md:grid-cols-[auto_1fr_1fr_auto_auto] gap-2 md:gap-4 border-b border-white/5 px-2 md:px-4 py-2 text-sm font-bold uppercase tracking-widest text-muted">
-              <span className="w-8 text-center">#</span>
-              <span>Title</span>
-              <span className="hidden md:block">Album</span>
-              <span className="hidden sm:flex w-20 justify-center">Save</span>
-              <span className="w-12 flex justify-end">
-                <Clock size={16} />
-              </span>
-            </div>
-
-            {likedSongs.map((song, index) => (
-              <div
-                key={song.id}
-                onClick={() => playTrack(song, likedSongs)}
-                className="grid grid-cols-[auto_1fr_auto] md:grid-cols-[auto_1fr_1fr_auto_auto] items-center gap-2 md:gap-4 rounded-xl px-2 md:px-4 py-3 transition-colors hover:bg-white/5"
-              >
-                <span className="w-8 text-center text-muted">{index + 1}</span>
-                <div className="flex min-w-0 items-center gap-4">
-                  <div className="relative h-11 w-11 overflow-hidden rounded-lg">
-                    {getBestImageUrl(song.image) ? (
-                      <Image
-                        src={getBestImageUrl(song.image)!}
-                        alt={song.name}
-                        fill
-                        sizes="44px"
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-primary/40 to-void" />
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="truncate font-semibold">{song.name}</p>
-                    <p className="truncate text-xs text-muted">
-                      {song.artists.primary.map((artist) => artist.name).join(', ')}
-                    </p>
-                  </div>
+          <AppleMusicTrackList
+            tracks={likedSongs}
+            onPlayTrack={playTrack}
+            showStar={true}
+            showAlbum={false}
+            renderTrackOptions={(song, closeMenu) => (
+              <>
+                <TrackLikeButton track={song} asMenuItem />
+                <div className="w-full">
+                  <AddToQueueButton track={song} showText />
                 </div>
-                <p className="hidden truncate text-sm text-muted md:block">{song.album.name}</p>
-                <div className="hidden items-center justify-center gap-2 sm:flex">
-                  <TrackLikeButton track={song} />
-                  <AddToPlaylistButton track={song} />
+                <div className="w-full">
+                  <AddToPlaylistButton track={song} asMenuItem />
                 </div>
-                <div className="w-12 text-right text-xs text-muted">
-                  {Math.floor(song.duration / 60)}:{(song.duration % 60).toString().padStart(2, '0')}
-                </div>
-              </div>
-            ))}
-          </section>
+              </>
+            )}
+          />
         ) : (
           <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-center">
             <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-primary/15 text-primary">

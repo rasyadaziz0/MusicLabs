@@ -3,19 +3,44 @@
 import { usePlayer } from '@/context/PlayerContext';
 import { getBestImageUrl } from '@/lib/api/musicApi';
 import { getPlaylistById } from '@/lib/supabase/music';
-import { usePlaylistTracks, useRemoveTrackFromPlaylist } from '@/hooks/useMusicLibrary';
+import { usePlaylistTracks, useRemoveTrackFromPlaylist, useTogglePinPlaylist, useDeletePlaylist } from '@/hooks/useMusicLibrary';
 import { useQuery } from '@tanstack/react-query';
-import { Play, Clock, Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Pin, MoreHorizontal, Share, Edit2 } from 'lucide-react';
 import Image from 'next/image';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import { useState, useEffect, useRef } from 'react';
 import TrackLikeButton from '@/components/library/TrackLikeButton';
+import AddToQueueButton from '@/components/library/AddToQueueButton';
 import AddToPlaylistButton from '@/components/library/AddToPlaylistButton';
+import { AppleMusicHeader } from '@/components/ui/AppleMusicHeader';
+import { AppleMusicTrackList } from '@/components/ui/AppleMusicTrackList';
 
 export default function PlaylistPage() {
   const { id } = useParams();
+  const router = useRouter();
   const { playTrack } = usePlayer();
   const playlistId = Array.isArray(id) ? id[0] : id;
   const removeTrackMutation = useRemoveTrackFromPlaylist();
+  const togglePinMutation = useTogglePinPlaylist();
+  const deletePlaylistMutation = useDeletePlaylist();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    alert('Link copied to clipboard!');
+    setIsMenuOpen(false);
+  };
 
   const { data: playlist, isLoading: isPlaylistLoading } = useQuery({
     queryKey: ['playlist', playlistId],
@@ -33,117 +58,124 @@ export default function PlaylistPage() {
   const coverUrl = playlist?.cover_url || getBestImageUrl(playlistTracks[0]?.image ?? []);
 
   return (
-    <>
-      <div className="flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8 mb-8 md:mb-10 text-center md:text-left mt-4 md:mt-0">
-        <div className="relative w-48 h-48 md:w-64 md:h-64 rounded-3xl overflow-hidden shadow-2xl bg-white/5 border border-white/10 flex-shrink-0 mx-auto md:mx-0">
-          {coverUrl ? (
+    <div className="flex flex-col w-full min-h-screen bg-transparent pt-8 px-6 md:px-10 pb-32">
+      {/* Hero Section */}
+      <AppleMusicHeader
+        title={playlist?.name || 'Loading...'}
+        subtitle={playlist?.user_id ? 'Rasyad azizan' : 'Unknown'}
+        description="Updated 2 Weeks Ago"
+        cover={
+          coverUrl ? (
             <Image src={coverUrl} alt={playlist?.name || 'Playlist cover'} fill className="object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-void">
               <Plus size={64} className="text-white/20" />
             </div>
-          )}
-        </div>
-        <div className="flex-1">
-          <p className="text-sm font-bold uppercase tracking-widest text-muted mb-2">Playlist</p>
-          <h1 className="text-5xl md:text-7xl font-display font-bold mb-6 tracking-tighter">{playlist?.name}</h1>
-          {playlist?.description && (
-            <p className="mb-4 max-w-2xl text-sm text-muted">{playlist.description}</p>
-          )}
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <span className="text-white">{playlist?.user_id ? 'You' : 'Unknown'}</span>
-            <span className="text-muted">•</span>
-            <span className="text-muted">{playlistTracks.length} songs</span>
+          )
+        }
+        onPlay={() => playlistTracks.length > 0 && playTrack(playlistTracks[0], playlistTracks)}
+        onShuffle={() => { /* shuffle logic */ }}
+        backHref="/library"
+        topRightActions={
+          <div className="relative" ref={menuRef}>
+            <button 
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="w-10 h-10 rounded-full border border-white/20 hover:bg-white/10 flex items-center justify-center transition-colors text-white"
+            >
+              <MoreHorizontal size={18} />
+            </button>
+
+            {isMenuOpen && (
+              <div className="absolute right-0 top-full mt-2 w-56 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl z-50 py-1 flex flex-col overflow-hidden">
+                <button onClick={handleShare} className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors flex items-center gap-3">
+                  <Share size={16} /> Share Playlist
+                </button>
+                
+                {playlist?.user_id && (
+                  <>
+                    <button onClick={() => {
+                      router.push(`/playlist/${playlist.id}/edit`);
+                      setIsMenuOpen(false);
+                    }} className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors flex items-center gap-3">
+                      <Edit2 size={16} /> Edit Playlist
+                    </button>
+                    
+                    <button onClick={() => {
+                      togglePinMutation.mutate({ playlistId: playlist.id, currentPinStatus: !!playlist.is_pinned });
+                      setIsMenuOpen(false);
+                    }} className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors flex items-center gap-3">
+                      <Pin size={16} className={playlist.is_pinned ? "text-primary" : ""} fill={playlist.is_pinned ? "currentColor" : "none"} /> 
+                      {playlist.is_pinned ? "Unpin Playlist" : "Pin Playlist"}
+                    </button>
+
+                    <div className="h-px bg-white/10 my-1 mx-2" />
+
+                    <button onClick={() => {
+                      if (confirm('Are you sure you want to delete this playlist?')) {
+                        deletePlaylistMutation.mutate(playlist.id, {
+                          onSuccess: () => router.push('/library/playlists')
+                        });
+                      }
+                      setIsMenuOpen(false);
+                    }} className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-white/10 transition-colors flex items-center gap-3">
+                      <Trash2 size={16} /> Delete Playlist
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
           </div>
-        </div>
-      </div>
+        }
+      />
 
-      <div className="flex items-center justify-center md:justify-start gap-6 mb-10">
-        <button 
-          onClick={() => playlistTracks.length > 0 && playTrack(playlistTracks[0], playlistTracks)}
-          className="w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center hover:scale-105 transition-transform shadow-xl"
-        >
-          <Play size={28} fill="currentColor" className="ml-1" />
-        </button>
-      </div>
-
+      {/* Tracklist */}
       {isTracksLoading ? (
-        <div className="space-y-4">
+        <div className="space-y-4 w-full">
           {[...Array(5)].map((_, index) => (
-            <div key={index} className="h-16 rounded-xl bg-white/5 animate-pulse" />
+            <div key={index} className="h-14 rounded-lg bg-white/5 animate-pulse" />
           ))}
         </div>
       ) : playlistTracks.length > 0 ? (
-        <div className="space-y-1">
-        <div className="grid grid-cols-[auto_1fr_auto] md:grid-cols-[auto_1fr_1fr_auto_auto_auto] gap-2 md:gap-4 px-2 md:px-4 py-2 text-sm font-bold text-muted uppercase tracking-widest border-b border-white/5 mb-4">
-          <span className="w-8 text-center">#</span>
-          <span>Title</span>
-          <span className="hidden md:block">Album</span>
-          <span className="hidden sm:flex w-20 justify-center">Save</span>
-          <span className="hidden lg:flex w-20 justify-center">Manage</span>
-          <span className="w-12 flex justify-end"><Clock size={16} /></span>
-        </div>
+        <AppleMusicTrackList
+          tracks={playlistTracks}
+          onPlayTrack={playTrack}
+          showStar={false}
+          showAlbum={true}
+          renderTrackOptions={(song, closeMenu) => (
+            <>
+              <TrackLikeButton track={song} asMenuItem />
+              <div className="w-full">
+                <AddToQueueButton track={song} showText />
+              </div>
+              <div className="w-full">
+                <AddToPlaylistButton track={song} asMenuItem />
+              </div>
 
-        {playlistTracks.map((song, index) => (
-          <div 
-            key={song.id}
-            onClick={() => playTrack(song, playlistTracks)}
-            className="grid grid-cols-[auto_1fr_auto] md:grid-cols-[auto_1fr_1fr_auto_auto_auto] gap-2 md:gap-4 px-2 md:px-4 py-3 rounded-xl hover:bg-white/5 transition-colors group cursor-pointer items-center"
-          >
-            <span className="w-8 text-center text-muted group-hover:text-white font-medium">
-              {index + 1}
-            </span>
-            <div className="flex items-center gap-4 min-w-0">
-              <div className="relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
-                {(() => {
-                  const imgUrl = song.image.find(i => i.quality === '150x150')?.url || song.image[0]?.url;
-                  return imgUrl ? (
-                    <Image src={imgUrl} alt={song.name} fill className="object-cover" />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-primary/40 to-void" />
-                  );
-                })()}
-              </div>
-              <div className="min-w-0">
-                <p className="font-bold truncate">{song.name}</p>
-                <p className="text-xs text-muted truncate">{song.artists.primary.map(a => a.name).join(', ')}</p>
-              </div>
-            </div>
-            <div className="hidden md:block text-sm text-muted truncate">
-              {song.album.name}
-            </div>
-            <div className="hidden items-center justify-center gap-2 sm:flex">
-              <TrackLikeButton track={song} />
-              <AddToPlaylistButton track={song} />
-            </div>
-            <div className="hidden justify-center lg:flex">
+              <div className="h-px bg-white/10 my-1 mx-2" />
+
               <button
                 type="button"
-                onClick={(event) => {
-                  event.stopPropagation();
+                onClick={(e) => {
+                  e.stopPropagation();
                   removeTrackMutation.mutate({ playlistId: playlistId!, trackId: song.id });
+                  closeMenu();
                 }}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-muted transition-colors hover:text-red-300"
-                title="Remove from playlist"
-                aria-label="Remove from playlist"
+                className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/10 transition-colors flex items-center gap-3"
               >
                 <Trash2 size={16} />
+                Remove from Playlist
               </button>
-            </div>
-            <div className="w-12 text-right text-xs text-muted font-medium">
-              {Math.floor(song.duration / 60)}:{(song.duration % 60).toString().padStart(2, '0')}
-            </div>
-          </div>
-        ))}
-        </div>
+            </>
+          )}
+        />
       ) : (
-        <div className="rounded-3xl border border-dashed border-white/10 bg-white/5 px-6 py-12 text-center">
-          <h2 className="text-2xl font-bold">Playlist masih kosong</h2>
-          <p className="mt-2 text-sm text-muted">
-            Tambahin lagu dari halaman search, liked songs, atau player bar.
+        <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-6 py-16 text-center mt-8">
+          <h2 className="text-xl font-bold mb-2">Playlist is empty</h2>
+          <p className="text-sm text-white/50">
+            Find and add songs from the search page or your library.
           </p>
         </div>
       )}
-    </>
+    </div>
   );
 }

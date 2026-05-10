@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Check, ListPlus, Loader2 } from 'lucide-react';
+import { Check, ListPlus, Loader2, Plus } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Song } from '@/types/music';
 import { cn } from '@/lib/utils';
@@ -11,9 +11,10 @@ import { useAddTrackToPlaylist, useLibraryPlaylists } from '@/hooks/useMusicLibr
 interface AddToPlaylistButtonProps {
   track: Song;
   className?: string;
+  asMenuItem?: boolean;
 }
 
-export default function AddToPlaylistButton({ track, className }: AddToPlaylistButtonProps) {
+export default function AddToPlaylistButton({ track, className, asMenuItem = false }: AddToPlaylistButtonProps) {
   const { user, signInWithGoogle } = useAuth();
   const { data: playlists = [], isLoading } = useLibraryPlaylists();
   const addMutation = useAddTrackToPlaylist();
@@ -69,41 +70,52 @@ export default function AddToPlaylistButton({ track, className }: AddToPlaylistB
   };
 
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef} className={cn("relative", asMenuItem && "w-full")}>
       <button
         type="button"
         onClick={handleButtonClick}
         className={cn(
-          'inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-muted transition-colors hover:text-white',
+          asMenuItem ? 'w-full text-left px-4 py-2 text-[13px] text-white hover:bg-white/10 transition-colors flex items-center justify-between' : 'inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-muted transition-colors hover:text-white',
           className
         )}
         title="Add to playlist"
         aria-label="Add to playlist"
       >
-        <ListPlus size={16} />
+        {asMenuItem ? (
+          <>
+            <span>Add to Playlist</span>
+            <ListPlus size={16} className="text-white/60" />
+          </>
+        ) : (
+          <ListPlus size={16} />
+        )}
       </button>
 
       {isOpen && (
         <div
           className={cn(
-            'absolute right-0 z-30 w-72 rounded-2xl border border-white/10 bg-[#121212] p-3 shadow-2xl',
-            openUpward ? 'bottom-11' : 'top-11'
+            'absolute z-50 w-56 rounded-xl border border-white/15 bg-[#1c1c1e]/90 p-1.5 shadow-2xl backdrop-blur-xl',
+            asMenuItem ? (openUpward ? 'bottom-full left-0 mb-1' : 'top-full left-0 mt-1') : (openUpward ? 'bottom-11 right-0' : 'top-11 right-0')
           )}
           onClick={(event) => event.stopPropagation()}
         >
-          <div className="mb-2 flex items-center justify-between">
-            <p className="text-sm font-semibold">Add to playlist</p>
-            <Link href="/playlist/create" className="text-xs text-primary hover:underline">
-              New playlist
-            </Link>
+          <div className="mb-1 border-b border-white/5 px-2 py-1.5 flex items-center">
+            <p className="text-[11px] font-semibold text-white/50 uppercase tracking-wider ml-1">Add to Playlist</p>
           </div>
 
+          <Link href="/playlist/create" className="group mb-1 flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left text-[13px] font-medium text-white transition-colors hover:bg-white/10">
+            <Plus size={16} className="text-[#FA243C]" />
+            <span>New Playlist</span>
+          </Link>
+
+          <div className="my-1 mx-2 h-px bg-white/5" />
+
           {isLoading ? (
-            <div className="flex items-center justify-center py-6 text-muted">
+            <div className="flex items-center justify-center py-6 text-white/50">
               <Loader2 size={16} className="animate-spin" />
             </div>
           ) : playlists.length > 0 ? (
-            <div className="space-y-1">
+            <div className="max-h-48 overflow-y-auto space-y-0.5 custom-scrollbar">
               {playlists.map((playlist) => {
                 const isSelected = selectedPlaylistId === playlist.id;
 
@@ -113,24 +125,21 @@ export default function AddToPlaylistButton({ track, className }: AddToPlaylistB
                     type="button"
                     onClick={() => handleAdd(playlist.id)}
                     disabled={addMutation.isPending}
-                    className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition-colors hover:bg-white/5 disabled:opacity-60"
+                    className="group flex w-full items-center justify-between rounded-lg px-2 py-2 text-left text-[13px] transition-colors hover:bg-white/10 disabled:opacity-60"
                   >
-                    <div className="min-w-0">
-                      <p className="truncate font-medium text-white">{playlist.name}</p>
-                      <p className="truncate text-xs text-muted">
-                        {playlist.description || 'Personal playlist'}
-                      </p>
-                    </div>
-                    {isSelected && <Check size={16} className="text-primary" />}
+                    <span className="truncate font-medium text-white/90 group-hover:text-white">
+                      {playlist.name}
+                    </span>
+                    {isSelected && <Check size={14} className="text-[#FA243C] flex-shrink-0 ml-2" />}
                   </button>
                 );
               })}
             </div>
           ) : (
-            <div className="rounded-xl border border-dashed border-white/10 px-4 py-5 text-center">
-              <p className="text-sm text-muted">Belum ada playlist.</p>
-              <Link href="/playlist/create" className="mt-2 inline-block text-sm font-medium text-primary hover:underline">
-                Buat playlist pertama
+            <div className="px-3 py-4 text-center">
+              <p className="text-[12px] text-white/50 mb-2">Belum ada playlist.</p>
+              <Link href="/playlist/create" className="inline-block text-[12px] font-medium text-[#FA243C] hover:text-[#FA243C]/80 transition-colors">
+                Buat sekarang
               </Link>
             </div>
           )}

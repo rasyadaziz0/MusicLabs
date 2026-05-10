@@ -163,7 +163,7 @@ export async function GET(request: NextRequest) {
     console.error('Audio resolve failed with youtubei.js:', getErrorMessage(error));
 
     return NextResponse.json(
-      { error: 'Failed to resolve audio: ' + getErrorMessage(error) },
+      { error: 'Failed to resolve audio' },
       { status: 500 }
     );
   }

@@ -44,6 +44,37 @@ export interface Song {
   deezerTrackId?: number;   // Original Deezer track ID for reference
   preview?: string;         // Deezer 30s preview URL
   youtubeId?: string;       // Resolved YouTube video ID
+  isRadio?: boolean;        // True if this is a radio stream
+  radioStreamUrl?: string;  // Direct stream URL for radio
+  radioMeta?: {             // Live metadata from icecast stream
+    title: string;          // e.g. "Artist - Song Title"
+    station: string;        // Station name
+  };
+}
+
+/** Shape returned by radio-browser.info */
+export interface RadioStation {
+  stationuuid: string;
+  name: string;
+  url: string;
+  url_resolved: string;
+  homepage: string;
+  favicon: string;
+  tags: string;
+  country: string;
+  countrycode: string;
+  state: string;
+  language: string;
+  languagecodes: string;
+  codec: string;
+  bitrate: number;
+  votes: number;
+  clickcount: number;
+  clicktrend: number;
+  lastchangetime: string;
+  lastcheckok: number;      // 1 = online, 0 = offline
+  geo_lat: number | null;
+  geo_long: number | null;
 }
 
 export interface Album {

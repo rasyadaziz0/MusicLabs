@@ -23,15 +23,7 @@ A full-featured music streaming web app inspired by Spotify, dibangun dari scrat
 ## Brand & Design System
 
 ### Color Palette
-```css
---color-primary:    #2F2FE4;  /* Electric Blue — CTA, active states */
---color-deep:       #162E93;  /* Royal Blue — secondary elements */
---color-dark-navy:  #1A1953;  /* Midnight — card backgrounds */
---color-void:       #080616;  /* Near-black — base background */
---color-white:      #FFFFFF;
---color-muted:      #8888BB;  /* Muted text */
---color-surface:    #0F0D2E;  /* Surface / sidebar background */
-```
+
 
 ### Typography
 - **Display/Heading**: `Syne` atau `Space Grotesk` — bold, modern
@@ -421,6 +413,7 @@ CREATE TABLE playlists (
   description TEXT,
   cover_url TEXT,
   is_public BOOLEAN DEFAULT false,
+  is_pinned BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT now()
 );
 

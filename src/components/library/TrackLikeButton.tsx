@@ -9,9 +9,10 @@ import { useLikedSongsIndex, useToggleLikedSong } from '@/hooks/useMusicLibrary'
 interface TrackLikeButtonProps {
   track: Song;
   className?: string;
+  asMenuItem?: boolean;
 }
 
-export default function TrackLikeButton({ track, className }: TrackLikeButtonProps) {
+export default function TrackLikeButton({ track, className, asMenuItem }: TrackLikeButtonProps) {
   const { user, signInWithGoogle } = useAuth();
   const { likedSet } = useLikedSongsIndex();
   const toggleMutation = useToggleLikedSong();
@@ -27,6 +28,28 @@ export default function TrackLikeButton({ track, className }: TrackLikeButtonPro
 
     toggleMutation.mutate(track.id);
   };
+
+  if (asMenuItem) {
+    return (
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={toggleMutation.isPending}
+        className={cn(
+          'w-full text-left px-4 py-2 text-sm transition-colors hover:bg-white/10 disabled:opacity-60 flex items-center gap-3',
+          isLiked ? 'text-primary' : 'text-white',
+          className
+        )}
+      >
+        {toggleMutation.isPending ? (
+          <Loader2 size={16} className="animate-spin" />
+        ) : (
+          <Heart size={16} fill={isLiked ? 'currentColor' : 'none'} />
+        )}
+        {isLiked ? 'Remove from Liked Songs' : 'Save to Liked Songs'}
+      </button>
+    );
+  }
 
   return (
     <button

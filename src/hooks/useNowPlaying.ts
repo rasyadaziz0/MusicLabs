@@ -11,7 +11,7 @@ import {
 } from '@/hooks/useMusicLibrary';
 import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react';
 
-const LYRICS_SYNC_OFFSET_SEC = 0.1;
+const LYRICS_SYNC_OFFSET_SEC = 0;
 
 export function useNowPlaying(isOpen: boolean) {
   const {
@@ -27,6 +27,9 @@ export function useNowPlaying(isOpen: boolean) {
     prevTrack,
     seek,
     setVolume,
+    addToQueue,
+    isRadio,
+    radioMeta,
   } = usePlayer();
 
   const { lines, isSynced, isLoading: isLyricsLoading } = useLyrics(currentTrack);
@@ -46,6 +49,8 @@ export function useNowPlaying(isOpen: boolean) {
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null);
   const [openMenuUpward, setOpenMenuUpward] = useState(false);
+  const [isGuestGateOpen, setIsGuestGateOpen] = useState(false);
+  const [guestGateAction, setGuestGateAction] = useState('use this feature');
 
   const activeIndex = useMemo(() => {
     if (!isSynced || lines.length === 0) return -1;
@@ -63,19 +68,21 @@ export function useNowPlaying(isOpen: boolean) {
 
   useEffect(() => {
     if (!isOpen || activeIndex < 0 || !lyricsScrollRef.current) return;
+    if (lines[activeIndex]?.isPlaceholder) return;
     const el = lyricsScrollRef.current.querySelector(
       `[data-lyric-index="${activeIndex}"]`,
     ) as HTMLElement | null;
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, [activeIndex, isOpen]);
+  }, [activeIndex, isOpen, lines]);
 
   useEffect(() => {
     if (!isOpen || activeIndex < 0 || !mobileLyricsScrollRef.current) return;
+    if (lines[activeIndex]?.isPlaceholder) return;
     const el = mobileLyricsScrollRef.current.querySelector(
       `[data-lyric-index="${activeIndex}"]`,
     ) as HTMLElement | null;
     if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, [activeIndex, isOpen, isLyricsOpen]);
+  }, [activeIndex, isOpen, isLyricsOpen, lines]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -105,7 +112,7 @@ export function useNowPlaying(isOpen: boolean) {
   const handleToggleLike = async (event: ReactMouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
     if (!currentTrack) return;
-    if (!user) { await signInWithGoogle(); return; }
+    if (!user) { setGuestGateAction('like this song'); setIsGuestGateOpen(true); return; }
     toggleLikeMutation.mutate(currentTrack.id);
   };
 
@@ -147,7 +154,7 @@ export function useNowPlaying(isOpen: boolean) {
 
   const handleAddToLibraryAction = async () => {
     if (!currentTrack) return;
-    if (!user) { await signInWithGoogle(); return; }
+    if (!user) { setGuestGateAction('add to your library'); setIsGuestGateOpen(true); return; }
     if (!isLiked) toggleLikeMutation.mutate(currentTrack.id);
   };
 
@@ -158,7 +165,7 @@ export function useNowPlaying(isOpen: boolean) {
 
   const handleAddToPlaylist = async (playlistId: string) => {
     if (!currentTrack) return;
-    if (!user) { await signInWithGoogle(); return; }
+    if (!user) { setGuestGateAction('add to a playlist'); setIsGuestGateOpen(true); return; }
     setSelectedPlaylistId(playlistId);
     addToPlaylistMutation.mutate(
       { playlistId, trackId: currentTrack.id },
@@ -184,6 +191,7 @@ export function useNowPlaying(isOpen: boolean) {
     prevTrack,
     seek,
     setVolume,
+    addToQueue,
     lines,
     isSynced,
     isLyricsLoading,
@@ -208,6 +216,11 @@ export function useNowPlaying(isOpen: boolean) {
     handleAddToLibraryAction,
     handleMoreAction,
     handleAddToPlaylist,
+    isGuestGateOpen,
+    guestGateAction,
+    setIsGuestGateOpen,
+    isRadio,
+    radioMeta,
   };
 }
 

@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 const SPOTIFY_PLAYLIST_API_BASE = 'https://api.spotify.com/v1/playlists';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization');
     if (!authHeader) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -16,15 +16,15 @@ export async function POST(request: Request) {
     });
 
     const {
-      data: { session },
-      error: sessionError,
-    } = await supabase.auth.getSession();
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser(token);
 
-    if (sessionError || !session) {
+    if (userError || !user) {
       return NextResponse.json({ error: 'Sesi lu nggak valid.' }, { status: 401 });
     }
 
-    const spotifyToken = session.provider_token;
+    const spotifyToken = request.cookies.get('spotify_token')?.value;
     if (!spotifyToken) {
       return NextResponse.json({ error: 'Lu belum Connect Spotify!' }, { status: 403 });
     }

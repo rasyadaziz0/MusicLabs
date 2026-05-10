@@ -8,6 +8,7 @@ export interface PlaylistRecord {
   name: string;
   description: string | null;
   cover_url: string | null;
+  is_pinned?: boolean;
   created_at?: string;
 }
 
@@ -25,7 +26,7 @@ interface LikedSongRow {
 export async function getUserPlaylists(userId: string) {
   const { data, error } = await supabase
     .from('playlists')
-    .select('id, user_id, name, description, cover_url, created_at')
+    .select('id, user_id, name, description, cover_url, is_pinned, created_at')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
 
@@ -36,7 +37,7 @@ export async function getUserPlaylists(userId: string) {
 export async function getPlaylistById(playlistId: string) {
   const { data, error } = await supabase
     .from('playlists')
-    .select('id, user_id, name, description, cover_url, created_at')
+    .select('id, user_id, name, description, cover_url, is_pinned, created_at')
     .eq('id', playlistId)
     .single();
 
@@ -65,6 +66,26 @@ export async function createPlaylist(input: {
 
   if (error) throw error;
   return data as PlaylistRecord;
+}
+
+export async function togglePinPlaylist(playlistId: string, currentPinStatus: boolean) {
+  const { error } = await supabase
+    .from('playlists')
+    .update({ is_pinned: !currentPinStatus })
+    .eq('id', playlistId);
+
+  if (error) throw error;
+  return !currentPinStatus;
+}
+
+export async function deletePlaylist(playlistId: string) {
+  const { error } = await supabase
+    .from('playlists')
+    .delete()
+    .eq('id', playlistId);
+
+  if (error) throw error;
+  return true;
 }
 
 export async function getPlaylistTrackIds(playlistId: string) {
@@ -184,7 +205,7 @@ export async function toggleLikedSong(userId: string, trackId: string) {
 }
 
 export async function recordRecentPlay(userId: string, trackId: string) {
-  const { error } = await supabase.from('recent_plays').insert({
+  const { error } = await supabase.from('listening_history').insert({
     user_id: userId,
     track_id: trackId,
   });
@@ -196,7 +217,7 @@ export async function recordRecentPlay(userId: string, trackId: string) {
 
 export async function getRecentPlays(userId: string): Promise<Song[]> {
   const { data, error } = await supabase
-    .from('recent_plays')
+    .from('listening_history')
     .select('track_id')
     .eq('user_id', userId)
     .order('played_at', { ascending: false })

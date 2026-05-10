@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Search, Library } from 'lucide-react';
+import { Home, Search, Library, Radio } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { icon: Home, label: 'Home', href: '/' },
   { icon: Search, label: 'Search', href: '/search' },
+  { icon: Radio, label: 'Radio', href: '/radio' },
   { icon: Library, label: 'Library', href: '/library' },
 ];
 

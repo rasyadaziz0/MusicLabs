@@ -3,7 +3,7 @@
 import { useMemo, useRef, useEffect } from 'react';
 import { LrcLine } from '@/lib/utils/lrcParser';
 
-const LYRICS_SYNC_DELAY_SEC = 0 ;
+const LYRICS_SYNC_DELAY_SEC = 0;
 
 interface UseLyricsScrollOptions {
   lines: LrcLine[];
@@ -43,11 +43,12 @@ export function useLyricsScroll({
 
   useEffect(() => {
     if (activeIndex < 0 || !scrollRef.current) return;
+    if (lines[activeIndex]?.isPlaceholder) return;
     const activeLine = scrollRef.current.children[activeIndex] as HTMLElement;
     if (activeLine) {
       activeLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-  }, [activeIndex]);
+  }, [activeIndex, lines]);
 
   return { activeIndex, scrollRef };
 }
