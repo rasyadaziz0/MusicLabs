@@ -1,0 +1,118 @@
+export const GLOBAL_EXCLUDED_TERMS = [
+  'anak', 'balita', 'bayi', 'nina bobo', 'nursery', 'kids', 'kartun',
+  'background music', 'royalty free', 'uniquesound', 'melodality',
+  'doran opus', 'stock music', 'advertising', 'jingle', 'mr revant',
+  'mrrevant', 'jeezy beatz', 'looperman',
+];
+
+export const MOOD_PLAYLISTS = [
+  {
+    key: 'fokus',
+    label: 'Fokus',
+    queries: [
+      'Cigarettes After Sex',
+      'The Weeknd after hours',
+      'Billie Eilish when we all fall asleep',
+      'Sufjan Stevens',
+      'Bon Iver',
+      'Radiohead',
+      'Phoebe Bridgers',
+      'The National',
+    ],
+    include: ['cigarettes', 'weeknd', 'billie', 'sufjan', 'eilish', 'after hours', 'alternative', 'indie', 'dream pop', 'bon iver', 'radiohead', 'phoebe', 'national'],
+    exclude: ['background music', 'royalty', 'uniquesound', 'advertising', 'kids', 'nursery'],
+  },
+  {
+    key: 'sedih',
+    label: 'Sedih',
+    queries: [
+      'Kunto Aji mantra mantra',
+      'Hindia sebuah pertanyaan untuk kamu',
+      'Pamungkas to the bone',
+      'Tulus monokrom',
+      'Raisa usai di sini',
+      'Fiersa Besari',
+      'Budi Doremi',
+    ],
+    include: ['kunto', 'hindia', 'pamungkas', 'tulus', 'raisa', 'monokrom', 'mantra', 'galau', 'fiersa', 'budi doremi'],
+    exclude: ['happy', 'background music', 'royalty', 'advertising'],
+  },
+  {
+    key: 'senang',
+    label: 'Senang',
+    queries: [
+      'Dua Lipa levitating',
+      'Harry Styles as it was',
+      'Bruno Mars uptown funk',
+      'Tiara Andini',
+      'Taylor Swift',
+      'Katy Perry',
+      'Maroon 5',
+    ],
+    include: ['dua lipa', 'harry styles', 'bruno mars', 'tiara', 'levitating', 'uptown', 'pop', 'taylor', 'katy', 'maroon 5'],
+    exclude: ['background music', 'royalty', 'advertising', 'uniquesound', 'stock'],
+  },
+  {
+    key: 'heartbreak',
+    label: 'Heartbreak',
+    queries: [
+      'Ariana Grande thank u next',
+      'Olivia Rodrigo drivers license',
+      'Mahalini melawan restu',
+      'Tiara Andini gemintang di hati',
+      'SZA',
+      'Billie Eilish',
+      'Idgitaf',
+    ],
+    include: ['ariana', 'olivia', 'mahalini', 'tiara', 'rodrigo', 'grande', 'drivers license', 'melawan', 'sza', 'billie', 'idgitaf'],
+    exclude: ['background music', 'royalty', 'advertising', 'stock'],
+  },
+  {
+    key: 'percintaan',
+    label: 'Percintaan',
+    queries: [
+      'Ed Sheeran perfect',
+      'Raisa LDR',
+      'Pamungkas one man show',
+      'Afgan sadis',
+      'John Legend',
+      'Rizky Febian',
+      'Andmesh',
+    ],
+    include: ['ed sheeran', 'raisa', 'pamungkas', 'afgan', 'perfect', 'love', 'romantic', 'john legend', 'rizky', 'andmesh'],
+    exclude: ['background music', 'royalty', 'advertising', 'stock'],
+  },
+  {
+    key: 'energi',
+    label: 'Energi',
+    queries: [
+      'The Weeknd blinding lights',
+      'Dua Lipa dont start now',
+      'Marshmello happier',
+      'Martin Garrix animals',
+      'David Guetta',
+      'Imagine Dragons',
+      'Avicii',
+    ],
+    include: ['weeknd', 'dua lipa', 'marshmello', 'martin garrix', 'blinding lights', 'edm', 'dance', 'david guetta', 'imagine', 'avicii'],
+    exclude: ['background music', 'royalty', 'advertising', 'stock', 'kids'],
+  },
+  {
+    key: 'rileks',
+    label: 'Rileks',
+    queries: [
+      'Coldplay the scientist',
+      'Honne location unknown',
+      'Tom Misch geography',
+      'Yura Yunita cinta dan rahasia',
+      'Rex Orange County',
+      'Still Woozy',
+      'Daniel Caesar',
+    ],
+    include: ['coldplay', 'honne', 'tom misch', 'yura', 'chill', 'indie', 'acoustic', 'neo soul', 'rex', 'woozy', 'daniel caesar'],
+    exclude: ['background music', 'royalty', 'advertising', 'stock', 'uniquesound'],
+  },
+] as const;
+
+export type MoodConfig = (typeof MOOD_PLAYLISTS)[number];
+export type MoodKey = MoodConfig['key'];

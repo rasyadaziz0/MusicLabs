@@ -10,9 +10,12 @@ export function useLyrics(currentTrack: Song | null) {
   const [isSynced, setIsSynced] = useState(false);
 
   useEffect(() => {
+    // Clear old lyrics immediately when track changes to prevent stale state bugs
+    // such as Romanization triggering for the new track using the old track's lyrics.
+    setLines([]);
+    setIsSynced(false);
+
     if (!currentTrack) {
-      setLines([]);
-      setIsSynced(false);
       setIsLoading(false);
       return;
     }

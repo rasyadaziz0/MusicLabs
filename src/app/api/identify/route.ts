@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 import { checkRateLimit, getRequestIp } from '@/lib/server/rateLimit';
 import { Song } from '@/types/music';
 
@@ -6,23 +7,87 @@ export const runtime = 'nodejs';
 
 import { searchITunesTracks } from '@/lib/server/itunesApi';
 
+// ── Helpers ───────────────────────────────────────────────────────
+
+function getBearerToken(request: NextRequest): string | null {
+  const authorization = request.headers.get('authorization') ?? '';
+  const [scheme, token] = authorization.split(' ');
+  if (scheme?.toLowerCase() !== 'bearer' || !token) return null;
+  return token;
+}
+
 // ── POST handler ──────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
-  // Rate limit: 10 identify requests per minute per IP
-  const ip = getRequestIp(request);
-  const limiter = await checkRateLimit(ip, {
-    limit: 10,
-    windowMs: 60_000,
-    keyPrefix: 'identify:audd',
+  // ── Auth check: require logged-in user ──────────────────────────
+  const bearerToken = getBearerToken(request);
+  if (!bearerToken) {
+    return NextResponse.json(
+      { error: 'Login required to use song identification.' },
+      { status: 401 }
+    );
+  }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey =
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return NextResponse.json(
+      { error: 'Server configuration error.' },
+      { status: 500 }
+    );
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    global: {
+      headers: { Authorization: `Bearer ${bearerToken}` },
+    },
   });
 
-  if (!limiter.allowed) {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser(bearerToken);
+
+  if (userError || !user) {
     return NextResponse.json(
-      { error: 'Too many requests. Please wait.' },
+      { error: 'Login required to use song identification.' },
+      { status: 401 }
+    );
+  }
+
+  // ── Rate limit: per-IP (10/min) ─────────────────────────────────
+  const ip = getRequestIp(request);
+  const ipLimiter = await checkRateLimit(ip, {
+    limit: 10,
+    windowMs: 60_000,
+    keyPrefix: 'identify:ip',
+  });
+
+  if (!ipLimiter.allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please wait a moment.' },
       {
         status: 429,
-        headers: { 'Retry-After': String(limiter.resetInSeconds) },
+        headers: { 'Retry-After': String(ipLimiter.resetInSeconds) },
+      }
+    );
+  }
+
+  // ── Rate limit: per-user (5/min) ────────────────────────────────
+  const userLimiter = await checkRateLimit(user.id, {
+    limit: 5,
+    windowMs: 60_000,
+    keyPrefix: 'identify:user',
+  });
+
+  if (!userLimiter.allowed) {
+    return NextResponse.json(
+      { error: 'You\'re identifying songs too fast. Please wait a moment.' },
+      {
+        status: 429,
+        headers: { 'Retry-After': String(userLimiter.resetInSeconds) },
       }
     );
   }

@@ -1,59 +1,111 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Innertube } from 'youtubei.js';
+import { Innertube, UniversalCache, Log } from 'youtubei.js';
 
 export const runtime = 'nodejs';
 
-// Singleton Innertube instance — avoids creating a new client per request
-let ytInstance: Innertube | null = null;
+// Disable internal logging spam from youtubei.js
+Log.setLevel(Log.Level.NONE);
 
-async function getYt() {
-  if (!ytInstance) {
-    ytInstance = await Innertube.create();
+let ytInstance: Innertube | null = null;
+let lastInit = 0;
+
+async function getYt(forceRefresh = false) {
+  const now = Date.now();
+  if (!ytInstance || now - lastInit > 1000 * 60 * 10 || forceRefresh) {
+    ytInstance = await Innertube.create({
+      cache: new UniversalCache(true, './.cache'),
+      generate_session_locally: true,
+      retrieve_player: true,
+    });
+    lastInit = Date.now();
   }
   return ytInstance;
 }
 
-/**
- * GET /api/audio/{videoId}
- * 
- * Proxy fallback untuk mengambil audio stream URL langsung dari YouTube via youtubei.js.
- */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ videoId: string }> }
 ) {
   const { videoId } = await params;
 
-  if (!videoId || !/^[A-Za-z0-9_-]{10,12}$/.test(videoId)) {
+  if (!videoId || !/^[A-Za-z0-9_-]{11}$/.test(videoId)) {
     return NextResponse.json({ error: 'Invalid videoId format' }, { status: 400 });
   }
 
-  try {
-    const youtube = await getYt();
-    const info = await youtube.getInfo(videoId);
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const youtube = await getYt(attempt > 0);
+      const info = await youtube.getInfo(videoId);
 
-    const format = info.chooseFormat({ type: 'audio', quality: 'best' });
-    const audioUrl = format ? await format.decipher(youtube.session.player) : null;
+      // Use streaming_data property directly
+      const streamingData = info.streaming_data;
 
-    if (!audioUrl) {
-      return NextResponse.json(
-        { error: 'No playable audio stream found for this music' },
-        { status: 404 }
-      );
+      let audioUrl: string | null = null;
+
+      // Cari format audio terbaik dari streamingData
+      const audioFormats = streamingData?.adaptive_formats?.filter((f: any) => {
+        const mime = f.mime_type || '';
+        return f.has_audio && !f.has_video &&
+          (mime.includes('audio/mp4') || mime.includes('audio/webm'));
+      }).sort((a: any, b: any) => {
+        const aMp4 = (a.mime_type || '').includes('audio/mp4');
+        const bMp4 = (b.mime_type || '').includes('audio/mp4');
+        if (aMp4 && !bMp4) return -1;
+        if (!aMp4 && bMp4) return 1;
+        return (b.average_bitrate || 0) - (a.average_bitrate || 0);
+      }) ?? [];
+
+      for (const format of audioFormats) {
+        // getStreamingData() sudah otomatis decipher URL-nya
+        const url = format.url;
+        if (url) {
+          audioUrl = url;
+          break;
+        }
+      }
+
+      // Fallback: coba manual decipher kalau url masih null
+      if (!audioUrl) {
+        for (const format of audioFormats) {
+          try {
+            const url = await format.decipher(youtube.session.player);
+            if (url) { audioUrl = url; break; }
+          } catch (e) {
+            console.warn('Manual decipher failed:', e instanceof Error ? e.message : e);
+          }
+        }
+      }
+
+      if (!audioUrl) {
+        if (attempt === 0) {
+          console.warn('No URL found, retrying with fresh instance...');
+          ytInstance = null;
+          continue;
+        }
+        return NextResponse.json(
+          { error: 'No playable audio stream found' },
+          { status: 404 }
+        );
+      }
+
+      if (request.nextUrl.searchParams.get('redirect') === '1') {
+        return NextResponse.redirect(audioUrl);
+      }
+
+      return NextResponse.json({ url: audioUrl });
+
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      console.error(`Audio proxy error (attempt ${attempt + 1}):`, msg);
+
+      if (attempt === 0) {
+        ytInstance = null;
+        continue;
+      }
+
+      return NextResponse.json({ error: 'Failed to resolve audio stream', detail: msg }, { status: 500 });
     }
-
-    // If ?redirect=1, redirect directly (legacy behavior)
-    if (request.nextUrl.searchParams.get('redirect') === '1') {
-      return NextResponse.redirect(audioUrl);
-    }
-
-    // Default: return URL as JSON so client can set audio.src directly
-    return NextResponse.json({ url: audioUrl });
-  } catch (error: unknown) {
-    console.error('Audio proxy error:', error instanceof Error ? error.message : error);
-    return NextResponse.json(
-      { error: 'Failed to resolve audio stream' },
-      { status: 500 }
-    );
   }
+
+  return NextResponse.json({ error: 'Unexpected error' }, { status: 500 });
 }
