@@ -3,8 +3,10 @@
 import { usePlayer } from '@/context/PlayerContext';
 import { useLyrics } from '@/hooks/useLyrics';
 import { useLyricsScroll } from '@/hooks/useLyricsScroll';
+import { useRomanization } from '@/hooks/useRomanization';
+import { LrcWord } from '@/lib/utils/lrcParser';
 import { Music2 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 
 interface LyricsSidebarProps {
@@ -12,10 +14,52 @@ interface LyricsSidebarProps {
   onClose: () => void;
 }
 
+/* ── Karaoke word (sidebar version — smaller) ── */
+function SidebarKaraokeWord({
+  word,
+  currentTime,
+}: {
+  word: LrcWord;
+  currentTime: number;
+}) {
+  const progress = useMemo(() => {
+    if (currentTime >= word.endTime) return 1;
+    if (currentTime <= word.startTime) return 0;
+    const duration = word.endTime - word.startTime;
+    if (duration <= 0) return 1;
+    return (currentTime - word.startTime) / duration;
+  }, [currentTime, word.startTime, word.endTime]);
+
+  const fillPercent = Math.round(progress * 100);
+  const activeColor = 'rgba(255,255,255,1)';
+  const inactiveColor = 'rgba(255,255,255,0.35)';
+
+  if (fillPercent <= 0) {
+    return <span style={{ color: inactiveColor }}>{word.text}</span>;
+  }
+  if (fillPercent >= 100) {
+    return <span style={{ color: activeColor }}>{word.text}</span>;
+  }
+
+  return (
+    <span
+      style={{
+        backgroundImage: `linear-gradient(90deg, ${activeColor} ${fillPercent}%, ${inactiveColor} ${fillPercent}%)`,
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        backgroundClip: 'text',
+      }}
+    >
+      {word.text}
+    </span>
+  );
+}
+
 export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
   const { currentTrack, currentTime, seek } = usePlayer();
   const { lines, isSynced, isLoading } = useLyrics(currentTrack);
   const { activeIndex, scrollRef } = useLyricsScroll({ lines, isSynced, currentTime });
+  const romanizations = useRomanization(lines, currentTrack?.id ?? null);
   const popupRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -42,6 +86,9 @@ export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
         fontSize: '22px',
         color: 'rgba(255,255,255,1)',
         fontWeight: 700,
+        opacity: 1,
+        filter: 'blur(0px)',
+        transform: 'scale(1)',
       };
     }
     if (dist === 1) {
@@ -49,6 +96,9 @@ export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
         fontSize: '16px',
         color: 'rgba(255,255,255,0.28)',
         fontWeight: 700,
+        opacity: 0.6,
+        filter: 'blur(0.3px)',
+        transform: 'scale(0.98)',
       };
     }
     if (dist <= 3) {
@@ -56,12 +106,18 @@ export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
         fontSize: '15px',
         color: 'rgba(255,255,255,0.15)',
         fontWeight: 700,
+        opacity: 0.35,
+        filter: 'blur(0.8px)',
+        transform: 'scale(0.97)',
       };
     }
     return {
       fontSize: '14px',
       color: 'rgba(255,255,255,0.07)',
       fontWeight: 700,
+      opacity: 0.18,
+      filter: 'blur(1.2px)',
+      transform: 'scale(0.96)',
     };
   };
 
@@ -95,14 +151,34 @@ export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
           border: none;
           text-align: left;
           padding: 0;
-          margin-bottom: 22px;
+          margin-bottom: 6px;
           font-family: -apple-system, 'Helvetica Neue', sans-serif;
           font-weight: 700;
           line-height: 1.35;
           letter-spacing: -0.3px;
-          transition: color 0.35s ease, font-size 0.35s ease;
+          transform-origin: left center;
+          transition: color 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+                      font-size 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+                      transform 0.45s cubic-bezier(0.4, 0, 0.2, 1),
+                      opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                      filter 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+          will-change: transform, color, opacity, filter;
+          -webkit-font-smoothing: antialiased;
         }
         .lyric-btn:focus { outline: none; }
+        .sidebar-lyric-wrapper {
+          margin-bottom: 16px;
+        }
+        .sidebar-roman {
+          display: block;
+          font-weight: 400;
+          font-style: italic;
+          line-height: 1.3;
+          letter-spacing: 0.1px;
+          margin-top: 3px;
+          padding-left: 1px;
+          transition: color 0.4s ease, opacity 0.4s ease, font-size 0.4s ease;
+        }
         @keyframes skeleton-shimmer {
           0% { background-position: -200% 0; }
           100% { background-position: 200% 0; }
@@ -201,20 +277,56 @@ export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
           </div>
         ) : lines.length > 0 ? (
           <div style={{ animation: 'lyricsFadeIn 0.5s ease-out' }}>
-            {lines.map((line, index) => (
-              <button
-                key={`${line.time}-${index}`}
-                className="lyric-btn"
-                data-lyric-index={index}
-                onClick={() => isSynced && !line.isPlaceholder && seek(line.time)}
-                style={{
-                  ...getLineStyle(index),
-                  cursor: isSynced && !line.isPlaceholder ? 'pointer' : 'default',
-                }}
-              >
-                {line.text}
-              </button>
-            ))}
+            {lines.map((line, index) => {
+              const isActive = activeIndex === index;
+              const dist = Math.abs(index - activeIndex);
+              const romanText = romanizations.get(index);
+
+              // Romanization size
+              const romanFontSize = isActive ? '13px' : dist === 1 ? '12px' : '11px';
+              const romanColor = isActive
+                ? 'rgba(255,255,255,0.45)'
+                : dist === 1
+                ? 'rgba(255,255,255,0.15)'
+                : 'rgba(255,255,255,0.06)';
+
+              return (
+                <div key={`${line.time}-${index}`} className="sidebar-lyric-wrapper">
+                  <button
+                    className="lyric-btn"
+                    data-lyric-index={index}
+                    onClick={() => isSynced && !line.isPlaceholder && seek(line.time)}
+                    style={{
+                      ...getLineStyle(index),
+                      cursor: isSynced && !line.isPlaceholder ? 'pointer' : 'default',
+                    }}
+                  >
+                    {/* Karaoke word glow for active line */}
+                    {isActive && isSynced && line.words && line.words.length > 0 ? (
+                      line.words.map((word, wi) => (
+                        <SidebarKaraokeWord key={wi} word={word} currentTime={currentTime} />
+                      ))
+                    ) : (
+                      line.text
+                    )}
+                  </button>
+
+                  {/* Romanization */}
+                  {romanText && (
+                    <span
+                      className="sidebar-roman"
+                      style={{
+                        fontSize: romanFontSize,
+                        color: romanColor,
+                        opacity: getLineStyle(index).opacity,
+                      }}
+                    >
+                      {romanText}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div style={{

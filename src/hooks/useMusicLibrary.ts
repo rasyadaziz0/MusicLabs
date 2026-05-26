@@ -81,7 +81,7 @@ export function useCreatePlaylist() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (payload: { name: string; description?: string; coverUrl?: string }) => {
+    mutationFn: async (payload: { name: string; description?: string; coverUrl?: string; isPublic?: boolean }) => {
       if (!user?.id || !session?.access_token) throw new Error('Please sign in first.');
 
       const response = await fetch('/api/playlists', {
@@ -94,6 +94,7 @@ export function useCreatePlaylist() {
           name: payload.name,
           description: payload.description,
           coverUrl: payload.coverUrl,
+          isPublic: payload.isPublic,
         }),
       });
 
@@ -115,7 +116,7 @@ export function useUpdatePlaylist() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, payload }: { id: string, payload: { name: string; description?: string; coverUrl?: string } }) => {
+    mutationFn: async ({ id, payload }: { id: string, payload: { name: string; description?: string; coverUrl?: string; isPublic?: boolean } }) => {
       if (!user?.id || !session?.access_token) throw new Error('Please sign in first.');
 
       const response = await fetch(`/api/playlists/${id}`, {
@@ -128,6 +129,7 @@ export function useUpdatePlaylist() {
           name: payload.name,
           description: payload.description,
           coverUrl: payload.coverUrl,
+          isPublic: payload.isPublic,
         }),
       });
 

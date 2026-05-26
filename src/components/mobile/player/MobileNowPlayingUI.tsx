@@ -252,7 +252,7 @@ export default function MobileNowPlayingUI(props: NowPlayingUIProps) {
                         : <Heart size={20} fill={isLiked ? 'currentColor' : 'none'} />
                       }
                     </button>
-                    <MoreMenu {...props} openMenuUpward={true} />
+                    <MoreMenu {...props} openMenuUpward={false} />
                   </div>
                 </div>
 
@@ -269,6 +269,8 @@ export default function MobileNowPlayingUI(props: NowPlayingUIProps) {
                       if (isSynced && !isPlaceholder) seek(time);
                     }}
                     hideHeader
+                    currentTime={currentTime}
+                    romanizations={props.romanizations}
                   />
                 </div>
               </>

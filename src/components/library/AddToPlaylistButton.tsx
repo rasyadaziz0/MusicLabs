@@ -75,7 +75,7 @@ export default function AddToPlaylistButton({ track, className, asMenuItem = fal
         type="button"
         onClick={handleButtonClick}
         className={cn(
-          asMenuItem ? 'w-full text-left px-4 py-2 text-[13px] text-white hover:bg-white/10 transition-colors flex items-center justify-between' : 'inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-muted transition-colors hover:text-white',
+          asMenuItem ? 'w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between group' : 'inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-muted transition-colors hover:text-white',
           className
         )}
         title="Add to playlist"
@@ -84,7 +84,7 @@ export default function AddToPlaylistButton({ track, className, asMenuItem = fal
         {asMenuItem ? (
           <>
             <span>Add to Playlist</span>
-            <ListPlus size={16} className="text-white/60" />
+            <ListPlus size={15} className="text-white/40 group-hover:text-white/80 transition-colors" />
           </>
         ) : (
           <ListPlus size={16} />

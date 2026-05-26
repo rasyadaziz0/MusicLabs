@@ -29,7 +29,7 @@ export default function AddToQueueButton({ track, className, showText = false }:
       onClick={handleAdd}
       className={cn(
         'inline-flex items-center justify-center transition-colors',
-        showText ? 'w-full gap-2 rounded-xl px-3 py-2 text-sm text-left hover:bg-white/5' : 'h-9 w-9 rounded-full border border-white/10 bg-white/5 text-muted hover:text-white',
+        showText ? 'w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 flex items-center justify-between group' : 'h-9 w-9 rounded-full border border-white/10 bg-white/5 text-muted hover:text-white',
         className
       )}
       title="Add to queue"
@@ -37,13 +37,13 @@ export default function AddToQueueButton({ track, className, showText = false }:
     >
       {showText ? (
         <>
-          <span className="flex-1 text-white">Add to Queue</span>
-          <span className="text-white/60">
-            {added ? <span className="text-xs text-[#e0903a]">Added</span> : <ListPlus size={14} />}
+          <span>Add to Queue</span>
+          <span className="text-white/40 group-hover:text-white/80 transition-colors">
+            {added ? <span className="text-xs text-[#FA243C]">Added</span> : <ListPlus size={15} />}
           </span>
         </>
       ) : (
-        added ? <span className="text-xs text-[#e0903a] font-medium px-1">Added</span> : <ListPlus size={16} />
+        added ? <span className="text-xs text-[#FA243C] font-medium px-1">Added</span> : <ListPlus size={16} />
       )}
     </button>
   );

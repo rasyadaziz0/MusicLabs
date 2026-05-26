@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { searchDeezerTracks, searchDeezerArtists } from '@/lib/server/deezerApi';
+import { searchITunesTracks, searchITunesArtists } from '@/lib/server/itunesApi';
 import { checkRateLimit, getRequestIp } from '@/lib/server/rateLimit';
 
 export const runtime = 'nodejs';
@@ -37,8 +37,8 @@ export async function GET(request: NextRequest) {
 
   try {
     const [songs, artists] = await Promise.all([
-      searchDeezerTracks(query.trim(), 10),
-      searchDeezerArtists(query.trim(), 5),
+      searchITunesTracks(query.trim(), 15),
+      searchITunesArtists(query.trim(), 5),
     ]);
 
     return NextResponse.json(
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
       }
     );
   } catch (error) {
-    console.error('Deezer combined search failed:', error);
-    return NextResponse.json({ error: 'Gagal nyari lagu' }, { status: 500 });
+    console.error('iTunes combined search failed:', error);
+    return NextResponse.json({ error: 'Gagal nyari' }, { status: 500 });
   }
 }

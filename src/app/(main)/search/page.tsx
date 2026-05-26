@@ -5,7 +5,7 @@ import { Song } from '@/types/music';
 import { useQuery } from '@tanstack/react-query';
 import { Search as SearchIcon, Clock } from 'lucide-react';
 import Image from 'next/image';
-import { Suspense, useEffect, useMemo, useState } from 'react';
+import { Suspense, useEffect, useMemo, useState, useRef } from 'react';
 import { usePlayer } from '@/context/PlayerContext';
 import { getBestImageUrl } from '@/lib/api/musicApi';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -14,6 +14,8 @@ import { decodeQuery, encodeQuery } from '@/lib/utils/searchEncode';
 import TrackLikeButton from '@/components/library/TrackLikeButton';
 import AddToPlaylistButton from '@/components/library/AddToPlaylistButton';
 import AddToQueueButton from '@/components/library/AddToQueueButton';
+import { AppleMusicTrackList } from '@/components/ui/AppleMusicTrackList';
+import { Share, Link2 } from 'lucide-react';
 
 function normalizeSearchText(value: string) {
   return value.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').replace(/\s+/g, ' ').trim();
@@ -87,14 +89,20 @@ function SearchPageContent() {
   const query = debouncedQuery.trim();
   const [selectedArtistId, setSelectedArtistId] = useState<string | null>(null);
   const { playTrack } = usePlayer();
+  const lastPushedQueryRef = useRef(queryFromUrl);
 
   useEffect(() => {
-    setInputValue(queryFromUrl);
+    if (queryFromUrl !== lastPushedQueryRef.current) {
+      setInputValue(queryFromUrl);
+      lastPushedQueryRef.current = queryFromUrl;
+    }
   }, [queryFromUrl]);
 
   useEffect(() => {
     const currentQuery = queryFromUrl.trim();
     if (query === currentQuery) return;
+
+    lastPushedQueryRef.current = query;
 
     const params = new URLSearchParams(searchParams.toString());
     if (query) {
@@ -205,7 +213,7 @@ function SearchPageContent() {
   const categories = [
     { title: 'AcadMusic Radio', bg: '#FA243C' },
     { title: 'Sleep', bg: '#29326D' },
-    { title: 'AcadMusic Radio', bg: '#FA243C' },
+    { title: 'Chill', bg: '#1A6B4A' },
     { title: 'New in Electronic', bg: '#D3286E' },
     { title: 'K-Pop', bg: '#FF6275' },
     { title: 'Pop', bg: '#FA58B6' },
@@ -293,72 +301,46 @@ function SearchPageContent() {
                 </div>
               )}
               {displayedSongs.length > 0 && (
-                <>
-                  <div className="grid grid-cols-[auto_1fr_auto] md:grid-cols-[auto_1fr_1fr_auto_auto_auto] gap-2 md:gap-4 px-2 md:px-4 py-2 text-sm font-bold text-muted uppercase tracking-widest border-b border-white/5 mb-4">
-                    <span className="w-8 text-center">#</span>
-                    <span>Title</span>
-                    <span className="hidden md:block">Album</span>
-                    <span className="hidden sm:flex w-20 justify-center">Save</span>
-                    <span className="hidden lg:flex w-28 justify-center">Actions</span>
-                    <span className="w-12 flex justify-end"><Clock size={16} /></span>
-                  </div>
-                  {displayedSongs.map((song: Song, index: number) => (
-                    <div
-                      key={song.id}
-                      onClick={() => playTrack(song, displayedSongs)}
-                      className="grid grid-cols-[auto_1fr_auto] md:grid-cols-[auto_1fr_1fr_auto_auto_auto] gap-2 md:gap-4 px-2 md:px-4 py-3 rounded-xl hover:bg-white/5 transition-colors group cursor-pointer items-center"
-                    >
-                      <span className="w-8 text-center text-muted group-hover:text-white font-medium">
-                        {index + 1}
-                      </span>
-                      <div className="flex items-center gap-4 min-w-0">
-                        <div className="relative w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
-                          {getBestImageUrl(song.image) ? (
-                            <Image
-                              src={getBestImageUrl(song.image)!}
-                              alt={song.name}
-                              fill
-                              sizes="40px"
-                              className="object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-primary/40 to-void" />
-                          )}
+                <div className="-mx-4 md:mx-0">
+                  <AppleMusicTrackList
+                    tracks={displayedSongs}
+                    onPlayTrack={playTrack}
+                    showStar={false}
+                    showAlbum={true}
+                    renderTrackOptions={(song, closeMenu) => (
+                      <>
+                        <AddToPlaylistButton track={song} asMenuItem />
+                        <div className="w-full">
+                          <AddToQueueButton track={song} showText />
                         </div>
-                        <div className="min-w-0">
-                          <p className="font-bold truncate">{song.name}</p>
-                          <div className="text-xs text-muted truncate flex items-center gap-1">
-                            {song.artists.primary.map((a, i) => (
-                              <span key={a.id}>
-                                <Link
-                                  href={`/artist/${a.id}`}
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="hover:underline hover:text-white transition-colors"
-                                >
-                                  {a.name}
-                                </Link>
-                                {i < song.artists.primary.length - 1 && ', '}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="hidden md:block text-sm text-muted truncate">
-                        {song.album.name}
-                      </div>
-                      <div className="hidden justify-center sm:flex">
-                        <TrackLikeButton track={song} />
-                      </div>
-                      <div className="hidden justify-center lg:flex gap-1">
-                        <AddToQueueButton track={song} />
-                        <AddToPlaylistButton track={song} />
-                      </div>
-                      <div className="w-12 text-right text-xs text-muted font-medium">
-                        {Math.floor(song.duration / 60)}:{(song.duration % 60).toString().padStart(2, '0')}
-                      </div>
-                    </div>
-                  ))}
-                </>
+                        
+                        <div className="h-px bg-white/5 my-1 mx-3" />
+                        
+                        <TrackLikeButton track={song} asMenuItem />
+                        
+                        <div className="h-px bg-white/5 my-1 mx-3" />
+                        
+                        <button onClick={() => {
+                          if (!song?.album?.id) return;
+                          navigator.clipboard.writeText(`${window.location.origin}/album/${song.album.id}`);
+                          alert('Album link copied to clipboard!');
+                          closeMenu();
+                        }} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between group">
+                          <span>Share</span>
+                          <Share size={15} className="text-white/40 group-hover:text-white/80 transition-colors" />
+                        </button>
+                        <button onClick={() => {
+                          navigator.clipboard.writeText(`${window.location.origin}/search?q=${encodeURIComponent(song.name)}`);
+                          alert('Song search link copied!');
+                          closeMenu();
+                        }} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between group">
+                          <span>Copy Link</span>
+                          <Link2 size={15} className="text-white/40 group-hover:text-white/80 transition-colors" />
+                        </button>
+                      </>
+                    )}
+                  />
+                </div>
               )}
               {displayedSongs.length === 0 && rankedArtists.length === 0 && !isArtistSongsLoading && !isArtistNameSongsLoading && (
                 <div className="text-center py-20">

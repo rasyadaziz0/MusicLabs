@@ -1,20 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getITunesArtist, getITunesArtistAlbums } from '@/lib/server/itunesApi';
 
 export const runtime = 'nodejs';
-
-interface DeezerArtistResponse {
-  id: number;
-  name: string;
-  link: string;
-  picture: string;
-  picture_small: string;
-  picture_medium: string;
-  picture_big: string;
-  picture_xl: string;
-  nb_album: number;
-  nb_fan: number;
-  type: string;
-}
 
 export async function GET(
   _request: NextRequest,
@@ -26,38 +13,27 @@ export async function GET(
     return NextResponse.json({ data: null }, { status: 400 });
   }
 
+  if (id.startsWith('dz-') || id.startsWith('sp-')) {
+    return NextResponse.json({ data: null, error: 'Legacy IDs are no longer supported. Please search again.' }, { status: 404 });
+  }
+
   try {
-    const numericId = parseInt(id, 10);
-    if (isNaN(numericId)) {
-      return NextResponse.json({ data: null }, { status: 400 });
-    }
+    // Strip "itunes-artist-" prefix if present
+    const itunesId = id.replace(/^itunes-artist-/, '');
 
-    const res = await fetch(`https://api.deezer.com/artist/${numericId}`, {
-      next: { revalidate: 300 },
-    });
-
-    if (!res.ok) {
-      return NextResponse.json({ data: null }, { status: res.status });
-    }
-
-    const artist: DeezerArtistResponse = await res.json();
+    const [artist, albums] = await Promise.all([
+      getITunesArtist(itunesId),
+      getITunesArtistAlbums(itunesId, 5),
+    ]);
 
     return NextResponse.json({
       data: {
-        id: artist.id,
-        name: artist.name,
-        link: artist.link,
-        picture: artist.picture_xl || artist.picture_big || artist.picture_medium || '',
-        picture_small: artist.picture_small,
-        picture_medium: artist.picture_medium,
-        picture_big: artist.picture_big,
-        picture_xl: artist.picture_xl,
-        nb_album: artist.nb_album,
-        nb_fan: artist.nb_fan,
+        ...artist,
+        nb_album: albums.length,
       },
     });
   } catch (error) {
-    console.error('Artist info failed:', error);
+    console.error('iTunes artist info failed:', error);
     return NextResponse.json({ data: null }, { status: 500 });
   }
 }

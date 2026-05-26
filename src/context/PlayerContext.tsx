@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useEffect, useRef, useState, useCallback } from 'react';
+import Hls from 'hls.js';
 import { Song } from '@/types/music';
 import { getBestImageUrl } from '@/lib/api/musicApi';
 import { resolveToYoutubeId } from '@/lib/youtube';
@@ -17,7 +18,7 @@ interface PlayerContextType {
   currentTrack: Song | null;
   isPlaying: boolean;
   isResolving: boolean;
-  isPreview: boolean; // True if playing Deezer 30s preview
+  isPreview: boolean; // True if playing 30s preview (Spotify/iTunes)
   isGuestPreview: boolean; // True if preview because user is not logged in
   isRadio: boolean; // True if currently playing a radio stream
   radioMeta: RadioMeta | null; // Live "now playing" metadata from radio
@@ -390,27 +391,58 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     // Create a fresh audio element for this radio stream
     const audio = new Audio();
     audio.volume = volume;
-    audio.src = streamUrl;
     radioAudioRef.current = audio;
 
-    audio.onplay = () => setIsPlaying(true);
-    audio.onpause = () => setIsPlaying(false);
-    audio.onerror = (e) => {
-      console.error('Radio stream error:', streamUrl);
-      if (audio.error) {
-        console.error('Error code:', audio.error.code, 'Message:', audio.error.message);
-      }
+    let hls: Hls | null = null;
+    let hasFallenBack = false;
 
-      // If the resolved URL failed and we have an alternate URL (homepage or raw url), 
-      // sometimes trying that might work if it redirects to a valid stream
-      if (streamUrl !== track.url && track.url) {
-        console.log('Trying fallback URL:', track.url);
-        audio.src = track.url;
+    const setupStream = (url: string) => {
+      if (url.includes('.m3u8') && Hls.isSupported()) {
+        hls = new Hls({
+          startLevel: -1,
+          debug: false,
+        });
+        hls.loadSource(url);
+        hls.attachMedia(audio);
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+          audio.play().catch(console.error);
+        });
+        hls.on(Hls.Events.ERROR, (event, data) => {
+          if (data.fatal) {
+            console.error('HLS error:', data);
+            handleFallback();
+          }
+        });
+      } else {
+        // Native fallback (Safari supports HLS natively)
+        audio.src = url;
         audio.play().catch(console.error);
       }
     };
 
-    audio.play().catch(console.error);
+    const handleFallback = () => {
+      if (!hasFallenBack && streamUrl !== track.url && track.url) {
+        hasFallenBack = true;
+        console.log('Trying fallback URL:', track.url);
+        if (hls) {
+          hls.destroy();
+          hls = null;
+        }
+        setupStream(track.url);
+      }
+    };
+
+    audio.onplay = () => setIsPlaying(true);
+    audio.onpause = () => setIsPlaying(false);
+    audio.onerror = (e) => {
+      console.error('Radio stream error:', audio.src);
+      if (audio.error) {
+        console.error('Error code:', audio.error.code, 'Message:', audio.error.message);
+      }
+      handleFallback();
+    };
+
+    setupStream(streamUrl);
 
     // Attempt to poll Icecast metadata via our API proxy
     const pollMetadata = async () => {
@@ -460,7 +492,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     // Stop radio if switching away
     stopRadio();
 
-    // Guest mode: skip YouTube, force 30s Deezer preview
+    // Guest mode: skip YouTube, force 30s preview
     // Use ref to avoid stale closure — user state may lag behind auth change
     if (!userRef.current) {
       setIsResolving(false);

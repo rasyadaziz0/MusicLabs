@@ -74,3 +74,54 @@ body {
   mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
   -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
 }
+
+/* ── Identify Feature Animations ───────────────────────────────── */
+
+@keyframes identify-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.25);
+    opacity: 0.15;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes identify-modal-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes identify-result-in {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.identify-pulse-ring {
+  animation: identify-pulse 1.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.identify-modal-enter {
+  animation: identify-modal-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.identify-result-enter {
+  animation: identify-result-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

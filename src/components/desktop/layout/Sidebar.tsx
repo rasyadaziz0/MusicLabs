@@ -9,6 +9,8 @@ import { useAuth } from '@/context/AuthContext';
 import { useState } from 'react';
 import Image from 'next/image';
 
+import IdentifyButton from '../../identify/IdentifyButton';
+
 const navItems = [
   { icon: Search, label: 'Search', href: '/search' },
   { icon: Home, label: 'Home', href: '/' },
@@ -65,6 +67,7 @@ export default function Sidebar() {
               </Link>
             );
           })}
+          <IdentifyButton variant="sidebar" />
         </div>
 
         {/* Library — only show for logged-in users */}

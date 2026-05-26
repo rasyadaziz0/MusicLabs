@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { searchDeezerTracks } from '@/lib/server/deezerApi';
+import { searchITunesTracks } from '@/lib/server/itunesApi';
 import { checkRateLimit, getRequestIp } from '@/lib/server/rateLimit';
 
 export const runtime = 'nodejs';
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const songs = await searchDeezerTracks(query.trim(), limit);
+    const songs = await searchITunesTracks(query.trim(), limit);
     return NextResponse.json(
       { data: { results: songs } },
       {
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
       }
     );
   } catch (error) {
-    console.error('Deezer search/songs failed:', error);
+    console.error('iTunes search/songs failed:', error);
     return NextResponse.json({ data: { results: [] } }, { status: 500 });
   }
 }

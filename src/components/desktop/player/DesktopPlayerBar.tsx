@@ -1,14 +1,18 @@
 'use client';
 
+import React from 'react';
 import { cn } from '@/lib/utils';
 import {
   Play, Pause, SkipForward, SkipBack, Repeat, Shuffle,
   Volume2, VolumeX, MessageSquare, ListMusic, MoreHorizontal,
-  Loader2, Radio as RadioIcon
+  Loader2, Radio as RadioIcon, Share, Link2
 } from 'lucide-react';
 import Image from 'next/image';
 import { getBestImageUrl } from '@/lib/api/musicApi';
 import QueuePopup from '@/components/player/QueuePopup';
+import TrackLikeButton from '@/components/library/TrackLikeButton';
+import AddToPlaylistButton from '@/components/library/AddToPlaylistButton';
+import AddToQueueButton from '@/components/library/AddToQueueButton';
 
 export interface DesktopPlayerBarProps {
   currentTrack: any;
@@ -50,6 +54,32 @@ export default function DesktopPlayerBar({
   isQueueOpen, setIsQueueOpen, isLyricsOpen, setIsLyricsOpen
 }: DesktopPlayerBarProps) {
   const hasTrack = !!currentTrack;
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const menuRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleShare = () => {
+    if (!currentTrack?.album?.id) return;
+    navigator.clipboard.writeText(`${window.location.origin}/album/${currentTrack.album.id}`);
+    alert('Album link copied to clipboard!');
+    setIsMenuOpen(false);
+  };
+
+  const handleCopyLink = () => {
+    if (!currentTrack) return;
+    navigator.clipboard.writeText(`${window.location.origin}/search?q=${encodeURIComponent(currentTrack.name)}`);
+    alert('Song search link copied!');
+    setIsMenuOpen(false);
+  };
 
   return (
     <div
@@ -71,7 +101,7 @@ export default function DesktopPlayerBar({
           <button onClick={hasTrack ? prevTrack : undefined} className={cn("transition-colors", hasTrack ? "text-white hover:text-white/80" : "text-white/15 cursor-default")}>
             <SkipBack size={22} fill="currentColor" strokeWidth={0} />
           </button>
-          <button onClick={hasTrack ? togglePlay : undefined} disabled={hasTrack ? isResolving : true} className={cn("transition-colors disabled:opacity-50", hasTrack ? "text-white hover:text-white/80" : "text-white/15 cursor-default")}>
+          <button onClick={hasTrack ? togglePlay : undefined} disabled={!hasTrack || isResolving ? true : undefined} className={cn("transition-colors disabled:opacity-50", hasTrack ? "text-white hover:text-white/80" : "text-white/15 cursor-default")}>
             {isResolving ? (
               <Loader2 size={28} className="animate-spin" />
             ) : isPlaying ? (
@@ -166,9 +196,41 @@ export default function DesktopPlayerBar({
 
         {/* RIGHT — Extra Controls */}
         <div className="flex items-center gap-[18px]">
-          <button className={cn("transition-colors", hasTrack ? "text-white hover:text-white/80" : "text-white/15 pointer-events-none")}>
-            <MoreHorizontal size={20} strokeWidth={2.5} />
-          </button>
+          <div className="relative flex items-center justify-center" ref={menuRef}>
+            <button 
+              onClick={() => {
+                if (!hasTrack) return;
+                setIsMenuOpen(!isMenuOpen);
+              }}
+              className={cn("transition-colors", hasTrack ? (isMenuOpen ? "text-white" : "text-white hover:text-white/80") : "text-white/15 pointer-events-none")}
+            >
+              <MoreHorizontal size={20} strokeWidth={2.5} />
+            </button>
+
+            {isMenuOpen && currentTrack && (
+              <div className="absolute right-0 bottom-full mb-4 w-56 bg-[#252525] border border-white/5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.6)] z-50 py-1.5 flex flex-col overflow-hidden animate-in slide-in-from-bottom-2 fade-in">
+                <AddToPlaylistButton track={currentTrack} asMenuItem />
+                <div className="w-full">
+                  <AddToQueueButton track={currentTrack} showText />
+                </div>
+                
+                <div className="h-px bg-white/5 my-1 mx-3" />
+                
+                <TrackLikeButton track={currentTrack} asMenuItem />
+                
+                <div className="h-px bg-white/5 my-1 mx-3" />
+                
+                <button onClick={handleShare} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between group">
+                  <span>Share</span>
+                  <Share size={15} className="text-white/40 group-hover:text-white/80 transition-colors" />
+                </button>
+                <button onClick={handleCopyLink} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between group">
+                  <span>Copy Link</span>
+                  <Link2 size={15} className="text-white/40 group-hover:text-white/80 transition-colors" />
+                </button>
+              </div>
+            )}
+          </div>
           <button
             onClick={() => {
               if (!hasTrack) return;

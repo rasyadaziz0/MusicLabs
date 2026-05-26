@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { parseLRC, LrcLine, addInstrumentalPlaceholders } from '@/lib/utils/lrcParser';
+import { parseLRC, LrcLine, addInstrumentalPlaceholders, addWordTimings } from '@/lib/utils/lrcParser';
 import { Song } from '@/types/music';
 
 export function useLyrics(currentTrack: Song | null) {
@@ -32,8 +32,18 @@ export function useLyrics(currentTrack: Song | null) {
     const fetchLyrics = async () => {
       setIsLoading(true);
       try {
+        const albumName = currentTrack.album?.name ?? '';
+        const params = new URLSearchParams({
+          title: currentTrack.name,
+          artist: artistName,
+          duration: durationInSeconds.toString()
+        });
+        if (albumName) {
+          params.append('album', albumName);
+        }
+
         const res = await fetch(
-          `/api/lyrics?title=${encodeURIComponent(currentTrack.name)}&artist=${encodeURIComponent(artistName)}&duration=${durationInSeconds}`,
+          `/api/lyrics?${params.toString()}`,
           { signal: controller.signal },
         );
 
@@ -47,7 +57,8 @@ export function useLyrics(currentTrack: Song | null) {
 
         if (data.lyrics && data.synced) {
           const parsedLines = parseLRC(data.lyrics);
-          setLines(addInstrumentalPlaceholders(parsedLines));
+          const withPlaceholders = addInstrumentalPlaceholders(parsedLines);
+          setLines(addWordTimings(withPlaceholders));
           setIsSynced(true);
         } else {
           setLines([]);

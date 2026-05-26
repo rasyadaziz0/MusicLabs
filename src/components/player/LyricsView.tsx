@@ -3,12 +3,14 @@
 import { usePlayer } from '@/context/PlayerContext';
 import { useLyrics } from '@/hooks/useLyrics';
 import { useLyricsScroll } from '@/hooks/useLyricsScroll';
+import { useRomanization } from '@/hooks/useRomanization';
 import LyricsUI from './LyricsUI';
 
 export default function LyricsView({ onClose }: { onClose?: () => void }) {
   const { currentTrack, currentTime, seek } = usePlayer();
   const { lines, isSynced, isLoading } = useLyrics(currentTrack);
   const { activeIndex, scrollRef } = useLyricsScroll({ lines, isSynced, currentTime });
+  const romanizations = useRomanization(lines, currentTrack?.id ?? null);
 
   if (!currentTrack) return null;
 
@@ -25,7 +27,8 @@ export default function LyricsView({ onClose }: { onClose?: () => void }) {
       isLoading={isLoading}
       scrollRef={scrollRef}
       onLineClick={handleLineClick}
+      currentTime={currentTime}
+      romanizations={romanizations}
     />
   );
 }
-

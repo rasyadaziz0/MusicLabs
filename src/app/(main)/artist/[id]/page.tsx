@@ -10,6 +10,9 @@ import { Play, MoreHorizontal, Plus } from 'lucide-react';
 import TrackLikeButton from '@/components/library/TrackLikeButton';
 import AddToPlaylistButton from '@/components/library/AddToPlaylistButton';
 import AddToQueueButton from '@/components/library/AddToQueueButton';
+import { AppleMusicTrackList } from '@/components/ui/AppleMusicTrackList';
+import { Share, Link2 } from 'lucide-react';
+import Link from 'next/link';
 
 interface ArtistInfo {
   id: number;
@@ -41,27 +44,27 @@ async function fetchArtistTopTracks(numericId: string): Promise<Song[]> {
 export default function ArtistPage() {
   const params = useParams();
   const rawId = params.id as string;
-  // Strip "dz-artist-" prefix if present
-  const numericId = rawId.replace(/dz-artist-/, '');
+  // Strip "itunes-artist-" prefix if present
+  const itunesId = rawId.replace(/itunes-artist-/, '');
 
   const { playTrack } = usePlayer();
 
   const { data: artist, isLoading: isArtistLoading } = useQuery({
-    queryKey: ['artist-info', numericId],
-    queryFn: () => fetchArtistInfo(numericId),
-    enabled: !!numericId,
+    queryKey: ['artist-info', itunesId],
+    queryFn: () => fetchArtistInfo(itunesId),
+    enabled: !!itunesId,
   });
 
   const { data: topTracks = [], isLoading: isTracksLoading } = useQuery({
-    queryKey: ['artist-top-tracks', numericId],
-    queryFn: () => fetchArtistTopTracks(numericId),
-    enabled: !!numericId,
+    queryKey: ['artist-top-tracks', itunesId],
+    queryFn: () => fetchArtistTopTracks(itunesId),
+    enabled: !!itunesId,
   });
 
   const { data: albums = [] } = useQuery({
-    queryKey: ['artist-albums', numericId],
-    queryFn: () => getArtistAlbums(numericId, 50),
-    enabled: !!numericId,
+    queryKey: ['artist-albums', itunesId],
+    queryFn: () => getArtistAlbums(itunesId, 50),
+    enabled: !!itunesId,
   });
 
   const handlePlayAll = () => {
@@ -139,7 +142,7 @@ export default function ArtistPage() {
               <div className="flex gap-5">
                 <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-lg overflow-hidden flex-shrink-0 shadow-lg shadow-black/40 bg-white/5">
                   <Image
-                    src={albums[0].cover_xl || albums[0].cover_big || albums[0].cover}
+                    src={albums[0].cover_xl || albums[0].cover_big || albums[0].cover || ''}
                     alt={albums[0].title}
                     fill
                     sizes="160px"
@@ -187,40 +190,47 @@ export default function ArtistPage() {
               ) : topTracks.length === 0 ? (
                 <p className="text-white/30 py-4 text-[13px]">No top songs available.</p>
               ) : (
-                topTracks.slice(0, 5).map((song: Song, index: number) => (
-                  <div
-                    key={song.id}
-                    onClick={() => playTrack(song, topTracks)}
-                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 cursor-pointer group transition-colors border-b border-transparent hover:border-white/5"
-                  >
-                    <div className="relative w-[46px] h-[46px] rounded-[4px] flex-shrink-0 overflow-hidden shadow-sm">
-                      {getBestImageUrl(song.image) ? (
-                        <Image
-                          src={getBestImageUrl(song.image)!}
-                          alt={song.name}
-                          fill
-                          sizes="46px"
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-white/10" />
-                      )}
-                    </div>
-                    
-                    <div className="flex-1 min-w-0 pr-4">
-                      <p className="text-[14px] font-medium text-white truncate">{song.name}</p>
-                      <p className="text-[12px] text-white/50 truncate mt-[1px]">
-                        {song.artists.primary.map(a => a.name).join(', ')} &mdash; {song.album.name}
-                      </p>
-                    </div>
-                    
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
-                      <TrackLikeButton track={song} />
-                      <AddToQueueButton track={song} />
-                      <AddToPlaylistButton track={song} />
-                    </div>
-                  </div>
-                ))
+                <div className="-mx-4 md:mx-0">
+                  <AppleMusicTrackList
+                    tracks={topTracks.slice(0, 5)}
+                    onPlayTrack={playTrack}
+                    hideHeader={true}
+                    showAlbum={false}
+                    className="w-full flex flex-col gap-1"
+                    renderTrackOptions={(song, closeMenu) => (
+                      <>
+                        <AddToPlaylistButton track={song} asMenuItem />
+                        <div className="w-full">
+                          <AddToQueueButton track={song} showText />
+                        </div>
+                        
+                        <div className="h-px bg-white/5 my-1 mx-3" />
+                        
+                        <TrackLikeButton track={song} asMenuItem />
+                        
+                        <div className="h-px bg-white/5 my-1 mx-3" />
+                        
+                        <button onClick={() => {
+                          if (!song?.album?.id) return;
+                          navigator.clipboard.writeText(`${window.location.origin}/album/${song.album.id}`);
+                          alert('Album link copied to clipboard!');
+                          closeMenu();
+                        }} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between group">
+                          <span>Share</span>
+                          <Share size={15} className="text-white/40 group-hover:text-white/80 transition-colors" />
+                        </button>
+                        <button onClick={() => {
+                          navigator.clipboard.writeText(`${window.location.origin}/search?q=${encodeURIComponent(song.name)}`);
+                          alert('Song search link copied!');
+                          closeMenu();
+                        }} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between group">
+                          <span>Copy Link</span>
+                          <Link2 size={15} className="text-white/40 group-hover:text-white/80 transition-colors" />
+                        </button>
+                      </>
+                    )}
+                  />
+                </div>
               )}
             </div>
           </div>
@@ -237,10 +247,10 @@ export default function ArtistPage() {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-5 gap-y-8">
             {albums.length > 0 ? (
               albums.map((album: any) => (
-                <div key={album.id} className="flex flex-col group cursor-pointer">
+                <Link key={album.id} href={`/album/${album.id}`} className="flex flex-col group cursor-pointer">
                   <div className="relative aspect-square w-full rounded-lg overflow-hidden mb-3 shadow-[0_4px_12px_rgba(0,0,0,0.5)] bg-white/5">
                     <Image
-                      src={album.cover_xl || album.cover_big || album.cover_medium || album.cover}
+                      src={album.cover_xl || album.cover_big || album.cover_medium || album.cover || ''}
                       alt={album.title}
                       fill
                       sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 16vw"
@@ -251,7 +261,7 @@ export default function ArtistPage() {
                   <p className="text-[13px] text-white/50 truncate mt-[2px]">
                     {album.release_date ? new Date(album.release_date).getFullYear() : 'Album'}
                   </p>
-                </div>
+                </Link>
               ))
             ) : (
               [...Array(6)].map((_, i) => (

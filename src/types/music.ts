@@ -41,8 +41,8 @@ export interface Song {
   image: ImageQuality[];
   downloadUrl: DownloadUrl[];
   audioUrl?: string;        // Resolved YouTube audio URL (set lazily on play)
-  deezerTrackId?: number;   // Original Deezer track ID for reference
-  preview?: string;         // Deezer 30s preview URL
+  spotifyId?: string;       // Spotify track ID for reference
+  preview?: string;         // 30s preview URL (Spotify or iTunes)
   youtubeId?: string;       // Resolved YouTube video ID
   isRadio?: boolean;        // True if this is a radio stream
   radioStreamUrl?: string;  // Direct stream URL for radio

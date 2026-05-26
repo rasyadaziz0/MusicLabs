@@ -9,8 +9,8 @@ import NowPlaying from './NowPlaying';
 import LyricsSidebar from './LyricsSidebar';
 import GuestGate from '@/components/auth/GuestGate';
 
-const MobilePlayerBar = dynamic(() => import('@/components/mobile/player/MobilePlayerBar'));
-const DesktopPlayerBar = dynamic(() => import('@/components/desktop/player/DesktopPlayerBar'));
+const MobilePlayerBar = dynamic(() => import('@/components/mobile/player/MobilePlayerBar'), { ssr: false });
+const DesktopPlayerBar = dynamic(() => import('@/components/desktop/player/DesktopPlayerBar'), { ssr: false });
 
 export interface PlayerBarProps {
   isMobile?: boolean;

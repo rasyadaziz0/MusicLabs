@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDeezerArtistAlbums } from '@/lib/server/deezerApi';
+import { getITunesArtistAlbums } from '@/lib/server/itunesApi';
 
 export const runtime = 'nodejs';
 
@@ -11,20 +11,18 @@ export async function GET(
   const limitParam = request.nextUrl.searchParams.get('limit');
   const limit = limitParam ? parseInt(limitParam, 10) : 50;
 
-  if (!id) {
+  if (!id || id.startsWith('dz-') || id.startsWith('sp-')) {
     return NextResponse.json({ data: [] });
   }
 
   try {
-    const numericId = parseInt(id, 10);
-    if (isNaN(numericId)) {
-      return NextResponse.json({ data: [] });
-    }
+    // Strip "itunes-artist-" prefix if present
+    const itunesId = id.replace(/^itunes-artist-/, '');
 
-    const albums = await getDeezerArtistAlbums(numericId, limit);
+    const albums = await getITunesArtistAlbums(itunesId, limit);
     return NextResponse.json({ data: albums });
   } catch (error) {
-    console.error('Artist albums failed:', error);
+    console.error('iTunes artist albums failed:', error);
     return NextResponse.json({ data: [] }, { status: 500 });
   }
 }

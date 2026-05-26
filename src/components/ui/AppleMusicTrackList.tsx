@@ -3,13 +3,16 @@ import Image from 'next/image';
 import { Song } from '@/types/music';
 import { getBestImageUrl } from '@/lib/api/musicApi';
 import { Star, MoreHorizontal } from 'lucide-react';
+import Link from 'next/link';
 
 export interface AppleMusicTrackListProps {
   tracks: Song[];
   onPlayTrack: (track: Song, allTracks: Song[]) => void;
   showStar?: boolean;
   showAlbum?: boolean;
+  hideHeader?: boolean;
   renderTrackOptions?: (track: Song, closeMenu: () => void) => ReactNode;
+  className?: string;
 }
 
 export function AppleMusicTrackList({
@@ -17,7 +20,9 @@ export function AppleMusicTrackList({
   onPlayTrack,
   showStar = false,
   showAlbum = true,
-  renderTrackOptions
+  hideHeader = false,
+  renderTrackOptions,
+  className = "space-y-1 mt-12 w-full",
 }: AppleMusicTrackListProps) {
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
@@ -32,16 +37,18 @@ export function AppleMusicTrackList({
   const totalDuration = tracks.reduce((acc, song) => acc + song.duration, 0);
 
   return (
-    <section className="space-y-1 mt-12 w-full">
+    <section className={className}>
       {/* Table Header */}
-      <div className="flex items-center gap-4 px-4 py-2 border-b border-white/10 text-[13px] font-semibold text-white/50 uppercase tracking-wider mb-2">
-        {showStar && <div className="w-6 flex-shrink-0"></div>}
-        <div className="flex-1 min-w-0">Song</div>
-        <div className="hidden md:block w-1/4 min-w-0">Artist</div>
-        {showAlbum && <div className="hidden md:block w-1/4 min-w-0">Album</div>}
-        <div className="w-12 md:w-16 flex-shrink-0 text-right">Time</div>
-        {renderTrackOptions && <div className="w-8 flex-shrink-0"></div>}
-      </div>
+      {!hideHeader && (
+        <div className="flex items-center gap-4 px-4 py-2 border-b border-white/10 text-[13px] font-semibold text-white/50 uppercase tracking-wider mb-2">
+          {showStar && <div className="w-6 flex-shrink-0"></div>}
+          <div className="flex-1 min-w-0">Song</div>
+          <div className="hidden md:block w-1/4 min-w-0">Artist</div>
+          {showAlbum && <div className="hidden md:block w-1/4 min-w-0">Album</div>}
+          <div className="w-12 md:w-16 flex-shrink-0 text-right">Time</div>
+          {renderTrackOptions && <div className="w-8 flex-shrink-0"></div>}
+        </div>
+      )}
 
       {/* Tracks */}
       <div className="space-y-1">
@@ -74,13 +81,34 @@ export function AppleMusicTrackList({
               <span className="truncate text-sm font-medium text-white">{song.name}</span>
             </div>
             
-            <div className="hidden md:block w-1/4 min-w-0 truncate text-sm text-white/70 group-hover:text-white transition-colors">
-              {song.artists.primary.map(a => a.name).join(', ')}
+            <div className="hidden md:block w-1/4 min-w-0 truncate text-sm text-white/70 transition-colors">
+              {song.artists.primary.map((a, i) => (
+                <span key={a.id}>
+                  <Link
+                    href={`/artist/${a.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="hover:underline hover:text-white transition-colors"
+                  >
+                    {a.name}
+                  </Link>
+                  {i < song.artists.primary.length - 1 && ', '}
+                </span>
+              ))}
             </div>
 
             {showAlbum && (
-              <div className="hidden md:block w-1/4 min-w-0 truncate text-sm text-white/70 group-hover:text-white transition-colors">
-                {song.album.name}
+              <div className="hidden md:block w-1/4 min-w-0 truncate text-sm text-white/70 transition-colors">
+                {song.album.id ? (
+                  <Link
+                    href={`/album/${song.album.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="hover:underline hover:text-white transition-colors"
+                  >
+                    {song.album.name}
+                  </Link>
+                ) : (
+                  song.album.name
+                )}
               </div>
             )}
             

@@ -36,17 +36,17 @@ export default function TrackLikeButton({ track, className, asMenuItem }: TrackL
         onClick={handleClick}
         disabled={toggleMutation.isPending}
         className={cn(
-          'w-full text-left px-4 py-2 text-sm transition-colors hover:bg-white/10 disabled:opacity-60 flex items-center gap-3',
+          'w-full text-left px-4 py-2.5 text-[13px] font-medium transition-colors hover:bg-white/10 disabled:opacity-60 flex items-center justify-between group',
           isLiked ? 'text-primary' : 'text-white',
           className
         )}
       >
+        <span>{isLiked ? 'Remove from Liked Songs' : 'Favourite'}</span>
         {toggleMutation.isPending ? (
-          <Loader2 size={16} className="animate-spin" />
+          <Loader2 size={15} className="animate-spin text-white/40" />
         ) : (
-          <Heart size={16} fill={isLiked ? 'currentColor' : 'none'} />
+          <Heart size={15} fill={isLiked ? 'currentColor' : 'none'} className={isLiked ? '' : 'text-white/40 group-hover:text-white/80 transition-colors'} />
         )}
-        {isLiked ? 'Remove from Liked Songs' : 'Save to Liked Songs'}
       </button>
     );
   }

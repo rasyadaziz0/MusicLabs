@@ -15,6 +15,7 @@ export default function CreatePlaylistPage() {
     name: '',
     description: '',
     coverUrl: '',
+    isPublic: false,
   });
   const [errorMessage, setErrorMessage] = useState('');
   const friendlyCreatePlaylistError =
@@ -154,6 +155,25 @@ export default function CreatePlaylistPage() {
                   placeholder="What's this playlist about?"
                   className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-[14px] text-white placeholder:text-white/30 focus:outline-none focus:border-[#FA243C] focus:bg-white/10 transition-colors resize-none"
                 />
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={form.isPublic}
+                  onClick={() => setForm(prev => ({ ...prev, isPublic: !prev.isPublic }))}
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${form.isPublic ? 'bg-[#FA243C]' : 'bg-white/10'}`}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${form.isPublic ? 'translate-x-5' : 'translate-x-0'}`}
+                  />
+                </button>
+                <div>
+                  <span className="text-[14px] font-medium text-white">Public Playlist</span>
+                  <p className="text-[12px] text-white/50">Allow anyone to listen to this playlist</p>
+                </div>
               </div>
 
               {errorMessage && (

@@ -3,6 +3,7 @@
 import { usePlayer } from '@/context/PlayerContext';
 import { useAuth } from '@/context/AuthContext';
 import { useLyrics } from '@/hooks/useLyrics';
+import { useRomanization } from '@/hooks/useRomanization';
 import {
   useAddTrackToPlaylist,
   useLibraryPlaylists,
@@ -33,6 +34,7 @@ export function useNowPlaying(isOpen: boolean) {
   } = usePlayer();
 
   const { lines, isSynced, isLoading: isLyricsLoading } = useLyrics(currentTrack);
+  const romanizations = useRomanization(lines, currentTrack?.id ?? null);
   const { user, signInWithGoogle } = useAuth();
   const { likedSet } = useLikedSongsIndex();
   const { data: playlists = [], isLoading: isPlaylistsLoading } = useLibraryPlaylists();
@@ -194,6 +196,7 @@ export function useNowPlaying(isOpen: boolean) {
     addToQueue,
     lines,
     isSynced,
+    romanizations,
     isLyricsLoading,
     activeIndex,
     isLiked,

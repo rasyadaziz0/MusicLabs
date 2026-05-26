@@ -1,30 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDeezerArtistTopTracks } from '@/lib/server/deezerApi';
+import { getITunesArtistTopTracks } from '@/lib/server/itunesApi';
 
 export const runtime = 'nodejs';
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const limitParam = request.nextUrl.searchParams.get('limit');
-  const limit = limitParam ? parseInt(limitParam, 10) : 20;
 
   if (!id) {
     return NextResponse.json({ data: { songs: [] } });
   }
 
-  try {
-    const numericId = parseInt(id, 10);
-    if (isNaN(numericId)) {
-      return NextResponse.json({ data: { songs: [] } });
-    }
+  if (id.startsWith('dz-') || id.startsWith('sp-')) {
+    return NextResponse.json({ data: { songs: [] } });
+  }
 
-    const songs = await getDeezerArtistTopTracks(numericId, limit);
+  try {
+    // Strip "itunes-artist-" prefix if present
+    const itunesId = id.replace(/^itunes-artist-/, '');
+
+    const songs = await getITunesArtistTopTracks(itunesId, 20);
     return NextResponse.json({ data: { songs } });
   } catch (error) {
-    console.error('Deezer artist top tracks failed:', error);
+    console.error('iTunes artist top tracks failed:', error);
     return NextResponse.json({ data: { songs: [] } }, { status: 500 });
   }
 }

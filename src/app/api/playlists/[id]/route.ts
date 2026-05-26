@@ -5,6 +5,7 @@ type UpdatePlaylistBody = {
   name?: string;
   description?: string;
   coverUrl?: string;
+  isPublic?: boolean;
 };
 
 function getBearerToken(request: NextRequest) {
@@ -56,11 +57,15 @@ export async function PUT(
       return NextResponse.json({ error: 'Playlist name is required' }, { status: 400 });
     }
 
-    const payload = {
+    const payload: any = {
       name,
       description: body.description?.trim() || null,
       cover_url: body.coverUrl?.trim() || null,
     };
+
+    if (body.isPublic !== undefined) {
+      payload.is_public = body.isPublic;
+    }
 
     const { data, error } = await supabase
       .from('playlists')

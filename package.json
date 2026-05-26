@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@distube/ytdl-core": "^4.16.12",
+    "@google/generative-ai": "^0.24.1",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.104.1",
     "@tanstack/react-query": "^5.100.3",
@@ -19,6 +20,7 @@
     "clsx": "^2.1.1",
     "framer-motion": "^12.38.0",
     "gsap": "^3.15.0",
+    "hls.js": "^1.6.16",
     "icecast-metadata-js": "^1.2.9",
     "icecast-metadata-player": "^1.17.13",
     "lucide-react": "^1.11.0",

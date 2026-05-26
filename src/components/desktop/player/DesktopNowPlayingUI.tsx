@@ -158,6 +158,8 @@ export default function DesktopNowPlayingUI(props: NowPlayingUIProps) {
                 scrollRef={lyricsScrollRef}
                 onLineClick={(time, isPlaceholder) => { if (isSynced && !isPlaceholder) seek(time); }}
                 hideHeader
+                currentTime={currentTime}
+                romanizations={props.romanizations}
               />
             </div>
           </div>

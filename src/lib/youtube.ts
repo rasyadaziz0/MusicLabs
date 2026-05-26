@@ -1,5 +1,5 @@
 /**
- * Client-side resolver for matching Deezer tracks to YouTube videos.
+ * Client-side resolver for matching Spotify tracks to YouTube videos.
  * Uses localStorage to cache results and reduce API calls.
  */
 import { supabase } from './supabase/client';

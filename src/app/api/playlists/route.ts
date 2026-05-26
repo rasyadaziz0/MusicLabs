@@ -5,6 +5,7 @@ type CreatePlaylistBody = {
   name?: string;
   description?: string;
   coverUrl?: string;
+  isPublic?: boolean;
 };
 
 function getBearerToken(request: NextRequest) {
@@ -57,6 +58,7 @@ export async function POST(request: NextRequest) {
       name,
       description: body.description?.trim() || null,
       cover_url: body.coverUrl?.trim() || null,
+      is_public: body.isPublic ?? false,
     };
 
     const { data, error } = await supabase

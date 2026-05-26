@@ -9,6 +9,7 @@ export interface PlaylistRecord {
   description: string | null;
   cover_url: string | null;
   is_pinned?: boolean;
+  is_public?: boolean;
   created_at?: string;
 }
 
@@ -26,7 +27,7 @@ interface LikedSongRow {
 export async function getUserPlaylists(userId: string) {
   const { data, error } = await supabase
     .from('playlists')
-    .select('id, user_id, name, description, cover_url, is_pinned, created_at')
+    .select('id, user_id, name, description, cover_url, is_pinned, is_public, created_at')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
 
@@ -37,7 +38,7 @@ export async function getUserPlaylists(userId: string) {
 export async function getPlaylistById(playlistId: string) {
   const { data, error } = await supabase
     .from('playlists')
-    .select('id, user_id, name, description, cover_url, is_pinned, created_at')
+    .select('id, user_id, name, description, cover_url, is_pinned, is_public, created_at')
     .eq('id', playlistId)
     .single();
 
@@ -61,7 +62,7 @@ export async function createPlaylist(input: {
   const { data, error } = await supabase
     .from('playlists')
     .insert(payload)
-    .select('id, user_id, name, description, cover_url, created_at')
+    .select('id, user_id, name, description, cover_url, is_public, created_at')
     .single();
 
   if (error) throw error;

@@ -4,7 +4,18 @@ import { Song, ImageQuality } from '@/types/music';
 
 async function apiFetchInternal<T>(path: string): Promise<T> {
   const res = await fetch(path, { next: { revalidate: 60 } });
-  if (!res.ok) throw new Error(`API error: ${path}`);
+  
+  if (!res.ok) {
+    let errMsg = `API error: ${path}`;
+    try {
+      const errJson = await res.json();
+      if (errJson.error) errMsg = errJson.error;
+    } catch {
+      // ignore JSON parse error
+    }
+    throw new Error(errMsg);
+  }
+  
   const json = await res.json();
   return (json?.data ?? json) as T;
 }
@@ -20,7 +31,7 @@ export const searchArtists = (q: string, page = 1) =>
 export const searchAll = (q: string) =>
   apiFetchInternal<any>(`/api/search?q=${encodeURIComponent(q)}`);
 
-// ── Home feed (Deezer chart) ───────────────────────────────────────
+// ── Home feed (YT Music) ──────────────────────────────────────────
 
 export const getHomeFeed = () =>
   apiFetchInternal<any>(`/api/home`);
@@ -28,23 +39,28 @@ export const getHomeFeed = () =>
 // ── Artist songs ───────────────────────────────────────────────────
 
 export const getArtistSongs = (artistId: string, page = 1) => {
-  // Extract numeric Deezer ID from prefixed format (e.g., "dz-artist-123" → "123")
-  const numericId = artistId.replace(/^dz-artist-/, '');
+  // Extract iTunes ID from prefixed format (e.g., "itunes-artist-123" → "123")
+  const itunesId = artistId.replace(/^itunes-artist-/, '');
   return apiFetchInternal<any>(
-    `/api/artists/${numericId}/top?page=${page}&limit=20`
+    `/api/artists/${itunesId}/top?page=${page}&limit=20`
   );
 };
 
 export const getArtistAlbums = (artistId: string, limit = 50) => {
-  const numericId = artistId.replace(/^dz-artist-/, '');
+  const itunesId = artistId.replace(/^itunes-artist-/, '');
   return apiFetchInternal<any[]>(
-    `/api/artists/${numericId}/albums?limit=${limit}`
+    `/api/artists/${itunesId}/albums?limit=${limit}`
   );
 };
 
 export const getSong = (trackId: string) => {
-  const normalizedTrackId = trackId.replace(/^dz-/, '');
-  return apiFetchInternal<Song>(`/api/tracks/${normalizedTrackId}`);
+  const itunesId = trackId.replace(/^itunes-/, '');
+  return apiFetchInternal<Song>(`/api/tracks/${itunesId}`);
+};
+
+export const getAlbum = (albumId: string) => {
+  const itunesId = albumId.replace(/^itunes-album-/, '');
+  return apiFetchInternal<any>(`/api/albums/${itunesId}`);
 };
 
 export const getSongsByIds = async (trackIds: string[]) => {
@@ -54,7 +70,7 @@ export const getSongsByIds = async (trackIds: string[]) => {
     .map((result) => result.value);
 };
 
-// ── Lyrics (stub — Deezer doesn't provide lyrics) ─────────────────
+// ── Lyrics (stub) ─────────────────────────────────────────────────
 
 export const getSongLyrics = async (_trackId: string): Promise<{ lyrics: string } | null> => {
   return null;
@@ -98,9 +114,18 @@ export function getBestAudioUrl(song: Song): string {
 
 /** Get best cover art image URL. Returns undefined when no valid URL is available. */
 export function getBestImageUrl(images: ImageQuality[]): string | undefined {
-  const url =
-    images.find(i => i.quality === '500x500')?.url ??
-    images.find(i => i.quality === '150x150')?.url ??
-    images[0]?.url;
-  return url || undefined;
+  if (!images || images.length === 0) return undefined;
+
+  // First try explicitly looking for 500x500 just in case
+  const exact500 = images.find(i => i.quality === '500x500')?.url;
+  if (exact500) return exact500;
+
+  // Otherwise, sort by width (assuming quality is format "WxH") and get the largest
+  const sorted = [...images].sort((a, b) => {
+    const widthA = parseInt(a.quality.split('x')[0]) || 0;
+    const widthB = parseInt(b.quality.split('x')[0]) || 0;
+    return widthB - widthA; // Descending
+  });
+
+  return sorted[0]?.url || undefined;
 }
