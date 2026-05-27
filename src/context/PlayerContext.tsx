@@ -137,18 +137,48 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     setState({ isRadio: false, radioMeta: null });
   }, []);
 
-  const playPreviewFallback = useCallback((track?: Song) => {
+  const playPreviewFallback = useCallback(async (track?: Song) => {
     const router = refs.current.router;
     if (!router) return;
     const fallbackTrack = track ?? refs.current.currentTrack;
-    if (!fallbackTrack?.preview) return;
+    if (!fallbackTrack) return;
+
+    let previewUrl = fallbackTrack.preview;
+
+    // If there's no preview URL cached on the track, fetch one from iTunes
+    if (!previewUrl) {
+      try {
+        const artistName = fallbackTrack.artists.primary[0]?.name || '';
+        const res = await fetch(
+          `/api/preview?title=${encodeURIComponent(fallbackTrack.name)}&artist=${encodeURIComponent(artistName)}`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          previewUrl = data.previewUrl || null;
+        }
+      } catch (err) {
+        console.error('Failed to fetch preview URL:', err);
+      }
+    }
+
+    if (!previewUrl) {
+      console.warn('No preview URL available for', fallbackTrack.name);
+      setState({ isResolving: false });
+      return;
+    }
+
+    // Cache it on the track so subsequent plays don't re-fetch
+    fallbackTrack.preview = previewUrl;
+
+    // Verify the track is still the active one after the async fetch
+    if (refs.current.currentTrack && refs.current.currentTrack.id !== fallbackTrack.id) return;
 
     setState({ isPreview: true, isResolving: false });
     router.setActive('html5');
     stopRadio();
 
     router.youtube.stop();
-    router.html5.playSrc(fallbackTrack.preview);
+    router.html5.playSrc(previewUrl);
   }, [stopRadio]);
 
   useEffect(() => {
@@ -324,7 +354,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     stopRadio();
 
     if (!refs.current.user) {
-      setState({ isResolving: false, isGuestPreview: true });
+      setState({ isResolving: true, isGuestPreview: true });
       playPreviewFallback(track);
       return;
     }

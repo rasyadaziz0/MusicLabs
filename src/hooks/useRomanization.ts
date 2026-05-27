@@ -62,15 +62,26 @@ export function useRomanization(
       try {
         const lineTexts = lines.map((l) => l.text);
 
-        const res = await fetch('/api/romanize', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ lines: lineTexts, trackId }),
-          signal: controller.signal,
-        });
+        let res: Response | null = null;
+        let attempt = 0;
+        while (attempt < 3) {
+          try {
+            res = await fetch('/api/romanize', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ lines: lineTexts, trackId }),
+              signal: controller.signal,
+            });
+            if (res.ok) break;
+          } catch (e: any) {
+            if (e.name === 'AbortError') throw e;
+          }
+          attempt++;
+          if (attempt < 3) await new Promise(r => setTimeout(r, 1000 * attempt));
+        }
 
-        if (!res.ok) {
-          console.warn('Romanization API returned', res.status);
+        if (!res || !res.ok) {
+          console.warn('Romanization API returned', res?.status || 'Network Error');
           return;
         }
 

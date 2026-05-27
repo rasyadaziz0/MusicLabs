@@ -58,12 +58,18 @@ export default function MobilePlayerBar({
             Live Radio
           </p>
         )}
-        {!isRadio && isGuestPreview && (
+        {!isRadio && isResolving && (
+          <p className="text-[9px] text-white/50 font-semibold uppercase tracking-wider mb-0.5 flex items-center gap-1">
+            <Loader2 size={8} className="animate-spin" />
+            Loading track…
+          </p>
+        )}
+        {!isRadio && !isResolving && isGuestPreview && (
           <p className="text-[9px] text-[#FA243C] font-semibold uppercase tracking-wider mb-0.5">
             Preview
           </p>
         )}
-        {!isRadio && !isGuestPreview && (
+        {!isRadio && !isResolving && !isGuestPreview && (
           <p className="text-[9px] text-white/60 font-medium uppercase tracking-wider mb-0.5">
             High Quality Audio
           </p>

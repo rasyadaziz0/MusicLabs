@@ -60,6 +60,11 @@ export async function POST(request: Request) {
       );
     }
 
+    // Bail early if client already disconnected
+    if (request.signal?.aborted) {
+      return NextResponse.json({ error: 'Request aborted' }, { status: 499 });
+    }
+
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({ 
       model: 'gemini-3.1-flash-lite',
@@ -84,13 +89,55 @@ CRITICAL RULES:
 Text to romanize:
 ${numberedLines}`;
 
-    const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
+    // ── Retry with exponential backoff for transient errors ────────
+    const MAX_RETRIES = 3;
+    let lastError: unknown = null;
+    let responseText = '';
+
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      // Check abort before each attempt
+      if (request.signal?.aborted) {
+        return NextResponse.json({ error: 'Request aborted' }, { status: 499 });
+      }
+
+      try {
+        const result = await model.generateContent(prompt);
+        responseText = result.response.text();
+        lastError = null;
+        break;
+      } catch (err: any) {
+        lastError = err;
+        const status = err?.status ?? err?.response?.status ?? 0;
+        const isRetryable = status === 503 || status === 429 || status >= 500;
+
+        if (!isRetryable || attempt === MAX_RETRIES - 1) {
+          throw err;
+        }
+
+        // Exponential backoff: 1s, 2s, 4s
+        const delay = Math.pow(2, attempt) * 1000;
+        console.warn(`Gemini API attempt ${attempt + 1} failed (${status}), retrying in ${delay}ms...`);
+        await new Promise((r) => setTimeout(r, delay));
+      }
+    }
+
+    if (lastError) throw lastError;
 
     const romanizationMap: Record<number, string> = {};
     
     try {
-      const parsed = JSON.parse(responseText);
+      let cleanedText = responseText.trim();
+      if (cleanedText.startsWith('```json')) {
+         cleanedText = cleanedText.replace(/^```json/, '').replace(/```$/, '').trim();
+      } else if (cleanedText.startsWith('```')) {
+         cleanedText = cleanedText.replace(/^```/, '').replace(/```$/, '').trim();
+      }
+      
+      let parsed = JSON.parse(cleanedText);
+      if (parsed.romanizations && typeof parsed.romanizations === 'object') {
+        parsed = parsed.romanizations;
+      }
+      
       for (const [key, value] of Object.entries(parsed)) {
         const responseIdx = parseInt(key) - 1; // 0-based in our textsToRomanize
         if (!isNaN(responseIdx) && responseIdx >= 0 && responseIdx < indicesToRomanize.length) {
@@ -110,7 +157,16 @@ ${numberedLines}`;
         },
       }
     );
-  } catch (err) {
+  } catch (err: any) {
+    // Suppress harmless client-disconnect errors
+    if (
+      err?.code === 'ECONNRESET' ||
+      err?.name === 'AbortError' ||
+      request.signal?.aborted
+    ) {
+      return NextResponse.json({ error: 'Request aborted' }, { status: 499 });
+    }
+
     console.error('Romanization error:', err);
     return NextResponse.json(
       { error: 'Failed to romanize lyrics' },
@@ -118,3 +174,4 @@ ${numberedLines}`;
     );
   }
 }
+

@@ -170,19 +170,32 @@ export default function DesktopPlayerBar({
                       <span className="text-[13px] font-bold text-white truncate leading-tight">
                         {currentTrack.name}
                       </span>
-                      <span className="text-[11px] text-white/70 truncate leading-[14px]">
-                        {currentTrack.artists?.primary?.map((a: any) => a.name).join(', ')} {currentTrack.album?.name ? `— ${currentTrack.album.name}` : ''}
-                      </span>
+                      {isResolving ? (
+                        <span className="text-[11px] text-white/50 truncate leading-[14px] flex items-center gap-1.5">
+                          <Loader2 size={10} className="animate-spin flex-shrink-0" />
+                          Loading track…
+                        </span>
+                      ) : (
+                        <span className="text-[11px] text-white/70 truncate leading-[14px]">
+                          {currentTrack.artists?.primary?.map((a: any) => a.name).join(', ')} {currentTrack.album?.name ? `— ${currentTrack.album.name}` : ''}
+                        </span>
+                      )}
                     </>
                   )}
                 </div>
               </div>
               {/* Progress Bar — hidden for radio (infinite stream) */}
               {!isRadio ? (
-                <div className="w-full h-[2px] bg-white/[0.15] relative mt-[2px] group/progress rounded-full">
-                  <input type="range" min={0} max={duration || 0} value={currentTime} onChange={(e) => seek(Number(e.target.value))} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 hover:h-3 hover:-top-[5px]" />
-                  <div className="absolute h-full bg-white rounded-full transition-colors group-hover/progress:bg-white" style={{ width: `${(currentTime / (duration || 1)) * 100}%` }} />
-                </div>
+                isResolving ? (
+                  <div className="w-full h-[2px] bg-white/[0.08] mt-[2px] rounded-full overflow-hidden">
+                    <div className="h-full w-full bg-gradient-to-r from-transparent via-white/30 to-transparent rounded-full animate-[shimmer_1.5s_ease-in-out_infinite]" style={{ backgroundSize: '200% 100%' }} />
+                  </div>
+                ) : (
+                  <div className="w-full h-[2px] bg-white/[0.15] relative mt-[2px] group/progress rounded-full">
+                    <input type="range" min={0} max={duration || 0} value={currentTime} onChange={(e) => seek(Number(e.target.value))} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 hover:h-3 hover:-top-[5px]" />
+                    <div className="absolute h-full bg-white rounded-full transition-colors group-hover/progress:bg-white" style={{ width: `${(currentTime / (duration || 1)) * 100}%` }} />
+                  </div>
+                )
               ) : (
                 <div className="w-full h-[2px] bg-[#FA243C]/20 mt-[2px] rounded-full overflow-hidden">
                   <div className="h-full w-1/3 bg-[#FA243C]/40 rounded-full animate-pulse" />
