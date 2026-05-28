@@ -13,7 +13,7 @@ async function getYt(forceRefresh = false) {
   const now = Date.now();
   if (!ytInstance || now - lastInit > 1000 * 60 * 10 || forceRefresh) {
     ytInstance = await Innertube.create({
-      cache: new UniversalCache(true, './.cache'),
+      cache: new UniversalCache(false),
       generate_session_locally: true,
       retrieve_player: true,
     });
