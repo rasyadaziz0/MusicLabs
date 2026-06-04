@@ -31,8 +31,8 @@ export default function RadioPage() {
 
   // Fetch Indonesian stations
   const { data: stations = [], isLoading } = useQuery({
-    queryKey: ['radioStations', 'Indonesia'],
-    queryFn: () => searchRadioStations('Indonesia', 100),
+    queryKey: ['radioStations', 'ID'],
+    queryFn: () => searchRadioStations('ID', 100),
     staleTime: 1000 * 60 * 30, // 30 min
   });
 

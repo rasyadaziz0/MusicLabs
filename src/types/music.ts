@@ -7,6 +7,20 @@ export interface Artist {
   url: string;
 }
 
+export interface ArtistInfo {
+  id: number;
+  name: string;
+  link: string;
+  picture: string;
+  picture_small: string;
+  picture_medium: string;
+  picture_big: string;
+  picture_xl: string;
+  nb_album: number;
+  nb_fan: number;
+  genres?: string[];
+}
+
 export interface ImageQuality {
   quality: string;
   url: string;

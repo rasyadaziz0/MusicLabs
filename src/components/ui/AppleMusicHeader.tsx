@@ -16,6 +16,8 @@ export interface AppleMusicHeaderProps {
   backHref?: string;
 }
 
+import { useRouter } from 'next/navigation';
+
 export function AppleMusicHeader({
   title,
   subtitle,
@@ -29,21 +31,42 @@ export function AppleMusicHeader({
   topRightActions,
   backHref,
 }: AppleMusicHeaderProps) {
+  const router = useRouter();
+
+  const handleBack = (e: React.MouseEvent) => {
+    e.preventDefault();
+    router.back();
+  };
+
   return (
-    <section className="flex flex-col md:flex-row items-center md:items-start gap-8 mb-8 pt-4 relative">
-      {topRightActions && (
-        <div className="absolute right-0 top-0 z-20">
-          {topRightActions}
+    <div className="w-full">
+      {/* Desktop Back Button */}
+      {backHref && (
+        <div className="hidden md:flex mb-6 w-full">
+          <button 
+            onClick={handleBack} 
+            className="inline-flex items-center gap-2 px-3 py-1.5 text-white/70 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-colors text-sm font-medium"
+          >
+            <ChevronLeft size={18} strokeWidth={2.5} />
+            Back
+          </button>
         </div>
       )}
 
-      {backHref && (
-        <div className="absolute left-0 top-0 z-20 md:hidden">
-          <Link href={backHref} className="p-2 -ml-2 text-[#FA243C] hover:bg-white/5 rounded-full transition-colors flex items-center justify-center">
-            <ChevronLeft size={28} strokeWidth={2.5} />
-          </Link>
-        </div>
-      )}
+      <section className="flex flex-col md:flex-row items-center md:items-start gap-8 mb-8 pt-4 md:pt-0 relative">
+        {topRightActions && (
+          <div className="absolute right-0 top-0 z-20">
+            {topRightActions}
+          </div>
+        )}
+
+        {backHref && (
+          <div className="absolute left-0 top-0 z-20 md:hidden">
+            <button onClick={handleBack} className="p-2 -ml-2 text-[#FA243C] hover:bg-white/5 rounded-full transition-colors flex items-center justify-center">
+              <ChevronLeft size={28} strokeWidth={2.5} />
+            </button>
+          </div>
+        )}
 
       {/* Artwork */}
       <div className="w-56 h-56 md:w-[260px] md:h-[260px] flex-shrink-0 bg-white/5 rounded-2xl flex items-center justify-center shadow-2xl relative overflow-hidden">
@@ -101,5 +124,6 @@ export function AppleMusicHeader({
         </div>
       </div>
     </section>
+    </div>
   );
 }

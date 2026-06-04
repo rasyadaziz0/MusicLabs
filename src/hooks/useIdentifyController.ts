@@ -34,14 +34,18 @@ export function useIdentifyController() {
   const prevTranscriptRef = useRef('');
 
   // Reset when mode changes
+  const resetTranscriptRef = useRef(speech.resetTranscript);
+  resetTranscriptRef.current = speech.resetTranscript;
+
   useEffect(() => {
     setState('idle');
     setMatchedSong(null);
     setRawMatch(null);
     setSpeechResults([]);
     setErrorMessage('');
-    speech.resetTranscript();
-  }, [mode, speech]);
+    resetTranscriptRef.current();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
   const handleAuddIdentify = useCallback(async () => {
     if (quota.isExhausted) {
@@ -92,7 +96,8 @@ export function useIdentifyController() {
     setSpeechResults([]);
     prevTranscriptRef.current = '';
     speech.startListening();
-  }, [speech]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [speech.startListening]);
 
   useEffect(() => {
     const processSpeech = async () => {
@@ -154,7 +159,8 @@ export function useIdentifyController() {
       speech.stopListening();
     }
     setState('idle');
-  }, [mode, recorder, speech]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, recorder.stopRecording, speech.stopListening]);
 
   const resetState = useCallback(() => {
     setState('idle');

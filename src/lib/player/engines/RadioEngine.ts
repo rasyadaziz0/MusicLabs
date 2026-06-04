@@ -15,6 +15,7 @@ export interface RadioEngineCallbacks {
   onPlay: () => void;
   onPause: () => void;
   onMetaUpdate: (meta: RadioMeta) => void;
+  onError?: (errorMsg: string) => void;
 }
 
 // ─── Engine class ───
@@ -23,6 +24,11 @@ export class RadioEngine {
   private audio: HTMLAudioElement | null = null;
   private metaInterval: NodeJS.Timeout | null = null;
   private callbacks: RadioEngineCallbacks;
+  private _listeners?: {
+    handlePlay: () => void;
+    handlePause: () => void;
+    handleError: () => void;
+  };
 
   constructor(callbacks: RadioEngineCallbacks) {
     this.callbacks = callbacks;
@@ -96,18 +102,31 @@ export class RadioEngine {
           hls = null;
         }
         setupStream(track.url);
+      } else {
+        // Fallback exhausted or unavailable
+        if (this.callbacks.onError) {
+          this.callbacks.onError('Stream offline');
+        }
       }
     };
 
-    audio.onplay = () => this.callbacks.onPlay();
-    audio.onpause = () => this.callbacks.onPause();
-    audio.onerror = () => {
+    const handlePlay = () => this.callbacks.onPlay();
+    const handlePause = () => this.callbacks.onPause();
+    const handleError = () => {
       console.error('Radio stream error:', audio.src);
       if (audio.error) {
         console.error('Error code:', audio.error.code, 'Message:', audio.error.message);
       }
       handleFallback();
     };
+
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('playing', handlePlay);
+    audio.addEventListener('pause', handlePause);
+    audio.addEventListener('error', handleError);
+
+    // Save references so we can remove them later
+    this._listeners = { handlePlay, handlePause, handleError };
 
     setupStream(streamUrl);
 
@@ -140,9 +159,13 @@ export class RadioEngine {
   /** Stop any active radio stream playback & metadata polling */
   stop(): void {
     if (this.audio) {
-      this.audio.onplay = null;
-      this.audio.onpause = null;
-      this.audio.onerror = null;
+      if (this._listeners) {
+        const { handlePlay, handlePause, handleError } = this._listeners;
+        this.audio.removeEventListener('play', handlePlay);
+        this.audio.removeEventListener('playing', handlePlay);
+        this.audio.removeEventListener('pause', handlePause);
+        this.audio.removeEventListener('error', handleError);
+      }
       this.audio.pause();
       this.audio.removeAttribute('src');
       this.audio.load();
@@ -170,5 +193,3 @@ export class RadioEngine {
     this.stop();
   }
 }
-
-

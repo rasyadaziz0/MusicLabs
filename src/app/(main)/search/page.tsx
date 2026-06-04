@@ -26,6 +26,16 @@ function getMatchScore(text: string, query: string) {
   if (text === query) return 120;
   if (text.startsWith(query)) return 80;
   if (text.includes(query)) return 50;
+  
+  const queryWords = query.split(' ').filter(Boolean);
+  let matchedWords = 0;
+  for (const w of queryWords) {
+    if (text.includes(w)) matchedWords++;
+  }
+  if (matchedWords > 0) {
+    return matchedWords * 10;
+  }
+  
   return 0;
 }
 
@@ -120,7 +130,8 @@ function SearchPageContent() {
     queryFn: async () => {
       if (query.length <= 2) return { songs: [], artists: [] };
 
-      const [songsData, artistsData] = await Promise.all([searchSongs(query), searchArtists(query)]);
+      const safeQuery = normalizeSearchText(query) || query;
+      const [songsData, artistsData] = await Promise.all([searchSongs(safeQuery), searchArtists(safeQuery)]);
       const normalizedArtists: SearchArtistResult[] = (artistsData?.results ?? [])
         .map((artist: RawSearchArtistResult) => ({
           id: artist?.id,
@@ -145,7 +156,7 @@ function SearchPageContent() {
     if (!normalizedQuery) return songs;
 
     return songs
-      .map((song: Song) => {
+      .map((song: Song, index: number) => {
         const title = normalizeSearchText(song.name);
         const allArtistsText = normalizeSearchText(
           [...song.artists.primary, ...song.artists.featured, ...song.artists.all]
@@ -157,10 +168,9 @@ function SearchPageContent() {
 
         // Prioritize records that clearly match title or artist.
         const score = Math.max(titleScore, artistScore);
-        return { song, score };
+        return { song, score, index };
       })
-      .filter((item) => item.score > 0)
-      .sort((a, b) => b.score - a.score)
+      .sort((a, b) => b.score !== a.score ? b.score - a.score : a.index - b.index)
       .map((item) => item.song);
   }, [songs, query]);
   const rankedArtists = useMemo(() => {
@@ -168,12 +178,11 @@ function SearchPageContent() {
     if (!normalizedQuery) return artists;
 
     return artists
-      .map((artist: SearchArtistResult) => {
+      .map((artist: SearchArtistResult, index: number) => {
         const artistName = normalizeSearchText(artist.title);
-        return { artist, score: getMatchScore(artistName, normalizedQuery) };
+        return { artist, score: getMatchScore(artistName, normalizedQuery), index };
       })
-      .filter((item) => item.score > 0)
-      .sort((a, b) => b.score - a.score)
+      .sort((a, b) => b.score !== a.score ? b.score - a.score : a.index - b.index)
       .map((item) => item.artist)
       .slice(0, 8);
   }, [artists, query]);

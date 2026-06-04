@@ -55,7 +55,7 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto space-y-6 scrollbar-hide">
+      <nav className="flex-1 overflow-y-auto overflow-x-hidden space-y-6 scrollbar-hide">
         <div className="space-y-0.5">
           {navItems.map((item) => {
             const Icon = item.icon;

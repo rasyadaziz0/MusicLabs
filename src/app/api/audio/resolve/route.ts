@@ -133,30 +133,53 @@ export async function GET(request: NextRequest) {
     const youtube = await getYt();
 
     // Step 1: Search for the track
-    // Gunakan youtube.music.search dengan filter 'song' agar hanya mendapatkan lagu official
-    // dan menghindari hasil berupa playlist atau music video panjang.
     const searchResults = await youtube.music.search(query, { type: 'song' });
 
     if (!searchResults.songs || !searchResults.songs.contents || searchResults.songs.contents.length === 0) {
       return NextResponse.json({ error: 'No song results found on YouTube Music' }, { status: 404 });
     }
 
-    // Ambil lagu pertama (paling relevan dari YouTube Music)
-    const firstSong = searchResults.songs.contents[0];
+    // Filter and score results
+    const targetTitle = normalizeText(title).trim();
+    const targetArtist = normalizeText(artist || '').trim();
+
+    const rankedSongs = searchResults.songs.contents.map((song: any, index: number) => {
+      let score = 100 - index * 5;
+      const songTitle = normalizeText(song.title || '').trim();
+      
+      const artistsArr = Array.isArray(song.artists) ? song.artists : [];
+      const songArtist = typeof song.artists === 'string' 
+        ? normalizeText(song.artists) 
+        : normalizeText(artistsArr.map((a: any) => a.name).join(' ') || song.author || '').trim();
+
+      if (songTitle && targetTitle && (songTitle.includes(targetTitle) || targetTitle.includes(songTitle))) score += 20;
+      if (songArtist && targetArtist && (songArtist.includes(targetArtist) || targetArtist.includes(songArtist))) score += 20;
+
+      // Penalize live and cover if they are not in the target title
+      if (!targetTitle.includes('live') && songTitle.includes('live')) score -= 30;
+      if (!targetTitle.includes('cover') && songTitle.includes('cover')) score -= 30;
+      if (!targetTitle.includes('karaoke') && songTitle.includes('karaoke')) score -= 30;
+      if (!targetTitle.includes('remix') && songTitle.includes('remix')) score -= 20;
+
+      return { song, score };
+    }).sort((a, b) => b.score - a.score);
+
+    // Ambil lagu dengan skor tertinggi (paling relevan dari YouTube Music)
+    const bestMatch = rankedSongs[0].song;
 
     // Pastikan ini adalah object yang punya id
-    if (!('id' in firstSong) || !firstSong.id) {
+    if (!('id' in bestMatch) || !bestMatch.id) {
       return NextResponse.json({ error: 'Invalid search result format' }, { status: 404 });
     }
 
-    const videoId = firstSong.id as string;
+    const videoId = bestMatch.id as string;
 
     // Kembalikan videoId dan metadata dasar langsung (tanpa getInfo yang lambat)
     return NextResponse.json({
       videoId,
-      title: firstSong.title,
-      artist: typeof firstSong.artists === 'string' ? firstSong.artists : firstSong.author,
-      duration: firstSong.duration?.text,
+      title: bestMatch.title,
+      artist: typeof bestMatch.artists === 'string' ? bestMatch.artists : bestMatch.author,
+      duration: bestMatch.duration?.text,
     });
 
   } catch (error: unknown) {

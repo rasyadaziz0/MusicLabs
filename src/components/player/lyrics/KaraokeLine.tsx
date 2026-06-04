@@ -17,7 +17,7 @@ export function KaraokeLine({
   return (
     <>
       {line.words.map((word, i) => (
-        <KaraokeWord key={i} word={word} currentTime={currentTime} />
+        <KaraokeWord key={i} word={word} />
       ))}
     </>
   );

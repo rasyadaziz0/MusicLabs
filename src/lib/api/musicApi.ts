@@ -38,6 +38,17 @@ export const getHomeFeed = () =>
 
 // ── Artist songs ───────────────────────────────────────────────────
 
+export const getArtistInfo = (artistId: string) => {
+  const itunesId = artistId.replace(/^itunes-artist-/, '');
+  return apiFetchInternal<any>(`/api/artists/${itunesId}`);
+};
+
+export const getArtistTopTracks = (artistId: string) => {
+  const itunesId = artistId.replace(/^itunes-artist-/, '');
+  return apiFetchInternal<any>(`/api/artists/${itunesId}/top?limit=100`)
+    .then((res) => res?.songs ?? []);
+};
+
 export const getArtistSongs = (artistId: string, page = 1) => {
   // Extract iTunes ID from prefixed format (e.g., "itunes-artist-123" → "123")
   const itunesId = artistId.replace(/^itunes-artist-/, '');

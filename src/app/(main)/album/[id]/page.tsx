@@ -15,7 +15,7 @@ import { AppleMusicTrackList } from '@/components/ui/AppleMusicTrackList';
 
 export default function AlbumPage() {
   const { id } = useParams();
-  const { playTrack } = usePlayer();
+  const { playTrack, shufflePlay } = usePlayer();
   const albumId = Array.isArray(id) ? id[0] : id;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -69,7 +69,7 @@ export default function AlbumPage() {
           )
         }
         onPlay={() => albumTracks.length > 0 && playTrack(albumTracks[0], albumTracks)}
-        onShuffle={() => { /* shuffle logic */ }}
+        onShuffle={() => albumTracks.length > 0 && shufflePlay(albumTracks)}
         backHref="/search"
         topRightActions={
           <div className="relative" ref={menuRef}>

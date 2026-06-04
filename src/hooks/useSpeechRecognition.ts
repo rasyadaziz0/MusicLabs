@@ -96,7 +96,7 @@ export function useSpeechRecognition(lang = 'en-US'): UseSpeechRecognitionReturn
 
     recognition.onerror = (event: any) => {
       if (event.error === 'not-allowed') {
-        setError('Microphone access denied.');
+        setError('Microphone access denied. Check browser permissions AND Windows Privacy Settings (Allow desktop apps to access microphone).');
       } else if (event.error === 'no-speech') {
         setError('No speech detected. Try again.');
       } else if (event.error !== 'aborted') {

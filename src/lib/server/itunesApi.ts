@@ -75,15 +75,55 @@ export function mapITunesToSong(item: ITunesResult): Song {
   };
 }
 
-export async function searchITunesTracks(query: string, limit = 20): Promise<Song[]> {
-  try {
+export async function searchITunesTracks(query: string, limit = 25): Promise<Song[]> {
+  const fetchTunes = async (q: string, l: number) => {
     const res = await fetch(
-      `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=${limit}`,
+      `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=music&entity=song&limit=${l}`,
       { next: { revalidate: 300 } }
     );
     if (!res.ok) return [];
     const data = await res.json();
     return (data.results || []).map(mapITunesToSong);
+  };
+
+  try {
+    // 1. Primary search: Use a larger limit so frontend getMatchScore can filter better
+    const searchLimit = Math.max(limit, 50);
+    let songs = await fetchTunes(query.trim(), searchLimit);
+    const existingIds = new Set(songs.map(s => s.id));
+
+    // 2. Fallback: iTunes strict matching often fails on "Artist - Title" format
+    if (query.includes('-')) {
+      const parts = query.split('-');
+      const titlePart = parts[parts.length - 1].trim();
+
+      if (titlePart) {
+        const fallbackSongs = await fetchTunes(titlePart, searchLimit);
+        for (const song of fallbackSongs) {
+          if (!existingIds.has(song.id)) {
+            songs.push(song);
+            existingIds.add(song.id);
+          }
+        }
+      }
+    }
+    // 3. Fallback: If it's just a space-separated string with many words and few results
+    else if (songs.length < 10) {
+      const words = query.split(' ').filter(Boolean);
+      // Try searching just the last 1-2 words assuming it's the title
+      if (words.length > 2) {
+        const titleGuess = words.slice(-2).join(' ');
+        const fallbackSongs = await fetchTunes(titleGuess, searchLimit);
+        for (const song of fallbackSongs) {
+          if (!existingIds.has(song.id)) {
+            songs.push(song);
+            existingIds.add(song.id);
+          }
+        }
+      }
+    }
+
+    return songs.slice(0, Math.max(limit, 50));
   } catch {
     return [];
   }
@@ -175,7 +215,7 @@ export async function getITunesArtistAlbums(itunesId: string, limit = 50) {
     );
     if (!res.ok) return [];
     const data = await res.json();
-    
+
     // First result is artist, subsequent are collections (albums)
     return (data.results || [])
       .filter((item: ITunesResult) => item.wrapperType === 'collection')
@@ -208,7 +248,7 @@ export async function getITunesAlbum(itunesId: string) {
     );
     if (!res.ok) return null;
     const data = await res.json();
-    
+
     // First result is collection (album), subsequent are tracks
     const items = data.results || [];
     const albumItem = items.find((item: ITunesResult) => item.wrapperType === 'collection');

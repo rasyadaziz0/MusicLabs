@@ -8,6 +8,8 @@ import { LrcWord } from '@/lib/utils/lrcParser';
 import { Music2 } from 'lucide-react';
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { KaraokeWordAnimator } from './lyrics/KaraokeWordAnimator';
+import { LyricStyleManager } from './lyrics/LyricStyleManager';
 
 interface LyricsSidebarProps {
   isOpen: boolean;
@@ -17,39 +19,30 @@ interface LyricsSidebarProps {
 /* ── Karaoke word (sidebar version — smaller) ── */
 function SidebarKaraokeWord({
   word,
-  currentTime,
 }: {
   word: LrcWord;
-  currentTime: number;
 }) {
-  const progress = useMemo(() => {
-    if (currentTime >= word.endTime) return 1;
-    if (currentTime <= word.startTime) return 0;
-    const duration = word.endTime - word.startTime;
-    if (duration <= 0) return 1;
-    return (currentTime - word.startTime) / duration;
-  }, [currentTime, word.startTime, word.endTime]);
+  const spanRef = useRef<HTMLSpanElement>(null);
 
-  const fillPercent = Math.round(progress * 100);
   const activeColor = 'rgba(255,255,255,1)';
   const inactiveColor = 'rgba(255,255,255,0.35)';
 
-  if (fillPercent <= 0) {
-    return <span style={{ color: inactiveColor }}>{word.text}</span>;
-  }
-  if (fillPercent >= 100) {
-    return <span style={{ color: activeColor }}>{word.text}</span>;
-  }
+  const animator = useMemo(() => {
+    return new KaraokeWordAnimator(word, {
+      activeColor,
+      inactiveColor,
+    });
+  }, [word, activeColor, inactiveColor]);
+
+  useEffect(() => {
+    if (spanRef.current) {
+      animator.attach(spanRef.current);
+    }
+    return () => animator.detach();
+  }, [animator]);
 
   return (
-    <span
-      style={{
-        backgroundImage: `linear-gradient(90deg, ${activeColor} ${fillPercent}%, ${inactiveColor} ${fillPercent}%)`,
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
-        backgroundClip: 'text',
-      }}
-    >
+    <span ref={spanRef} style={{ color: inactiveColor, transition: 'none' }}>
       {word.text}
     </span>
   );
@@ -76,50 +69,6 @@ export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
   }, [isOpen, onClose]);
 
   if (!isOpen || !mounted) return null;
-
-  const getLineStyle = (index: number): React.CSSProperties => {
-    const dist = Math.abs(index - activeIndex);
-    const isActive = index === activeIndex;
-
-    if (isActive) {
-      return {
-        fontSize: '22px',
-        color: 'rgba(255,255,255,1)',
-        fontWeight: 700,
-        opacity: 1,
-        filter: 'blur(0px)',
-        transform: 'scale(1)',
-      };
-    }
-    if (dist === 1) {
-      return {
-        fontSize: '16px',
-        color: 'rgba(255,255,255,0.28)',
-        fontWeight: 700,
-        opacity: 0.6,
-        filter: 'blur(0.3px)',
-        transform: 'scale(0.98)',
-      };
-    }
-    if (dist <= 3) {
-      return {
-        fontSize: '15px',
-        color: 'rgba(255,255,255,0.15)',
-        fontWeight: 700,
-        opacity: 0.35,
-        filter: 'blur(0.8px)',
-        transform: 'scale(0.97)',
-      };
-    }
-    return {
-      fontSize: '14px',
-      color: 'rgba(255,255,255,0.07)',
-      fontWeight: 700,
-      opacity: 0.18,
-      filter: 'blur(1.2px)',
-      transform: 'scale(0.96)',
-    };
-  };
 
   const content = (
     <div
@@ -281,14 +230,12 @@ export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
               const isActive = activeIndex === index;
               const dist = Math.abs(index - activeIndex);
               const romanText = romanizations.get(index);
-
-              // Romanization size
-              const romanFontSize = isActive ? '13px' : dist === 1 ? '12px' : '11px';
-              const romanColor = isActive
-                ? 'rgba(255,255,255,0.45)'
-                : dist === 1
-                ? 'rgba(255,255,255,0.15)'
-                : 'rgba(255,255,255,0.06)';
+              const lineStyle = LyricStyleManager.getSidebarLineStyle(index, activeIndex);
+              const romanStyle = LyricStyleManager.getSidebarRomanizationStyle(
+                index,
+                activeIndex,
+                lineStyle.opacity
+              );
 
               return (
                 <div key={`${line.time}-${index}`} className="sidebar-lyric-wrapper">
@@ -297,14 +244,14 @@ export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
                     data-lyric-index={index}
                     onClick={() => isSynced && !line.isPlaceholder && seek(line.time)}
                     style={{
-                      ...getLineStyle(index),
+                      ...lineStyle,
                       cursor: isSynced && !line.isPlaceholder ? 'pointer' : 'default',
                     }}
                   >
                     {/* Karaoke word glow for active line */}
                     {isActive && isSynced && line.words && line.words.length > 0 ? (
                       line.words.map((word, wi) => (
-                        <SidebarKaraokeWord key={wi} word={word} currentTime={currentTime} />
+                        <SidebarKaraokeWord key={wi} word={word} />
                       ))
                     ) : (
                       line.text
@@ -315,11 +262,7 @@ export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
                   {romanText && (
                     <span
                       className="sidebar-roman"
-                      style={{
-                        fontSize: romanFontSize,
-                        color: romanColor,
-                        opacity: getLineStyle(index).opacity,
-                      }}
+                      style={romanStyle}
                     >
                       {romanText}
                     </span>

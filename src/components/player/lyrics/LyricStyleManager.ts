@@ -1,38 +1,41 @@
 import { Transition } from 'framer-motion';
 
 export class LyricStyleManager {
+  /* ── Apple Music style: uniform font size, no zoom/scale on active line ── */
+  private static readonly UNIFORM_FONT = 'clamp(26px, 3vw, 34px)';
+
   static getLineStyle(index: number, activeIndex: number) {
     const dist = Math.abs(index - activeIndex);
     const isActive = index === activeIndex;
 
     if (isActive) {
       return {
-        fontSize: 'clamp(28px, 3.4vw, 38px)',
+        fontSize: this.UNIFORM_FONT,
         color: 'rgba(255,255,255,0.97)',
         filter: 'blur(0px)',
         scale: 1,
         opacity: 1,
-        textShadow: '0 0 30px rgba(255,255,255,0.15)',
+        textShadow: '0 0 20px rgba(255,255,255,0.10)',
         y: 0,
       };
     }
     if (dist === 1) {
       return {
-        fontSize: 'clamp(24px, 2.8vw, 32px)',
-        color: 'rgba(255,255,255,0.35)',
-        filter: 'blur(0.4px)',
-        scale: 0.97,
-        opacity: 0.55,
+        fontSize: this.UNIFORM_FONT,
+        color: 'rgba(255,255,255,0.30)',
+        filter: 'blur(0px)',
+        scale: 1,
+        opacity: 0.50,
         textShadow: '0 0 0px transparent',
         y: 0,
       };
     }
     if (dist === 2) {
       return {
-        fontSize: 'clamp(22px, 2.5vw, 30px)',
-        color: 'rgba(255,255,255,0.2)',
-        filter: 'blur(1.2px)',
-        scale: 0.96,
+        fontSize: this.UNIFORM_FONT,
+        color: 'rgba(255,255,255,0.18)',
+        filter: 'blur(0.3px)',
+        scale: 1,
         opacity: 0.35,
         textShadow: '0 0 0px transparent',
         y: 0,
@@ -40,20 +43,20 @@ export class LyricStyleManager {
     }
     if (dist === 3) {
       return {
-        fontSize: 'clamp(20px, 2.2vw, 28px)',
-        color: 'rgba(255,255,255,0.12)',
-        filter: 'blur(1.8px)',
-        scale: 0.95,
+        fontSize: this.UNIFORM_FONT,
+        color: 'rgba(255,255,255,0.10)',
+        filter: 'blur(0.6px)',
+        scale: 1,
         opacity: 0.22,
         textShadow: '0 0 0px transparent',
         y: 0,
       };
     }
     return {
-      fontSize: 'clamp(18px, 2vw, 26px)',
+      fontSize: this.UNIFORM_FONT,
       color: 'rgba(255,255,255,0.06)',
-      filter: 'blur(2.5px)',
-      scale: 0.94,
+      filter: 'blur(1px)',
+      scale: 1,
       opacity: 0.12,
       textShadow: '0 0 0px transparent',
       y: 0,
@@ -64,14 +67,8 @@ export class LyricStyleManager {
     const dist = Math.abs(index - activeIndex);
     const isActive = index === activeIndex;
 
-    const romanFontSize = isActive
-      ? 'clamp(14px, 1.6vw, 18px)'
-      : dist === 1
-      ? 'clamp(12px, 1.4vw, 16px)'
-      : 'clamp(11px, 1.2vw, 14px)';
-
     return {
-      fontSize: romanFontSize,
+      fontSize: 'clamp(13px, 1.5vw, 17px)',
       color: isActive
         ? 'rgba(255,255,255,0.55)'
         : dist === 1
@@ -99,6 +96,44 @@ export class LyricStyleManager {
       type: 'tween',
       duration: 0.4,
       ease: [0.4, 0, 0.2, 1],
+    };
+  }
+
+  /* ── Sidebar Styles (Standard CSS instead of Framer Motion) ── */
+  static getSidebarLineStyle(index: number, activeIndex: number): React.CSSProperties {
+    const dist = Math.abs(index - activeIndex);
+    const isActive = index === activeIndex;
+
+    const base: React.CSSProperties = {
+      fontSize: '18px',
+      fontWeight: 700,
+      transform: 'scale(1)',
+    };
+
+    if (isActive) {
+      return { ...base, color: 'rgba(255,255,255,1)', opacity: 1, filter: 'blur(0px)' };
+    }
+    if (dist === 1) {
+      return { ...base, color: 'rgba(255,255,255,0.28)', opacity: 0.55, filter: 'blur(0px)' };
+    }
+    if (dist <= 3) {
+      return { ...base, color: 'rgba(255,255,255,0.15)', opacity: 0.35, filter: 'blur(0.3px)' };
+    }
+    return { ...base, color: 'rgba(255,255,255,0.07)', opacity: 0.18, filter: 'blur(0.6px)' };
+  }
+
+  static getSidebarRomanizationStyle(index: number, activeIndex: number, lineOpacity: number | string | undefined): React.CSSProperties {
+    const dist = Math.abs(index - activeIndex);
+    const isActive = index === activeIndex;
+    
+    return {
+      fontSize: '12px',
+      color: isActive
+        ? 'rgba(255,255,255,0.45)'
+        : dist === 1
+        ? 'rgba(255,255,255,0.15)'
+        : 'rgba(255,255,255,0.06)',
+      opacity: Number(lineOpacity) || 1,
     };
   }
 }

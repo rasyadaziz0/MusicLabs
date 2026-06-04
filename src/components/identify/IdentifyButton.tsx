@@ -55,7 +55,7 @@ export default function IdentifyButton({ variant = 'sidebar', className }: Ident
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className={`flex items-center gap-3 px-3 py-1.5 mx-2 rounded-md transition-colors text-[13px] font-medium border border-transparent text-white/80 hover:bg-white/5 w-full text-left ${className ?? ''}`}
+        className={`flex items-center gap-3 px-3 py-1.5 mx-2 rounded-md transition-colors text-[13px] font-medium border border-transparent text-white/80 hover:bg-white/5 w-[calc(100%-1rem)] text-left ${className ?? ''}`}
       >
         <AudioLines size={18} className="text-[#FA243C]" />
         <span>Identify Song</span>

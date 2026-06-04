@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
 
   const query = request.nextUrl.searchParams.get('query') || request.nextUrl.searchParams.get('q');
   const limitParam = request.nextUrl.searchParams.get('limit');
-  const limit = limitParam ? parseInt(limitParam, 10) : 20;
+  const limit = limitParam ? parseInt(limitParam, 10) : 25;
 
   if (!query?.trim()) {
     return NextResponse.json({ data: { results: [] } });

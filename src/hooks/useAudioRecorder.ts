@@ -61,11 +61,7 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
 
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            echoCancellation: true,
-            noiseSuppression: true,
-            sampleRate: 44100,
-          },
+          audio: true, // Simplified constraints to test if this is the issue
         });
         streamRef.current = stream;
 
@@ -134,11 +130,10 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
             }
           }, durationMs);
         });
-      } catch (err) {
-        const msg =
-          err instanceof DOMException && err.name === 'NotAllowedError'
-            ? 'Microphone access denied. Please allow mic permissions.'
-            : 'Failed to access microphone.';
+      } catch (err: any) {
+        console.error('Mic Error:', err);
+        const errorDetails = err?.name ? `${err.name}: ${err.message}` : String(err);
+        const msg = `Gagal akses mic (${errorDetails}). Pastikan mic tidak sedang dipakai aplikasi lain (Zoom/Discord) atau coba restart browser.`;
         setError(msg);
         cleanup();
         return null;

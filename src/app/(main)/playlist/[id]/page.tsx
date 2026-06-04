@@ -18,7 +18,7 @@ import { AppleMusicTrackList } from '@/components/ui/AppleMusicTrackList';
 export default function PlaylistPage() {
   const { id } = useParams();
   const router = useRouter();
-  const { playTrack } = usePlayer();
+  const { playTrack, shufflePlay } = usePlayer();
   const playlistId = Array.isArray(id) ? id[0] : id;
   const removeTrackMutation = useRemoveTrackFromPlaylist();
   const togglePinMutation = useTogglePinPlaylist();
@@ -74,7 +74,7 @@ export default function PlaylistPage() {
           )
         }
         onPlay={() => playlistTracks.length > 0 && playTrack(playlistTracks[0], playlistTracks)}
-        onShuffle={() => { /* shuffle logic */ }}
+        onShuffle={() => playlistTracks.length > 0 && shufflePlay(playlistTracks)}
         backHref="/library"
         topRightActions={
           <div className="relative" ref={menuRef}>

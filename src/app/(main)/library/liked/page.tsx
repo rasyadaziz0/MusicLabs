@@ -14,7 +14,7 @@ import AddToPlaylistButton from '@/components/library/AddToPlaylistButton';
 
 export default function LikedSongsPage() {
   const { user, signInWithGoogle } = useAuth();
-  const { playTrack } = usePlayer();
+  const { playTrack, shufflePlay } = usePlayer();
   const { data: likedSongs = [], isLoading } = useLikedSongs();
 
   return (
@@ -34,7 +34,7 @@ export default function LikedSongsPage() {
             </>
           }
           onPlay={() => likedSongs.length > 0 && playTrack(likedSongs[0], likedSongs)}
-          onShuffle={() => { /* shuffle logic */ }}
+          onShuffle={() => likedSongs.length > 0 && shufflePlay(likedSongs)}
           isSaved={true}
           backHref="/library"
           topRightActions={

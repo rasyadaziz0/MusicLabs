@@ -13,6 +13,7 @@ import { Html5Engine } from '@/lib/player/engines/Html5Engine';
 import { RadioEngine, RadioMeta } from '@/lib/player/engines/RadioEngine';
 import { QueueManager } from '@/lib/player/QueueManager';
 import { AudioRouter } from '@/lib/player/AudioRouter';
+import { registerTimeGetter } from '@/hooks/useHighPrecisionTime';
 
 interface PlayerContextType {
   currentTrack: Song | null;
@@ -38,6 +39,7 @@ interface PlayerContextType {
   seek: (time: number) => void;
   setVolume: (volume: number) => void;
   addToQueue: (track: Song) => void;
+  shufflePlay: (tracks: Song[]) => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -264,6 +266,12 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       onPlay: () => setState({ isPlaying: true }),
       onPause: () => setState({ isPlaying: false }),
       onMetaUpdate: (meta) => setState({ radioMeta: meta }),
+      onError: (msg) => {
+        setState({
+          isPlaying: false,
+          radioMeta: { title: msg, station: refs.current.currentTrack?.name || 'Error' }
+        });
+      },
     });
 
     const router = new AudioRouter(ytEngine, html5Engine, radioEngine);
@@ -271,6 +279,14 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
     ytEngine.initialize();
     html5Engine.initialize(1);
+
+    // Register high-precision time getter for karaoke rendering (~60fps rAF)
+    registerTimeGetter(() => {
+      const engine = router.activeEngine;
+      if (engine === 'html5') return html5Engine.getCurrentTime();
+      if (engine === 'youtube') return ytEngine.getCurrentTime();
+      return 0;
+    });
 
     refs.current.timer = setInterval(() => {
       const progress = router.pollProgress();
@@ -502,6 +518,16 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     }
   }, [abortPendingResolve, getFallbackCacheKey, playPreviewFallback, playRadioStream, stopRadio]);
 
+  const shufflePlay = useCallback((tracks: Song[]) => {
+    if (tracks.length === 0) return;
+    const queueMgr = refs.current.queueMgr;
+    if (!queueMgr) return;
+    const firstTrack = queueMgr.shuffleAndPlay(tracks);
+    if (firstTrack) {
+      playTrack(firstTrack);
+    }
+  }, [playTrack]);
+
   const togglePlay = useCallback(() => {
     refs.current.router?.togglePlay(isPlaying);
   }, [isPlaying]);
@@ -603,7 +629,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       prevTrack,
       seek,
       setVolume,
-      addToQueue
+      addToQueue,
+      shufflePlay
     }}>
       {children}
     </PlayerContext.Provider>

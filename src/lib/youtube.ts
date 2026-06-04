@@ -4,7 +4,7 @@
  */
 import { supabase } from './supabase/client';
 
-const CACHE_KEY_PREFIX = 'yt_resolve_v4_';
+const CACHE_KEY_PREFIX = 'yt_resolve_v7_';
 
 type ResolveOptions = {
   signal?: AbortSignal;
