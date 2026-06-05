@@ -16,6 +16,8 @@ interface AuthContextType {
   signInWithPassword: (email: string, password: string) => Promise<AuthActionResult>;
   signUpWithPassword: (email: string, password: string, fullName: string) => Promise<AuthActionResult>;
   signOut: () => Promise<AuthActionResult>;
+  resetPasswordForEmail: (email: string) => Promise<AuthActionResult>;
+  updatePassword: (password: string) => Promise<AuthActionResult>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,7 +25,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 function mapAuthErrorMessage(action: 'login' | 'register' | 'google' | 'logout') {
   switch (action) {
     case 'login':
-      return 'Login gagal. Cek email/password lalu coba lagi.';
+      return 'Email atau Password salah, coba lagi';
     case 'register':
       return 'Daftar akun gagal. Coba lagi beberapa saat lagi.';
     case 'google':
@@ -101,23 +103,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       console.error('Auth signInWithPassword gagal:', error);
+      // Jika error karena email belum dikonfirmasi, beri pesan spesifik
+      if (error.message.toLowerCase().includes('email not confirmed')) {
+        return { error: 'Email belum diverifikasi. Silakan cek kotak masuk email kamu.' };
+      }
       return { error: mapAuthErrorMessage('login') };
     }
     return { error: null };
   };
 
   const signUpWithPassword = async (email: string, password: string, fullName: string) => {
-    const { error } = await supabase.auth.signUp({
+    const callbackUrl = new URL('/auth/callback', window.location.origin);
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { full_name: fullName },
+        emailRedirectTo: callbackUrl.toString(),
       },
     });
+
     if (error) {
       console.error('Auth signUpWithPassword gagal:', error);
       return { error: mapAuthErrorMessage('register') };
     }
+
+    if (data?.user && data.user.identities && data.user.identities.length === 0) {
+      return { error: 'Email udah ada, langsung login aja ;)' };
+    }
+
     return { error: null };
   };
 
@@ -130,9 +144,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error: null };
   };
 
+  const resetPasswordForEmail = async (email: string) => {
+    const callbackUrl = new URL('/update-password', window.location.origin);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: callbackUrl.toString(),
+    });
+    if (error) {
+      console.error('Auth resetPasswordForEmail gagal:', error);
+      return { error: 'Gagal mengirim link reset password. Pastikan email terdaftar dan coba lagi.' };
+    }
+    return { error: null };
+  };
+
+  const updatePassword = async (password: string) => {
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) {
+      console.error('Auth updatePassword gagal:', error);
+      return { error: 'Gagal memperbarui password. Silakan coba lagi.' };
+    }
+    return { error: null };
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, session, loading, signInWithGoogle, signInWithPassword, signUpWithPassword, signOut }}
+      value={{ 
+        user, session, loading, signInWithGoogle, signInWithPassword, 
+        signUpWithPassword, signOut, resetPasswordForEmail, updatePassword 
+      }}
     >
       {children}
     </AuthContext.Provider>
