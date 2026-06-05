@@ -18,6 +18,7 @@ interface AuthContextType {
   signOut: () => Promise<AuthActionResult>;
   resetPasswordForEmail: (email: string) => Promise<AuthActionResult>;
   updatePassword: (password: string) => Promise<AuthActionResult>;
+  updateProfile: (data: { name?: string; avatarUrl?: string }) => Promise<AuthActionResult>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -165,11 +166,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error: null };
   };
 
+  const updateProfile = async (data: { name?: string; avatarUrl?: string }) => {
+    const updateData: any = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.avatarUrl !== undefined) updateData.avatar_url = data.avatarUrl;
+
+    const { data: userData, error } = await supabase.auth.updateUser({
+      data: updateData
+    });
+
+    if (error) {
+      console.error('Auth updateProfile gagal:', error);
+      return { error: 'Gagal memperbarui profil. Silakan coba lagi.' };
+    }
+
+    // Update local state immediately
+    if (userData.user) {
+      setUser(userData.user);
+    }
+    
+    return { error: null };
+  };
+
   return (
     <AuthContext.Provider
       value={{ 
         user, session, loading, signInWithGoogle, signInWithPassword, 
-        signUpWithPassword, signOut, resetPasswordForEmail, updatePassword 
+        signUpWithPassword, signOut, resetPasswordForEmail, updatePassword, updateProfile 
       }}
     >
       {children}

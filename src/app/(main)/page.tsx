@@ -93,6 +93,13 @@ export default function Home() {
                       <p className="text-[13px] font-semibold text-white/90 truncate">{user.user_metadata?.name || 'User'}</p>
                       <p className="text-[11px] text-white/50 truncate">{user.email}</p>
                     </div>
+                    <a
+                      href="/profile"
+                      className="w-full text-left px-4 py-2 text-[13px] text-white/80 hover:bg-white/5 transition-colors flex items-center gap-2"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                      <span>Profile</span>
+                    </a>
                     <button
                       onClick={handleSignOut}
                       className="w-full text-left px-4 py-2 text-[13px] text-red-400 hover:bg-white/5 transition-colors flex items-center gap-2"

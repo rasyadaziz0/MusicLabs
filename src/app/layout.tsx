@@ -6,6 +6,7 @@ import { PlayerProvider } from "@/context/PlayerContext";
 import QueryProvider from "@/context/QueryProvider";
 import PWARegistration from "@/components/PWARegistration";
 import YouTubePlayerMount from "@/components/YouTubePlayerMount";
+import { Analytics } from "@vercel/analytics/react";
 
 const syne = Syne({
   variable: "--font-display",
@@ -61,6 +62,7 @@ export default function RootLayout({
             </PlayerProvider>
           </AuthProvider>
         </QueryProvider>
+        <Analytics />
       </body>
     </html>
   );

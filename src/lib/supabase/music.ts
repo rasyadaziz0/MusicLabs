@@ -232,3 +232,13 @@ export async function getRecentPlays(userId: string): Promise<Song[]> {
   if (uniqueIds.length === 0) return [];
   return getSongsByIds(uniqueIds);
 }
+
+export async function getListeningStats(userId: string): Promise<{ totalPlays: number }> {
+  const { count, error } = await supabase
+    .from('listening_history')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId);
+
+  if (error) throw error;
+  return { totalPlays: count ?? 0 };
+}

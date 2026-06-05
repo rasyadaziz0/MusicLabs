@@ -147,14 +147,16 @@ export default function Sidebar() {
       {/* Footer Profile & Links */}
       {user ? (
         <div className="flex items-center gap-3 px-4 group">
-          <div className="w-8 h-8 rounded-full overflow-hidden bg-white/10 relative flex-shrink-0">
-            {user.user_metadata?.avatar_url ? (
-              <Image src={user.user_metadata.avatar_url.trim().replace(/^`+|`+$/g, '')} alt="User" fill sizes="36px" className="object-cover" />
-            ) : (
-              <div className="w-full h-full bg-[#FA243C]" />
-            )}
-          </div>
-          <span className="text-[13px] font-semibold text-white/90 flex-1 truncate">{user.user_metadata?.name || 'User'}</span>
+          <Link href="/profile" className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="w-8 h-8 rounded-full overflow-hidden bg-white/10 relative flex-shrink-0">
+              {user.user_metadata?.avatar_url ? (
+                <Image src={user.user_metadata.avatar_url.trim().replace(/^`+|`+$/g, '')} alt="User" fill sizes="36px" className="object-cover" />
+              ) : (
+                <div className="w-full h-full bg-[#FA243C]" />
+              )}
+            </div>
+            <span className="text-[13px] font-semibold text-white/90 flex-1 truncate hover:text-white transition-colors">{user.user_metadata?.name || 'User'}</span>
+          </Link>
           <button
             onClick={handleSignOut}
             className="p-1.5 text-white/30 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
