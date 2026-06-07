@@ -26,6 +26,7 @@ export async function GET(request: Request) {
   const cleanTitle = title.replace(/\(.*?\)|\[.*?\]/g, '').trim();
   const cleanArtist = artist.replace(/\(.*?\)|\[.*?\]/g, '').trim();
   const cleanAlbum = album ? album.replace(/\(.*?\)|\[.*?\]/g, '').trim() : '';
+  const primaryArtist = cleanArtist.split(/[,&/]| feat\.? | ft\.? /i)[0].trim();
 
   try {
     let fallbackPlainLyrics: string | null | undefined = null;
@@ -39,8 +40,14 @@ export async function GET(request: Request) {
       });
       if (cleanAlbum) getParams.append('album_name', cleanAlbum);
 
-      const getUrl = `https://lrclib.net/api/get?${getParams.toString()}`;
-      const getRes = await fetch(getUrl);
+      let getUrl = `https://lrclib.net/api/get?${getParams.toString()}`;
+      let getRes = await fetch(getUrl);
+      
+      if (!getRes.ok && primaryArtist !== cleanArtist) {
+        getParams.set('artist_name', primaryArtist);
+        getUrl = `https://lrclib.net/api/get?${getParams.toString()}`;
+        getRes = await fetch(getUrl);
+      }
       
       if (getRes.ok) {
         const getData = (await getRes.json()) as LrcLibTrack;
@@ -54,9 +61,15 @@ export async function GET(request: Request) {
     }
 
     // 2. Fallback ke /api/search kalau /api/get gagal atau gak dapet synced lyrics
-    const searchUrl = `https://lrclib.net/api/search?track_name=${encodeURIComponent(cleanTitle)}&artist_name=${encodeURIComponent(cleanArtist)}`;
-    const searchRes = await fetch(searchUrl);
-    const searchData = (await searchRes.json()) as LrcLibTrack[];
+    let searchUrl = `https://lrclib.net/api/search?track_name=${encodeURIComponent(cleanTitle)}&artist_name=${encodeURIComponent(cleanArtist)}`;
+    let searchRes = await fetch(searchUrl);
+    let searchData = (await searchRes.json()) as LrcLibTrack[];
+
+    if ((!searchData || searchData.length === 0) && primaryArtist !== cleanArtist) {
+      searchUrl = `https://lrclib.net/api/search?track_name=${encodeURIComponent(cleanTitle)}&artist_name=${encodeURIComponent(primaryArtist)}`;
+      searchRes = await fetch(searchUrl);
+      searchData = (await searchRes.json()) as LrcLibTrack[];
+    }
 
     let bestMatch: LrcLibTrack | undefined;
     if (searchData && searchData.length > 0) {
@@ -129,13 +142,23 @@ export async function GET(request: Request) {
         };
 
         let syncedLrc = await fetchNeteaseLrc(cleanTitle + ' ' + cleanArtist, cleanTitle);
+        if (!syncedLrc && primaryArtist !== cleanArtist) {
+          syncedLrc = await fetchNeteaseLrc(cleanTitle + ' ' + primaryArtist, cleanTitle);
+        }
         
         // 3.5 Fallback ke iTunes JP untuk terjemahan judul (mengatasi judul Inggris dari YouTube Music yang aslinya bahasa Jepang)
         if (!syncedLrc) {
           try {
-            const itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(cleanArtist + ' ' + cleanTitle)}&country=jp&entity=song&limit=1`;
-            const itunesRes = await fetch(itunesUrl);
-            const itunesData = await itunesRes.json();
+            let itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(cleanArtist + ' ' + cleanTitle)}&country=jp&entity=song&limit=1`;
+            let itunesRes = await fetch(itunesUrl);
+            let itunesData = await itunesRes.json();
+            
+            if (!itunesData.results?.length && primaryArtist !== cleanArtist) {
+              itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(primaryArtist + ' ' + cleanTitle)}&country=jp&entity=song&limit=1`;
+              itunesRes = await fetch(itunesUrl);
+              itunesData = await itunesRes.json();
+            }
+
             const jpTrackName = itunesData.results?.[0]?.trackName;
             
             if (jpTrackName && normKey(jpTrackName) !== normKey(cleanTitle)) {
@@ -159,8 +182,13 @@ export async function GET(request: Request) {
       }
 
     // 3. Fallback ke lyrics.ovh kalau lrclib tetep gak nemu
-    const ovhUrl = `https://api.lyrics.ovh/v1/${encodeURIComponent(cleanArtist)}/${encodeURIComponent(cleanTitle)}`;
-    const ovhRes = await fetch(ovhUrl);
+    let ovhUrl = `https://api.lyrics.ovh/v1/${encodeURIComponent(cleanArtist)}/${encodeURIComponent(cleanTitle)}`;
+    let ovhRes = await fetch(ovhUrl);
+    
+    if (!ovhRes.ok && primaryArtist !== cleanArtist) {
+      ovhUrl = `https://api.lyrics.ovh/v1/${encodeURIComponent(primaryArtist)}/${encodeURIComponent(cleanTitle)}`;
+      ovhRes = await fetch(ovhUrl);
+    }
     
     if (ovhRes.ok) {
       const ovhData = await ovhRes.json();

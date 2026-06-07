@@ -14,6 +14,8 @@ import { RadioEngine, RadioMeta } from '@/lib/player/engines/RadioEngine';
 import { QueueManager } from '@/lib/player/QueueManager';
 import { AudioRouter } from '@/lib/player/AudioRouter';
 import { registerTimeGetter } from '@/hooks/useHighPrecisionTime';
+import { useMediaSession } from '@/hooks/useMediaSession';
+import { PlayerCache } from '@/lib/player/PlayerCache';
 
 interface PlayerContextType {
   currentTrack: Song | null;
@@ -23,6 +25,7 @@ interface PlayerContextType {
   isGuestPreview: boolean;
   isRadio: boolean;
   radioMeta: RadioMeta | null;
+  isError: boolean;
   currentTime: number;
   duration: number;
   volume: number;
@@ -39,6 +42,7 @@ interface PlayerContextType {
   seek: (time: number) => void;
   setVolume: (volume: number) => void;
   addToQueue: (track: Song) => void;
+  clearQueue: () => void;
   shufflePlay: (tracks: Song[]) => void;
 }
 
@@ -57,6 +61,7 @@ type PlayerState = {
   queueIndex: number;
   isRadio: boolean;
   radioMeta: RadioMeta | null;
+  isError: boolean;
   isShuffled: boolean;
   repeatMode: 'none' | 'all' | 'one';
 };
@@ -74,6 +79,7 @@ const initialState: PlayerState = {
   queueIndex: -1,
   isRadio: false,
   radioMeta: null,
+  isError: false,
   isShuffled: false,
   repeatMode: 'none',
 };
@@ -89,7 +95,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const {
     currentTrack, isPlaying, isResolving, isPreview, isGuestPreview,
     currentTime, duration, volume, queue, queueIndex,
-    isRadio, radioMeta, isShuffled, repeatMode
+    isRadio, radioMeta, isError, isShuffled, repeatMode
   } = state;
 
   const refs = useRef({
@@ -124,8 +130,6 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       recordRecentPlay(user.id, currentTrack.id).catch(console.error);
     }
   }, [user, currentTrack]);
-
-  const getFallbackCacheKey = useCallback((trackId: string) => `fallback_yt_${trackId}`, []);
 
   const abortPendingResolve = useCallback(() => {
     if (refs.current.resolveAbort) {
@@ -165,7 +169,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
     if (!previewUrl) {
       console.warn('No preview URL available for', fallbackTrack.name);
-      setState({ isResolving: false });
+      setState({ isResolving: false, isError: true });
+      alert('Lagu tidak tersedia');
       return;
     }
 
@@ -235,7 +240,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
                 return;
               }
 
-              localStorage.setItem(getFallbackCacheKey(activeTrack.id), fallbackVideoId);
+              PlayerCache.setFallbackVideoId(activeTrack.id, fallbackVideoId);
               ytEngine.loadVideo(fallbackVideoId);
               setState({ isResolving: false });
             } catch (error) {
@@ -302,7 +307,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       router.destroy();
       refs.current.router = null;
     };
-  }, [abortPendingResolve, getFallbackCacheKey, playPreviewFallback]);
+  }, [abortPendingResolve, playPreviewFallback]);
 
   useEffect(() => {
     refs.current.queueMgr = new QueueManager({
@@ -357,6 +362,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       currentTrack: track,
       isPreview: false,
       isGuestPreview: false,
+      isError: false,
       currentTime: 0,
     });
     refs.current.currentTrack = track;
@@ -384,7 +390,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
       try {
         const artistName = track.artists.primary[0]?.name || '';
-        const cachedFallback = localStorage.getItem(getFallbackCacheKey(track.id));
+        const cachedFallback = PlayerCache.getFallbackVideoId(track.id);
 
         let videoId: string | null = cachedFallback;
         if (!videoId) {
@@ -424,7 +430,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
         try {
           const artistName = track.artists.primary[0]?.name || '';
-          let fallbackVideoId: string | null = localStorage.getItem(getFallbackCacheKey(track.id));
+          let fallbackVideoId: string | null = PlayerCache.getFallbackVideoId(track.id);
 
           if (!fallbackVideoId) {
             const controller = new AbortController();
@@ -458,7 +464,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const artistName = track.artists.primary[0]?.name || '';
-      const cachedFallback = localStorage.getItem(getFallbackCacheKey(track.id));
+      const cachedFallback = PlayerCache.getFallbackVideoId(track.id);
       if (cachedFallback && router.youtube.isReady()) {
         router.setActive('youtube');
         router.youtube.loadVideo(cachedFallback);
@@ -516,7 +522,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
         refs.current.resolveAbort = null;
       }
     }
-  }, [abortPendingResolve, getFallbackCacheKey, playPreviewFallback, playRadioStream, stopRadio]);
+  }, [abortPendingResolve, playPreviewFallback, playRadioStream, stopRadio]);
 
   const shufflePlay = useCallback((tracks: Song[]) => {
     if (tracks.length === 0) return;
@@ -590,20 +596,16 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     refs.current.queueMgr?.addToQueue(track);
   }, []);
 
-  useEffect(() => {
-    if (currentTrack && 'mediaSession' in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: currentTrack.name,
-        artist: currentTrack.artists.primary.map(a => a.name).join(', '),
-        album: currentTrack.album.name,
-        artwork: [{ src: getBestImageUrl(currentTrack.image) ?? '', sizes: '512x512', type: 'image/jpeg' }]
-      });
-      navigator.mediaSession.setActionHandler('play', togglePlay);
-      navigator.mediaSession.setActionHandler('pause', togglePlay);
-      navigator.mediaSession.setActionHandler('nexttrack', nextTrack);
-      navigator.mediaSession.setActionHandler('previoustrack', prevTrack);
-    }
-  }, [currentTrack, togglePlay, nextTrack, prevTrack]);
+  const clearQueue = useCallback(() => {
+    refs.current.queueMgr?.clearQueue();
+  }, []);
+
+  useMediaSession({
+    currentTrack,
+    togglePlay,
+    nextTrack,
+    prevTrack,
+  });
 
   return (
     <PlayerContext.Provider value={{
@@ -614,6 +616,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       isGuestPreview,
       isRadio,
       radioMeta,
+      isError,
       currentTime,
       duration,
       volume,
@@ -630,6 +633,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       seek,
       setVolume,
       addToQueue,
+      clearQueue,
       shufflePlay
     }}>
       {children}

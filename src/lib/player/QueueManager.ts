@@ -155,6 +155,19 @@ export class QueueManager {
     this.emit();
   }
 
+  clearQueue(): void {
+    if (this._queueIndex >= 0) {
+      this._queue = this._queue.slice(0, this._queueIndex + 1);
+      const remainingIds = new Set(this._queue.map(t => t.id));
+      this._originalQueue = this._originalQueue.filter(t => remainingIds.has(t.id));
+    } else {
+      this._queue = [];
+      this._originalQueue = [];
+      this._queueIndex = -1;
+    }
+    this.emit();
+  }
+
   /**
    * Append a track to the end of the queue.
    * Skips if the last track in the queue is the same track (duplicate-adjacent guard).

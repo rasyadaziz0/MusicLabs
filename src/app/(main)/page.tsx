@@ -150,16 +150,13 @@ export default function Home() {
 
                 <div className="absolute bottom-0 left-0 p-5 w-full bg-gradient-to-t from-black/60 to-transparent">
                   <p className="text-white/90 text-[11px] font-semibold mb-1 uppercase tracking-widest">
-                    {index % 2 === 0 ? 'Made for You' : 'New Release'}
+                    {index % 2 === 0 ? 'Trending' : 'Top Hit'}
                   </p>
                   <h3 className="text-2xl md:text-[28px] font-bold text-white mb-1 line-clamp-2 leading-tight">
-                    {index % 2 === 0 ? 'New Music' : song.name}
+                    {song.name}
                   </h3>
                   <p className="text-[14px] text-white/80 line-clamp-2 leading-snug">
-                    {index % 2 === 0 
-                      ? `${song.artists.primary.map(a => a.name).join(', ')} and more`
-                      : `${song.artists.primary.map(a => a.name).join(', ')}`
-                    }
+                    {song.artists.primary.map((a: any) => a.name).join(', ')}
                   </p>
                 </div>
               </div>

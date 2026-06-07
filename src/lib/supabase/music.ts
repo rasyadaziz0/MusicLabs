@@ -206,13 +206,25 @@ export async function toggleLikedSong(userId: string, trackId: string) {
 }
 
 export async function recordRecentPlay(userId: string, trackId: string) {
-  const { error } = await supabase.from('listening_history').insert({
-    user_id: userId,
-    track_id: trackId,
-  });
+  const { data: existing } = await supabase
+    .from('listening_history')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('track_id', trackId)
+    .maybeSingle();
 
-  if (error) {
-    console.error('Failed to record recent play:', error);
+  if (existing) {
+    const { error } = await supabase
+      .from('listening_history')
+      .update({ played_at: new Date().toISOString() })
+      .eq('id', existing.id);
+    if (error) console.error('Failed to update recent play:', error);
+  } else {
+    const { error } = await supabase.from('listening_history').insert({
+      user_id: userId,
+      track_id: trackId,
+    });
+    if (error) console.error('Failed to record recent play:', error);
   }
 }
 

@@ -13,10 +13,13 @@ type YoutubeSearchItem = {
 };
 
 let yt: Innertube | null = null;
+let lastInit = 0;
 
-async function getYt() {
-  if (!yt) {
+async function getYt(forceRefresh = false) {
+  const now = Date.now();
+  if (!yt || now - lastInit > 1000 * 60 * 10 || forceRefresh) {
     yt = await Innertube.create();
+    lastInit = Date.now();
   }
   return yt;
 }
@@ -130,10 +133,17 @@ export async function GET(request: NextRequest) {
     : title.trim();
 
   try {
-    const youtube = await getYt();
+    let youtube = await getYt();
 
     // Step 1: Search for the track
-    const searchResults = await youtube.music.search(query, { type: 'song' });
+    let searchResults;
+    try {
+      searchResults = await youtube.music.search(query, { type: 'song' });
+    } catch (innerError) {
+      console.warn('Initial search failed, trying to re-initialize Innertube:', getErrorMessage(innerError));
+      youtube = await getYt(true);
+      searchResults = await youtube.music.search(query, { type: 'song' });
+    }
 
     if (!searchResults.songs || !searchResults.songs.contents || searchResults.songs.contents.length === 0) {
       return NextResponse.json({ error: 'No song results found on YouTube Music' }, { status: 404 });
@@ -184,6 +194,7 @@ export async function GET(request: NextRequest) {
 
   } catch (error: unknown) {
     console.error('Audio resolve failed with youtubei.js:', getErrorMessage(error));
+    yt = null;
 
     return NextResponse.json(
       { error: 'Failed to resolve audio' },

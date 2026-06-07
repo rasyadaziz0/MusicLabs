@@ -14,7 +14,7 @@ interface QueuePopupProps {
 }
 
 export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
-  const { queue, queueIndex, playTrack } = usePlayer();
+  const { queue, queueIndex, playTrack, clearQueue, cycleRepeatMode, repeatMode } = usePlayer();
   const popupRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -92,7 +92,7 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               <button
-                onClick={() => { /* TODO: clear queue */ }}
+                onClick={() => clearQueue()}
                 style={{
                   fontSize: '13px',
                   fontWeight: 600,
@@ -107,14 +107,16 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
                 Clear
               </button>
               <button
+                onClick={cycleRepeatMode}
                 style={{
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
-                  color: 'rgba(255,255,255,0.5)',
+                  color: repeatMode !== 'none' ? '#fff' : 'rgba(255,255,255,0.5)',
                   display: 'flex',
                   alignItems: 'center',
                   padding: 0,
+                  position: 'relative',
                 }}
                 aria-label="Loop"
               >
@@ -127,6 +129,19 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
                   <path d="M7 22l-4-4 4-4" />
                   <path d="M21 13v2a4 4 0 0 1-4 4H3" />
                 </svg>
+                {repeatMode === 'one' && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    fontSize: '10px',
+                    fontWeight: 'bold',
+                    color: '#fff',
+                  }}>
+                    1
+                  </span>
+                )}
               </button>
             </div>
           </div>
