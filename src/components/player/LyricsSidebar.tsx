@@ -8,6 +8,7 @@ import { LrcWord } from '@/lib/utils/lrcParser';
 import { Music2 } from 'lucide-react';
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { KaraokeWordAnimator } from './lyrics/KaraokeWordAnimator';
 import { LyricStyleManager } from './lyrics/LyricStyleManager';
 
@@ -58,41 +59,35 @@ export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
 
   useEffect(() => { setMounted(true); }, []);
 
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
-        onClose();
-      }
-    };
-    if (isOpen) document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen, onClose]);
+  // The user explicitly requested to remove click-outside-to-close for the lyrics sidebar
+  // so it behaves like Apple Music (only closes when clicking the lyrics button).
 
-  if (!isOpen || !mounted) return null;
+  if (!mounted) return null;
 
   const content = (
-    <div
-      ref={popupRef}
-      style={{
-        position: 'fixed',
-        top: 0,
-        right: 0,
-        width: '340px',
-        height: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        zIndex: 100,
-        fontFamily: "-apple-system, 'Helvetica Neue', sans-serif",
-        overflow: 'hidden',
-        animation: 'lyricsSlideIn 0.25s ease',
-      }}
-    >
-      <style>{`
-        @keyframes lyricsSlideIn {
-          from { transform: translateX(100%); opacity: 0; }
-          to   { transform: translateX(0);    opacity: 1; }
-        }
-        .lyrics-scroll::-webkit-scrollbar { display: none; }
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          ref={popupRef}
+          initial={{ x: '100%' }}
+          animate={{ x: 0 }}
+          exit={{ x: '100%' }}
+          transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+          style={{
+            position: 'fixed',
+            top: 0,
+            right: 0,
+            width: '340px',
+            height: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            zIndex: 100,
+            fontFamily: "-apple-system, 'Helvetica Neue', sans-serif",
+            overflow: 'hidden',
+          }}
+        >
+          <style>{`
+            .lyrics-scroll::-webkit-scrollbar { display: none; }
         .lyric-btn {
           display: block;
           width: 100%;
@@ -284,7 +279,9 @@ export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
           </div>
         )}
       </div>
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 
   return createPortal(content, document.body);

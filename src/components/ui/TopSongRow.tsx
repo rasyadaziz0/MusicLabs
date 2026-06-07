@@ -3,9 +3,9 @@ import Image from 'next/image';
 import { Play, MoreHorizontal, Share } from 'lucide-react';
 import { Song } from '@/types/music';
 import { getBestImageUrl } from '@/lib/api/musicApi';
-import TrackLikeButton from '@/components/library/TrackLikeButton';
-import AddToPlaylistButton from '@/components/library/AddToPlaylistButton';
-import AddToQueueButton from '@/components/library/AddToQueueButton';
+import TrackLikeButton from '@/components/ui/TrackLikeButton';
+import AddToPlaylistButton from '@/components/ui/AddToPlaylistButton';
+import AddToQueueButton from '@/components/ui/AddToQueueButton';
 
 export function TopSongRow({
   song,

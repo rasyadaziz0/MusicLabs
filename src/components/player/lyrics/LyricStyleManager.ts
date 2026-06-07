@@ -4,9 +4,21 @@ export class LyricStyleManager {
   /* ── Apple Music style: uniform font size, no zoom/scale on active line ── */
   private static readonly UNIFORM_FONT = 'clamp(26px, 3vw, 34px)';
 
-  static getLineStyle(index: number, activeIndex: number) {
+  static getLineStyle(index: number, activeIndex: number, isUserScrolling: boolean = false, isPlaceholder: boolean = false) {
     const dist = Math.abs(index - activeIndex);
     const isActive = index === activeIndex;
+
+    if (isPlaceholder && !isActive && !isUserScrolling) {
+      return {
+        fontSize: this.UNIFORM_FONT,
+        color: 'rgba(255,255,255,0)',
+        filter: 'blur(0px)',
+        scale: 1,
+        opacity: 0,
+        textShadow: 'none',
+        y: 0,
+      };
+    }
 
     if (isActive) {
       return {
@@ -19,6 +31,33 @@ export class LyricStyleManager {
         y: 0,
       };
     }
+
+    if (isUserScrolling) {
+      // Show all lyrics clearly when scrolling
+      return {
+        fontSize: this.UNIFORM_FONT,
+        color: 'rgba(255,255,255,0.40)',
+        filter: 'blur(0px)',
+        scale: 1,
+        opacity: 0.50,
+        textShadow: '0 0 0px rgba(255,255,255,0)',
+        y: 0,
+      };
+    }
+
+    if (index < activeIndex) {
+      // Past lyrics: fade out completely
+      return {
+        fontSize: this.UNIFORM_FONT,
+        color: 'rgba(255,255,255,0)',
+        filter: 'blur(2px)',
+        scale: 1,
+        opacity: 0,
+        textShadow: '0 0 0px rgba(255,255,255,0)',
+        y: -10, // slight upward movement on fade out
+      };
+    }
+
     if (dist === 1) {
       return {
         fontSize: this.UNIFORM_FONT,
@@ -26,7 +65,7 @@ export class LyricStyleManager {
         filter: 'blur(0px)',
         scale: 1,
         opacity: 0.50,
-        textShadow: '0 0 0px transparent',
+        textShadow: '0 0 0px rgba(255,255,255,0)',
         y: 0,
       };
     }
@@ -37,7 +76,7 @@ export class LyricStyleManager {
         filter: 'blur(0.3px)',
         scale: 1,
         opacity: 0.35,
-        textShadow: '0 0 0px transparent',
+        textShadow: '0 0 0px rgba(255,255,255,0)',
         y: 0,
       };
     }
@@ -48,7 +87,7 @@ export class LyricStyleManager {
         filter: 'blur(0.6px)',
         scale: 1,
         opacity: 0.22,
-        textShadow: '0 0 0px transparent',
+        textShadow: '0 0 0px rgba(255,255,255,0)',
         y: 0,
       };
     }
@@ -58,22 +97,28 @@ export class LyricStyleManager {
       filter: 'blur(1px)',
       scale: 1,
       opacity: 0.12,
-      textShadow: '0 0 0px transparent',
+      textShadow: '0 0 0px rgba(255,255,255,0)',
       y: 0,
     };
   }
 
-  static getRomanizationStyle(index: number, activeIndex: number, lineStyleOpacity: number, lineStyleFilter: string) {
-    const dist = Math.abs(index - activeIndex);
+  static getRomanizationStyle(index: number, activeIndex: number, lineStyleOpacity: number, lineStyleFilter: string, isUserScrolling: boolean = false) {
     const isActive = index === activeIndex;
+
+    if (index < activeIndex && !isUserScrolling) {
+      return {
+        fontSize: 'clamp(13px, 1.5vw, 17px)',
+        color: 'rgba(255,255,255,0)',
+        opacity: 0,
+        filter: 'blur(2px)',
+      };
+    }
 
     return {
       fontSize: 'clamp(13px, 1.5vw, 17px)',
       color: isActive
         ? 'rgba(255,255,255,0.55)'
-        : dist === 1
-        ? 'rgba(255,255,255,0.18)'
-        : 'rgba(255,255,255,0.08)',
+        : (isUserScrolling ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.18)'),
       opacity: lineStyleOpacity,
       filter: lineStyleFilter,
     };

@@ -52,6 +52,14 @@ export default function PlayerBar({ isMobile }: PlayerBarProps) {
   const [isLyricsOpen, setIsLyricsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // Automatically close sidebars when Now Playing is opened
+  useEffect(() => {
+    if (isNowPlayingOpen) {
+      setIsLyricsOpen(false);
+      setIsQueueOpen(false);
+    }
+  }, [isNowPlayingOpen]);
+
   const toggleMute = () => {
     if (isMuted) {
       setVolume(prevVolume);

@@ -9,6 +9,7 @@ export interface LrcLine {
   text: string;
   isPlaceholder?: boolean;
   words?: LrcWord[];
+  bgText?: string;
 }
 
 /**
@@ -28,7 +29,16 @@ export function parseLRC(lrc: string): LrcLine[] {
     if (matches.length === 0) continue;
     const stripped = line.replace(timeRegex, '').replace(/\[[^\]]+\]/g, '').trim();
     const isPlaceholder = stripped.length === 0;
-    const text = isPlaceholder ? '...' : stripped;
+    let text = isPlaceholder ? '...' : stripped;
+    let bgText: string | undefined;
+
+    if (!isPlaceholder) {
+      const bgMatch = text.match(/(.+?)\s*\(([^)]+)\)$/);
+      if (bgMatch) {
+        text = bgMatch[1].trim();
+        bgText = bgMatch[2].trim();
+      }
+    }
 
     for (const match of matches) {
       const minutes = parseInt(match[1]);
@@ -42,6 +52,7 @@ export function parseLRC(lrc: string): LrcLine[] {
         time: Math.max(0, shiftedTime),
         text,
         isPlaceholder,
+        bgText,
       });
     }
   }

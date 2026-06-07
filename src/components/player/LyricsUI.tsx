@@ -3,8 +3,7 @@
 import { LrcLine } from '@/lib/utils/lrcParser';
 import { Song } from '@/types/music';
 import { motion } from 'framer-motion';
-import { useState } from 'react';
-
+import { useState, useEffect } from 'react';
 import { LyricsHeader } from './lyrics/LyricsHeader';
 import { LyricLine } from './lyrics/LyricLine';
 import { LyricsSkeleton } from './lyrics/LyricsSkeleton';
@@ -35,7 +34,42 @@ export default function LyricsUI({
   romanizations,
 }: LyricsUIProps) {
   const [showRomanization, setShowRomanization] = useState(true);
+  const [isUserScrolling, setIsUserScrolling] = useState(false);
   const hasRomanizations = romanizations && romanizations.size > 0;
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    let scrollTimeout: NodeJS.Timeout;
+
+    const handleScroll = () => {
+      setIsUserScrolling(true);
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        setIsUserScrolling(false);
+      }, 3000);
+    };
+
+    el.addEventListener('wheel', handleScroll, { passive: true });
+    el.addEventListener('touchmove', handleScroll, { passive: true });
+
+    return () => {
+      el.removeEventListener('wheel', handleScroll);
+      el.removeEventListener('touchmove', handleScroll);
+      clearTimeout(scrollTimeout);
+    };
+  }, [scrollRef]);
+
+  // Auto-scroll logic (moved from useNowPlaying to respect isUserScrolling)
+  useEffect(() => {
+    if (activeIndex < 0 || !scrollRef.current || isUserScrolling) return;
+    if (lines[activeIndex]?.isPlaceholder) return;
+    const el = scrollRef.current.querySelector(
+      `[data-lyric-index="${activeIndex}"]`
+    ) as HTMLElement | null;
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [activeIndex, lines, scrollRef, isUserScrolling]);
 
   return (
     <>
@@ -60,6 +94,7 @@ export default function LyricsUI({
           will-change: transform, filter, opacity, color;
           -webkit-font-smoothing: antialiased;
           -moz-osx-font-smoothing: grayscale;
+          scroll-margin-top: 22vh;
         }
         .lyric-line-wrapper {
           margin-bottom: 20px;
@@ -141,6 +176,7 @@ export default function LyricsUI({
                   activeIndex={activeIndex}
                   isSynced={isSynced}
                   currentTime={currentTime}
+                  isUserScrolling={isUserScrolling}
                   romanText={showRomanization ? romanizations?.get(index) : undefined}
                   onLineClick={onLineClick}
                 />

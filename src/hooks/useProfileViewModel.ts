@@ -4,6 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useLibraryPlaylists, useLikedSongs } from '@/hooks/useMusicLibrary';
 import { getRecentPlays, getListeningStats } from '@/lib/supabase/music';
+import { useFollowCounts } from '@/hooks/useFollow';
+import { getUserProfile } from '@/lib/supabase/social';
 import { useRouter } from 'next/navigation';
 
 export function useProfileViewModel() {
@@ -25,6 +27,14 @@ export function useProfileViewModel() {
     enabled: !!user?.id,
   });
 
+  const { data: followCounts } = useFollowCounts(user?.id ?? null);
+
+  const { data: profile } = useQuery({
+    queryKey: ['userProfile', user?.id],
+    queryFn: () => getUserProfile(user!.id),
+    enabled: !!user?.id,
+  });
+
   const handleSignOut = async () => {
     await signOut();
     router.push('/');
@@ -36,10 +46,13 @@ export function useProfileViewModel() {
     playlistCount: playlists.length,
     likedCount: likedSongs.length,
     listenedCount: listeningStats?.totalPlays ?? 0,
+    followerCount: followCounts?.followers ?? 0,
+    followingCount: followCounts?.following ?? 0,
   };
 
   return {
     user,
+    profile,
     playlists,
     likedSongs,
     recentlyPlayed,

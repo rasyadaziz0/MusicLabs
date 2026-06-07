@@ -13,6 +13,7 @@ interface LyricLineProps {
   isSynced: boolean;
   romanText?: string;
   currentTime: number;
+  isUserScrolling?: boolean;
   onLineClick: (time: number, isPlaceholder?: boolean) => void;
 }
 
@@ -23,16 +24,48 @@ export function LyricLine({
   isSynced,
   romanText,
   currentTime,
+  isUserScrolling = false,
   onLineClick,
 }: LyricLineProps) {
   const isActive = activeIndex === index;
-  const lineStyle = LyricStyleManager.getLineStyle(index, activeIndex);
+  const isPlaceholder = !!line.isPlaceholder;
+  const lineStyle = LyricStyleManager.getLineStyle(index, activeIndex, isUserScrolling, isPlaceholder);
   const romanStyle = LyricStyleManager.getRomanizationStyle(
     index,
     activeIndex,
     lineStyle.opacity,
-    lineStyle.filter
+    lineStyle.filter,
+    isUserScrolling
   );
+
+  // Apple Music logic: dots only show up when active, or if user is scrolling they show up lightly.
+  // Actually, if it's a placeholder, and we want to render dots, we can do it here.
+  const renderContent = () => {
+    if (isPlaceholder) {
+      // The text is probably '...'. Let's render nice pulsing dots if active, or just text if scrolling
+      if (!isActive && !isUserScrolling) return null; // handled by opacity=0 in StyleManager, but can also just return null
+      return (
+        <span style={{ letterSpacing: '4px' }}>● ● ●</span>
+      );
+    }
+    let mainContent;
+    if (isActive && isSynced && line.words && line.words.length > 0) {
+      mainContent = <KaraokeLine line={line} currentTime={currentTime} />;
+    } else {
+      mainContent = line.text;
+    }
+
+    if (line.bgText) {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
+          <span>{mainContent}</span>
+          <span style={{ fontSize: '0.65em', opacity: 0.8, letterSpacing: '0px' }}>{line.bgText}</span>
+        </div>
+      );
+    }
+
+    return mainContent;
+  };
 
   return (
     <div className="lyric-line-wrapper">
@@ -46,12 +79,7 @@ export function LyricLine({
           cursor: isSynced && !line.isPlaceholder ? 'pointer' : 'default',
         }}
       >
-        {/* Karaoke word glow for active line */}
-        {isActive && isSynced && line.words && line.words.length > 0 ? (
-          <KaraokeLine line={line} currentTime={currentTime} />
-        ) : (
-          line.text
-        )}
+        {renderContent()}
       </motion.button>
 
       {/* Romanization subtitle */}

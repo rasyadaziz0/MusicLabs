@@ -18,7 +18,7 @@ interface AuthContextType {
   signOut: () => Promise<AuthActionResult>;
   resetPasswordForEmail: (email: string) => Promise<AuthActionResult>;
   updatePassword: (password: string) => Promise<AuthActionResult>;
-  updateProfile: (data: { name?: string; avatarUrl?: string }) => Promise<AuthActionResult>;
+  updateProfile: (data: { username?: string; name?: string; bio?: string; avatarUrl?: string }) => Promise<AuthActionResult>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -166,22 +166,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error: null };
   };
 
-  const updateProfile = async (data: { name?: string; avatarUrl?: string }) => {
-    const updateData: any = {};
-    if (data.name !== undefined) updateData.name = data.name;
-    if (data.avatarUrl !== undefined) updateData.avatar_url = data.avatarUrl;
+  const updateProfile = async (data: { username?: string; name?: string; bio?: string; avatarUrl?: string }) => {
+    const authUpdateData: any = {};
+    if (data.name !== undefined) authUpdateData.name = data.name;
+    if (data.avatarUrl !== undefined) authUpdateData.avatar_url = data.avatarUrl;
 
-    const { data: userData, error } = await supabase.auth.updateUser({
-      data: updateData
+    const { data: userData, error: authError } = await supabase.auth.updateUser({
+      data: authUpdateData
     });
 
-    if (error) {
-      console.error('Auth updateProfile gagal:', error);
-      return { error: 'Gagal memperbarui profil. Silakan coba lagi.' };
+    if (authError) {
+      console.error('Auth updateProfile gagal (auth):', authError);
+      return { error: 'Gagal memperbarui profil auth. Silakan coba lagi.' };
     }
 
-    // Update local state immediately
     if (userData.user) {
+      // Check for unique username
+      if (data.username !== undefined) {
+        const { data: existingUser, error: checkError } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('username', data.username)
+          .neq('id', userData.user.id)
+          .maybeSingle();
+          
+        if (checkError) {
+          console.error('Error checking username:', checkError);
+        } else if (existingUser) {
+          return { error: 'Nama pengguna sudah terpakai oleh user lain. Silakan pilih yang lain.' };
+        }
+      }
+
+      // Update public.profiles table
+      const profileUpdates: any = {};
+      if (data.username !== undefined) profileUpdates.username = data.username;
+      if (data.name !== undefined) profileUpdates.display_name = data.name;
+      if (data.bio !== undefined) profileUpdates.bio = data.bio;
+      if (data.avatarUrl !== undefined) profileUpdates.avatar_url = data.avatarUrl;
+
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update(profileUpdates)
+        .eq('id', userData.user.id);
+        
+      if (profileError) {
+        console.error('Auth updateProfile gagal (profiles):', profileError);
+        // We still updated auth, so maybe we don't throw, or we return error
+      }
+
       setUser(userData.user);
     }
     

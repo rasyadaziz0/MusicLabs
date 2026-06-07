@@ -68,23 +68,7 @@ export function useNowPlaying(isOpen: boolean) {
     return lo;
   }, [currentTime, isSynced, lines]);
 
-  useEffect(() => {
-    if (!isOpen || activeIndex < 0 || !lyricsScrollRef.current) return;
-    if (lines[activeIndex]?.isPlaceholder) return;
-    const el = lyricsScrollRef.current.querySelector(
-      `[data-lyric-index="${activeIndex}"]`,
-    ) as HTMLElement | null;
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, [activeIndex, isOpen, lines]);
 
-  useEffect(() => {
-    if (!isOpen || activeIndex < 0 || !mobileLyricsScrollRef.current) return;
-    if (lines[activeIndex]?.isPlaceholder) return;
-    const el = mobileLyricsScrollRef.current.querySelector(
-      `[data-lyric-index="${activeIndex}"]`,
-    ) as HTMLElement | null;
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, [activeIndex, isOpen, isLyricsOpen, lines]);
 
   useEffect(() => {
     if (!isOpen) {

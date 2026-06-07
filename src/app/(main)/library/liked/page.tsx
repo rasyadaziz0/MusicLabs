@@ -8,9 +8,9 @@ import { useAuth } from '@/context/AuthContext';
 import { useLikedSongs } from '@/hooks/useMusicLibrary';
 import { AppleMusicHeader } from '@/components/ui/AppleMusicHeader';
 import { AppleMusicTrackList } from '@/components/ui/AppleMusicTrackList';
-import TrackLikeButton from '@/components/library/TrackLikeButton';
-import AddToQueueButton from '@/components/library/AddToQueueButton';
-import AddToPlaylistButton from '@/components/library/AddToPlaylistButton';
+import TrackLikeButton from '@/components/ui/TrackLikeButton';
+import AddToQueueButton from '@/components/ui/AddToQueueButton';
+import AddToPlaylistButton from '@/components/ui/AddToPlaylistButton';
 
 export default function LikedSongsPage() {
   const { user, signInWithGoogle } = useAuth();

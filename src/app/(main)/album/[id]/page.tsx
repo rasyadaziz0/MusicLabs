@@ -7,9 +7,9 @@ import { MoreHorizontal, Share } from 'lucide-react';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
-import TrackLikeButton from '@/components/library/TrackLikeButton';
-import AddToQueueButton from '@/components/library/AddToQueueButton';
-import AddToPlaylistButton from '@/components/library/AddToPlaylistButton';
+import TrackLikeButton from '@/components/ui/TrackLikeButton';
+import AddToQueueButton from '@/components/ui/AddToQueueButton';
+import AddToPlaylistButton from '@/components/ui/AddToPlaylistButton';
 import { AppleMusicHeader } from '@/components/ui/AppleMusicHeader';
 import { AppleMusicTrackList } from '@/components/ui/AppleMusicTrackList';
 
