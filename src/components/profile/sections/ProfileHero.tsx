@@ -2,7 +2,8 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { LogOut, ListMusic, Heart, Users, UserCheck, User, Share2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { LogOut, ListMusic, Heart, Users, UserCheck, User, Share2, ArrowLeft } from 'lucide-react';
 import { UserProfile } from '@/lib/supabase/social';
 
 interface ProfileHeroProps {
@@ -27,6 +28,7 @@ export function ProfileHero({
   setFollowModalTab,
   setFollowModalOpen,
 }: ProfileHeroProps) {
+  const router = useRouter();
   const avatarUrl = profile?.avatar_url || user.user_metadata?.avatar_url?.trim().replace(/^`+|`+$/g, '');
   const displayName = profile?.display_name || profile?.username || user.user_metadata?.name || user.user_metadata?.full_name || 'User';
   const usernameDisplay = profile?.username;
@@ -44,6 +46,20 @@ export function ProfileHero({
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-[#FA243C]/[0.06] blur-[120px]" />
       </div>
+
+      {/* Back button */}
+      <button
+        onClick={() => {
+          if (window.history.length > 2) {
+            router.back();
+          } else {
+            router.push('/');
+          }
+        }}
+        className="absolute top-6 left-6 p-2 rounded-full bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-colors z-20 md:hidden"
+      >
+        <ArrowLeft size={20} />
+      </button>
 
       <div className="relative flex flex-col items-center pt-10 md:pt-14 pb-8 px-6">
         {/* Avatar */}
@@ -104,23 +120,23 @@ export function ProfileHero({
         </button>
 
         {/* Stats row */}
-        <div className="flex items-center gap-8 md:gap-12 mt-7">
+        <div className="flex items-center gap-3 sm:gap-6 md:gap-12 mt-7 w-full justify-center overflow-x-auto scrollbar-hide max-w-full">
           <StatItem value={stats.playlistCount} label="Playlists" icon={<ListMusic size={15} className="text-[#FA243C]" />} />
-          <div className="w-px h-8 bg-white/10" />
+          <div className="w-px h-8 bg-white/10 shrink-0" />
           <StatItem value={stats.likedCount} label="Liked" icon={<Heart size={15} className="text-[#FA243C]" />} />
-          <div className="w-px h-8 bg-white/10" />
+          <div className="w-px h-8 bg-white/10 shrink-0" />
           <button
             type="button"
             onClick={() => { setFollowModalTab('followers'); setFollowModalOpen(true); }}
-            className="group cursor-pointer"
+            className="group cursor-pointer shrink-0"
           >
             <StatItem value={stats.followerCount} label="Followers" icon={<Users size={15} className="text-[#FA243C]" />} clickable />
           </button>
-          <div className="w-px h-8 bg-white/10" />
+          <div className="w-px h-8 bg-white/10 shrink-0" />
           <button
             type="button"
             onClick={() => { setFollowModalTab('following'); setFollowModalOpen(true); }}
-            className="group cursor-pointer"
+            className="group cursor-pointer shrink-0"
           >
             <StatItem value={stats.followingCount} label="Following" icon={<UserCheck size={15} className="text-[#FA243C]" />} clickable />
           </button>
@@ -137,15 +153,6 @@ export function ProfileHero({
               Edit Profile
             </span>
           </Link>
-          <button
-            onClick={handleSignOut}
-            className="px-6 py-2 rounded-full bg-transparent border border-[#FA243C]/30 text-[13px] font-semibold text-[#FA243C] hover:bg-[#FA243C]/10 transition-colors"
-          >
-            <span className="flex items-center gap-2">
-              <LogOut size={14} />
-              Sign Out
-            </span>
-          </button>
         </div>
       </div>
     </div>

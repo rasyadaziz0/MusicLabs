@@ -20,6 +20,16 @@ export interface FollowCounts {
 export async function followUser(followerId: string, followingId: string) {
   if (followerId === followingId) throw new Error('Cannot follow yourself');
 
+  // Check if already following to avoid 409 Conflict on double click or out-of-sync UI
+  const { data: existing } = await supabase
+    .from('follows')
+    .select('follower_id')
+    .eq('follower_id', followerId)
+    .eq('following_id', followingId)
+    .maybeSingle();
+
+  if (existing) return true;
+
   const { error } = await supabase.from('follows').insert({
     follower_id: followerId,
     following_id: followingId,
