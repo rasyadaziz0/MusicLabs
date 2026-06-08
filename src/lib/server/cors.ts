@@ -87,7 +87,18 @@ export function enforceCors(
   const allowCredentials = config.allowCredentials ?? false;
   const origin = getRequestOrigin(request);
 
-  if (!origin || !allowedOrigins.has(origin)) {
+  if (!origin) {
+    // Allow direct browser navigation in development
+    if (process.env.NODE_ENV !== 'production') {
+      return { corsHeaders: {} };
+    }
+    return {
+      corsHeaders: {},
+      response: NextResponse.json({ error: 'Forbidden origin' }, { status: 403 }),
+    };
+  }
+
+  if (!allowedOrigins.has(origin)) {
     return {
       corsHeaders: {},
       response: NextResponse.json({ error: 'Forbidden origin' }, { status: 403 }),

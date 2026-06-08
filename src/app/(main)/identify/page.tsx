@@ -56,7 +56,7 @@ export default function IdentifyPage() {
   const hasResults = state === 'results' || state === 'no-match' || state === 'error';
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-[#000000] relative overflow-hidden text-white font-sans selection:bg-white/30">
+    <div className="min-h-[100dvh] flex flex-col relative overflow-hidden text-white font-sans selection:bg-white/30">
       
       <AnimatedBackground isRecordingOrProcessing={isRecordingOrProcessing} />
 

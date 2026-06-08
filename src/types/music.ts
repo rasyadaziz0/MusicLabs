@@ -64,6 +64,7 @@ export interface Song {
     title: string;          // e.g. "Artist - Song Title"
     station: string;        // Station name
   };
+  genre?: string;           // Primary genre (e.g. "Pop", "Rock") — from iTunes primaryGenreName
 }
 
 /** Shape returned by radio-browser.info */

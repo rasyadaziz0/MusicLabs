@@ -72,6 +72,7 @@ export function mapITunesToSong(item: ITunesResult): Song {
     ].filter(i => i.url),
     downloadUrl: [],
     preview: item.previewUrl || '',
+    genre: item.primaryGenreName || '',
   };
 }
 

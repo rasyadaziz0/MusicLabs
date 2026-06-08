@@ -3,12 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { LrcLine } from '@/lib/utils/lrcParser';
 
-/**
- * Hook that fetches romanization for non-Latin lyrics lines via Gemini AI.
- * Returns a Map of line-index → romanized text.
- * Caches results per trackId to avoid redundant API calls.
- */
-
 // In-memory cache per track
 const romanizationCache = new Map<string, Map<number, string>>();
 

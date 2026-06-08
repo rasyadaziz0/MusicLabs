@@ -1,12 +1,25 @@
 'use client';
 
 import { usePlayer } from '@/context/PlayerContext';
-import { getBestImageUrl } from '@/lib/api/musicApi';
-import { formatTime } from '@/lib/utils';
-import Image from 'next/image';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { restrictToVerticalAxis, restrictToWindowEdges } from '@dnd-kit/modifiers';
+import { QueuePopupController } from './QueuePopupController';
+import { SortableTrackRow } from './SortableTrackRow';
 
 interface QueuePopupProps {
   isOpen: boolean;
@@ -14,17 +27,29 @@ interface QueuePopupProps {
 }
 
 export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
-  const { queue, queueIndex, playTrack, clearQueue, cycleRepeatMode, repeatMode } = usePlayer();
+  const player = usePlayer();
+  // Instantiate the controller pattern (OOP approach) to handle the complex queue mapping and DnD logic
+  const controller = useMemo(() => new QueuePopupController(player), [player]);
+
   const popupRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   if (!mounted) return null;
-
-  const upNext = queue.slice(queueIndex + 1);
 
   const content = (
     <AnimatePresence>
@@ -65,6 +90,9 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
         .queue-track-row:hover .queue-duration {
           color: rgba(255,255,255,0.6);
         }
+        .queue-track-row:hover .queue-drag-handle {
+          color: rgba(255,255,255,0.6);
+        }
         .queue-list::-webkit-scrollbar { width: 4px; }
         .queue-list::-webkit-scrollbar-track { background: transparent; }
         .queue-list::-webkit-scrollbar-thumb {
@@ -92,7 +120,7 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
               <button
-                onClick={() => clearQueue()}
+                onClick={controller.clearQueue}
                 style={{
                   fontSize: '13px',
                   fontWeight: 600,
@@ -107,12 +135,12 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
                 Clear
               </button>
               <button
-                onClick={cycleRepeatMode}
+                onClick={controller.cycleRepeatMode}
                 style={{
                   background: 'none',
                   border: 'none',
                   cursor: 'pointer',
-                  color: repeatMode !== 'none' ? '#fff' : 'rgba(255,255,255,0.5)',
+                  color: controller.repeatMode !== 'none' ? '#fff' : 'rgba(255,255,255,0.5)',
                   display: 'flex',
                   alignItems: 'center',
                   padding: 0,
@@ -129,7 +157,7 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
                   <path d="M7 22l-4-4 4-4" />
                   <path d="M21 13v2a4 4 0 0 1-4 4H3" />
                 </svg>
-                {repeatMode === 'one' && (
+                {controller.repeatMode === 'one' && (
                   <span style={{
                     position: 'absolute',
                     top: '50%',
@@ -157,7 +185,7 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
               scrollbarColor: 'rgba(255,255,255,0.15) transparent',
             }}
           >
-            {upNext.length === 0 ? (
+            {!controller.hasUpcomingTracks ? (
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -169,80 +197,25 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
                 </p>
               </div>
             ) : (
-              upNext.map((track, i) => (
-                <div
-                  key={`${track.id}-${i}`}
-                  className="queue-track-row"
-                  onClick={() => playTrack(track, queue)}
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={controller.handleDragEnd}
+                modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
+              >
+                <SortableContext
+                  items={controller.sortableItems.map(t => t.uniqueId)}
+                  strategy={verticalListSortingStrategy}
                 >
-                  {/* Album art */}
-                  <div style={{
-                    width: '42px',
-                    height: '42px',
-                    borderRadius: '5px',
-                    flexShrink: 0,
-                    overflow: 'hidden',
-                    border: '0.5px solid rgba(255,255,255,0.08)',
-                    background: 'rgba(255,255,255,0.06)',
-                    position: 'relative',
-                  }}>
-                    {getBestImageUrl(track.image) ? (
-                      <Image
-                        src={getBestImageUrl(track.image)!}
-                        alt={track.name}
-                        fill
-                        sizes="42px"
-                        style={{ objectFit: 'cover' }}
-                      />
-                    ) : (
-                      <div style={{ width: '100%', height: '100%', background: 'rgba(255,255,255,0.08)' }} />
-                    )}
-                  </div>
-
-                  {/* Track info */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{
-                      fontSize: '14px',
-                      fontWeight: 500,
-                      color: '#fff',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      letterSpacing: '-0.1px',
-                      lineHeight: 1.3,
-                      margin: 0,
-                    }}>
-                      {track.name}
-                    </p>
-                    <p style={{
-                      fontSize: '12px',
-                      color: 'rgba(255,255,255,0.45)',
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      marginTop: '2px',
-                      margin: '2px 0 0',
-                    }}>
-                      {track.artists.primary.map((a: { name: string }) => a.name).join(', ')}
-                    </p>
-                  </div>
-
-                  {/* Duration */}
-                  <div
-                    className="queue-duration"
-                    style={{
-                      fontSize: '12px',
-                      color: 'rgba(255,255,255,0.35)',
-                      fontVariantNumeric: 'tabular-nums',
-                      fontWeight: 500,
-                      flexShrink: 0,
-                      transition: 'color 0.12s ease',
-                    }}
-                  >
-                    {formatTime(track.duration)}
-                  </div>
-                </div>
-              ))
+                  {controller.sortableItems.map((track) => (
+                    <SortableTrackRow
+                      key={track.uniqueId}
+                      track={track}
+                      onClick={() => controller.playTrack(track)}
+                    />
+                  ))}
+                </SortableContext>
+              </DndContext>
             )}
           </div>
         </motion.div>

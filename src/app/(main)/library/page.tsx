@@ -1,22 +1,25 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronRight, Music, Mic, SquareStack, Library, Heart, PlusSquare } from 'lucide-react';
+import { ChevronRight, Music, Mic, SquareStack, Library, Heart, PlusSquare, Sparkles } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useLibraryPlaylists } from '@/hooks/useMusicLibrary';
+import { useDiscoverWeekly } from '@/hooks/useDiscoverWeekly';
 import Image from 'next/image';
 
 const libraryMenu = [
   { label: 'Playlists', icon: Library, href: '/library/playlists' },
   { label: 'Favourite Songs', icon: Heart, href: '/library/liked' },
-  { label: 'Artists', icon: Mic, href: '#' },
-  { label: 'Albums', icon: SquareStack, href: '#' },
-  { label: 'Songs', icon: Music, href: '#' },
+  { label: 'Artists', icon: Mic, href: '/library/artists' },
+  { label: 'Albums', icon: SquareStack, href: '/library/albums' },
+  { label: 'Songs', icon: Music, href: '/library/songs' },
+  { label: 'Made For You', icon: Sparkles, href: '/made-for-you' },
 ];
 
 export default function LibraryPage() {
   const { user, signInWithGoogle } = useAuth();
   const { data: playlists = [], isLoading: isPlaylistsLoading } = useLibraryPlaylists();
+  const { hasPlaylist, playlistId } = useDiscoverWeekly();
 
   if (!user) {
     return (
@@ -60,6 +63,33 @@ export default function LibraryPage() {
         </div>
       </div>
 
+      {/* Discover Weekly Card removed from Mobile (moved to Sidebar/Home) */}
+      <div className="hidden md:block px-5 md:px-8 mt-8">
+        <Link
+          href="/made-for-you"
+          className="block rounded-3xl border border-white/10 bg-gradient-to-br from-[#FA243C]/15 via-[#2F2FE4]/10 to-transparent p-5 hover:border-white/15 transition-colors"
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/60">
+                <Sparkles size={12} className="text-[#FA243C]" />
+                Personal
+              </div>
+              <h2 className="text-[22px] font-bold text-white tracking-tight">Made For You</h2>
+              <p className="mt-2 max-w-2xl text-sm text-white/55">
+                Buka mix personal dari history, likes, mood, dan Discover Weekly kamu.
+              </p>
+              {hasPlaylist && playlistId ? (
+                <p className="mt-3 text-xs font-medium text-[#FA243C]">Discover Weekly aktif dan siap diputar</p>
+              ) : (
+                <p className="mt-3 text-xs font-medium text-white/45">Belum ada Discover Weekly? tenang, sekarang ada halaman khususnya.</p>
+              )}
+            </div>
+            <ChevronRight size={20} className="mt-1 text-white/35" />
+          </div>
+        </Link>
+      </div>
+
       {/* Recently Added */}
       <div className="px-5 md:px-8 mt-10">
         <h2 className="text-[22px] font-bold text-white mb-5 tracking-tight">Recently Added</h2>
@@ -67,7 +97,7 @@ export default function LibraryPage() {
         {isPlaylistsLoading ? (
            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-6 md:gap-x-6 md:gap-y-8">
              {[...Array(6)].map((_, i) => (
-               <div key={i} className="aspect-square bg-white/5 rounded-xl md:rounded-2xl animate-pulse" />
+               <div key={i} className="aspect-square rounded-xl md:rounded-2xl animate-shimmer" />
              ))}
            </div>
         ) : playlists.length > 0 ? (

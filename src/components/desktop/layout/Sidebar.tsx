@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, LayoutGrid, Radio, Clock, Mic, SquareStack, Music, UserSquare, Search, ChevronDown, ChevronRight, Pin, Star, LogOut, PlusSquare } from 'lucide-react';
+import { Home, LayoutGrid, Radio, Clock, Mic, SquareStack, Music, UserSquare, Search, ChevronDown, ChevronRight, Pin, Star, LogOut, PlusSquare, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLibraryPlaylists } from '@/hooks/useMusicLibrary';
+import { useDiscoverWeekly } from '@/hooks/useDiscoverWeekly';
 import { useAuth } from '@/context/AuthContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
 import IdentifyButton from '../../identify/IdentifyButton';
@@ -18,12 +19,12 @@ const navItems = [
 ];
 
 const libraryItems = [
-  { icon: Clock, label: 'Recently Added', href: '#' },
+  { icon: Clock, label: 'Recently Added', href: '/library/recent' },
   { icon: PlusSquare, label: 'New Playlist', href: '/playlist/create' },
-  { icon: Mic, label: 'Artists', href: '#' },
-  { icon: SquareStack, label: 'Albums', href: '#' },
-  { icon: Music, label: 'Songs', href: '#' },
-  { icon: UserSquare, label: 'Made for You', href: '#' },
+  // Artists position was here, we will inject Discover Weekly here dynamically
+  { icon: SquareStack, label: 'Albums', href: '/library/albums' },
+  { icon: Music, label: 'Songs', href: '/library/songs' },
+  { icon: UserSquare, label: 'Made for You', href: '/made-for-you' },
 ];
 
 export default function Sidebar() {
@@ -32,6 +33,33 @@ export default function Sidebar() {
   const { user, signOut } = useAuth();
   const { data: playlists = [] } = useLibraryPlaylists();
   const [isPinsOpen, setIsPinsOpen] = useState(true);
+
+  const { hasPlaylist, playlistId, generatedAt } = useDiscoverWeekly();
+  const [hasSeenLatest, setHasSeenLatest] = useState(true);
+
+  const discoverWeeklyHref = playlistId ? `/playlist/${playlistId}` : '#';
+  const isDiscoverWeeklyActive = pathname === discoverWeeklyHref;
+
+  useEffect(() => {
+    if (!generatedAt) return;
+    const seenAt = localStorage.getItem('discover_weekly_seen_at');
+    if (seenAt === generatedAt) {
+      setHasSeenLatest(true);
+    } else {
+      setHasSeenLatest(false);
+    }
+  }, [generatedAt]);
+
+  useEffect(() => {
+    if (isDiscoverWeeklyActive && generatedAt && !hasSeenLatest) {
+      localStorage.setItem('discover_weekly_seen_at', generatedAt);
+      setHasSeenLatest(true);
+    }
+  }, [isDiscoverWeeklyActive, generatedAt, hasSeenLatest]);
+
+  // Check if it was updated in the last 2 days AND the user hasn't seen it yet
+  const isWithinTwoDays = generatedAt && (Date.now() - new Date(generatedAt).getTime() < 2 * 24 * 60 * 60 * 1000);
+  const isRecentlyUpdated = isWithinTwoDays && !hasSeenLatest;
 
   const isGuest = !user;
 
@@ -89,7 +117,36 @@ export default function Sidebar() {
                 </button>
               </div>
 
-              {libraryItems.map((item) => {
+              {/* Item sebelum Artists */}
+              {libraryItems.slice(0, 2).map((item) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.href;
+                return (
+                  <Link key={item.label} href={item.href} className={navLinkClass(isActive)}>
+                    <Icon size={18} className="text-[#FA243C]" />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+
+              {/* Discover Weekly menggantikan Artists JIKA sudah ada. Jika belum, tampilkan Artists. */}
+              {hasPlaylist ? (
+                <Link key="discover-weekly" href={discoverWeeklyHref} className={navLinkClass(isDiscoverWeeklyActive)}>
+                  <Sparkles size={18} className={isRecentlyUpdated ? "text-white" : "text-[#FA243C]"} />
+                  <span className={isRecentlyUpdated ? "text-white font-bold" : ""}>
+                    Discover Weekly
+                    {isRecentlyUpdated && <span className="ml-2 text-[9px] bg-white/20 text-white px-1.5 py-0.5 rounded-full">NEW</span>}
+                  </span>
+                </Link>
+              ) : (
+                <Link key="Artists" href="/library/artists" className={navLinkClass(pathname === '/library/artists')}>
+                  <Mic size={18} className="text-[#FA243C]" />
+                  <span>Artists</span>
+                </Link>
+              )}
+
+              {/* Item setelah Artists (Albums, Songs, Made for You) */}
+              {libraryItems.slice(2).map((item) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href;
                 return (
@@ -116,11 +173,13 @@ export default function Sidebar() {
                 <Star size={18} className="text-[#FA243C]" />
                 <span>Favourite Songs</span>
               </Link>
-              {playlists.map(playlist => (
-                <Link key={playlist.id} href={`/playlist/${playlist.id}`} className={navLinkClass(pathname === `/playlist/${playlist.id}`)}>
-                  <Music size={18} className="text-[#FA243C]" />
-                  <span className="truncate">{playlist.name}</span>
-                </Link>
+              {playlists
+                .filter(playlist => playlist.name !== 'Discover Weekly')
+                .map(playlist => (
+                  <Link key={playlist.id} href={`/playlist/${playlist.id}`} className={navLinkClass(pathname === `/playlist/${playlist.id}`)}>
+                    <Music size={18} className="text-[#FA243C]" />
+                    <span className="truncate">{playlist.name}</span>
+                  </Link>
               ))}
             </div>
           </div>

@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-A full-featured music streaming web app inspired by Spotify, dibangun dari scratch dengan backend sendiri (tanpa Spotify API). Mendukung playback background, realtime lyrics sync, playlist management per user, Google OAuth login, dan installable di HP sebagai PWA.
+A full-featured music streaming web app inspired by Spotify, dibangun dari scratch dengan backend sendiri (tanpa Spotify API). Mendukung playback background, realtime lyrics sync, playlist management per user (termasuk kolaborasi), Google OAuth login, user profiles, integrasi AI, dan installable di HP sebagai PWA.
 
 ---
 
@@ -17,6 +17,7 @@ A full-featured music streaming web app inspired by Spotify, dibangun dari scrat
 | Animation | Framer Motion + GSAP |
 | PWA | next-pwa / custom Service Worker |
 | Audio Engine | Web Audio API + HTML5 Audio + Media Session API |
+| AI Integration | Google Gemini API |
 
 ---
 
@@ -37,6 +38,41 @@ A full-featured music streaming web app inspired by Spotify, dibangun dari scrat
 - Smooth page transitions via Framer Motion (layout animations)
 - Waveform / vinyl animations untuk now playing
 - GSAP untuk entrance animation & scroll effects
+
+---
+
+## 🌟 Advanced Features & Hidden Gems
+
+Selain fitur standar pemutar musik, proyek ini telah berkembang pesat dengan berbagai fitur tingkat lanjut yang beroperasi di *under-the-hood*:
+
+### 1. AI Discover Weekly (Powered by Gemini AI)
+- Generator rekomendasi playlist berbasis AI. Membaca `listening_history` user dan menggunakan Google Gemini API untuk mem-prompt 30 rekomendasi lagu baru setiap minggu.
+- Tereksekusi via Cron Jobs (`/api/cron/discover`).
+
+### 2. Live Radio Stations
+- Direktori lengkap radio FM/AM dari seluruh dunia (Halaman `/radio` & `/api/radio/metadata`).
+- Memiliki filter kategori (Pop, News, Anime, dsb.) dengan arsitektur UI/Logic terpisah (`useRadioController` dan `RadioCards`).
+
+### 3. Your Music Recap (Spotify Wrapped Style)
+- Tampilan infografis kebiasaan mendengarkan musik user (Halaman `/recap`).
+- Melacak *Top Tracks*, *Top Artists*, dan persentase pendengaran berdasarkan data bulanan atau *all-time*.
+
+### 4. Cross-Platform Playlist Importer
+- Fitur migrasi *playlist* dari platform raksasa seperti Spotify dan Apple Music ke dalam aplikasi kita (`/import/spotify` dan `AppleMusicTrackList`).
+
+### 5. Romanized Lyrics & AI Transliteration
+- API khusus (`/api/romanize`) dan Hook (`useRomanization`) untuk menerjemahkan lirik berhuruf non-Latin (Hangul/K-Pop, Kanji/J-Pop) menjadi huruf alfabet (romaji/romanisasi) secara real-time.
+
+### 6. Audio Recognition (Shazam Clone)
+- Mendeteksi lagu menggunakan input dari mikrofon perangkat (`/identify` dan `/api/identify`).
+
+### 7. Collaborative Playlists & User Profiles
+- Dukungan multi-user untuk mengedit satu playlist bersama (`playlist_collaborators`).
+- Profil publik pengguna (`/[username]`) dan fitur pencarian pengguna (`/api/users/search`).
+
+### 8. YouTube Audio Resolving & Previews
+- Resolusi audio tingkat lanjut yang mengekstrak langsung dari ID Video YouTube (`/api/audio/[videoId]` dan `/api/audio/resolve`).
+- Dukungan memutar *preview* lagu pendek (`/api/preview`).
 
 ---
 
@@ -374,6 +410,8 @@ export function useLyrics(trackId: string | null, currentTime: number) {
 ## Database Schema (Supabase)
 
 > **Catatan penting:** Supabase **hanya** menyimpan data yang user-owned (playlist, liked tracks, history, profile). Data musik (tracks, albums, artists) diambil dari Music API (YouTube Music-compatible) — tidak perlu di-duplikasi ke Supabase.
+> 
+> **Pembaruan Arsitektur (OOP Refactor):** Interaksi ke Supabase kini difaktorkan dalam arsitektur **OOP Repository Pattern** di `src/lib/supabase/repositories/` untuk memastikan *Clean Code*. Repository yang tersedia: `PlaylistRepository`, `LikeRepository`, dan `HistoryRepository`. Jangan menaruh query SQL mentah di komponen UI.
 
 ```sql
 -- Users (auto-created via Supabase Auth trigger)

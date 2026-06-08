@@ -1,10 +1,13 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
+import toast from 'react-hot-toast';
 import { Volume2, VolumeX, MessageSquare, ListMusic, MoreHorizontal, Share, Link2 } from 'lucide-react';
 import QueuePopup from '@/components/player/QueuePopup';
 import TrackLikeButton from '@/components/ui/TrackLikeButton';
 import AddToPlaylistButton from '@/components/ui/AddToPlaylistButton';
 import AddToQueueButton from '@/components/ui/AddToQueueButton';
+import { usePlayer } from '@/context/PlayerContext';
+import { Timer } from 'lucide-react';
 
 export interface DesktopExtraControlsProps {
   currentTrack: any;
@@ -25,6 +28,7 @@ export default function DesktopExtraControls({
   isVolumeSliderOpen, setIsVolumeSliderOpen,
   isQueueOpen, setIsQueueOpen, isLyricsOpen, setIsLyricsOpen
 }: DesktopExtraControlsProps) {
+  const { setSleepTimer, clearSleepTimer, sleepTimerEndTime } = usePlayer();
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
 
@@ -41,14 +45,14 @@ export default function DesktopExtraControls({
   const handleShare = () => {
     if (!currentTrack?.album?.id) return;
     navigator.clipboard.writeText(`${window.location.origin}/album/${currentTrack.album.id}`);
-    alert('Album link copied to clipboard!');
+    toast.success('Album link copied to clipboard!');
     setIsMenuOpen(false);
   };
 
   const handleCopyLink = () => {
     if (!currentTrack) return;
     navigator.clipboard.writeText(`${window.location.origin}/search?q=${encodeURIComponent(currentTrack.name)}`);
-    alert('Song search link copied!');
+    toast.success('Song search link copied!');
     setIsMenuOpen(false);
   };
 
@@ -91,6 +95,39 @@ export default function DesktopExtraControls({
                 <span>Copy Link</span>
                 <Link2 size={15} className="text-white/40 group-hover:text-white/80 transition-colors" />
               </button>
+
+              <div className="h-px bg-white/5 my-1 mx-3" />
+
+              <div className="px-4 py-2">
+                <div className="text-[12px] text-white/50 mb-2 flex items-center gap-1.5">
+                  <Timer size={14} /> Sleep Timer
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {[15, 30, 45, 60].map(mins => (
+                    <button
+                      key={mins}
+                      onClick={() => {
+                        setSleepTimer(mins);
+                        setIsMenuOpen(false);
+                      }}
+                      className="flex-1 text-[11px] bg-white/10 hover:bg-white/20 text-white px-1 py-1 rounded transition-colors text-center"
+                    >
+                      {mins}m
+                    </button>
+                  ))}
+                  {sleepTimerEndTime && (
+                    <button
+                      onClick={() => {
+                        clearSleepTimer();
+                        setIsMenuOpen(false);
+                      }}
+                      className="w-full mt-1.5 text-[11px] bg-[#FA243C]/20 hover:bg-[#FA243C]/40 text-[#FA243C] py-1.5 rounded transition-colors"
+                    >
+                      Batalkan Timer
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           )}
         </div>

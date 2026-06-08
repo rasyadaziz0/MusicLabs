@@ -5,15 +5,23 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import {
   addTrackToPlaylist,
+  getAllPlaylistTracksForUser,
   getLikedSongIds,
   getLikedSongsWithDetails,
   getPlaylistTracks,
+  getRecentPlays,
   getUserPlaylists,
   removeTrackFromPlaylist,
+  reorderPlaylistTracks,
   toggleLikedSong,
   togglePinPlaylist,
   deletePlaylist,
 } from '@/lib/supabase/music';
+import {
+  buildLibraryAlbums,
+  buildLibraryArtists,
+  buildLibrarySongs,
+} from '@/lib/library/deriveLibrary';
 
 export function useLibraryPlaylists() {
   const { user } = useAuth();
@@ -50,6 +58,64 @@ export function useLikedSongs() {
     queryFn: () => getLikedSongsWithDetails(user!.id),
     enabled: Boolean(user?.id),
   });
+}
+
+export function useLibraryCollectionData() {
+  const { user } = useAuth();
+
+  const likedSongsQuery = useLikedSongs();
+  const recentSongsQuery = useQuery({
+    queryKey: ['recent-library-songs', user?.id],
+    queryFn: () => getRecentPlays(user!.id),
+    enabled: Boolean(user?.id),
+  });
+  const playlistSongsQuery = useQuery({
+    queryKey: ['library-playlist-songs', user?.id],
+    queryFn: () => getAllPlaylistTracksForUser(user!.id),
+    enabled: Boolean(user?.id),
+  });
+
+  const songs = useMemo(
+    () => buildLibrarySongs(likedSongsQuery.data ?? [], recentSongsQuery.data ?? [], playlistSongsQuery.data ?? []),
+    [likedSongsQuery.data, recentSongsQuery.data, playlistSongsQuery.data]
+  );
+
+  return {
+    songs,
+    likedSongs: likedSongsQuery.data ?? [],
+    recentSongs: recentSongsQuery.data ?? [],
+    playlistSongs: playlistSongsQuery.data ?? [],
+    isLoading:
+      likedSongsQuery.isLoading || recentSongsQuery.isLoading || playlistSongsQuery.isLoading,
+  };
+}
+
+export function useLibrarySongs() {
+  const collection = useLibraryCollectionData();
+  return {
+    ...collection,
+    songs: collection.songs,
+  };
+}
+
+export function useLibraryArtists() {
+  const collection = useLibraryCollectionData();
+  const artists = useMemo(() => buildLibraryArtists(collection.songs), [collection.songs]);
+
+  return {
+    ...collection,
+    artists,
+  };
+}
+
+export function useLibraryAlbums() {
+  const collection = useLibraryCollectionData();
+  const albums = useMemo(() => buildLibraryAlbums(collection.songs), [collection.songs]);
+
+  return {
+    ...collection,
+    albums,
+  };
 }
 
 export function usePlaylistTracks(playlistId: string | null) {
@@ -170,6 +236,37 @@ export function useRemoveTrackFromPlaylist() {
     },
   });
 }
+
+export function useReorderPlaylistTracks() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ playlistId, trackIdsInOrder }: { playlistId: string; trackIdsInOrder: string[] }) =>
+      reorderPlaylistTracks(playlistId, trackIdsInOrder),
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: ['playlist-tracks', variables.playlistId] });
+      const previousTracks = queryClient.getQueryData<any[]>(['playlist-tracks', variables.playlistId]);
+      
+      if (previousTracks) {
+        const newTracks = variables.trackIdsInOrder
+          .map(id => previousTracks.find(t => t.id === id))
+          .filter(Boolean);
+        queryClient.setQueryData(['playlist-tracks', variables.playlistId], newTracks);
+      }
+      
+      return { previousTracks };
+    },
+    onError: (err, variables, context) => {
+      if (context?.previousTracks) {
+        queryClient.setQueryData(['playlist-tracks', variables.playlistId], context.previousTracks);
+      }
+    },
+    onSettled: (_result, _error, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['playlist-tracks', variables.playlistId] });
+    },
+  });
+}
+
 
 export function useTogglePinPlaylist() {
   const queryClient = useQueryClient();

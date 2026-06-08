@@ -62,7 +62,7 @@ export default function AuthCallback() {
         <div className="flex h-screen items-center justify-center bg-void">
           <div className="text-center">
             <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-muted">Loading...</p>
+            <p className="text-muted">Please wait...</p>
           </div>
         </div>
       }

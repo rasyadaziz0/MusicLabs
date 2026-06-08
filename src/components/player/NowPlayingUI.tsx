@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Ellipsis, ListPlus, Share2, Plus, Heart, Link2, Loader2 } from 'lucide-react';
+import { Ellipsis, ListPlus, Share2, Plus, Heart, Link2, Loader2, Timer } from 'lucide-react';
+import { usePlayer } from '@/context/PlayerContext';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import type { NowPlayingState } from '@/hooks/useNowPlaying';
@@ -25,6 +26,7 @@ export function NowPlayingUI(props: NowPlayingUIProps) {
 /* ── More Menu (shared for both desktop and mobile) ── */
 export function MoreMenu(props: NowPlayingUIProps) {
   const { isMoreMenuOpen, setIsMoreMenuOpen, moreMenuRef, handleMoreAction, handleToggleLike, handleAddToLibraryAction, handleShareAction, handleCopyLinkAction, handleAddToPlaylist, playlists, isPlaylistsLoading, addToPlaylistMutation, selectedPlaylistId, isLiked, addToQueue, currentTrack, openMenuUpward } = props;
+  const { setSleepTimer, clearSleepTimer, sleepTimerEndTime } = usePlayer();
 
   const [showPlaylists, setShowPlaylists] = useState(false);
 
@@ -69,6 +71,33 @@ export function MoreMenu(props: NowPlayingUIProps) {
                 <span style={{ color: 'rgba(255,255,255,0.6)' }}>{item.icon}</span>
               </button>
             ))}
+            
+            <div style={{ height: 1, background: 'rgba(255,255,255,0.08)', margin: '4px 14px' }} />
+            
+            <div style={{ padding: '4px 14px 8px' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.4)', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
+                <Timer size={12} /> Sleep Timer
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                {[15, 30, 45, 60].map(mins => (
+                  <button
+                    key={mins}
+                    onClick={() => { setSleepTimer(mins); setIsMoreMenuOpen(false); }}
+                    style={{ flex: 1, padding: '4px 0', background: 'rgba(255,255,255,0.1)', color: '#fff', border: 'none', borderRadius: 4, fontSize: 11, cursor: 'pointer' }}
+                  >
+                    {mins}m
+                  </button>
+                ))}
+                {sleepTimerEndTime && (
+                  <button
+                    onClick={() => { clearSleepTimer(); setIsMoreMenuOpen(false); }}
+                    style={{ width: '100%', marginTop: 4, padding: '6px 0', background: 'rgba(250,36,60,0.2)', color: '#FA243C', border: 'none', borderRadius: 4, fontSize: 11, cursor: 'pointer' }}
+                  >
+                    Batalkan Timer
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
           {showPlaylists && (
             <div style={menuStyle}>

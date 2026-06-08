@@ -1,5 +1,6 @@
 import { Users, UserCheck, Globe, Share2 } from 'lucide-react';
 import Image from 'next/image';
+import toast from 'react-hot-toast';
 import FollowButton from '@/components/ui/FollowButton';
 
 interface OtherProfileHeroProps {
@@ -89,7 +90,7 @@ export default function OtherProfileHero({
               const appUrl = process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://music-labs-beryl.vercel.app');
               const url = profile?.username ? `${appUrl}/@${profile.username}` : `${appUrl}/user/${userId}`;
               navigator.clipboard.writeText(url);
-              alert('Profile link copied to clipboard!');
+              toast.success('Profile link copied to clipboard!');
             }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.06] transition-colors"
           >

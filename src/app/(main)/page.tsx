@@ -2,12 +2,14 @@
 
 import { getBestImageUrl } from '@/lib/api/musicApi';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Song } from '@/types/music';
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { LogOut } from 'lucide-react';
+import { LogOut, Sparkles, Play, RefreshCw, Loader2 } from 'lucide-react';
 import { MOOD_PLAYLISTS } from '@/config/moods';
 import { useHomeViewModel } from '@/hooks/useHomeViewModel';
+import { TopPicksCard, TrackCard, SocialActivityCard, GuestBanner } from '@/components/home/HomeCards';
 
 export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -22,9 +24,11 @@ export default function Home() {
     isHomeLoading,
     isRecentLoading,
     isMoodSongsLoading,
+    isSocialFeedLoading,
     trendingSongs,
     recentlyPlayedSongs,
     moodSongs,
+    socialFeed,
     playTrack,
   } = useHomeViewModel();
 
@@ -93,13 +97,13 @@ export default function Home() {
                       <p className="text-[13px] font-semibold text-white/90 truncate">{user.user_metadata?.name || 'User'}</p>
                       <p className="text-[11px] text-white/50 truncate">{user.email}</p>
                     </div>
-                    <a
+                    <Link
                       href="/profile"
                       className="w-full text-left px-4 py-2 text-[13px] text-white/80 hover:bg-white/5 transition-colors flex items-center gap-2"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                       <span>Profile</span>
-                    </a>
+                    </Link>
                     <button
                       onClick={handleSignOut}
                       className="w-full text-left px-4 py-2 text-[13px] text-red-400 hover:bg-white/5 transition-colors flex items-center gap-2"
@@ -124,42 +128,13 @@ export default function Home() {
           {trendingSongs.slice(0, 8).map((song: Song, index: number) => {
             const bgGradient = topPicksGradients[index % topPicksGradients.length];
             return (
-              <div
+              <TopPicksCard
                 key={song.id}
-                className="group relative flex-shrink-0 w-[260px] md:w-[310px] aspect-[4/5] rounded-[16px] overflow-hidden cursor-pointer shadow-md transition-transform hover:scale-[1.02]"
-                onClick={() => playTrack(song, trendingSongs)}
-                style={{ background: bgGradient }}
-              >
-                {/* Subtle AcadMusic Logo in top right */}
-                <div className="absolute top-4 right-4 flex items-center gap-1 opacity-80">
-                  <span className="text-[12px] font-bold text-white tracking-tight">AcadMusic</span>
-                </div>
-
-                {/* Optional centered image collage effect for variety */}
-                {index % 2 === 1 && getBestImageUrl(song.image) && (
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-2xl border-4 border-black/10">
-                    <Image
-                      src={getBestImageUrl(song.image)!}
-                      alt={song.name}
-                      fill
-                      sizes="160px"
-                      className="object-cover"
-                    />
-                  </div>
-                )}
-
-                <div className="absolute bottom-0 left-0 p-5 w-full bg-gradient-to-t from-black/60 to-transparent">
-                  <p className="text-white/90 text-[11px] font-semibold mb-1 uppercase tracking-widest">
-                    {index % 2 === 0 ? 'Trending' : 'Top Hit'}
-                  </p>
-                  <h3 className="text-2xl md:text-[28px] font-bold text-white mb-1 line-clamp-2 leading-tight">
-                    {song.name}
-                  </h3>
-                  <p className="text-[14px] text-white/80 line-clamp-2 leading-snug">
-                    {song.artists.primary.map((a: any) => a.name).join(', ')}
-                  </p>
-                </div>
-              </div>
+                song={song}
+                index={index}
+                gradient={bgGradient}
+                onPlay={() => playTrack(song, trendingSongs)}
+              />
             );
           })}
         </div>
@@ -180,30 +155,11 @@ export default function Home() {
             ))
           ) : recentlyPlayedSongs.length > 0 ? (
             recentlyPlayedSongs.map((song: Song, index: number) => (
-              <button
+              <TrackCard
                 key={`${song.id}-recent-${index}`}
-                type="button"
-                className="group flex-shrink-0 w-[160px] md:w-[180px] text-left"
-                onClick={() => playTrack(song, recentlyPlayedSongs)}
-              >
-                <div className="relative aspect-square rounded-[12px] overflow-hidden mb-3 bg-white/5 border border-white/5 shadow-sm">
-                  {getBestImageUrl(song.image) && (
-                    <Image
-                      src={getBestImageUrl(song.image)!}
-                      alt={song.name}
-                      fill
-                      sizes="180px"
-                      className="object-cover"
-                    />
-                  )}
-                  {/* Dark overlay on hover */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-                </div>
-                <p className="text-white font-medium text-[14px] line-clamp-1 leading-snug">{song.name}</p>
-                <p className="text-muted text-[13px] line-clamp-1 mt-0.5">
-                  {song.artists.primary.map(a => a.name).join(', ')}
-                </p>
-              </button>
+                song={song}
+                onPlay={() => playTrack(song, recentlyPlayedSongs)}
+              />
             ))
           ) : (
             <p className="text-sm text-muted">No recently played songs.</p>
@@ -211,20 +167,55 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Mobile-only Discover Weekly Playlist Card */}
+      {user && (
+        <section className="px-2 pt-4 md:hidden">
+          <div className="flex items-center gap-1 mb-4">
+            <h2 className="text-[20px] font-bold text-white">Made For You</h2>
+          </div>
+          <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-hide -mx-4 px-4">
+            <Link href="/made-for-you" className="group flex-shrink-0 w-[160px] text-left">
+              <div className="relative aspect-square rounded-[12px] overflow-hidden mb-3 bg-gradient-to-br from-[#FA243C] to-[#2F2FE4] border border-white/10 flex flex-col items-center justify-center p-4 shadow-lg">
+                <Sparkles size={36} className="text-white opacity-90 mb-2" />
+                <span className="text-white font-bold text-[18px] leading-tight text-center tracking-tight">Discover<br/>Weekly</span>
+                {/* Dark overlay on hover */}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+              </div>
+              <p className="text-white font-medium text-[14px] line-clamp-1 leading-snug">Discover Weekly</p>
+              <p className="text-muted text-[13px] line-clamp-1 mt-0.5">Lagu baru tiap minggu</p>
+            </Link>
+          </div>
+        </section>
+      )}
+
       {/* Guest Sign-In Banner */}
-      {!user && (
-        <section className="px-2">
-          <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-[#FA243C]/20 via-[#FA243C]/10 to-transparent border border-[#FA243C]/20 p-6 flex items-center justify-between">
-            <div>
-              <h3 className="text-[16px] font-bold text-white mb-1">Get the full experience</h3>
-              <p className="text-[13px] text-white/50">Sign in to save songs, create playlists, and listen to full tracks.</p>
-            </div>
-            <a
-              href="/login"
-              className="flex-shrink-0 ml-4 px-5 py-2 rounded-full bg-[#FA243C] text-white text-[13px] font-semibold hover:bg-[#FA243C]/90 transition-colors"
-            >
-              Sign In
-            </a>
+      {!user && <GuestBanner />}
+
+      {/* Social Feed Section */}
+      {user && (
+        <section className="px-2 pt-4">
+          <div className="flex items-center gap-1 mb-4">
+            <h2 className="text-[20px] font-bold text-white">Activity Feed</h2>
+          </div>
+          <div className="flex overflow-x-auto gap-4 md:gap-5 pb-2 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+            {isSocialFeedLoading ? (
+              [...Array(4)].map((_, i) => (
+                <div
+                  key={`social-loading-${i}`}
+                  className="flex-shrink-0 w-[240px] md:w-[280px] h-[80px] rounded-[12px] bg-white/5 animate-pulse"
+                />
+              ))
+            ) : socialFeed && socialFeed.length > 0 ? (
+              socialFeed.map((item: any, index: number) => (
+                <SocialActivityCard
+                  key={`${item.id}-social-${index}`}
+                  item={item}
+                  onPlay={() => playTrack(item.track, socialFeed.map((f: any) => f.track))}
+                />
+              ))
+            ) : (
+              <p className="text-sm text-muted">No recent activity from people you follow.</p>
+            )}
           </div>
         </section>
       )}
@@ -260,29 +251,11 @@ export default function Home() {
             ))
           )}
           {!isMoodSongsLoading && moodSongs.map((song: Song, index: number) => (
-            <button
+            <TrackCard
               key={`${song.id}-mood-${selectedMood}-${index}`}
-              type="button"
-              className="group flex-shrink-0 w-[160px] md:w-[180px] text-left"
-              onClick={() => playTrack(song, moodSongs)}
-            >
-              <div className="relative aspect-square rounded-[12px] overflow-hidden mb-3 bg-white/5 border border-white/5 shadow-sm">
-                {getBestImageUrl(song.image) && (
-                  <Image
-                    src={getBestImageUrl(song.image)!}
-                    alt={song.name}
-                    fill
-                    sizes="180px"
-                    className="object-cover"
-                  />
-                )}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
-              </div>
-              <p className="text-white font-medium text-[14px] line-clamp-1 leading-snug">{song.name}</p>
-              <p className="text-muted text-[13px] line-clamp-1 mt-0.5">
-                {song.artists.primary.map(a => a.name).join(', ')}
-              </p>
-            </button>
+              song={song}
+              onPlay={() => playTrack(song, moodSongs)}
+            />
           ))}
           {!isMoodSongsLoading && moodSongs.length === 0 && (
             <p className="text-sm text-muted">No songs available for this mood.</p>
@@ -293,3 +266,4 @@ export default function Home() {
     </div>
   );
 }
+

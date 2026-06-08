@@ -7,6 +7,7 @@ import QueryProvider from "@/context/QueryProvider";
 import PWARegistration from "@/components/PWARegistration";
 import YouTubePlayerMount from "@/components/YouTubePlayerMount";
 import { Analytics } from "@vercel/analytics/react";
+import { Toaster } from "react-hot-toast";
 
 const syne = Syne({
   variable: "--font-display",
@@ -63,6 +64,16 @@ export default function RootLayout({
           </AuthProvider>
         </QueryProvider>
         <Analytics />
+        <Toaster 
+          position="bottom-center"
+          toastOptions={{
+            style: {
+              background: '#1a1a1a',
+              color: '#fff',
+              border: '1px solid rgba(255,255,255,0.1)',
+            },
+          }}
+        />
       </body>
     </html>
   );

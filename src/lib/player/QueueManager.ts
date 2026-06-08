@@ -58,11 +58,6 @@ export class QueueManager {
     }
     return shuffled;
   }
-
-  /**
-   * Shuffle the queue, keeping a specific track at position 0
-   * (so the currently playing track stays at the front).
-   */
   private shuffleQueueKeepingCurrent(tracks: Song[], currentTrackId?: string): Song[] {
     if (tracks.length <= 1) return [...tracks];
 
@@ -79,10 +74,6 @@ export class QueueManager {
 
   // ── Mutations ──
 
-  /**
-   * Replace the queue contents. If `trackId` is provided, the index is
-   * set to the position of that track (falls back to 0).
-   */
   setQueue(tracks: Song[], trackId?: string): void {
     this._originalQueue = [...tracks];
 
@@ -103,12 +94,6 @@ export class QueueManager {
     this._queueIndex = index;
     this.emit();
   }
-
-  /**
-   * Toggle shuffle on/off.
-   * - When turning ON: shuffles the queue but keeps the current track in place.
-   * - When turning OFF: restores original order, repositioning index to the current track.
-   */
   toggleShuffle(): void {
     this._isShuffled = !this._isShuffled;
 
@@ -130,11 +115,6 @@ export class QueueManager {
     this.emit();
   }
 
-  /**
-   * Shuffle the queue and start playing from the first track.
-   * Used by page-level shuffle buttons (playlist, album, liked songs).
-   * Returns the first track in the shuffled queue.
-   */
   shuffleAndPlay(tracks: Song[]): Song | null {
     if (tracks.length === 0) return null;
 
@@ -157,9 +137,15 @@ export class QueueManager {
 
   clearQueue(): void {
     if (this._queueIndex >= 0) {
+      const currentTrack = this._queue[this._queueIndex];
       this._queue = this._queue.slice(0, this._queueIndex + 1);
-      const remainingIds = new Set(this._queue.map(t => t.id));
-      this._originalQueue = this._originalQueue.filter(t => remainingIds.has(t.id));
+
+      if (currentTrack) {
+        const origIdx = this._originalQueue.findIndex(t => t.id === currentTrack.id);
+        if (origIdx !== -1) {
+          this._originalQueue = this._originalQueue.slice(0, origIdx + 1);
+        }
+      }
     } else {
       this._queue = [];
       this._originalQueue = [];
@@ -167,11 +153,6 @@ export class QueueManager {
     }
     this.emit();
   }
-
-  /**
-   * Append a track to the end of the queue.
-   * Skips if the last track in the queue is the same track (duplicate-adjacent guard).
-   */
   addToQueue(track: Song): void {
     if (this._queue.length > 0 && this._queue[this._queue.length - 1].id === track.id) return;
     this._queue = [...this._queue, track];
@@ -179,14 +160,31 @@ export class QueueManager {
     this.emit();
   }
 
-  // ── Index calculation ──
+  reorderQueue(startIndex: number, endIndex: number): void {
+    if (
+      startIndex < 0 || startIndex >= this._queue.length ||
+      endIndex < 0 || endIndex >= this._queue.length ||
+      startIndex === endIndex
+    ) {
+      return;
+    }
 
-  /**
-   * Calculate the next track index based on shuffle and repeat mode.
-   *
-   * - repeat-one is NOT handled here (the caller should check & replay before calling)
-   * - Returns `null` when playback should stop (end of non-repeating queue)
-   */
+    const newQueue = [...this._queue];
+    const [moved] = newQueue.splice(startIndex, 1);
+    newQueue.splice(endIndex, 0, moved);
+    this._queue = newQueue;
+
+    if (startIndex === this._queueIndex) {
+      this._queueIndex = endIndex;
+    } else if (startIndex < this._queueIndex && endIndex >= this._queueIndex) {
+      this._queueIndex--;
+    } else if (startIndex > this._queueIndex && endIndex <= this._queueIndex) {
+      this._queueIndex++;
+    }
+
+    this.emit();
+  }
+
   getNextIndex(): number | null {
     if (this._queue.length === 0 || this._queueIndex === -1) return null;
 

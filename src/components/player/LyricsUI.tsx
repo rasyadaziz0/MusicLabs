@@ -68,7 +68,16 @@ export default function LyricsUI({
     const el = scrollRef.current.querySelector(
       `[data-lyric-index="${activeIndex}"]`
     ) as HTMLElement | null;
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (el && scrollRef.current) {
+      const container = scrollRef.current;
+
+      // On mobile, position active lyric slightly higher (at 33% instead of 50%)
+      const isMobile = window.innerWidth < 768;
+      const offsetRatio = isMobile ? 0.20 : 0.5;
+
+      const offset = el.offsetTop - (container.clientHeight * offsetRatio) + (el.clientHeight / 2);
+      container.scrollTo({ top: offset, behavior: 'smooth' });
+    }
   }, [activeIndex, lines, scrollRef, isUserScrolling]);
 
   return (
@@ -148,6 +157,7 @@ export default function LyricsUI({
           ref={scrollRef}
           className="lyrics-scroll-area"
           style={{
+            position: 'relative',
             flex: 1,
             overflowY: 'auto',
             scrollbarWidth: 'none',

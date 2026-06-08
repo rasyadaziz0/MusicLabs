@@ -1,6 +1,7 @@
 'use client';
 
 import { Search as SearchIcon, Share, Link2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import Image from 'next/image';
 import Link from 'next/link';
 import { AppleMusicTrackList } from '@/components/ui/AppleMusicTrackList';
@@ -114,7 +115,7 @@ export function MusicSearchResults({
                 <button onClick={() => {
                   if (!song?.album?.id) return;
                   navigator.clipboard.writeText(`${window.location.origin}/album/${song.album.id}`);
-                  alert('Album link copied to clipboard!');
+                  toast.success('Album link copied to clipboard!');
                   closeMenu();
                 }} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between group">
                   <span>Share</span>
@@ -122,7 +123,7 @@ export function MusicSearchResults({
                 </button>
                 <button onClick={() => {
                   navigator.clipboard.writeText(`${window.location.origin}/search?q=${encodeURIComponent(song.name)}`);
-                  alert('Song search link copied!');
+                  toast.success('Song search link copied!');
                   closeMenu();
                 }} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between group">
                   <span>Copy Link</span>

@@ -45,14 +45,6 @@ export function AnimatedBackground({ isRecordingOrProcessing }: AnimatedBackgrou
         )}
       </AnimatePresence>
       
-      {/* Idle calm background */}
-      <motion.div
-        animate={{ opacity: isRecordingOrProcessing ? 0 : 1 }}
-        transition={{ duration: 1 }}
-        className="absolute inset-0"
-      >
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120vw] h-[60vh] rounded-full bg-gradient-to-b from-[#1c1c1e] to-transparent blur-[80px]" />
-      </motion.div>
     </div>
   );
 }

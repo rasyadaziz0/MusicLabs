@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 import { LogOut, ListMusic, Heart, Users, UserCheck, User, Share2, ArrowLeft } from 'lucide-react';
 import { UserProfile } from '@/lib/supabase/social';
 
@@ -111,7 +112,7 @@ export function ProfileHero({
             const appUrl = process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://music-labs-beryl.vercel.app');
             const url = profile?.username ? `${appUrl}/@${profile.username}` : `${appUrl}/user/${user.id}`;
             navigator.clipboard.writeText(url);
-            alert('Profile link copied to clipboard!');
+            toast.success('Profile link copied to clipboard!');
           }}
           className="flex items-center gap-1.5 px-3 py-1.5 mt-4 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.06] transition-colors"
         >

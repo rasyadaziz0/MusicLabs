@@ -67,7 +67,12 @@ export class MoodService {
   public static async fetchMoodSongs(moodKey: MoodKey): Promise<Song[]> {
     const moodConfig = this.getMoodConfig(moodKey);
     const responses = await Promise.all(
-      moodConfig.queries.map((query) => searchSongs(query))
+      moodConfig.queries.map((query) => 
+        searchSongs(query).catch((error) => {
+          console.warn(`Failed to search songs for mood query "${query}":`, error);
+          return { results: [] };
+        })
+      )
     );
     const mergedResults: Song[] = responses.flatMap((res) => res?.results ?? []);
     const uniqueSongs = this.dedupeSongs(mergedResults);

@@ -1,6 +1,6 @@
 import { supabase } from './client';
-
-// ── Types ────────────────────────────────────────────────────
+import { getSongsByIds } from '../api/musicApi';
+import { Song } from '@/types/music';// ── Types ────────────────────────────────────────────────────
 export interface UserProfile {
   id: string;
   username: string | null;
@@ -198,4 +198,47 @@ export async function updateUserProfile(userId: string, updates: { username?: st
 
   if (error) throw error;
   return true;
+}
+
+// ── Social Feed ──────────────────────────────────────────────
+
+export interface SocialFeedItem {
+  id: string;
+  user: UserProfile;
+  track: Song;
+  played_at: string;
+}
+
+export async function getSocialFeed(userId: string): Promise<SocialFeedItem[]> {
+  // 1. Get following IDs
+  const { data: followingData } = await supabase
+    .from('follows')
+    .select('following_id')
+    .eq('follower_id', userId);
+  
+  const followingIds = followingData?.map(f => f.following_id) || [];
+  if (followingIds.length === 0) return [];
+
+  // 2. Get recent listens from these users
+  const { data: historyData } = await supabase
+    .from('listening_history')
+    .select('id, user_id, track_id, played_at, profiles(id, username, display_name, bio, avatar_url, created_at)')
+    .in('user_id', followingIds)
+    .order('played_at', { ascending: false })
+    .limit(30);
+
+  if (!historyData || historyData.length === 0) return [];
+
+  // 3. Fetch song details
+  const trackIds = Array.from(new Set(historyData.map((h: any) => h.track_id)));
+  const songs = await getSongsByIds(trackIds);
+  const songMap = new Map(songs.map((s: Song) => [s.id, s]));
+
+  // 4. Map back
+  return historyData.map((h: any) => ({
+    id: h.id,
+    user: h.profiles as unknown as UserProfile,
+    track: songMap.get(h.track_id),
+    played_at: h.played_at
+  })).filter((h: any) => h.track) as SocialFeedItem[];
 }

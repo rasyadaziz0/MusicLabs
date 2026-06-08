@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getHomeFeed } from '@/lib/api/musicApi';
 import { getRecentPlays } from '@/lib/supabase/music';
+import { getSocialFeed } from '@/lib/supabase/social';
 import { useAuth } from '@/context/AuthContext';
 import { useState } from 'react';
 import { MoodKey } from '@/config/moods';
@@ -29,6 +30,12 @@ export function useHomeViewModel() {
   const { data: dbRecentPlays, isLoading: isRecentLoading } = useQuery({
     queryKey: ['recentPlays', user?.id],
     queryFn: () => getRecentPlays(user!.id),
+    enabled: !!user?.id,
+  });
+
+  const { data: socialFeed, isLoading: isSocialFeedLoading } = useQuery({
+    queryKey: ['socialFeed', user?.id],
+    queryFn: () => getSocialFeed(user!.id),
     enabled: !!user?.id,
   });
 
@@ -63,10 +70,12 @@ export function useHomeViewModel() {
     isHomeLoading,
     isRecentLoading,
     isMoodSongsLoading,
+    isSocialFeedLoading,
     trendingSongs,
     newReleaseAlbums,
     recentlyPlayedSongs,
     moodSongs,
+    socialFeed,
     playTrack,
   };
 }
