@@ -5,6 +5,7 @@ import { Song } from '@/types/music';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 import { useLikedSongsIndex, useToggleLikedSong } from '@/hooks/useMusicLibrary';
+import { ContextMenuItem } from './context-menu/ContextMenuItem';
 
 interface TrackLikeButtonProps {
   track: Song;
@@ -31,23 +32,14 @@ export default function TrackLikeButton({ track, className, asMenuItem }: TrackL
 
   if (asMenuItem) {
     return (
-      <button
-        type="button"
+      <ContextMenuItem
+        icon={toggleMutation.isPending ? <Loader2 size={15} className="animate-spin text-white/40" /> : <Heart size={15} fill={isLiked ? 'currentColor' : 'none'} />}
+        label={isLiked ? 'Remove from Liked Songs' : 'Favourite'}
+        danger={isLiked}
         onClick={handleClick}
+        className={className}
         disabled={toggleMutation.isPending}
-        className={cn(
-          'w-full text-left px-4 py-2.5 text-[13px] font-medium transition-colors hover:bg-white/10 disabled:opacity-60 flex items-center justify-between group',
-          isLiked ? 'text-primary' : 'text-white',
-          className
-        )}
-      >
-        <span>{isLiked ? 'Remove from Liked Songs' : 'Favourite'}</span>
-        {toggleMutation.isPending ? (
-          <Loader2 size={15} className="animate-spin text-white/40" />
-        ) : (
-          <Heart size={15} fill={isLiked ? 'currentColor' : 'none'} className={isLiked ? '' : 'text-white/40 group-hover:text-white/80 transition-colors'} />
-        )}
-      </button>
+      />
     );
   }
 

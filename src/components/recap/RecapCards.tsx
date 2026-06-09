@@ -13,7 +13,7 @@ export function StatCard({
   suffix = '',
 }: {
   label: string;
-  value: number;
+  value: React.ReactNode;
   gradient: string;
   delay: number;
   suffix?: string;
@@ -23,7 +23,7 @@ export function StatCard({
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] }}
-      className="relative flex-1 min-w-[150px] aspect-square md:aspect-auto md:h-[180px]"
+      className="relative flex-shrink-0 w-[180px] md:w-auto md:flex-1 aspect-square md:aspect-auto md:h-[180px]"
     >
       <div
         className="absolute inset-0 squircle p-5 md:p-6 flex flex-col justify-between overflow-hidden group"
@@ -35,12 +35,12 @@ export function StatCard({
         </p>
         <div className="z-10 mt-auto">
           <motion.p
-            className="text-5xl md:text-6xl font-extrabold text-white tracking-tighter leading-none"
+            className="text-5xl md:text-6xl font-extrabold text-white tracking-tighter leading-none whitespace-nowrap"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: delay + 0.2 }}
           >
-            {value.toLocaleString()}
+            {typeof value === 'number' ? value.toLocaleString() : value}
             {suffix && <span className="text-2xl md:text-3xl font-bold ml-1">{suffix}</span>}
           </motion.p>
         </div>

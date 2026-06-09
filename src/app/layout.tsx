@@ -3,6 +3,7 @@ import { Syne, DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { PlayerProvider } from "@/context/PlayerContext";
+import { ArtworkColorsProvider } from "@/context/ArtworkColorsContext";
 import QueryProvider from "@/context/QueryProvider";
 import PWARegistration from "@/components/PWARegistration";
 import YouTubePlayerMount from "@/components/YouTubePlayerMount";
@@ -58,8 +59,10 @@ export default function RootLayout({
         <QueryProvider>
           <AuthProvider>
             <PlayerProvider>
-              {children}
-              <YouTubePlayerMount />
+              <ArtworkColorsProvider>
+                {children}
+                <YouTubePlayerMount />
+              </ArtworkColorsProvider>
             </PlayerProvider>
           </AuthProvider>
         </QueryProvider>

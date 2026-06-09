@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { getBestImageUrl } from '@/lib/api/musicApi';
 import GuestGate from '@/components/auth/GuestGate';
 import type { NowPlayingUIProps } from '@/components/player/NowPlayingUI';
@@ -23,6 +23,8 @@ export default function MobileNowPlayingUI(props: NowPlayingUIProps) {
     isGuestGateOpen, guestGateAction, setIsGuestGateOpen,
   } = props;
 
+  const dragControls = useDragControls();
+
   if (!currentTrack) return null;
   const coverUrl = getBestImageUrl(currentTrack.image);
   const artistNames = currentTrack.artists.primary.map((a: any) => a.name).join(', ');
@@ -35,6 +37,14 @@ export default function MobileNowPlayingUI(props: NowPlayingUIProps) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: '100%' }}
           transition={{ type: 'spring', damping: 28, stiffness: 260, mass: 0.9 }}
+          drag="y"
+          dragConstraints={{ top: 0, bottom: 0 }}
+          dragElastic={0.5}
+          dragListener={false}
+          dragControls={dragControls}
+          onDragEnd={(e, { offset, velocity }) => {
+            if (offset.y > 100 || velocity.y > 500) onClose();
+          }}
           style={{
             position: 'fixed', inset: 0, zIndex: 70, overflow: 'hidden',
             fontFamily: "-apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif",
@@ -45,7 +55,7 @@ export default function MobileNowPlayingUI(props: NowPlayingUIProps) {
           <style>{mobileNowPlayingCss}</style>
 
           {/* ── BG: blurred artwork ── */}
-          <MobileNowPlayingBackground coverUrl={coverUrl} />
+          <MobileNowPlayingBackground coverUrl={coverUrl} trackId={currentTrack.id} />
 
           <div style={{
             position: 'relative', zIndex: 10, height: '100%',
@@ -57,6 +67,7 @@ export default function MobileNowPlayingUI(props: NowPlayingUIProps) {
             {/* ── Top: Drag Handle ── */}
             <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 8, paddingBottom: isLyricsOpen ? 12 : 20 }}>
               <button
+                onPointerDown={(e) => dragControls.start(e)}
                 onClick={onClose}
                 aria-label="Close Now Playing"
                 style={{
@@ -93,17 +104,19 @@ export default function MobileNowPlayingUI(props: NowPlayingUIProps) {
               />
             ) : (
               /* ─────────────── ARTWORK MODE ─────────────── */
-              <MobileArtworkMode
-                currentTrack={currentTrack}
-                coverUrl={coverUrl}
-                isPlaying={isPlaying}
-                isPreview={isPreview}
-                isLiked={isLiked}
-                toggleLikeMutation={toggleLikeMutation}
-                handleToggleLike={handleToggleLike}
-                onClose={onClose}
-                nowPlayingProps={props}
-              />
+              <div onPointerDown={(e) => dragControls.start(e)} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                <MobileArtworkMode
+                  currentTrack={currentTrack}
+                  coverUrl={coverUrl}
+                  isPlaying={isPlaying}
+                  isPreview={isPreview}
+                  isLiked={isLiked}
+                  toggleLikeMutation={toggleLikeMutation}
+                  handleToggleLike={handleToggleLike}
+                  onClose={onClose}
+                  nowPlayingProps={props}
+                />
+              </div>
             )}
 
             {/* ═══════════════════════════════════════════

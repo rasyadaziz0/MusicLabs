@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Innertube } from 'youtubei.js';
+import { createClient } from '@/lib/supabase/server';
 
 export const runtime = 'nodejs';
 
@@ -99,12 +100,6 @@ async function resolveFallbackVideoId(title: string, artist: string): Promise<st
 
   return null;
 }
-
-/**
- * GET /api/audio/resolve?title=...&artist=...
- *
- * Mencari lagu di YouTube menggunakan youtubei.js (lebih stabil dari Piped API).
- */
 export async function GET(request: NextRequest) {
   const title = request.nextUrl.searchParams.get('title');
   const artist = request.nextUrl.searchParams.get('artist');
@@ -156,10 +151,10 @@ export async function GET(request: NextRequest) {
     const rankedSongs = searchResults.songs.contents.map((song: any, index: number) => {
       let score = 100 - index * 5;
       const songTitle = normalizeText(song.title || '').trim();
-      
+
       const artistsArr = Array.isArray(song.artists) ? song.artists : [];
-      const songArtist = typeof song.artists === 'string' 
-        ? normalizeText(song.artists) 
+      const songArtist = typeof song.artists === 'string'
+        ? normalizeText(song.artists)
         : normalizeText(artistsArr.map((a: any) => a.name).join(' ') || song.author || '').trim();
 
       if (songTitle && targetTitle && (songTitle.includes(targetTitle) || targetTitle.includes(songTitle))) score += 20;

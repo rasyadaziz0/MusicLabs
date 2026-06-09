@@ -1,5 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { createClient } from '@/lib/supabase/server';
+import { checkRateLimit } from '@/lib/server/rateLimit';
 
 export const runtime = 'nodejs';
 
@@ -18,7 +20,38 @@ function isLikelyIndonesian(text: string): boolean {
   return idWords.test(text);
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
+  // ── Auth check: require logged-in user ──────────────────────────
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return NextResponse.json(
+      { error: 'Login required to use romanization.' },
+      { status: 401 }
+    );
+  }
+
+  // ── Rate limit: per-user (15/min) ───────────────────────────────
+  const userLimiter = await checkRateLimit(user.id, {
+    limit: 15,
+    windowMs: 60_000,
+    keyPrefix: 'romanize:user',
+  });
+
+  if (!userLimiter.allowed) {
+    return NextResponse.json(
+      { error: 'Too many romanization requests. Please wait a moment.' },
+      {
+        status: 429,
+        headers: { 'Retry-After': String(userLimiter.resetInSeconds) },
+      }
+    );
+  }
+
   if (!GEMINI_API_KEY) {
     return NextResponse.json(
       { error: 'Gemini API key not configured' },
@@ -33,6 +66,15 @@ export async function POST(request: Request) {
 
     if (!Array.isArray(lines) || lines.length === 0) {
       return NextResponse.json({ error: 'No lines provided' }, { status: 400 });
+    }
+
+    if (lines.length > 100) {
+      return NextResponse.json({ error: 'Too many lines' }, { status: 400 });
+    }
+
+    const totalChars = lines.reduce((sum, line) => sum + (line?.length || 0), 0);
+    if (totalChars > 10000) {
+      return NextResponse.json({ error: 'Payload too large' }, { status: 400 });
     }
 
     // Filter: only romanize lines that contain non-Latin characters
@@ -84,7 +126,12 @@ CRITICAL RULES:
 3. For Korean: use Revised Romanization (e.g., 사랑해 → saranghae)  
 4. For Chinese: use Pinyin without tones (e.g., 你好 → ni hao)
 5. Keep any existing Latin characters as-is.
-6. Return a valid JSON object where the keys are the exact line numbers provided (e.g. "1", "2") and the values are the romanized strings.
+6. Return a valid JSON object. The keys MUST be the exact line numbers provided (e.g. "1", "2") and the values must be the romanized strings.
+Example output:
+{
+  "1": "konnichiwa",
+  "2": "ni hao"
+}
 
 Text to romanize:
 ${numberedLines}`;
@@ -138,15 +185,22 @@ ${numberedLines}`;
         parsed = parsed.romanizations;
       }
       
+      let hasData = false;
       for (const [key, value] of Object.entries(parsed)) {
         const responseIdx = parseInt(key) - 1; // 0-based in our textsToRomanize
         if (!isNaN(responseIdx) && responseIdx >= 0 && responseIdx < indicesToRomanize.length) {
           const originalIdx = indicesToRomanize[responseIdx];
           romanizationMap[originalIdx] = (value as string).trim();
+          hasData = true;
         }
+      }
+      
+      if (!hasData) {
+        throw new Error('Parsed JSON contained no valid romanization mappings.');
       }
     } catch (parseErr) {
       console.error('Failed to parse Gemini JSON response:', responseText);
+      throw parseErr;
     }
 
     return NextResponse.json(

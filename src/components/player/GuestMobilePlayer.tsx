@@ -11,10 +11,12 @@ export function GuestMobilePlayer({
   props,
   coverUrl,
   progress,
+  dragControls,
 }: {
   props: any;
   coverUrl: string;
   progress: number;
+  dragControls?: any;
 }) {
   const {
     onClose, currentTrack, isPlaying, isResolving, isPreview,
@@ -27,7 +29,7 @@ export function GuestMobilePlayer({
     <div style={{ position: 'relative', zIndex: 10, height: '100%', display: 'flex', flexDirection: 'column', padding: 'env(safe-area-inset-top, 12px) 28px env(safe-area-inset-bottom, 24px)', paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)' }}>
       {/* Pill drag handle */}
       <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 8, paddingBottom: 20 }}>
-        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <button onPointerDown={(e) => dragControls?.start(e)} onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <div style={{ width: 36, height: 5, borderRadius: 3, background: 'rgba(255,255,255,0.35)' }} />
         </button>
       </div>
@@ -35,8 +37,9 @@ export function GuestMobilePlayer({
       {/* Artwork */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>
         <motion.div
+          layoutId={`artwork-${currentTrack.id}`}
           animate={{ scale: isPlaying ? 1 : 0.88 }}
-          transition={{ type: 'spring', damping: 20, stiffness: 200, mass: 0.8 }}
+          transition={{ type: 'spring', damping: 30, stiffness: 300 }}
           style={{ position: 'relative', width: '100%', maxWidth: 360, aspectRatio: '1', borderRadius: 12, overflow: 'hidden', background: '#1a1a2a', boxShadow: '0 24px 64px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.3)' }}
         >
           {coverUrl ? <Image src={coverUrl} alt={currentTrack.name} fill sizes="300px" style={{ objectFit: 'cover' }} priority /> : null}

@@ -80,6 +80,9 @@ function checkLocalRateLimit(
   identifier: string,
   { limit, windowMs, keyPrefix = 'api' }: RateLimitConfig
 ): RateLimitResult {
+  // During local development, increase the limit significantly to prevent HMR and fast refreshes from exhausting it
+  const actualLimit = process.env.NODE_ENV === 'development' ? limit * 10 : limit;
+
   const now = Date.now();
   const key = `${keyPrefix}:${identifier}`;
   const existing = store.get(key);
@@ -89,18 +92,18 @@ function checkLocalRateLimit(
     store.set(key, { count: 1, resetAt });
     return {
       allowed: true,
-      limit,
-      remaining: Math.max(limit - 1, 0),
+      limit: actualLimit,
+      remaining: Math.max(actualLimit - 1, 0),
       resetInSeconds: Math.ceil(windowMs / 1000),
     };
   }
 
   existing.count += 1;
-  const remaining = Math.max(limit - existing.count, 0);
+  const remaining = Math.max(actualLimit - existing.count, 0);
 
   return {
-    allowed: existing.count <= limit,
-    limit,
+    allowed: existing.count <= actualLimit,
+    limit: actualLimit,
     remaining,
     resetInSeconds: Math.max(Math.ceil((existing.resetAt - now) / 1000), 1),
   };

@@ -28,7 +28,22 @@ export async function getPlaylistCollaborators(playlistId: string): Promise<Play
   }));
 }
 
-export async function addCollaborator(playlistId: string, userId: string, addedBy: string) {
+export async function addCollaborator(playlistId: string, userId: string) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+  const addedBy = user.id;
+
+  // Verify ownership
+  const { data: playlist, error: playlistError } = await supabase
+    .from('playlists')
+    .select('user_id')
+    .eq('id', playlistId)
+    .single();
+
+  if (playlistError || !playlist || playlist.user_id !== addedBy) {
+    throw new Error('Only the playlist owner can add collaborators');
+  }
+
   const { error } = await supabase.from('playlist_collaborators').insert({
     playlist_id: playlistId,
     user_id: userId,
@@ -43,6 +58,21 @@ export async function addCollaborator(playlistId: string, userId: string, addedB
 }
 
 export async function removeCollaborator(playlistId: string, userId: string) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+
+  // Verify permission: Must be the playlist owner, OR removing themselves
+  if (user.id !== userId) {
+    const { data: playlist } = await supabase
+      .from('playlists')
+      .select('user_id')
+      .eq('id', playlistId)
+      .single();
+    if (!playlist || playlist.user_id !== user.id) {
+      throw new Error('Only the playlist owner can remove other collaborators');
+    }
+  }
+
   const { error } = await supabase
     .from('playlist_collaborators')
     .delete()

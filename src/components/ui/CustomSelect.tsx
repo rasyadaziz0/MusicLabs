@@ -9,9 +9,10 @@ export interface CustomSelectProps<T extends string | number> {
   options: { value: T; label: string; disabled?: boolean }[];
   onChange: (value: T) => void;
   className?: string;
+  align?: 'left' | 'right';
 }
 
-export function CustomSelect<T extends string | number>({ value, options, onChange, className = '' }: CustomSelectProps<T>) {
+export function CustomSelect<T extends string | number>({ value, options, onChange, className = '', align = 'left' }: CustomSelectProps<T>) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -48,7 +49,7 @@ export function CustomSelect<T extends string | number>({ value, options, onChan
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.15, ease: 'easeOut' }}
-            className="absolute right-0 top-full mt-2 w-48 max-h-[300px] overflow-y-auto overflow-x-hidden rounded-xl border border-white/10 bg-[#1c1c1e] p-1.5 shadow-2xl z-50 origin-top-right scrollbar-hide"
+            className={`absolute ${align === 'right' ? 'right-0 origin-top-right' : 'left-0 origin-top-left'} top-full mt-2 w-48 max-h-[300px] overflow-y-auto overflow-x-hidden rounded-xl border border-white/10 bg-[#1c1c1e] p-1.5 shadow-2xl z-50 scrollbar-hide`}
           >
             {options.map((option) => (
               <button

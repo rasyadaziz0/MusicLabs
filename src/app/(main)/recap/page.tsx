@@ -89,12 +89,13 @@ export default function RecapPage() {
   }
 
   return (
-    <div className="pb-32">
+    <div className="pb-32 max-w-[1200px] mx-auto">
       {/* ── Hero ── */}
-      <div ref={heroRef} className="am-replay-hero pt-16 pb-12 px-5 md:px-12 border-b border-white/5">
+      <div className="px-4 md:px-8 pt-4 md:pt-8">
+        <div ref={heroRef} className="am-replay-hero pt-12 pb-12 px-6 md:px-12 rounded-3xl border border-white/5 shadow-2xl">
 
-        {/* Selectors */}
-        <div className="relative z-10 flex flex-wrap items-center gap-3 mb-10" data-animate>
+          {/* Selectors */}
+          <div className="relative z-50 flex flex-wrap items-center gap-3 mb-10" data-animate>
           <div className="relative z-50">
             <CustomSelect
               value={month}
@@ -131,9 +132,10 @@ export default function RecapPage() {
             Your top songs and artists of the month.
           </p>
         </div>
+        </div>
       </div>
 
-      <div className="max-w-[1200px] mx-auto px-5 md:px-12 pt-10">
+      <div className="px-5 md:px-12 pt-6">
         {/* ── Loading ── */}
         {isLoading && (
           <div className="space-y-12">
@@ -174,7 +176,7 @@ export default function RecapPage() {
                   {/* Milestones (Stats) */}
                   <section>
                     <h2 className="text-[26px] md:text-[32px] font-bold text-white mb-6 tracking-tight">Milestones</h2>
-                    <div className="flex flex-wrap md:flex-nowrap gap-4 md:gap-5">
+                    <div className="flex overflow-x-auto md:overflow-visible gap-4 md:gap-5 pb-6 md:pb-0 scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0">
                       <StatCard
                         label="Plays"
                         value={stats.totalTracks}
@@ -182,11 +184,24 @@ export default function RecapPage() {
                         delay={0}
                       />
                       <StatCard
-                        label="Minutes"
-                        value={stats.estimatedMinutes}
+                        label={Math.floor(stats.estimatedMinutes / 60) > 0 ? "Time" : "Minutes"}
+                        value={
+                          Math.floor(stats.estimatedMinutes / 60) > 0 ? (
+                            <>
+                              {Math.floor(stats.estimatedMinutes / 60)}
+                              <span className="text-2xl md:text-3xl font-bold mx-1 text-white/80">h</span>
+                              {stats.estimatedMinutes % 60}
+                              <span className="text-2xl md:text-3xl font-bold ml-1 text-white/80">m</span>
+                            </>
+                          ) : (
+                            <>
+                              {stats.estimatedMinutes}
+                              <span className="text-2xl md:text-3xl font-bold ml-1 text-white/80">m</span>
+                            </>
+                          )
+                        }
                         gradient="linear-gradient(135deg, #A824FF, #5024FF)"
                         delay={0.1}
-                        suffix="m"
                       />
                       <StatCard
                         label="Artists"

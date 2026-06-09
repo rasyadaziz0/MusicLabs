@@ -12,6 +12,7 @@ import { getBestImageUrl } from '@/lib/api/musicApi';
 import { Song } from '@/types/music';
 import { SearchArtistResult } from '@/hooks/useMusicSearch';
 import { usePlayer } from '@/context/PlayerContext';
+import { TopResultCard } from '@/components/search/TopResultCard';
 
 interface MusicSearchResultsProps {
   isLoading: boolean;
@@ -22,6 +23,7 @@ interface MusicSearchResultsProps {
   isArtistNameSongsLoading: boolean;
   selectedArtist: SearchArtistResult | null;
   rankedSongsLength: number;
+  topResult?: { type: 'song'; data: Song } | { type: 'artist'; data: SearchArtistResult } | null;
 }
 
 export function MusicSearchResults({
@@ -33,8 +35,17 @@ export function MusicSearchResults({
   isArtistNameSongsLoading,
   selectedArtist,
   rankedSongsLength,
+  topResult,
 }: MusicSearchResultsProps) {
   const { playTrack } = usePlayer();
+
+  const filteredArtists = topResult?.type === 'artist' 
+    ? rankedArtists.filter(a => a.id !== topResult.data.id)
+    : rankedArtists;
+
+  const filteredSongs = topResult?.type === 'song'
+    ? displayedSongs.filter(s => s.id !== topResult.data.id)
+    : displayedSongs;
 
   if (isLoading) {
     return (
@@ -48,11 +59,15 @@ export function MusicSearchResults({
 
   return (
     <>
-      {rankedArtists.length > 0 && (
+      {topResult && (
+        <TopResultCard topResult={topResult} />
+      )}
+
+      {filteredArtists.length > 0 && (
         <div className="mb-8">
           <h2 className="text-xl font-bold mb-4">Artists</h2>
           <div className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
-            {rankedArtists.map((artist: SearchArtistResult) => {
+            {filteredArtists.map((artist: SearchArtistResult) => {
               const imageUrl = getBestImageUrl(artist.image || []);
               return (
                 <Link
@@ -92,10 +107,10 @@ export function MusicSearchResults({
         </div>
       )}
 
-      {displayedSongs.length > 0 && (
+      {filteredSongs.length > 0 && (
         <div className="-mx-4 md:mx-0">
           <AppleMusicTrackList
-            tracks={displayedSongs}
+            tracks={filteredSongs}
             onPlayTrack={playTrack}
             showStar={false}
             showAlbum={true}
@@ -135,13 +150,13 @@ export function MusicSearchResults({
         </div>
       )}
 
-      {displayedSongs.length === 0 && rankedArtists.length === 0 && !isArtistSongsLoading && !isArtistNameSongsLoading && (
+      {filteredSongs.length === 0 && filteredArtists.length === 0 && !topResult && !isArtistSongsLoading && !isArtistNameSongsLoading && (
         <div className="text-center py-20">
           <p className="text-xl text-white/50 font-medium">No results found for &quot;{query}&quot;</p>
         </div>
       )}
 
-      {selectedArtist && displayedSongs.length === 0 && !isArtistSongsLoading && !isArtistNameSongsLoading && (
+      {selectedArtist && filteredSongs.length === 0 && !isArtistSongsLoading && !isArtistNameSongsLoading && (
         <div className="text-center py-10">
           <p className="text-base text-white/50">
             Belum ada lagu yang ketemu untuk artist &quot;{selectedArtist.title}&quot; dari source API ini.

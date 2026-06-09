@@ -14,7 +14,7 @@ export function getMatchScore(text: string, query: string) {
   if (text === query) return 120;
   if (text.startsWith(query)) return 80;
   if (text.includes(query)) return 50;
-  
+
   const queryWords = query.split(' ').filter(Boolean);
   let matchedWords = 0;
   for (const w of queryWords) {
@@ -23,7 +23,7 @@ export function getMatchScore(text: string, query: string) {
   if (matchedWords > 0) {
     return matchedWords * 10;
   }
-  
+
   return 0;
 }
 
@@ -92,9 +92,9 @@ export function useMusicSearch(query: string) {
   const songs: Song[] = searchResults?.songs ?? EMPTY_SONGS;
   const artists: SearchArtistResult[] = searchResults?.artists ?? EMPTY_ARTISTS;
 
-  const rankedSongs = useMemo(() => {
+  const rankedSongsWithScore = useMemo(() => {
     const normalizedQuery = normalizeSearchText(query);
-    if (!normalizedQuery) return songs;
+    if (!normalizedQuery) return songs.map((s, i) => ({ song: s, score: 0, index: i }));
 
     return songs
       .map((song: Song, index: number) => {
@@ -107,27 +107,46 @@ export function useMusicSearch(query: string) {
         const titleScore = getMatchScore(title, normalizedQuery);
         const artistScore = getMatchScore(allArtistsText, normalizedQuery);
 
-        // Prioritize records that clearly match title or artist.
         const score = Math.max(titleScore, artistScore);
         return { song, score, index };
       })
-      .sort((a, b) => b.score !== a.score ? b.score - a.score : a.index - b.index)
-      .map((item) => item.song);
+      .sort((a, b) => b.score !== a.score ? b.score - a.score : a.index - b.index);
   }, [songs, query]);
 
-  const rankedArtists = useMemo(() => {
+  const rankedArtistsWithScore = useMemo(() => {
     const normalizedQuery = normalizeSearchText(query);
-    if (!normalizedQuery) return artists;
+    if (!normalizedQuery) return artists.map((a, i) => ({ artist: a, score: 0, index: i }));
 
     return artists
       .map((artist: SearchArtistResult, index: number) => {
         const artistName = normalizeSearchText(artist.title);
         return { artist, score: getMatchScore(artistName, normalizedQuery), index };
       })
-      .sort((a, b) => b.score !== a.score ? b.score - a.score : a.index - b.index)
-      .map((item) => item.artist)
-      .slice(0, 8);
+      .sort((a, b) => b.score !== a.score ? b.score - a.score : a.index - b.index);
   }, [artists, query]);
+
+  const topResult = useMemo(() => {
+    if (!query || query.length <= 2) return null;
+    const topSong = rankedSongsWithScore[0];
+    const topArtist = rankedArtistsWithScore[0];
+
+    if (!topSong && !topArtist) return null;
+    if (!topSong) return { type: 'artist' as const, data: topArtist.artist };
+    if (!topArtist) return { type: 'song' as const, data: topSong.song };
+    if (topArtist.score >= 80 && topArtist.score >= topSong.score) {
+      return { type: 'artist' as const, data: topArtist.artist };
+    }
+
+    if (topSong.score > topArtist.score) {
+      return { type: 'song' as const, data: topSong.song };
+    }
+
+    // Default tie-breaker
+    return { type: 'artist' as const, data: topArtist.artist };
+  }, [rankedSongsWithScore, rankedArtistsWithScore, query]);
+
+  const rankedSongs = useMemo(() => rankedSongsWithScore.map(i => i.song), [rankedSongsWithScore]);
+  const rankedArtists = useMemo(() => rankedArtistsWithScore.map(i => i.artist).slice(0, 8), [rankedArtistsWithScore]);
 
   const selectedArtist = rankedArtists.find((artist: SearchArtistResult) => artist.id === selectedArtistId) ?? null;
 
@@ -176,5 +195,6 @@ export function useMusicSearch(query: string) {
     selectedArtist,
     selectedArtistId,
     setSelectedArtistId,
+    topResult,
   };
 }

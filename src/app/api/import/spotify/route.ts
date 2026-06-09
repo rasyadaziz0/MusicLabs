@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       tracks: tracks,
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Gagal narik data';
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error('Spotify import error:', error);
+    return NextResponse.json({ error: 'Gagal narik data' }, { status: 500 });
   }
 }

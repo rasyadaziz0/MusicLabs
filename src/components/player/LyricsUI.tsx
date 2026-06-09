@@ -71,9 +71,9 @@ export default function LyricsUI({
     if (el && scrollRef.current) {
       const container = scrollRef.current;
 
-      // On mobile, position active lyric slightly higher (at 33% instead of 50%)
+      // On mobile, position active lyric slightly higher (at 20%). On desktop, we also move it higher (at 25% instead of 50%).
       const isMobile = window.innerWidth < 768;
-      const offsetRatio = isMobile ? 0.20 : 0.5;
+      const offsetRatio = isMobile ? 0.20 : 0.20;
 
       const offset = el.offsetTop - (container.clientHeight * offsetRatio) + (el.clientHeight / 2);
       container.scrollTo({ top: offset, behavior: 'smooth' });
@@ -162,8 +162,8 @@ export default function LyricsUI({
             overflowY: 'auto',
             scrollbarWidth: 'none',
             paddingRight: 8,
-            paddingTop: '30vh',
-            paddingBottom: '30vh',
+            paddingTop: '20vh',
+            paddingBottom: '60vh',
             maskImage:
               'linear-gradient(to bottom, transparent 0%, black 12%, black 80%, transparent 100%)',
             WebkitMaskImage:

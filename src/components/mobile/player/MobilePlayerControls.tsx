@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Loader2, Play, Pause, SkipForward, SkipBack, Volume2, Volume1, MessageSquare, ListMusic } from 'lucide-react';
 import { formatTime } from '@/lib/utils';
 import QueuePopup from '@/components/player/QueuePopup';
+import { usePlayer } from '@/context/PlayerContext';
 
 interface MobilePlayerControlsProps {
   duration: number | undefined;
@@ -26,6 +27,7 @@ export function MobilePlayerControls({
   duration, currentTime, seek, prevTrack, nextTrack, togglePlay,
   isResolving, isPlaying, volume, setVolume, isLyricsOpen, setIsLyricsOpen, linesLength
 }: MobilePlayerControlsProps) {
+  const { isAutoplayEnabled, toggleAutoplay } = usePlayer();
   const [isDraggingProgress, setIsDraggingProgress] = useState(false);
   const [isQueueOpen, setIsQueueOpen] = useState(false);
 
@@ -211,11 +213,16 @@ export function MobilePlayerControls({
 
         {/* Queue Popup */}
         {isQueueOpen && (
-          <div style={{
-            position: 'fixed', inset: 0, zIndex: 100,
-            background: 'rgba(0,0,0,0.5)',
-          }}>
-            <QueuePopup isOpen={isQueueOpen} onClose={() => setIsQueueOpen(false)} />
+          <div 
+            onClick={() => setIsQueueOpen(false)}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 100,
+              background: 'rgba(0,0,0,0.5)',
+            }}
+          >
+            <div onClick={(e) => e.stopPropagation()}>
+              <QueuePopup isOpen={isQueueOpen} onClose={() => setIsQueueOpen(false)} />
+            </div>
           </div>
         )}
       </div>

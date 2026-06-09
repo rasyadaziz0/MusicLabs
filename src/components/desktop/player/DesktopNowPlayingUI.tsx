@@ -14,6 +14,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { NowPlayingUIProps } from '@/components/player/NowPlayingUI';
 import { MoreMenu } from '@/components/player/NowPlayingUI';
+import { DynamicGradientBackground } from '@/components/player/DynamicGradientBackground';
 
 const css = `
   .np-range { position:absolute; inset:-6px 0; width:100%; height:calc(100% + 12px); opacity:0; cursor:pointer; z-index:10; }
@@ -64,11 +65,7 @@ export default function DesktopNowPlayingUI(props: NowPlayingUIProps) {
           <style>{css}</style>
 
           {/* ── BG: blurred album art ── */}
-          <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
-            {coverUrl && <Image src={coverUrl} alt="bg" fill sizes="100vw" style={{ objectFit: 'cover' }} />}
-            <div style={{ position: 'absolute', inset: 0, backdropFilter: 'blur(72px)', WebkitBackdropFilter: 'blur(72px)', background: 'rgba(20,18,28,0.5)' }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(160deg, rgba(80,60,110,0.45) 0%, rgba(60,50,80,0.4) 50%, rgba(90,70,55,0.4) 100%)' }} />
-          </div>
+          <DynamicGradientBackground coverUrl={coverUrl} trackId={currentTrack.id} />
 
           {/* ── Close ── */}
           <button onClick={onClose} style={{ position: 'absolute', top: 18, left: 18, zIndex: 20, width: 30, height: 30, borderRadius: '50%', background: 'rgba(255,255,255,0.12)', border: 'none', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', backdropFilter: 'blur(8px)' }}>
@@ -88,14 +85,18 @@ export default function DesktopNowPlayingUI(props: NowPlayingUIProps) {
             <div className="np-left-panel">
               <div className="np-left-inner">
                 {/* Album art */}
-                <motion.div style={{
-                  position: 'relative', aspectRatio: '1', width: '100%',
-                  borderRadius: 12, overflow: 'hidden',
-                  boxShadow: '0 20px 60px rgba(0,0,0,0.55), 0 8px 24px rgba(0,0,0,0.3)',
-                  background: '#1a1a2a',
-                }}>
+                <motion.div
+                  layoutId={`artwork-${currentTrack.id}`}
+                  transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                  style={{
+                    position: 'relative', aspectRatio: '1', width: '100%',
+                    borderRadius: 12, overflow: 'hidden',
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.55), 0 8px 24px rgba(0,0,0,0.3)',
+                    background: '#1a1a2a',
+                  }}
+                >
                   {coverUrl ? (
-                    <Image src={coverUrl} alt={currentTrack.name} fill sizes="380px" style={{ objectFit: 'cover' }} />
+                    <Image src={coverUrl} alt={currentTrack.name} fill sizes="380px" style={{ objectFit: 'cover' }} priority />
                   ) : (
                     <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, rgba(120,80,160,0.4), rgba(20,20,40,1))' }} />
                   )}
@@ -122,8 +123,8 @@ export default function DesktopNowPlayingUI(props: NowPlayingUIProps) {
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingTop: 3, flexShrink: 0 }}>
-                    <button onClick={handleToggleLike} disabled={toggleLikeMutation.isPending} style={{ background: 'none', border: 'none', color: isLiked ? '#fa233b' : 'rgba(255,255,255,0.5)', cursor: 'pointer', padding: 0, display: 'flex' }}>
-                      {toggleLikeMutation.isPending ? <Loader2 size={17} style={{ animation: 'spin 1s linear infinite' }} /> : <Heart size={17} fill={isLiked ? 'currentColor' : 'none'} />}
+                    <button onClick={handleToggleLike} disabled={toggleLikeMutation.isPending} style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: 'none', color: isLiked ? '#fa233b' : '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }} onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'} onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}>
+                      {toggleLikeMutation.isPending ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Heart size={16} fill={isLiked ? 'currentColor' : 'none'} strokeWidth={isLiked ? 0 : 2} />}
                     </button>
                     <MoreMenu {...props} />
                   </div>
@@ -144,7 +145,7 @@ export default function DesktopNowPlayingUI(props: NowPlayingUIProps) {
                 </div>
 
                 {/* Playback controls */}
-                <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 4px' }}>
+                <div style={{ marginTop: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 32 }}>
                   <button onClick={() => { }} style={{ background: 'none', border: 'none', color: '#e05050', cursor: 'pointer', display: 'flex' }}>
                     <Shuffle size={17} strokeWidth={2.5} />
                   </button>
@@ -165,9 +166,11 @@ export default function DesktopNowPlayingUI(props: NowPlayingUIProps) {
                 {/* Volume */}
                 <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <Volume2 size={14} color="rgba(255,255,255,0.5)" />
-                  <div style={{ position: 'relative', flex: 1, height: 3, background: 'rgba(255,255,255,0.2)', borderRadius: 2 }}>
+                  <div style={{ position: 'relative', flex: 1, height: 4, background: 'rgba(255,255,255,0.2)', borderRadius: 2 }}>
                     <input type="range" className="np-range" min={0} max={1} step={0.01} value={volume} onChange={e => setVolume(Number(e.target.value))} />
-                    <div style={{ position: 'absolute', height: '100%', width: `${volume * 100}%`, background: '#fff', borderRadius: 2 }} />
+                    <div style={{ position: 'absolute', height: '100%', width: `${volume * 100}%`, background: '#fff', borderRadius: 2 }}>
+                      <div style={{ position: 'absolute', right: -5, top: '50%', transform: 'translateY(-50%)', width: 10, height: 10, background: '#fff', borderRadius: '50%', boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }} />
+                    </div>
                   </div>
                 </div>
               </div>

@@ -1,5 +1,6 @@
 
 import { Song } from '@/types/music';
+import { AutoplayManager } from './queue/AutoplayManager';
 
 // ─── Types ───
 
@@ -10,6 +11,7 @@ export interface QueueState {
   queueIndex: number;
   isShuffled: boolean;
   repeatMode: RepeatMode;
+  isAutoplayEnabled: boolean;
 }
 
 export interface QueueManagerCallbacks {
@@ -24,10 +26,14 @@ export class QueueManager {
   private _queueIndex: number = -1;
   private _isShuffled: boolean = false;
   private _repeatMode: RepeatMode = 'none';
+  private autoplayManager: AutoplayManager;
   private callbacks: QueueManagerCallbacks;
 
   constructor(callbacks: QueueManagerCallbacks) {
     this.callbacks = callbacks;
+    this.autoplayManager = new AutoplayManager({
+      onStateChange: () => this.emit(),
+    });
   }
 
   // ── Getters ──
@@ -36,6 +42,7 @@ export class QueueManager {
   get queueIndex(): number { return this._queueIndex; }
   get isShuffled(): boolean { return this._isShuffled; }
   get repeatMode(): RepeatMode { return this._repeatMode; }
+  get isAutoplayEnabled(): boolean { return this.autoplayManager.isEnabled; }
 
   // ── Internal emit ──
 
@@ -45,6 +52,7 @@ export class QueueManager {
       queueIndex: this._queueIndex,
       isShuffled: this._isShuffled,
       repeatMode: this._repeatMode,
+      isAutoplayEnabled: this.autoplayManager.isEnabled,
     });
   }
 
@@ -92,6 +100,10 @@ export class QueueManager {
 
   setIndex(index: number): void {
     this._queueIndex = index;
+    const currentTrack = this._queue[index];
+    if (currentTrack && currentTrack.isAutoplay) {
+      this.autoplayManager.markAsPlayed(currentTrack.id);
+    }
     this.emit();
   }
   toggleShuffle(): void {
@@ -135,6 +147,10 @@ export class QueueManager {
     this.emit();
   }
 
+  toggleAutoplay(): void {
+    this.autoplayManager.toggle();
+  }
+
   clearQueue(): void {
     if (this._queueIndex >= 0) {
       const currentTrack = this._queue[this._queueIndex];
@@ -155,8 +171,131 @@ export class QueueManager {
   }
   addToQueue(track: Song): void {
     if (this._queue.length > 0 && this._queue[this._queue.length - 1].id === track.id) return;
-    this._queue = [...this._queue, track];
-    this._originalQueue = [...this._originalQueue, track];
+    
+    // Find the first autoplay track to insert before it (so manual tracks stay together)
+    const firstAutoplayIdx = this._queue.findIndex(t => t.isAutoplay);
+    if (firstAutoplayIdx !== -1) {
+      this._queue = [
+        ...this._queue.slice(0, firstAutoplayIdx),
+        { ...track, isAutoplay: false },
+        ...this._queue.slice(firstAutoplayIdx)
+      ];
+    } else {
+      this._queue = [...this._queue, { ...track, isAutoplay: false }];
+    }
+    
+    // Also update original queue
+    const origFirstAutoplayIdx = this._originalQueue.findIndex(t => t.isAutoplay);
+    if (origFirstAutoplayIdx !== -1) {
+      this._originalQueue = [
+        ...this._originalQueue.slice(0, origFirstAutoplayIdx),
+        { ...track, isAutoplay: false },
+        ...this._originalQueue.slice(origFirstAutoplayIdx)
+      ];
+    } else {
+      this._originalQueue = [...this._originalQueue, { ...track, isAutoplay: false }];
+    }
+
+    this.emit();
+  }
+
+  removeFromQueue(trackId: string): void {
+    const idx = this._queue.findIndex((t, i) => t.id === trackId && i > this._queueIndex);
+    if (idx !== -1) {
+      this._queue.splice(idx, 1);
+      
+      const origIdx = this._originalQueue.findIndex(t => t.id === trackId);
+      if (origIdx !== -1) {
+        this._originalQueue.splice(origIdx, 1);
+      }
+      this.emit();
+    }
+  }
+
+  promoteToManual(trackId: string): void {
+    const idx = this._queue.findIndex((t, i) => t.id === trackId && i > this._queueIndex);
+    if (idx !== -1) {
+      this._queue[idx] = { ...this._queue[idx], isAutoplay: false };
+      
+      // Move it before other autoplay tracks
+      const [track] = this._queue.splice(idx, 1);
+      const firstAutoplayIdx = this._queue.findIndex(t => t.isAutoplay);
+      if (firstAutoplayIdx !== -1) {
+        this._queue.splice(firstAutoplayIdx, 0, track);
+      } else {
+        this._queue.push(track);
+      }
+
+      const origIdx = this._originalQueue.findIndex(t => t.id === trackId);
+      if (origIdx !== -1) {
+        this._originalQueue[origIdx] = { ...this._originalQueue[origIdx], isAutoplay: false };
+      }
+      this.emit();
+    }
+  }
+
+  appendAutoplayTracks(tracks: Song[]): void {
+    if (!tracks || tracks.length === 0) return;
+    
+    const existingIds = new Set(this._queue.map(t => t.id));
+    const taggedNewTracks = this.autoplayManager.getTracksToAppend(tracks, existingIds);
+
+    if (taggedNewTracks.length === 0) return;
+
+    // Append to the unshuffled tail (even if currently shuffled, they append at the end of _queue in order)
+    this._queue = [...this._queue, ...taggedNewTracks];
+    this._originalQueue = [...this._originalQueue, ...taggedNewTracks];
+    this.emit();
+  }
+
+  appendTracks(tracks: Song[]): void {
+    if (!tracks || tracks.length === 0) return;
+    
+    const existingIds = new Set(this._queue.map(t => t.id));
+    const newTracks = tracks.filter(t => !existingIds.has(t.id));
+    
+    if (newTracks.length === 0) return;
+
+    const taggedNewTracks = newTracks.map(t => ({ ...t, isAutoplay: t.isAutoplay ?? true }));
+
+    this._queue = [...this._queue, ...taggedNewTracks];
+    this._originalQueue = [...this._originalQueue, ...taggedNewTracks];
+    this.emit();
+  }
+
+  playNext(track: Song): void {
+    if (this._queue.length === 0) {
+      this.addToQueue(track);
+      return;
+    }
+
+    const trackToAdd = { ...track, isAutoplay: false };
+
+    // Insert after current track in active queue
+    const insertIdx = this._queueIndex >= 0 ? this._queueIndex + 1 : this._queue.length;
+    this._queue = [
+      ...this._queue.slice(0, insertIdx),
+      trackToAdd,
+      ...this._queue.slice(insertIdx)
+    ];
+
+    // Determine correct insertion point for original queue
+    const currentTrack = this._queueIndex >= 0 ? this._queue[this._queueIndex] : null;
+    let origInsertIdx = this._originalQueue.length;
+    
+    if (currentTrack) {
+      const foundIdx = this._originalQueue.findIndex((t) => t.id === currentTrack.id);
+      if (foundIdx !== -1) {
+        origInsertIdx = foundIdx + 1;
+      }
+    }
+
+    this._originalQueue = [
+      ...this._originalQueue.slice(0, origInsertIdx),
+      trackToAdd,
+      ...this._originalQueue.slice(origInsertIdx)
+    ];
+
     this.emit();
   }
 

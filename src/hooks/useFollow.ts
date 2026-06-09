@@ -65,12 +65,11 @@ export function useToggleFollow() {
       targetUserId: string;
       currentlyFollowing: boolean;
     }) => {
-      if (!user?.id) throw new Error('Please sign in first.');
       if (currentlyFollowing) {
-        await unfollowUser(user.id, targetUserId);
+        await unfollowUser(targetUserId);
         return false; // now NOT following
       } else {
-        await followUser(user.id, targetUserId);
+        await followUser(targetUserId);
         return true; // now following
       }
     },

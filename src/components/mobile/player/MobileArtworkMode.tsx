@@ -30,11 +30,12 @@ export function MobileArtworkMode({
         padding: '0 4px',
       }}>
         <motion.div
+          layoutId={`artwork-${currentTrack.id}`}
           animate={{
             scale: isPlaying ? 1 : 0.88,
             borderRadius: isPlaying ? 12 : 12,
           }}
-          transition={{ type: 'spring', damping: 20, stiffness: 200, mass: 0.8 }}
+          transition={{ type: 'spring', damping: 30, stiffness: 300 }}
           style={{
             position: 'relative', width: '100%', maxWidth: 360,
             aspectRatio: '1', borderRadius: 12,

@@ -172,6 +172,84 @@ export function mapYoutubeApiToAppSong(item: any): Song | null {
   };
 }
 
+export function mapUpNextToAppSong(item: any): Song | null {
+  if (!item?.videoId) return null;
+
+  const videoId = item.videoId;
+  // Some upNext items return an array for artists, some a string.
+  let artistName = 'Unknown Artist';
+  if (Array.isArray(item.artists)) {
+    artistName = item.artists.map((a: any) => a.name).join(', ');
+  } else if (typeof item.artists === 'string') {
+    artistName = item.artists;
+  }
+
+  const title = item.title || 'Unknown Title';
+  const thumbnail = item.thumbnail || item.thumbnails?.[0]?.url || '';
+  const images = thumbnail ? [{ quality: '500x500', url: thumbnail }] : [];
+  
+  // Parse duration string (e.g., "3:24" to seconds)
+  let durationInSeconds = 0;
+  if (typeof item.duration === 'string') {
+    const parts = item.duration.split(':').map(Number);
+    if (parts.length === 2) {
+      durationInSeconds = parts[0] * 60 + parts[1];
+    } else if (parts.length === 3) {
+      durationInSeconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
+    }
+  } else if (typeof item.duration === 'number') {
+    durationInSeconds = item.duration;
+  }
+
+  return {
+    id: videoId,
+    name: title,
+    type: 'song',
+    year: '',
+    releaseDate: null,
+    duration: durationInSeconds,
+    label: 'YouTube Music',
+    explicitContent: false,
+    playCount: 0,
+    language: '',
+    hasLyrics: false,
+    lyricsId: null,
+    url: `https://music.youtube.com/watch?v=${videoId}`,
+    copyright: '',
+    album: { id: `album-${videoId}`, name: 'Single', url: '' },
+    artists: {
+      primary: [
+        {
+          id: `artist-${videoId}`,
+          name: artistName,
+          role: 'primary',
+          type: 'artist',
+          image: images,
+          url: '',
+        },
+      ],
+      featured: [],
+      all: [
+        {
+          id: `artist-${videoId}`,
+          name: artistName,
+          role: 'primary',
+          type: 'artist',
+          image: images,
+          url: '',
+        },
+      ],
+    },
+    image: images,
+    downloadUrl: [
+      {
+        quality: '320kbps',
+        url: `/api/audio/${videoId}`,
+      },
+    ],
+  };
+}
+
 export function mapYtArtistToSearchArtist(artist: YTMusicArtist): SearchArtistResult | null {
   if (!artist?.artistId || !artist?.name) return null;
 

@@ -1,10 +1,11 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { getBestImageUrl } from '@/lib/api/musicApi';
 import GuestGate from '@/components/auth/GuestGate';
 import Image from 'next/image';
 import type { NowPlayingUIProps } from '@/components/player/NowPlayingUI';
+import { DynamicGradientBackground } from '@/components/player/DynamicGradientBackground';
 
 import { GuestDesktopPlayer } from './GuestDesktopPlayer';
 import { GuestMobilePlayer } from './GuestMobilePlayer';
@@ -20,6 +21,8 @@ export function GuestNowPlayingUI(props: NowPlayingUIProps) {
     isGuestGateOpen, guestGateAction, setIsGuestGateOpen, isMobile,
   } = props;
 
+  const dragControls = useDragControls();
+
   if (!currentTrack) return null;
   const progress = duration ? (currentTime / duration) * 100 : 0;
   const coverUrl = getBestImageUrl(currentTrack.image);
@@ -32,6 +35,14 @@ export function GuestNowPlayingUI(props: NowPlayingUIProps) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: isMobile ? '100%' : 14 }}
           transition={isMobile ? { type: 'spring', damping: 25, stiffness: 200 } : { duration: 0.25, ease: 'easeOut' }}
+          drag={isMobile ? "y" : false}
+          dragConstraints={{ top: 0, bottom: 0 }}
+          dragElastic={0.5}
+          dragListener={false}
+          dragControls={dragControls}
+          onDragEnd={(e, { offset, velocity }) => {
+            if (isMobile && (offset.y > 100 || velocity.y > 500)) props.onClose?.();
+          }}
           style={{
             position: 'fixed', inset: 0, zIndex: 70, overflow: 'hidden',
             fontFamily: "-apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif",
@@ -41,17 +52,15 @@ export function GuestNowPlayingUI(props: NowPlayingUIProps) {
           <style>{css}</style>
 
           {/* ── BG: blurred album art ── */}
-          <div style={{ position: 'absolute', inset: '-20px', zIndex: 0 }}>
-            {coverUrl && <Image src={coverUrl} alt="bg" fill sizes="100vw" style={{ objectFit: 'cover', transform: 'scale(1.15)' }} />}
-            <div style={{ position: 'absolute', inset: 0, backdropFilter: 'blur(80px) saturate(180%)', WebkitBackdropFilter: 'blur(80px) saturate(180%)', background: 'rgba(0,0,0,0.35)' }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.55) 100%)' }} />
-          </div>
+          <DynamicGradientBackground coverUrl={coverUrl} trackId={currentTrack.id} />
 
           {/* ── MAIN CONTENT ── */}
           {!isMobile ? (
             <GuestDesktopPlayer props={props} coverUrl={coverUrl} progress={progress} />
           ) : (
-            <GuestMobilePlayer props={props} coverUrl={coverUrl} progress={progress} />
+            <div onPointerDown={(e) => dragControls.start(e)} style={{ height: '100%' }}>
+              <GuestMobilePlayer props={props} coverUrl={coverUrl} progress={progress} dragControls={dragControls} />
+            </div>
           )}
 
           {/* Guest Gate Modal */}

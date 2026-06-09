@@ -35,7 +35,7 @@ export async function POST() {
   } catch (err: any) {
     console.error('Discover Weekly generation error:', err);
     return NextResponse.json(
-      { error: err?.message || 'Failed to generate Discover Weekly' },
+      { error: 'Failed to generate Discover Weekly' },
       { status: 500 },
     );
   }
@@ -103,7 +103,7 @@ export async function GET() {
   } catch (err: any) {
     console.error('Discover Weekly status error:', err);
     return NextResponse.json(
-      { error: err?.message || 'Failed to check Discover Weekly status' },
+      { error: 'Failed to check Discover Weekly status' },
       { status: 500 },
     );
   }

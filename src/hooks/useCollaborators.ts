@@ -12,8 +12,8 @@ export function usePlaylistCollaborators(playlistId: string | null) {
 export function useAddCollaborator() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ playlistId, userId, addedBy }: { playlistId: string; userId: string; addedBy: string }) => 
-      addCollaborator(playlistId, userId, addedBy),
+    mutationFn: ({ playlistId, userId }: { playlistId: string; userId: string; addedBy?: string }) => 
+      addCollaborator(playlistId, userId),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['playlist-collaborators', variables.playlistId] });
     },

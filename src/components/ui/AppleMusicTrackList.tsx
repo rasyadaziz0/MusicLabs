@@ -1,10 +1,11 @@
-import { useState, useEffect, ReactNode } from 'react';
+import { useState, useEffect, ReactNode, useRef } from 'react';
 import Image from 'next/image';
 import { Song } from '@/types/music';
 import { getBestImageUrl } from '@/lib/api/musicApi';
 import { Star, MoreHorizontal, GripVertical } from 'lucide-react';
 import Link from 'next/link';
 import { usePlayer } from '@/context/PlayerContext';
+import { TrackContextMenu } from './TrackContextMenu';
 import { motion } from 'framer-motion';
 import {
   DndContext,
@@ -105,7 +106,12 @@ export function AppleMusicTrackList({
   onReorder,
 }: AppleMusicTrackListProps) {
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ track: Song | null, x: number, y: number, isOpen: boolean }>({ track: null, x: 0, y: 0, isOpen: false });
   const { currentTrack, isPlaying } = usePlayer();
+  
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const touchStartPos = useRef<{ x: number, y: number } | null>(null);
+  const suppressClickRef = useRef<boolean>(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -127,6 +133,51 @@ export function AppleMusicTrackList({
   if (tracks.length === 0) return null;
 
   const totalDuration = tracks.reduce((acc, song) => acc + song.duration, 0);
+
+  const handleContextMenu = (e: React.MouseEvent, song: Song) => {
+    e.preventDefault();
+    setContextMenu({ track: song, x: e.clientX, y: e.clientY, isOpen: true });
+  };
+
+  const handleTouchStart = (e: React.TouchEvent, song: Song) => {
+    if (isReorderable) return;
+    const touch = e.touches[0];
+    touchStartPos.current = { x: touch.clientX, y: touch.clientY };
+    
+    longPressTimer.current = setTimeout(() => {
+      suppressClickRef.current = true;
+      setContextMenu({ track: song, x: touch.clientX, y: touch.clientY, isOpen: true });
+      // Clear flag after a short delay so normal clicks work again later
+      setTimeout(() => { suppressClickRef.current = false; }, 500);
+    }, 400);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (isReorderable || !touchStartPos.current || !longPressTimer.current) return;
+    const touch = e.touches[0];
+    const dx = touch.clientX - touchStartPos.current.x;
+    const dy = touch.clientY - touchStartPos.current.y;
+    
+    if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+
+  const handleTrackClick = (song: Song, allTracks: Song[]) => {
+    if (suppressClickRef.current) {
+      suppressClickRef.current = false;
+      return;
+    }
+    onPlayTrack(song, allTracks);
+  };
 
   return (
     <section className={className}>
@@ -170,8 +221,14 @@ export function AppleMusicTrackList({
               <SortableTrackItem key={song.id} song={song} index={index} isReorderable={isReorderable}>
                 {({ attributes, listeners }) => (
                   <div
-                    onClick={() => onPlayTrack(song, tracks)}
-                    className={`group flex items-center gap-4 rounded-xl px-4 py-2.5 cursor-pointer transition-colors select-none ${
+                    onClick={() => handleTrackClick(song, tracks)}
+                    onContextMenu={(e) => handleContextMenu(e, song)}
+                    onTouchStart={(e) => handleTouchStart(e, song)}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                    onTouchCancel={handleTouchEnd}
+                    style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}
+                    className={`group flex items-center gap-4 rounded-xl px-4 py-2.5 cursor-pointer transition-colors ${
                       isCurrentTrack 
                         ? 'bg-[#D80F1D] text-white' 
                         : 'hover:bg-white/10'
@@ -278,6 +335,13 @@ export function AppleMusicTrackList({
       <div className="mt-12 pt-6 border-t border-white/5 text-sm text-white/50 px-4 pb-12">
         {tracks.length} {tracks.length === 1 ? 'song' : 'songs'}, {Math.floor(totalDuration / 60)} minutes
       </div>
+
+      <TrackContextMenu
+        track={contextMenu.track}
+        isOpen={contextMenu.isOpen}
+        position={{ x: contextMenu.x, y: contextMenu.y }}
+        onClose={() => setContextMenu(prev => ({ ...prev, isOpen: false }))}
+      />
     </section>
   );
 }

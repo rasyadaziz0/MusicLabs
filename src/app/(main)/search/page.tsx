@@ -5,11 +5,11 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { decodeQuery, encodeQuery } from '@/lib/utils/searchEncode';
 import { useSearchUsers } from '@/hooks/useFollow';
 import { useMusicSearch } from '@/hooks/useMusicSearch';
-
 import { SearchHeader } from '@/components/search/SearchHeader';
-import { SearchCategories } from '@/components/search/SearchCategories';
+import { RecentAndTrending } from '@/components/search/RecentAndTrending';
 import { UserSearchResults } from '@/components/search/UserSearchResults';
 import { MusicSearchResults } from '@/components/search/MusicSearchResults';
+import { useRecentSearches } from '@/hooks/useRecentSearches';
 
 function useDebouncedValue<T>(value: T, delayMs: number): T {
   const [debounced, setDebounced] = useState(value);
@@ -31,13 +31,19 @@ function SearchPageContent() {
   const searchParams = useSearchParams();
   const rawQuery = searchParams.get('q') ?? '';
   const queryFromUrl = decodeQuery(rawQuery);
-  
+
   const [inputValue, setInputValue] = useState(queryFromUrl);
   const debouncedQuery = useDebouncedValue(inputValue, 500);
   const query = debouncedQuery.trim();
   const [searchMode, setSearchMode] = useState<'music' | 'users'>('music');
-  
+
   const lastPushedQueryRef = useRef(queryFromUrl);
+  const { addSearch } = useRecentSearches();
+
+  const handleSearchCommit = (val: string) => {
+    addSearch(val);
+    setInputValue(val);
+  };
 
   // Sync state if URL changes externally
   useEffect(() => {
@@ -67,7 +73,7 @@ function SearchPageContent() {
 
   // Data Hooks
   const { data: usersData, isLoading: isUsersLoading } = useSearchUsers(searchMode === 'users' ? query : '');
-  
+
   const {
     isLoading,
     isArtistSongsLoading,
@@ -76,6 +82,7 @@ function SearchPageContent() {
     rankedArtists,
     displayedSongs,
     selectedArtist,
+    topResult,
   } = useMusicSearch(searchMode === 'music' ? query : '');
 
   return (
@@ -85,6 +92,7 @@ function SearchPageContent() {
         setInputValue={setInputValue}
         searchMode={searchMode}
         setSearchMode={setSearchMode}
+        onCommit={handleSearchCommit}
       />
 
       {query.length > 2 ? (
@@ -105,11 +113,12 @@ function SearchPageContent() {
               isArtistNameSongsLoading={isArtistNameSongsLoading}
               selectedArtist={selectedArtist}
               rankedSongsLength={rankedSongs.length}
+              topResult={topResult}
             />
           )}
         </div>
       ) : (
-        <SearchCategories />
+        <RecentAndTrending onSearch={handleSearchCommit} />
       )}
     </>
   );

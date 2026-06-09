@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { parseLRC, LrcLine, addInstrumentalPlaceholders, addWordTimings } from '@/lib/utils/lrcParser';
 import { Song } from '@/types/music';
+import { supabase } from '@/lib/supabase/client';
 
 // ── In-memory cache & dedup ──────────────────────────────────────
 interface CachedLyrics {

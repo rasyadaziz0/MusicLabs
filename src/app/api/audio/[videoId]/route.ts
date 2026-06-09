@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Innertube, UniversalCache, Log } from 'youtubei.js';
+import { createClient } from '@/lib/supabase/server';
 
 export const runtime = 'nodejs';
 
@@ -26,6 +27,12 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ videoId: string }> }
 ) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   const { videoId } = await params;
 
   if (!videoId || !/^[A-Za-z0-9_-]{11}$/.test(videoId)) {

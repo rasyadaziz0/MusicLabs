@@ -17,7 +17,11 @@ export interface FollowCounts {
 
 // ── Follow Actions ───────────────────────────────────────────
 
-export async function followUser(followerId: string, followingId: string) {
+export async function followUser(followingId: string) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+  const followerId = user.id;
+
   if (followerId === followingId) throw new Error('Cannot follow yourself');
 
   // Check if already following to avoid 409 Conflict on double click or out-of-sync UI
@@ -43,7 +47,11 @@ export async function followUser(followerId: string, followingId: string) {
   return true;
 }
 
-export async function unfollowUser(followerId: string, followingId: string) {
+export async function unfollowUser(followingId: string) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+  const followerId = user.id;
+
   const { error } = await supabase
     .from('follows')
     .delete()

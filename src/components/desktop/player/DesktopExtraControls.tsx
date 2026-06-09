@@ -8,6 +8,8 @@ import AddToPlaylistButton from '@/components/ui/AddToPlaylistButton';
 import AddToQueueButton from '@/components/ui/AddToQueueButton';
 import { usePlayer } from '@/context/PlayerContext';
 import { Timer } from 'lucide-react';
+import { ContextMenu } from '@/components/ui/context-menu/ContextMenu';
+import { ContextMenuItem, ContextMenuDivider } from '@/components/ui/context-menu/ContextMenuItem';
 
 export interface DesktopExtraControlsProps {
   currentTrack: any;
@@ -42,6 +44,8 @@ export default function DesktopExtraControls({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const [menuPosition, setMenuPosition] = React.useState<{ x: number; y: number } | null>(null);
+
   const handleShare = () => {
     if (!currentTrack?.album?.id) return;
     navigator.clipboard.writeText(`${window.location.origin}/album/${currentTrack.album.id}`);
@@ -64,72 +68,89 @@ export default function DesktopExtraControls({
         isVolumeSliderOpen ? "opacity-0 pointer-events-none scale-95" : "opacity-100 scale-100"
       )}>
         <div className="relative flex items-center justify-center" ref={menuRef}>
-          <button 
-            onClick={() => {
+          <button
+            onClick={(e) => {
               if (!hasTrack) return;
-              setIsMenuOpen(!isMenuOpen);
+              if (isMenuOpen) {
+                setIsMenuOpen(false);
+                setMenuPosition(null);
+              } else {
+                const rect = e.currentTarget.getBoundingClientRect();
+                setMenuPosition({ x: rect.right, y: rect.top - 10 });
+                setIsMenuOpen(true);
+              }
             }}
             className={cn("transition-colors", hasTrack ? (isMenuOpen ? "text-white" : "text-white hover:text-white/80") : "text-white/15 pointer-events-none")}
           >
             <MoreHorizontal size={20} strokeWidth={2.5} />
           </button>
 
-          {isMenuOpen && currentTrack && (
-            <div className="absolute right-0 bottom-full mb-4 w-56 bg-[#252525] border border-white/5 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.6)] z-50 py-1.5 flex flex-col overflow-hidden animate-in slide-in-from-bottom-2 fade-in">
-              <AddToPlaylistButton track={currentTrack} asMenuItem />
-              <div className="w-full">
+          <ContextMenu
+            isOpen={isMenuOpen}
+            onClose={() => {
+              setIsMenuOpen(false);
+              setMenuPosition(null);
+            }}
+            position={menuPosition}
+            className="w-56 py-1.5"
+          >
+            {currentTrack && (
+              <>
+                <AddToPlaylistButton track={currentTrack} asMenuItem />
                 <AddToQueueButton track={currentTrack} showText />
-              </div>
-              
-              <div className="h-px bg-white/5 my-1 mx-3" />
-              
-              <TrackLikeButton track={currentTrack} asMenuItem />
-              
-              <div className="h-px bg-white/5 my-1 mx-3" />
-              
-              <button onClick={handleShare} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between group">
-                <span>Share</span>
-                <Share size={15} className="text-white/40 group-hover:text-white/80 transition-colors" />
-              </button>
-              <button onClick={handleCopyLink} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between group">
-                <span>Copy Link</span>
-                <Link2 size={15} className="text-white/40 group-hover:text-white/80 transition-colors" />
-              </button>
+                
+                <ContextMenuDivider />
+                
+                <TrackLikeButton track={currentTrack} asMenuItem />
+                
+                <ContextMenuDivider />
+                
+                <ContextMenuItem
+                  icon={<Share size={15} />}
+                  label="Share"
+                  onClick={handleShare}
+                />
+                <ContextMenuItem
+                  icon={<Link2 size={15} />}
+                  label="Copy Link"
+                  onClick={handleCopyLink}
+                />
 
-              <div className="h-px bg-white/5 my-1 mx-3" />
+                <ContextMenuDivider />
 
-              <div className="px-4 py-2">
-                <div className="text-[12px] text-white/50 mb-2 flex items-center gap-1.5">
-                  <Timer size={14} /> Sleep Timer
+                <div className="px-3 py-2">
+                  <div className="text-[12px] text-white/50 mb-2 flex items-center gap-1.5">
+                    <Timer size={14} /> Sleep Timer
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[15, 30, 45, 60].map(mins => (
+                      <button
+                        key={mins}
+                        onClick={() => {
+                          setSleepTimer(mins);
+                          setIsMenuOpen(false);
+                        }}
+                        className="flex-1 text-[11px] bg-white/10 hover:bg-white/20 text-white px-1 py-1 rounded transition-colors text-center"
+                      >
+                        {mins}m
+                      </button>
+                    ))}
+                    {sleepTimerEndTime && (
+                      <button
+                        onClick={() => {
+                          clearSleepTimer();
+                          setIsMenuOpen(false);
+                        }}
+                        className="w-full mt-1.5 text-[11px] bg-[#FA243C]/20 hover:bg-[#FA243C]/40 text-[#FA243C] py-1.5 rounded transition-colors"
+                      >
+                        Batalkan Timer
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {[15, 30, 45, 60].map(mins => (
-                    <button
-                      key={mins}
-                      onClick={() => {
-                        setSleepTimer(mins);
-                        setIsMenuOpen(false);
-                      }}
-                      className="flex-1 text-[11px] bg-white/10 hover:bg-white/20 text-white px-1 py-1 rounded transition-colors text-center"
-                    >
-                      {mins}m
-                    </button>
-                  ))}
-                  {sleepTimerEndTime && (
-                    <button
-                      onClick={() => {
-                        clearSleepTimer();
-                        setIsMenuOpen(false);
-                      }}
-                      className="w-full mt-1.5 text-[11px] bg-[#FA243C]/20 hover:bg-[#FA243C]/40 text-[#FA243C] py-1.5 rounded transition-colors"
-                    >
-                      Batalkan Timer
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
+              </>
+            )}
+          </ContextMenu>
         </div>
         <button
           onClick={() => {
@@ -159,7 +180,6 @@ export default function DesktopExtraControls({
       {/* Volume */}
       <div 
         className="relative flex items-center justify-end h-[32px] w-[18px]"
-        onMouseEnter={() => setIsVolumeSliderOpen(true)}
         onMouseLeave={() => setIsVolumeSliderOpen(false)}
       >
         <div 
@@ -188,7 +208,7 @@ export default function DesktopExtraControls({
 
           {/* Icon */}
           <button 
-            onClick={() => setIsVolumeSliderOpen(!isVolumeSliderOpen)}
+            onClick={() => setIsVolumeSliderOpen(true)}
             className={cn(
               "transition-colors flex-shrink-0 flex items-center justify-center w-[18px] h-full",
               isVolumeSliderOpen ? "text-white" : "text-white/60 hover:text-white"

@@ -4,6 +4,7 @@ import { usePlayer } from '@/context/PlayerContext';
 import { useAuth } from '@/context/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { LayoutGroup } from 'framer-motion';
 import { Timer } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import NowPlaying from './NowPlaying';
@@ -112,7 +113,7 @@ export default function PlayerBar({ isMobile }: PlayerBarProps) {
   const hasTrack = !!currentTrack;
 
   return (
-    <>
+    <LayoutGroup>
       {hasTrack && (
         <NowPlaying
           isOpen={isNowPlayingOpen}
@@ -192,6 +193,6 @@ export default function PlayerBar({ isMobile }: PlayerBarProps) {
         onClose={() => setIsGuestGateOpen(false)}
         action="listen to full songs"
       />
-    </>
+    </LayoutGroup>
   );
 }

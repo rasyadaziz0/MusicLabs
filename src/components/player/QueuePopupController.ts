@@ -9,6 +9,8 @@ export interface QueueContextAdapter {
   clearQueue: () => void;
   cycleRepeatMode: () => void;
   reorderQueue: (startIndex: number, endIndex: number) => void;
+  removeFromQueue: (trackId: string) => void;
+  promoteToManual: (trackId: string) => void;
 }
 
 export type SortableTrack = Song & { uniqueId: string };
@@ -24,7 +26,16 @@ export class QueuePopupController {
     return this.player.queue.slice(this.player.queueIndex + 1);
   }
 
+  get manualItems(): SortableTrack[] {
+    return this.upNext.filter(t => !t.isAutoplay).map((track, i) => ({ ...track, uniqueId: `${track.id}-${i}-m` }));
+  }
+
+  get autoplayItems(): SortableTrack[] {
+    return this.upNext.filter(t => t.isAutoplay).map((track, i) => ({ ...track, uniqueId: `${track.id}-${i}-a` }));
+  }
+
   get sortableItems(): SortableTrack[] {
+    // Keep this for backward compatibility if needed, though UI will use manualItems and autoplayItems
     return this.upNext.map((track, i) => ({ ...track, uniqueId: `${track.id}-${i}` }));
   }
 
@@ -39,9 +50,10 @@ export class QueuePopupController {
   handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (active && over && active.id !== over.id) {
-      const items = this.sortableItems;
-      const oldIndex = items.findIndex((t) => t.uniqueId === active.id);
-      const newIndex = items.findIndex((t) => t.uniqueId === over.id);
+      // Find within the combined sortable items list to map back to queue index
+      const combined = [...this.manualItems, ...this.autoplayItems];
+      const oldIndex = combined.findIndex((t) => t.uniqueId === active.id);
+      const newIndex = combined.findIndex((t) => t.uniqueId === over.id);
 
       if (oldIndex !== -1 && newIndex !== -1) {
         this.player.reorderQueue(
@@ -62,5 +74,13 @@ export class QueuePopupController {
 
   cycleRepeatMode = () => {
     this.player.cycleRepeatMode();
+  };
+
+  removeFromQueue = (trackId: string) => {
+    this.player.removeFromQueue(trackId);
+  };
+
+  promoteToManual = (trackId: string) => {
+    this.player.promoteToManual(trackId);
   };
 }

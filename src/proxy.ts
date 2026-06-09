@@ -6,6 +6,8 @@ import { updateSession } from './lib/supabase/middleware';
 
 const RATE_LIMIT_CONFIGS = [
   { prefix: '/api/audio/resolve', prefix_key: 'acadmusic:edge:audio-resolve', max: 10, window: '1 m' },
+  { prefix: '/api/romanize', prefix_key: 'acadmusic:edge:romanize', max: 10, window: '1 m' },
+  { prefix: '/api/lyrics', prefix_key: 'acadmusic:edge:lyrics', max: 20, window: '1 m' },
   { prefix: '/api/search', prefix_key: 'acadmusic:edge:search', max: 30, window: '1 m' },
 ];
 
@@ -32,7 +34,7 @@ function getRateLimitConfig(pathname: string) {
     : DEFAULT_RATE_LIMIT;
 }
 
-const AUTH_REQUIRED_PREFIXES = ['/api/audio/', '/api/import/'];
+const AUTH_REQUIRED_PREFIXES = ['/api/audio/', '/api/import/', '/api/romanize'];
 
 function routeRequiresAuth(pathname: string) {
   return AUTH_REQUIRED_PREFIXES.some((prefix) => pathname.startsWith(prefix));

@@ -7,6 +7,7 @@ import { Song } from '@/types/music';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 import { useAddTrackToPlaylist, useLibraryPlaylists } from '@/hooks/useMusicLibrary';
+import { ContextMenuItem } from './context-menu/ContextMenuItem';
 
 interface AddToPlaylistButtonProps {
   track: Song;
@@ -71,25 +72,23 @@ export default function AddToPlaylistButton({ track, className, asMenuItem = fal
 
   return (
     <div ref={containerRef} className={cn("relative", asMenuItem && "w-full")}>
-      <button
-        type="button"
-        onClick={handleButtonClick}
-        className={cn(
-          asMenuItem ? 'w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between group' : 'inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-muted transition-colors hover:text-white',
-          className
-        )}
-        title="Add to playlist"
-        aria-label="Add to playlist"
-      >
-        {asMenuItem ? (
-          <>
-            <span>Add to Playlist</span>
-            <ListPlus size={15} className="text-white/40 group-hover:text-white/80 transition-colors" />
-          </>
-        ) : (
+      {asMenuItem ? (
+        <ContextMenuItem
+          icon={<ListPlus size={15} />}
+          label="Add to Playlist"
+          onClick={handleButtonClick}
+          className={className}
+        />
+      ) : (
+        <button
+          type="button"
+          onClick={handleButtonClick}
+          className={cn('inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-muted transition-colors hover:text-white', className)}
+          title="Add to playlist"
+        >
           <ListPlus size={16} />
-        )}
-      </button>
+        </button>
+      )}
 
       {isOpen && (
         <div

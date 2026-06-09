@@ -2,6 +2,7 @@
 
 import { Loader2, Pause, Play, Radio as RadioIcon, SkipForward } from 'lucide-react';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 import { getBestImageUrl } from '@/lib/api/musicApi';
 
 export interface MobilePlayerBarProps {
@@ -34,7 +35,12 @@ export default function MobilePlayerBar({
       className="md:hidden fixed bottom-[104px] left-4 right-4 h-[60px] bg-white/10 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.4)] flex items-center px-3 gap-3 z-40 cursor-pointer"
       onClick={() => setIsNowPlayingOpen(true)}
     >
-      <div className="relative w-11 h-11 rounded-lg overflow-hidden flex-shrink-0 shadow-md">
+      <motion.div 
+        layoutId={`artwork-${currentTrack.id}`}
+        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+        style={{ borderRadius: 8 }}
+        className="relative w-11 h-11 overflow-hidden flex-shrink-0 shadow-md"
+      >
         {isRadio ? (
           <div className="w-full h-full bg-gradient-to-br from-[#FA243C]/30 to-[#FA243C]/10 flex items-center justify-center">
             <RadioIcon size={20} className="text-[#FA243C]" />
@@ -50,7 +56,7 @@ export default function MobilePlayerBar({
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-primary/40 to-void" />
         )}
-      </div>
+      </motion.div>
       <div className="flex-1 min-w-0 overflow-hidden flex flex-col justify-center">
         {isRadio && (
           <p className="text-[9px] text-[#FA243C] font-semibold uppercase tracking-wider mb-0.5 flex items-center gap-1">

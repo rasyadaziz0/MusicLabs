@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
 
     return response;
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Spotify OAuth callback error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error('Spotify OAuth callback error:', error);
+    return NextResponse.json({ error: 'Spotify OAuth callback error' }, { status: 500 });
   }
 }

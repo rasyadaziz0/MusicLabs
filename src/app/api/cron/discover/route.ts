@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     const authHeader = request.headers.get('authorization');
     const cronSecret = process.env.CRON_SECRET;
     
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -71,7 +71,7 @@ export async function GET(request: Request) {
   } catch (err: any) {
     console.error('Discover Weekly cron error:', err);
     return NextResponse.json(
-      { error: err?.message || 'Failed to execute Discover Weekly cron job' },
+      { error: 'Failed to execute Discover Weekly cron job' },
       { status: 500 }
     );
   }

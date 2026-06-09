@@ -1,7 +1,12 @@
+'use client';
+
+import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Song } from '@/types/music';
 import { getBestImageUrl } from '@/lib/api/musicApi';
+import { Play, MoreHorizontal } from 'lucide-react';
+import { TrackContextMenu } from '../ui/TrackContextMenu';
 
 // ── Top Picks Card ──────────────────────────────────────────
 export function TopPicksCard({
@@ -62,11 +67,20 @@ export function TrackCard({
   song: Song;
   onPlay: () => void;
 }) {
+  const [contextMenu, setContextMenu] = useState<{ isOpen: boolean; x: number; y: number }>({ isOpen: false, x: 0, y: 0 });
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({ isOpen: true, x: e.clientX, y: e.clientY });
+  };
+
   return (
-    <button
-      type="button"
-      className="group flex-shrink-0 w-[160px] md:w-[180px] text-left"
+    <>
+    <div
+      className="group flex-shrink-0 w-[160px] md:w-[180px] text-left cursor-pointer"
       onClick={onPlay}
+      onContextMenu={(e) => { e.preventDefault(); handleContextMenu(e); }}
     >
       <div className="relative aspect-square rounded-[12px] overflow-hidden mb-3 bg-white/5 border border-white/5 shadow-sm">
         {getBestImageUrl(song.image) && (
@@ -79,13 +93,36 @@ export function TrackCard({
           />
         )}
         {/* Dark overlay on hover */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300" />
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300" />
+        
+        {/* Hover Actions */}
+        <div className="absolute inset-x-0 bottom-0 p-2 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <button 
+            className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/60 hover:scale-105 transition-all shadow-md"
+            onClick={(e) => { e.stopPropagation(); onPlay(); }}
+          >
+            <Play className="w-4 h-4 ml-0.5" fill="currentColor" />
+          </button>
+          <button 
+            className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/60 hover:scale-105 transition-all shadow-md"
+            onClick={handleContextMenu}
+          >
+            <MoreHorizontal className="w-4 h-4" />
+          </button>
+        </div>
       </div>
       <p className="text-white font-medium text-[14px] line-clamp-1 leading-snug">{song.name}</p>
       <p className="text-muted text-[13px] line-clamp-1 mt-0.5">
         {song.artists.primary.map((a: any) => a.name).join(', ')}
       </p>
-    </button>
+    </div>
+    <TrackContextMenu
+      track={song}
+      isOpen={contextMenu.isOpen}
+      position={{ x: contextMenu.x, y: contextMenu.y }}
+      onClose={() => setContextMenu(prev => ({ ...prev, isOpen: false }))}
+    />
+    </>
   );
 }
 

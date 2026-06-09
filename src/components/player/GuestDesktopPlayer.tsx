@@ -4,6 +4,7 @@ import { Play, Pause, SkipForward, SkipBack, Shuffle, Repeat, Volume2, Loader2, 
 import { formatTime } from '@/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { MoreMenu } from '@/components/player/NowPlayingUI';
 
 // We reuse the NowPlayingUIProps type but we can omit what we don't need or just pass it
@@ -34,16 +35,20 @@ export function GuestDesktopPlayer({
       <div style={{ position: 'relative', zIndex: 10, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 24px', margin: '0 auto' }}>
         <div style={{ width: '100%', maxWidth: 440, display: 'flex', flexDirection: 'column' }}>
           {/* Album art */}
-          <div style={{ position: 'relative', aspectRatio: '1', width: '100%', borderRadius: 16, overflow: 'hidden', boxShadow: '0 24px 72px rgba(0,0,0,0.6), 0 12px 32px rgba(0,0,0,0.4)', background: '#1a1a2a' }}>
+          <motion.div 
+            layoutId={`artwork-${currentTrack.id}`}
+            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            style={{ position: 'relative', aspectRatio: '1', width: '100%', borderRadius: 16, overflow: 'hidden', boxShadow: '0 24px 72px rgba(0,0,0,0.6), 0 12px 32px rgba(0,0,0,0.4)', background: '#1a1a2a' }}
+          >
             {coverUrl ? (
-              <Image src={coverUrl} alt={currentTrack.name} fill sizes="64px" style={{ objectFit: 'cover' }} />
+              <Image src={coverUrl} alt={currentTrack.name} fill sizes="64px" style={{ objectFit: 'cover' }} priority />
             ) : (
               <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, rgba(120,80,160,0.4), rgba(20,20,40,1))' }} />
             )}
             {isPreview && (
               <span style={{ position: 'absolute', top: 12, right: 12, padding: '4px 12px', borderRadius: 999, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 700, background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.2)' }}>Preview</span>
             )}
-          </div>
+          </motion.div>
 
           {/* Track info + actions */}
           <div style={{ marginTop: 24, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10 }}>

@@ -25,6 +25,7 @@ interface PlayerContextType {
   queueIndex: number;
   isShuffled: boolean;
   repeatMode: 'none' | 'all' | 'one';
+  isAutoplayEnabled: boolean;
   toggleShuffle: () => void;
   cycleRepeatMode: () => void;
   playTrack: (track: Song, queue?: Song[]) => void;
@@ -34,12 +35,16 @@ interface PlayerContextType {
   seek: (time: number) => void;
   setVolume: (volume: number) => void;
   addToQueue: (track: Song) => void;
+  playNext: (track: Song) => void;
+  removeFromQueue: (trackId: string) => void;
+  promoteToManual: (trackId: string) => void;
   clearQueue: () => void;
   reorderQueue: (startIndex: number, endIndex: number) => void;
   shufflePlay: (tracks: Song[]) => void;
   sleepTimerEndTime: number | null;
   setSleepTimer: (minutes: number) => void;
   clearSleepTimer: () => void;
+  toggleAutoplay: () => void;
 }
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
@@ -109,6 +114,18 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     controllerRef.current?.addToQueue(track);
   }, []);
 
+  const playNext = useCallback((track: Song) => {
+    controllerRef.current?.playNext(track);
+  }, []);
+
+  const removeFromQueue = useCallback((trackId: string) => {
+    controllerRef.current?.removeFromQueue(trackId);
+  }, []);
+
+  const promoteToManual = useCallback((trackId: string) => {
+    controllerRef.current?.promoteToManual(trackId);
+  }, []);
+
   const clearQueue = useCallback(() => {
     controllerRef.current?.clearQueue();
   }, []);
@@ -138,6 +155,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     controllerRef.current?.clearSleepTimer();
   }, []);
 
+  const toggleAutoplay = useCallback(() => {
+    controllerRef.current?.toggleAutoplay();
+  }, []);
+
   // ── Media Session (React hook — stays in context) ──
   useMediaSession({
     currentTrack: state.currentTrack,
@@ -165,6 +186,8 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       queueIndex: state.queueIndex,
       isShuffled: state.isShuffled,
       repeatMode: state.repeatMode,
+      isAutoplayEnabled: state.isAutoplayEnabled,
+      toggleAutoplay,
       toggleShuffle,
       cycleRepeatMode,
       playTrack,
@@ -174,6 +197,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       seek,
       setVolume,
       addToQueue,
+      playNext,
+      removeFromQueue,
+      promoteToManual,
       clearQueue,
       reorderQueue,
       shufflePlay,
