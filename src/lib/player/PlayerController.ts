@@ -30,6 +30,7 @@ export type PlayerState = {
   isShuffled: boolean;
   repeatMode: 'none' | 'all' | 'one';
   sleepTimerEndTime: number | null;
+  isAutoplayEnabled: boolean;
 };
 
 export const INITIAL_STATE: PlayerState = {
@@ -49,6 +50,7 @@ export const INITIAL_STATE: PlayerState = {
   isShuffled: false,
   repeatMode: 'none',
   sleepTimerEndTime: null,
+  isAutoplayEnabled: false,
 };
 
 // ─── Options ───
@@ -147,6 +149,7 @@ export class PlayerController {
           queueIndex: qs.queueIndex,
           isShuffled: qs.isShuffled,
           repeatMode: qs.repeatMode,
+          isAutoplayEnabled: qs.isAutoplayEnabled,
         });
       },
     });
@@ -472,6 +475,18 @@ export class PlayerController {
     this.queueMgr.addToQueue(track);
   }
 
+  playNext(track: Song): void {
+    this.queueMgr.playNext(track);
+  }
+
+  removeFromQueue(trackId: string): void {
+    this.queueMgr.removeFromQueue(trackId);
+  }
+
+  promoteToManual(trackId: string): void {
+    this.queueMgr.promoteToManual(trackId);
+  }
+
   clearQueue(): void {
     this.queueMgr.clearQueue();
   }
@@ -493,6 +508,10 @@ export class PlayerController {
 
   cycleRepeatMode(): void {
     this.queueMgr.cycleRepeatMode();
+  }
+
+  toggleAutoplay(): void {
+    this.queueMgr.toggleAutoplay();
   }
 
   // ────────────────────────────────────────

@@ -71,7 +71,7 @@ function mapYoutubeiToSong(item: any): Song | null {
   };
 }
 
-export async function GET(request: NextRequest, { params }: { params: { videoId: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ videoId: string }> }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest, { params }: { params: { videoId:
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { videoId } = params;
+  const { videoId } = await params;
   const title = request.nextUrl.searchParams.get('title') || '';
   const artist = request.nextUrl.searchParams.get('artist') || '';
   const userId = request.nextUrl.searchParams.get('userId') || 'anonymous';
