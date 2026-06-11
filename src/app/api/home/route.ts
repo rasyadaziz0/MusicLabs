@@ -10,8 +10,19 @@ export async function GET() {
   try {
     const client = await getYtMusicClient();
     
-    // Fetch home sections
-    const sections = await client.getHomeSections();
+    // Temporarily suppress console.error to hide ZodError spam from ytmusic-api
+    const originalConsoleError = console.error;
+    console.error = (...args: any[]) => {
+      if (args[0] && typeof args[0] === 'object' && args[0].name === 'ZodError') return;
+      originalConsoleError(...args);
+    };
+
+    let sections: any[] = [];
+    try {
+      sections = await client.getHomeSections();
+    } finally {
+      console.error = originalConsoleError;
+    }
     
     // Pick the first section with songs as "Trending Songs" or fallback to an empty array
     let trendingSongs: any[] = [];
@@ -22,6 +33,7 @@ export async function GET() {
     for (const section of sections) {
       if (section.contents) {
         for (const item of section.contents) {
+          if (!item) continue;
           if ((item.type as string) === 'SONG' || (item.type as string) === 'VIDEO') {
             if (trendingSongs.length < 15) {
               const mapped = mapYtSongToAppSong(item as any);

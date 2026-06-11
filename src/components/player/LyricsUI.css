@@ -1,0 +1,49 @@
+.lyrics-scroll-area::-webkit-scrollbar { display: none; }
+.lyrics-scroll-area {
+  scroll-behavior: auto;        /* we control scroll ourselves */
+}
+.lyric-line {
+  display: block;
+  background: none;
+  border: none;
+  text-align: left;
+  width: 100%;
+  padding: 0;
+  margin-bottom: 6px;
+  font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.4px;
+  transform-origin: left center;
+  will-change: transform, filter, opacity, color;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-margin-top: 22vh;
+}
+.lyric-line-wrapper {
+  margin-bottom: 20px;
+}
+.lyric-line:focus { outline: none; }
+.lyric-line-hoverable { cursor: pointer; }
+.lyric-line-hoverable:hover { opacity: 0.6 !important; }
+.romanization-text {
+  display: block;
+  font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1.3;
+  letter-spacing: 0.2px;
+  margin-top: 4px;
+  padding-left: 1px;
+  -webkit-font-smoothing: antialiased;
+}
+@keyframes skeleton-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.lyric-skeleton {
+  border-radius: 10px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.8s ease-in-out infinite;
+}

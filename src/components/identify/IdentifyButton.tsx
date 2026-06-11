@@ -12,11 +12,6 @@ interface IdentifyButtonProps {
   className?: string;
 }
 
-/**
- * A standalone button that opens the IdentifyModal.
- * - `sidebar`: icon + label, matches existing Sidebar nav style
- * - `mobile`: compact round button for MobileNav
- */
 export default function IdentifyButton({ variant = 'sidebar', className }: IdentifyButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const searchParams = useSearchParams();

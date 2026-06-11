@@ -42,10 +42,8 @@ export function LyricLine({
   // Actually, if it's a placeholder, and we want to render dots, we can do it here.
   const renderContent = () => {
     if (isPlaceholder) {
-      // The text is probably '...'. Let's render nice pulsing dots if active, or just text if scrolling
-      if (!isActive && !isUserScrolling) return null; // handled by opacity=0 in StyleManager, but can also just return null
       return (
-        <span style={{ letterSpacing: '4px' }}>● ● ●</span>
+        <span style={{ letterSpacing: '4px' }}>●●●</span>
       );
     }
     let mainContent;

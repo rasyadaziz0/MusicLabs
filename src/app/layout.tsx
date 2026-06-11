@@ -7,6 +7,7 @@ import { ArtworkColorsProvider } from "@/context/ArtworkColorsContext";
 import QueryProvider from "@/context/QueryProvider";
 import PWARegistration from "@/components/PWARegistration";
 import YouTubePlayerMount from "@/components/YouTubePlayerMount";
+import { LiquidGlassFilters } from "@/components/ui/LiquidGlass";
 import { Analytics } from "@vercel/analytics/react";
 import { Toaster } from "react-hot-toast";
 
@@ -55,6 +56,7 @@ export default function RootLayout({
       className={`${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable} h-full antialiased dark`}
     >
       <body className="min-h-full bg-void text-white selection:bg-primary/30" suppressHydrationWarning>
+        <LiquidGlassFilters />
         <PWARegistration />
         <QueryProvider>
           <AuthProvider>

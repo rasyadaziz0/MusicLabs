@@ -10,6 +10,7 @@ import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { LyricStyleManager } from './lyrics/LyricStyleManager';
 import { SidebarKaraokeWord } from './lyrics/SidebarKaraokeWord';
+import { LiquidGlassCard } from '@/components/ui/LiquidGlass';
 import './lyrics/sidebar.css';
 
 interface LyricsSidebarProps {
@@ -51,85 +52,91 @@ export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
             overflow: 'hidden',
           }}
         >
-          {/* Blurred album art background */}
-          <div style={{ position: 'absolute', inset: 0, background: 'rgba(18,18,20,0.82)', backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)', zIndex: 0 }} />
+          {/* Dark Overlay for Text Readability */}
+          <div className="absolute inset-0 bg-black/45" />
 
-          {/* Colored glow from album art — tint based on currentTrack */}
-          <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 40% 50%, rgba(180,40,20,0.35) 0%, transparent 65%)', zIndex: 0, pointerEvents: 'none' }} />
-
-          {/* Top fade */}
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '80px', background: 'linear-gradient(to bottom, rgba(14,14,16,0.7) 0%, transparent 100%)', zIndex: 3, pointerEvents: 'none' }} />
-
-          {/* Bottom fade */}
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '100px', background: 'linear-gradient(to top, rgba(14,14,16,0.9) 0%, transparent 100%)', zIndex: 3, pointerEvents: 'none' }} />
-
-          {/* Scrollable lyrics */}
-          <div
-            ref={scrollRef}
-            className="lyrics-scroll"
-            style={{ position: 'relative', zIndex: 2, flex: 1, overflowY: 'auto', scrollbarWidth: 'none', padding: '60px 22px 80px' }}
+          <LiquidGlassCard
+            glowIntensity="none"
+            shadowIntensity="none"
+            blurIntensity="xl"
+            borderRadius="0px"
+            className="absolute inset-0 w-full h-full flex flex-col"
+            draggable={false}
           >
-            {isLoading ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', paddingTop: '8px' }}>
-                {[...Array(8)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="sidebar-lyric-skeleton"
-                    style={{
-                      height: i === 0 ? '26px' : i <= 2 ? '20px' : '16px',
-                      width: `${[75, 60, 68, 50, 65, 45, 58, 52][i]}%`,
-                      opacity: i <= 1 ? 0.7 : i <= 3 ? 0.4 : 0.2,
-                    }}
-                  />
-                ))}
-              </div>
-            ) : !currentTrack ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60%', gap: '10px' }}>
-                <Music2 size={28} color="rgba(255,255,255,0.15)" />
-                <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.3)', margin: 0 }}>Play a song to see lyrics</p>
-              </div>
-            ) : lines.length > 0 ? (
-              <div style={{ animation: 'lyricsFadeIn 0.5s ease-out' }}>
-                {lines.map((line, index) => {
-                  const isActive = activeIndex === index;
-                  const romanText = romanizations.get(index);
-                  const lineStyle = LyricStyleManager.getSidebarLineStyle(index, activeIndex);
-                  const romanStyle = LyricStyleManager.getSidebarRomanizationStyle(index, activeIndex, lineStyle.opacity);
+            {/* Top fade */}
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '80px', background: 'linear-gradient(to bottom, rgba(14,14,16,0.7) 0%, transparent 100%)', zIndex: 3, pointerEvents: 'none' }} />
 
-                  return (
-                    <div key={`${line.time}-${index}`} className="sidebar-lyric-wrapper">
-                      <button
-                        className="lyric-btn"
-                        data-lyric-index={index}
-                        onClick={() => isSynced && !line.isPlaceholder && seek(line.time)}
-                        style={{ ...lineStyle, cursor: isSynced && !line.isPlaceholder ? 'pointer' : 'default' }}
-                      >
-                        {/* Karaoke word glow for active line */}
-                        {isActive && isSynced && line.words && line.words.length > 0 ? (
-                          line.words.map((word, wi) => (
-                            <SidebarKaraokeWord key={wi} word={word} />
-                          ))
-                        ) : (
-                          line.text
+            {/* Bottom fade */}
+            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '100px', background: 'linear-gradient(to top, rgba(14,14,16,0.9) 0%, transparent 100%)', zIndex: 3, pointerEvents: 'none' }} />
+
+            {/* Scrollable lyrics */}
+            <div
+              ref={scrollRef}
+              className="lyrics-scroll"
+              style={{ position: 'relative', zIndex: 2, flex: 1, overflowY: 'auto', scrollbarWidth: 'none', padding: '60px 22px 80px' }}
+            >
+              {isLoading ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', paddingTop: '8px' }}>
+                  {[...Array(8)].map((_, i) => (
+                    <div
+                      key={i}
+                      className="sidebar-lyric-skeleton"
+                      style={{
+                        height: i === 0 ? '26px' : i <= 2 ? '20px' : '16px',
+                        width: `${[75, 60, 68, 50, 65, 45, 58, 52][i]}%`,
+                        opacity: i <= 1 ? 0.7 : i <= 3 ? 0.4 : 0.2,
+                      }}
+                    />
+                  ))}
+                </div>
+              ) : !currentTrack ? (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60%', gap: '10px' }}>
+                  <Music2 size={28} color="rgba(255,255,255,0.15)" />
+                  <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.3)', margin: 0 }}>Play a song to see lyrics</p>
+                </div>
+              ) : lines.length > 0 ? (
+                <div style={{ animation: 'lyricsFadeIn 0.5s ease-out' }}>
+                  {lines.map((line, index) => {
+                    const isActive = activeIndex === index;
+                    const romanText = romanizations.get(index);
+                    const lineStyle = LyricStyleManager.getSidebarLineStyle(index, activeIndex);
+                    const romanStyle = LyricStyleManager.getSidebarRomanizationStyle(index, activeIndex, lineStyle.opacity);
+
+                    return (
+                      <div key={`${line.time}-${index}`} className="sidebar-lyric-wrapper">
+                        <button
+                          className="lyric-btn"
+                          data-lyric-index={index}
+                          onClick={() => isSynced && !line.isPlaceholder && seek(line.time)}
+                          style={{ ...lineStyle, cursor: isSynced && !line.isPlaceholder ? 'pointer' : 'default' }}
+                        >
+                          {/* Karaoke word glow for active line */}
+                          {isActive && isSynced && line.words && line.words.length > 0 ? (
+                            line.words.map((word, wi) => (
+                              <SidebarKaraokeWord key={wi} word={word} />
+                            ))
+                          ) : (
+                            line.text
+                          )}
+                        </button>
+
+                        {/* Romanization */}
+                        {romanText && (
+                          <span className="sidebar-roman" style={romanStyle}>
+                            {romanText}
+                          </span>
                         )}
-                      </button>
-
-                      {/* Romanization */}
-                      {romanText && (
-                        <span className="sidebar-roman" style={romanStyle}>
-                          {romanText}
-                        </span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60%' }}>
-                <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.3)', margin: 0 }}>No lyrics available</p>
-              </div>
-            )}
-          </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60%' }}>
+                  <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.3)', margin: 0 }}>No lyrics available</p>
+                </div>
+              )}
+            </div>
+          </LiquidGlassCard>
         </motion.div>
       )}
     </AnimatePresence>

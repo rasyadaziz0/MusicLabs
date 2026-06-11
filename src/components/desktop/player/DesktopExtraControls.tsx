@@ -1,15 +1,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import toast from 'react-hot-toast';
-import { Volume2, VolumeX, MessageSquare, ListMusic, MoreHorizontal, Share, Link2 } from 'lucide-react';
+import { Volume2, VolumeX, MessageSquare, ListMusic } from 'lucide-react';
 import QueuePopup from '@/components/player/QueuePopup';
-import TrackLikeButton from '@/components/ui/TrackLikeButton';
-import AddToPlaylistButton from '@/components/ui/AddToPlaylistButton';
-import AddToQueueButton from '@/components/ui/AddToQueueButton';
-import { usePlayer } from '@/context/PlayerContext';
-import { Timer } from 'lucide-react';
-import { ContextMenu } from '@/components/ui/context-menu/ContextMenu';
-import { ContextMenuItem, ContextMenuDivider } from '@/components/ui/context-menu/ContextMenuItem';
 
 export interface DesktopExtraControlsProps {
   currentTrack: any;
@@ -30,35 +22,6 @@ export default function DesktopExtraControls({
   isVolumeSliderOpen, setIsVolumeSliderOpen,
   isQueueOpen, setIsQueueOpen, isLyricsOpen, setIsLyricsOpen
 }: DesktopExtraControlsProps) {
-  const { setSleepTimer, clearSleepTimer, sleepTimerEndTime } = usePlayer();
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const menuRef = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const [menuPosition, setMenuPosition] = React.useState<{ x: number; y: number } | null>(null);
-
-  const handleShare = () => {
-    if (!currentTrack?.album?.id) return;
-    navigator.clipboard.writeText(`${window.location.origin}/album/${currentTrack.album.id}`);
-    toast.success('Album link copied to clipboard!');
-    setIsMenuOpen(false);
-  };
-
-  const handleCopyLink = () => {
-    if (!currentTrack) return;
-    navigator.clipboard.writeText(`${window.location.origin}/search?q=${encodeURIComponent(currentTrack.name)}`);
-    toast.success('Song search link copied!');
-    setIsMenuOpen(false);
-  };
 
   return (
     <div className="flex items-center gap-[18px]">
@@ -67,91 +30,6 @@ export default function DesktopExtraControls({
         "flex items-center gap-[18px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
         isVolumeSliderOpen ? "opacity-0 pointer-events-none scale-95" : "opacity-100 scale-100"
       )}>
-        <div className="relative flex items-center justify-center" ref={menuRef}>
-          <button
-            onClick={(e) => {
-              if (!hasTrack) return;
-              if (isMenuOpen) {
-                setIsMenuOpen(false);
-                setMenuPosition(null);
-              } else {
-                const rect = e.currentTarget.getBoundingClientRect();
-                setMenuPosition({ x: rect.right, y: rect.top - 10 });
-                setIsMenuOpen(true);
-              }
-            }}
-            className={cn("transition-colors", hasTrack ? (isMenuOpen ? "text-white" : "text-white hover:text-white/80") : "text-white/15 pointer-events-none")}
-          >
-            <MoreHorizontal size={20} strokeWidth={2.5} />
-          </button>
-
-          <ContextMenu
-            isOpen={isMenuOpen}
-            onClose={() => {
-              setIsMenuOpen(false);
-              setMenuPosition(null);
-            }}
-            position={menuPosition}
-            className="w-56 py-1.5"
-          >
-            {currentTrack && (
-              <>
-                <AddToPlaylistButton track={currentTrack} asMenuItem />
-                <AddToQueueButton track={currentTrack} showText />
-                
-                <ContextMenuDivider />
-                
-                <TrackLikeButton track={currentTrack} asMenuItem />
-                
-                <ContextMenuDivider />
-                
-                <ContextMenuItem
-                  icon={<Share size={15} />}
-                  label="Share"
-                  onClick={handleShare}
-                />
-                <ContextMenuItem
-                  icon={<Link2 size={15} />}
-                  label="Copy Link"
-                  onClick={handleCopyLink}
-                />
-
-                <ContextMenuDivider />
-
-                <div className="px-3 py-2">
-                  <div className="text-[12px] text-white/50 mb-2 flex items-center gap-1.5">
-                    <Timer size={14} /> Sleep Timer
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {[15, 30, 45, 60].map(mins => (
-                      <button
-                        key={mins}
-                        onClick={() => {
-                          setSleepTimer(mins);
-                          setIsMenuOpen(false);
-                        }}
-                        className="flex-1 text-[11px] bg-white/10 hover:bg-white/20 text-white px-1 py-1 rounded transition-colors text-center"
-                      >
-                        {mins}m
-                      </button>
-                    ))}
-                    {sleepTimerEndTime && (
-                      <button
-                        onClick={() => {
-                          clearSleepTimer();
-                          setIsMenuOpen(false);
-                        }}
-                        className="w-full mt-1.5 text-[11px] bg-[#FA243C]/20 hover:bg-[#FA243C]/40 text-[#FA243C] py-1.5 rounded transition-colors"
-                      >
-                        Batalkan Timer
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </>
-            )}
-          </ContextMenu>
-        </div>
         <button
           onClick={() => {
             if (!hasTrack) return;

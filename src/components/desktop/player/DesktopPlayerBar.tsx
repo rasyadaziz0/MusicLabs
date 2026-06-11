@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import DesktopPlaybackControls from './DesktopPlaybackControls';
 import DesktopTrackInfo from './DesktopTrackInfo';
 import DesktopExtraControls from './DesktopExtraControls';
+import { GlassBar } from '@/components/ui/LiquidGlass';
 
 export interface DesktopPlayerBarProps {
   currentTrack: any;
@@ -55,7 +56,8 @@ export default function DesktopPlayerBar({
       )}
       style={{ marginRight: isLyricsOpen || isQueueOpen ? '340px' : '0' }}
     >
-      <div className="flex items-center h-[60px] bg-white/[0.08] backdrop-blur-[40px] backdrop-saturate-[200%] border border-white/10 rounded-full px-6 shadow-[0_12px_40px_rgba(0,0,0,0.4)]">
+      <GlassBar className="h-[60px] rounded-full">
+        <div className="flex items-center w-full h-full px-6">
 
         <DesktopPlaybackControls
           hasTrack={hasTrack}
@@ -108,7 +110,8 @@ export default function DesktopPlayerBar({
           setIsLyricsOpen={setIsLyricsOpen}
         />
 
-      </div>
+        </div>
+      </GlassBar>
     </div>
   );
 }

@@ -4,6 +4,14 @@ import { Radio as RadioIcon, Loader2, Maximize2 } from 'lucide-react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { getBestImageUrl } from '@/lib/api/musicApi';
+import toast from 'react-hot-toast';
+import { MoreHorizontal, Share, Link2, Timer } from 'lucide-react';
+import TrackLikeButton from '@/components/ui/TrackLikeButton';
+import AddToPlaylistButton from '@/components/ui/AddToPlaylistButton';
+import AddToQueueButton from '@/components/ui/AddToQueueButton';
+import { usePlayer } from '@/context/PlayerContext';
+import { ContextMenu } from '@/components/ui/context-menu/ContextMenu';
+import { ContextMenuItem, ContextMenuDivider } from '@/components/ui/context-menu/ContextMenuItem';
 
 export interface DesktopTrackInfoProps {
   currentTrack: any;
@@ -21,6 +29,35 @@ export default function DesktopTrackInfo({
   currentTrack, hasTrack, isRadio, radioMeta, isResolving,
   currentTime, duration, seek, setIsNowPlayingOpen
 }: DesktopTrackInfoProps) {
+  const { setSleepTimer, clearSleepTimer, sleepTimerEndTime } = usePlayer();
+  const [isMenuOpen, React_setIsMenuOpen] = React.useState(false);
+  const menuRef = React.useRef<HTMLDivElement>(null);
+  const [menuPosition, setMenuPosition] = React.useState<{ x: number; y: number } | null>(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        React_setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleShare = () => {
+    if (!currentTrack?.album?.id) return;
+    navigator.clipboard.writeText(`${window.location.origin}/album/${currentTrack.album.id}`);
+    toast.success('Album link copied to clipboard!');
+    React_setIsMenuOpen(false);
+  };
+
+  const handleCopyLink = () => {
+    if (!currentTrack) return;
+    navigator.clipboard.writeText(`${window.location.origin}/search?q=${encodeURIComponent(currentTrack.name)}`);
+    toast.success('Song search link copied!');
+    React_setIsMenuOpen(false);
+  };
+
   return (
     <div className="flex flex-col mx-8 w-[340px] justify-center group">
       {hasTrack ? (
@@ -80,6 +117,95 @@ export default function DesktopTrackInfo({
                 </>
               )}
             </div>
+
+            {/* Three Dots Menu */}
+            {!isRadio && (
+              <div className="relative flex items-center justify-center pl-2" ref={menuRef}>
+                <button
+                  onClick={(e) => {
+                    if (!hasTrack) return;
+                    if (isMenuOpen) {
+                      React_setIsMenuOpen(false);
+                      setMenuPosition(null);
+                    } else {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setMenuPosition({ x: rect.right, y: rect.top - 10 });
+                      React_setIsMenuOpen(true);
+                    }
+                  }}
+                  className={cn("transition-colors flex-shrink-0", hasTrack ? (isMenuOpen ? "text-white" : "text-white/50 hover:text-white/90") : "text-white/15 pointer-events-none")}
+                >
+                  <MoreHorizontal size={18} strokeWidth={2.5} />
+                </button>
+
+                <ContextMenu
+                  isOpen={isMenuOpen}
+                  onClose={() => {
+                    React_setIsMenuOpen(false);
+                    setMenuPosition(null);
+                  }}
+                  position={menuPosition}
+                  className="w-56 py-1.5"
+                >
+                  {currentTrack && (
+                    <>
+                      <AddToPlaylistButton track={currentTrack} asMenuItem />
+                      <AddToQueueButton track={currentTrack} showText />
+                      
+                      <ContextMenuDivider />
+                      
+                      <TrackLikeButton track={currentTrack} asMenuItem />
+                      
+                      <ContextMenuDivider />
+                      
+                      <ContextMenuItem
+                        icon={<Share size={15} />}
+                        label="Share"
+                        onClick={handleShare}
+                      />
+                      <ContextMenuItem
+                        icon={<Link2 size={15} />}
+                        label="Copy Link"
+                        onClick={handleCopyLink}
+                      />
+
+                      <ContextMenuDivider />
+
+                      <div className="px-3 py-2">
+                        <div className="text-[12px] text-white/50 mb-2 flex items-center gap-1.5">
+                          <Timer size={14} /> Sleep Timer
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {[15, 30, 45, 60].map(mins => (
+                            <button
+                              key={mins}
+                              onClick={() => {
+                                setSleepTimer(mins);
+                                React_setIsMenuOpen(false);
+                              }}
+                              className="flex-1 text-[11px] bg-white/10 hover:bg-white/20 text-white px-1 py-1 rounded transition-colors text-center"
+                            >
+                              {mins}m
+                            </button>
+                          ))}
+                          {sleepTimerEndTime && (
+                            <button
+                              onClick={() => {
+                                clearSleepTimer();
+                                React_setIsMenuOpen(false);
+                              }}
+                              className="w-full mt-1.5 text-[11px] bg-[#FA243C]/20 hover:bg-[#FA243C]/40 text-[#FA243C] py-1.5 rounded transition-colors"
+                            >
+                              Batalkan Timer
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </ContextMenu>
+              </div>
+            )}
           </div>
           {/* Progress Bar — hidden for radio (infinite stream) */}
           {!isRadio ? (

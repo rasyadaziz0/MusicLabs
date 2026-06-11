@@ -4,6 +4,7 @@ import { Loader2, Pause, Play, Radio as RadioIcon, SkipForward } from 'lucide-re
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { getBestImageUrl } from '@/lib/api/musicApi';
+import { GlassBar } from '@/components/ui/LiquidGlass';
 
 export interface MobilePlayerBarProps {
   currentTrack: any;
@@ -31,11 +32,12 @@ export default function MobilePlayerBar({
   if (!currentTrack) return null;
 
   return (
-    <div
-      className="md:hidden fixed bottom-[104px] left-4 right-4 h-[60px] bg-white/10 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.4)] flex items-center px-3 gap-3 z-40 cursor-pointer"
+    <GlassBar
+      className="md:hidden fixed bottom-[104px] left-4 right-4 h-[60px] rounded-[22px] z-40 cursor-pointer"
       onClick={() => setIsNowPlayingOpen(true)}
     >
-      <motion.div 
+      <div className="flex items-center w-full h-full px-3 gap-3">
+        <motion.div 
         layoutId={`artwork-${currentTrack.id}`}
         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
         style={{ borderRadius: 8 }}
@@ -107,6 +109,7 @@ export default function MobilePlayerBar({
           <SkipForward size={24} fill="currentColor" />
         </button>
       </div>
-    </div>
+      </div>
+    </GlassBar>
   );
 }

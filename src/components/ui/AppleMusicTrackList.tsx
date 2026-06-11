@@ -333,7 +333,15 @@ export function AppleMusicTrackList({
       </DndContext>
 
       <div className="mt-12 pt-6 border-t border-white/5 text-sm text-white/50 px-4 pb-12">
-        {tracks.length} {tracks.length === 1 ? 'song' : 'songs'}, {Math.floor(totalDuration / 60)} minutes
+        {tracks.length} {tracks.length === 1 ? 'lagu' : 'lagu'}, {(() => {
+          const totalMins = Math.floor(totalDuration / 60);
+          const hours = Math.floor(totalMins / 60);
+          const mins = totalMins % 60;
+          if (hours > 0) {
+            return `${hours} jam ${mins > 0 ? `${mins} menit` : ''}`.trim();
+          }
+          return `${mins} menit`;
+        })()}
       </div>
 
       <TrackContextMenu
