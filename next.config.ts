@@ -5,6 +5,14 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['sharp'],
   reactCompiler: true,
   allowedDevOrigins: ['127.0.0.1'],
+
+  // ── PAKSA binary sharp + libvips ikut ke serverless function ──
+  outputFileTracingIncludes: {
+    '/api/upload': [
+      'node_modules/@img/sharp-linux-x64/**/*',
+      'node_modules/@img/sharp-libvips-linux-x64/**/*',
+    ],
+  },
   turbopack: {
     root: __dirname,
   },
