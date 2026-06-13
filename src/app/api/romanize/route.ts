@@ -122,11 +122,12 @@ export async function POST(request: NextRequest) {
 
 CRITICAL RULES:
 1. ONLY romanize the exact text provided. DO NOT try to guess the song or fetch lyrics from memory. Provide a direct, literal transliteration.
-2. For Japanese: use Romaji (e.g., こんにちは → konnichiwa)
-3. For Korean: use Revised Romanization (e.g., 사랑해 → saranghae)  
-4. For Chinese: use Pinyin without tones (e.g., 你好 → ni hao)
-5. Keep any existing Latin characters as-is.
-6. Return a valid JSON object. The keys MUST be the exact line numbers provided (e.g. "1", "2") and the values must be the romanized strings.
+2. UNIVERSAL SPACING RULE (For ALL languages): Separate EVERY single syllable/character with a single space. BUT separate original words (if there are spaces in the original text) with a DOUBLE SPACE.
+3. For Korean: use Revised Romanization. Example: '이정도면 알아줄' -> 'i jeong do myeon  a ra jul'.
+4. For Japanese: use Romaji. Example: '君の 虜に' -> 'ki mi no  to ri ko ni'.
+5. For Chinese: use Pinyin without tones. Example: '你好 吗' -> 'ni hao  ma'.
+6. Keep any existing Latin characters and punctuation as-is.
+7. Return a valid JSON object. The keys MUST be the exact line numbers provided (e.g. "1", "2") and the values must be the romanized strings.
 Example output:
 {
   "1": "konnichiwa",

@@ -2,8 +2,7 @@
 
 import { useMemo, useRef, useEffect, useCallback } from 'react';
 import { LrcLine } from '@/lib/utils/lrcParser';
-
-const LYRICS_SYNC_DELAY_SEC = 0;
+import { getEffectiveTime } from '@/lib/lyrics/lyricsOffsetStore';
 
 /* Cubic-bezier easing — easeOutQuart for a gentle deceleration */
 function easeOutQuart(t: number): number {
@@ -14,6 +13,7 @@ interface UseLyricsScrollOptions {
   lines: LrcLine[];
   isSynced: boolean;
   currentTime: number;
+  trackId: string | null;
 }
 
 interface UseLyricsScrollReturn {
@@ -25,27 +25,28 @@ export function useLyricsScroll({
   lines,
   isSynced,
   currentTime,
+  trackId,
 }: UseLyricsScrollOptions): UseLyricsScrollReturn {
   const scrollRef = useRef<HTMLDivElement>(null);
   const animFrameRef = useRef<number>(0);
 
   const activeIndex = useMemo(() => {
     if (!isSynced || lines.length === 0) return -1;
-    const lyricTime = Math.max(0, currentTime - LYRICS_SYNC_DELAY_SEC);
-    if (lyricTime < lines[0].time) return -1;
+    const effectiveTime = getEffectiveTime(currentTime, trackId);
+    if (effectiveTime < lines[0].time) return -1;
 
     let lo = 0;
     let hi = lines.length - 1;
     while (lo < hi) {
       const mid = Math.floor((lo + hi + 1) / 2);
-      if (lines[mid].time <= lyricTime) {
+      if (lines[mid].time <= effectiveTime) {
         lo = mid;
       } else {
         hi = mid - 1;
       }
     }
     return lo;
-  }, [currentTime, lines, isSynced]);
+  }, [currentTime, lines, isSynced, trackId]);
 
   /* Custom smooth-scroll with easing via rAF */
   const smoothScrollTo = useCallback((container: HTMLElement, targetY: number, duration: number) => {
@@ -102,4 +103,3 @@ export function useLyricsScroll({
 
   return { activeIndex, scrollRef };
 }
-

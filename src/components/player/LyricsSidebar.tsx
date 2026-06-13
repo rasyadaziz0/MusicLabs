@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { LyricStyleManager } from './lyrics/LyricStyleManager';
-import { SidebarKaraokeWord } from './lyrics/SidebarKaraokeWord';
+import { KaraokeLine } from './lyrics/KaraokeLine';
 import { GlassBar } from '@/components/ui/LiquidGlass';
 import './lyrics/sidebar.css';
 
@@ -19,10 +19,11 @@ interface LyricsSidebarProps {
 }
 
 export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
-  const { currentTrack, currentTime, seek } = usePlayer();
-  const { lines, isSynced, isLoading } = useLyrics(currentTrack);
-  const { activeIndex, scrollRef } = useLyricsScroll({ lines, isSynced, currentTime });
-  const romanizations = useRomanization(lines, currentTrack?.id ?? null);
+  const { currentTrack, currentTime, seek, duration } = usePlayer();
+  const trackId = currentTrack?.id ?? null;
+  const { lines, isSynced, isLoading } = useLyrics(currentTrack, duration);
+  const { activeIndex, scrollRef } = useLyricsScroll({ lines, isSynced, currentTime, trackId });
+  const romanizations = useRomanization(lines, trackId);
   const popupRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -104,11 +105,8 @@ export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
                           onClick={() => isSynced && !line.isPlaceholder && seek(line.time)}
                           style={{ ...lineStyle, cursor: isSynced && !line.isPlaceholder ? 'pointer' : 'default' }}
                         >
-                          {/* Karaoke word glow for active line */}
-                          {isActive && isSynced && line.words && line.words.length > 0 ? (
-                            line.words.map((word, wi) => (
-                              <SidebarKaraokeWord key={wi} word={word} />
-                            ))
+                          {(isActive && line.words) ? (
+                            <KaraokeLine line={line} currentTime={currentTime} isActive={isActive} />
                           ) : (
                             line.text
                           )}

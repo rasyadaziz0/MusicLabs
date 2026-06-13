@@ -20,6 +20,7 @@ interface LyricsUIProps {
   hideHeader?: boolean;
   currentTime?: number;
   romanizations?: Map<number, string>;
+  trackId: string | null;
 }
 
 export default function LyricsUI({
@@ -33,6 +34,7 @@ export default function LyricsUI({
   hideHeader,
   currentTime = 0,
   romanizations,
+  trackId,
 }: LyricsUIProps) {
   const [showRomanization, setShowRomanization] = useState(true);
   const [isUserScrolling, setIsUserScrolling] = useState(false);
@@ -112,10 +114,11 @@ export default function LyricsUI({
             paddingRight: 8,
             paddingTop: '20vh',
             paddingBottom: '60vh',
+            fontFamily: '-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif',
             maskImage:
-              'linear-gradient(to bottom, transparent 0%, black 12%, black 80%, transparent 100%)',
+              'linear-gradient(180deg,transparent 0,#000 18%,#000 72%,transparent 100%)',
             WebkitMaskImage:
-              'linear-gradient(to bottom, transparent 0%, black 12%, black 80%, transparent 100%)',
+              'linear-gradient(180deg,transparent 0,#000 18%,#000 72%,transparent 100%)',
           }}
         >
           {isLoading ? (
@@ -135,6 +138,7 @@ export default function LyricsUI({
                   isSynced={isSynced}
                   currentTime={currentTime}
                   isUserScrolling={isUserScrolling}
+                  trackId={trackId}
                   romanText={showRomanization ? romanizations?.get(index) : undefined}
                   onLineClick={onLineClick}
                 />

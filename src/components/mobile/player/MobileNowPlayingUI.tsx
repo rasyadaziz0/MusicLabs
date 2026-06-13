@@ -101,6 +101,7 @@ export default function MobileNowPlayingUI(props: NowPlayingUIProps) {
                 currentTime={currentTime}
                 romanizations={props.romanizations}
                 nowPlayingProps={props}
+                trackId={props.trackId ?? null}
               />
             ) : (
               /* ─────────────── ARTWORK MODE ─────────────── */

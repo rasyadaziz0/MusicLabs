@@ -2,103 +2,73 @@ import { Transition } from 'framer-motion';
 
 export class LyricStyleManager {
   /* ── Apple Music style: uniform font size, no zoom/scale on active line ── */
-  private static readonly UNIFORM_FONT = 'clamp(26px, 3vw, 34px)';
+  private static readonly UNIFORM_FONT = 'clamp(1.5rem, 3.8vw, 2.4rem)';
+  private static readonly DIM = 0.28;
 
   static getLineStyle(index: number, activeIndex: number, isUserScrolling: boolean = false, isPlaceholder: boolean = false) {
-    const dist = Math.abs(index - activeIndex);
     const isActive = index === activeIndex;
+    const isPast = index < activeIndex;
+    const dist = Math.abs(index - activeIndex);
 
-    if (isPlaceholder && !isActive && !isUserScrolling) {
+    // When scrolling, ALL lines become uniformly visible and unblurred
+    if (isUserScrolling) {
       return {
         fontSize: this.UNIFORM_FONT,
-        color: 'rgba(255,255,255,0)',
-        filter: 'blur(0px)',
-        scale: 1,
-        opacity: 0,
-        textShadow: 'none',
+        color: '#fff',
+        opacity: isActive ? 1 : 0.5,
+        scale: isActive ? 1 : 0.955,
         y: 0,
+        filter: 'blur(0px)',
       };
     }
+
+    // --- NORMAL PLAYBACK (Not Scrolling) ---
 
     if (isActive) {
       return {
         fontSize: this.UNIFORM_FONT,
-        color: 'rgba(255,255,255,0.97)',
-        filter: 'blur(0px)',
-        scale: 1,
+        color: '#fff',
         opacity: 1,
-        textShadow: '0 0 20px rgba(255,255,255,0.10)',
+        scale: 1,
         y: 0,
-      };
-    }
-
-    if (isUserScrolling) {
-      // Show all lyrics clearly when scrolling
-      return {
-        fontSize: this.UNIFORM_FONT,
-        color: 'rgba(255,255,255,0.40)',
         filter: 'blur(0px)',
-        scale: 1,
-        opacity: 0.50,
-        textShadow: '0 0 0px rgba(255,255,255,0)',
-        y: 0,
       };
     }
 
-    if (index < activeIndex) {
-      // Past lyrics: fade out completely
+    // Past lyrics immediately disappear during playback
+    if (isPast) {
       return {
         fontSize: this.UNIFORM_FONT,
-        color: 'rgba(255,255,255,0)',
-        filter: 'blur(2px)',
-        scale: 1,
+        color: '#fff',
         opacity: 0,
-        textShadow: '0 0 0px rgba(255,255,255,0)',
-        y: -10, // slight upward movement on fade out
+        scale: 0.955,
+        y: 0,
+        filter: 'blur(2px)',
       };
     }
 
+    // Future lines get progressively dimmed and blurred based on distance
+    let futureOpacity = this.DIM;
+    let futureBlur = 'blur(1px)';
+    
     if (dist === 1) {
-      return {
-        fontSize: this.UNIFORM_FONT,
-        color: 'rgba(255,255,255,0.30)',
-        filter: 'blur(0px)',
-        scale: 1,
-        opacity: 0.50,
-        textShadow: '0 0 0px rgba(255,255,255,0)',
-        y: 0,
-      };
+      futureOpacity = 0.4;
+      futureBlur = 'blur(1.5px)';
+    } else if (dist === 2) {
+      futureOpacity = 0.2;
+      futureBlur = 'blur(3px)';
+    } else if (dist >= 3) {
+      futureOpacity = 0.08;
+      futureBlur = 'blur(5px)';
     }
-    if (dist === 2) {
-      return {
-        fontSize: this.UNIFORM_FONT,
-        color: 'rgba(255,255,255,0.18)',
-        filter: 'blur(0.3px)',
-        scale: 1,
-        opacity: 0.35,
-        textShadow: '0 0 0px rgba(255,255,255,0)',
-        y: 0,
-      };
-    }
-    if (dist === 3) {
-      return {
-        fontSize: this.UNIFORM_FONT,
-        color: 'rgba(255,255,255,0.10)',
-        filter: 'blur(0.6px)',
-        scale: 1,
-        opacity: 0.22,
-        textShadow: '0 0 0px rgba(255,255,255,0)',
-        y: 0,
-      };
-    }
+
     return {
       fontSize: this.UNIFORM_FONT,
-      color: 'rgba(255,255,255,0.06)',
-      filter: 'blur(1px)',
-      scale: 1,
-      opacity: 0.12,
-      textShadow: '0 0 0px rgba(255,255,255,0)',
+      color: '#fff',
+      opacity: futureOpacity,
+      scale: 0.955,
       y: 0,
+      filter: futureBlur,
     };
   }
 
@@ -126,12 +96,8 @@ export class LyricStyleManager {
 
   static getLineTransition(): Transition {
     return {
-      type: 'spring',
-      stiffness: 120,
-      damping: 20,
-      mass: 0.8,
-      filter: { type: 'tween', duration: 0.45, ease: [0.4, 0, 0.2, 1] },
-      textShadow: { type: 'tween', duration: 0.55, ease: [0.4, 0, 0.2, 1] },
+      opacity: { type: 'tween', duration: 0.45, ease: [0.4, 0, 0.2, 1] },
+      scale: { type: 'tween', duration: 0.55, ease: [0.34, 1.4, 0.5, 1] },
       color: { type: 'tween', duration: 0.4, ease: [0.4, 0, 0.2, 1] },
     };
   }

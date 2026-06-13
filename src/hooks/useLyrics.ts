@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { parseLRC, LrcLine, addInstrumentalPlaceholders, addWordTimings } from '@/lib/utils/lrcParser';
+import { parseLRC, LrcLine, addInstrumentalPlaceholders, parseYRC, estimateLineDurations } from '@/lib/utils/lrcParser';
 import { Song } from '@/types/music';
-import { supabase } from '@/lib/supabase/client';
 
 // ── In-memory cache & dedup ──────────────────────────────────────
 interface CachedLyrics {
@@ -15,7 +14,7 @@ const lyricsCache = new Map<string, CachedLyrics>();
 // Track inflight requests to avoid duplicate fetches from multiple components
 const inflightRequests = new Map<string, Promise<CachedLyrics | null>>();
 
-export function useLyrics(currentTrack: Song | null) {
+export function useLyrics(currentTrack: Song | null, actualDuration: number = 0) {
   const [lines, setLines] = useState<LrcLine[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSynced, setIsSynced] = useState(false);
@@ -25,9 +24,12 @@ export function useLyrics(currentTrack: Song | null) {
   const trackRef = useRef(currentTrack);
   trackRef.current = currentTrack;
 
+  // We need actual audio duration to match the correct LRC from LRClib,
+  // avoiding the drift caused by using metadata duration (which often differs).
+  const stabilizedDuration = Math.round(actualDuration);
+
   useEffect(() => {
     // Clear old lyrics immediately when track changes to prevent stale state bugs
-    // such as Romanization triggering for the new track using the old track's lyrics.
     setLines([]);
     setIsSynced(false);
 
@@ -42,6 +44,12 @@ export function useLyrics(currentTrack: Song | null) {
       setLines(cached.lines);
       setIsSynced(cached.isSynced);
       setIsLoading(false);
+      return;
+    }
+
+    // Wait until the audio engine has loaded the track and knows its real duration
+    if (stabilizedDuration === 0) {
+      setIsLoading(true);
       return;
     }
 
@@ -62,12 +70,11 @@ export function useLyrics(currentTrack: Song | null) {
 
         if (!requestPromise) {
           requestPromise = (async (): Promise<CachedLyrics | null> => {
-            const durationInSeconds = track.duration ? Math.floor(track.duration) : 0;
             const albumName = track.album?.name ?? '';
             const params = new URLSearchParams({
               title: track.name,
               artist: artistName,
-              duration: durationInSeconds.toString(),
+              duration: stabilizedDuration.toString(),
             });
             if (albumName) {
               params.append('album', albumName);
@@ -88,20 +95,25 @@ export function useLyrics(currentTrack: Song | null) {
 
             if (!res || !res.ok) return null;
 
-            const data: { lyrics?: string; synced?: boolean } = await res.json();
+            const data: { lyrics?: string; synced?: boolean; type?: string } = await res.json();
 
             if (data.lyrics) {
               if (data.synced) {
-                const parsedLines = parseLRC(data.lyrics);
+                let parsedLines: LrcLine[];
+                if (data.type === 'yrc') {
+                  parsedLines = parseYRC(data.lyrics);
+                } else {
+                  parsedLines = parseLRC(data.lyrics);
+                  parsedLines = estimateLineDurations(parsedLines);
+                }
                 const withPlaceholders = addInstrumentalPlaceholders(parsedLines);
-                return { lines: addWordTimings(withPlaceholders), isSynced: true };
+                return { lines: withPlaceholders, isSynced: true };
               } else {
                 const splitLines = data.lyrics.split('\n').map((text, i) => ({
                   time: i * 5, // Arbitrary time spacing for unsynced
                   text: text.trim(),
-                  isPlaceholder: false,
-                  words: []
-                })).filter(l => l.text !== '');
+                  isPlaceholder: false
+                })).filter((l: any) => l.text !== '');
                 return { lines: splitLines, isSynced: false };
               }
             }
@@ -136,7 +148,7 @@ export function useLyrics(currentTrack: Song | null) {
     };
 
     fetchLyrics();
-  }, [trackId]);
+  }, [trackId, stabilizedDuration]);
 
   return { lines, isLoading, isSynced };
 }

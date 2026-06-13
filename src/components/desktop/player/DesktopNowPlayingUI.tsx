@@ -189,6 +189,7 @@ export default function DesktopNowPlayingUI(props: NowPlayingUIProps) {
                 hideHeader
                 currentTime={currentTime}
                 romanizations={props.romanizations}
+                trackId={props.trackId ?? null}
               />
             </div>
           </div>

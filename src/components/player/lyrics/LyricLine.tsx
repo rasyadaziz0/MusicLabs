@@ -2,8 +2,8 @@
 
 import { motion } from 'framer-motion';
 import { LrcLine } from '@/lib/utils/lrcParser';
-import { KaraokeLine } from './KaraokeLine';
 import { LyricStyleManager } from './LyricStyleManager';
+import { KaraokeLine } from './KaraokeLine';
 
 
 interface LyricLineProps {
@@ -14,6 +14,7 @@ interface LyricLineProps {
   romanText?: string;
   currentTime: number;
   isUserScrolling?: boolean;
+  trackId: string | null;
   onLineClick: (time: number, isPlaceholder?: boolean) => void;
 }
 
@@ -25,10 +26,12 @@ export function LyricLine({
   romanText,
   currentTime,
   isUserScrolling = false,
+  trackId,
   onLineClick,
 }: LyricLineProps) {
   const isActive = activeIndex === index;
   const isPlaceholder = !!line.isPlaceholder;
+  const hidePlaceholder = isPlaceholder && !isActive;
   const lineStyle = LyricStyleManager.getLineStyle(index, activeIndex, isUserScrolling, isPlaceholder);
   const romanStyle = LyricStyleManager.getRomanizationStyle(
     index,
@@ -38,20 +41,12 @@ export function LyricLine({
     isUserScrolling
   );
 
-  // Apple Music logic: dots only show up when active, or if user is scrolling they show up lightly.
-  // Actually, if it's a placeholder, and we want to render dots, we can do it here.
   const renderContent = () => {
-    if (isPlaceholder) {
-      return (
-        <span style={{ letterSpacing: '4px' }}>●●●</span>
-      );
-    }
-    let mainContent;
-    if (isActive && isSynced && line.words && line.words.length > 0) {
-      mainContent = <KaraokeLine line={line} currentTime={currentTime} />;
-    } else {
-      mainContent = line.text;
-    }
+    const mainContent = ((isActive || isPlaceholder) && line.words) ? (
+      <KaraokeLine line={line} currentTime={currentTime} isActive={isActive} />
+    ) : (
+      line.text
+    );
 
     if (line.bgText) {
       return (
@@ -66,7 +61,17 @@ export function LyricLine({
   };
 
   return (
-    <div className="lyric-line-wrapper">
+    <motion.div 
+      className="lyric-line-wrapper"
+      animate={{
+        height: hidePlaceholder ? 0 : 'auto',
+        marginBottom: hidePlaceholder ? 0 : 20,
+        opacity: hidePlaceholder ? 0 : 1
+      }}
+      initial={false}
+      transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
+      style={{ overflow: 'hidden' }}
+    >
       <motion.button
         data-lyric-index={index}
         className={`lyric-line${isSynced && !line.isPlaceholder && !isActive ? ' lyric-line-hoverable' : ''}`}
@@ -82,14 +87,59 @@ export function LyricLine({
 
       {/* Romanization subtitle */}
       {romanText && (
-        <motion.span
+        <motion.div
           className="romanization-text"
           animate={romanStyle}
           transition={LyricStyleManager.getRomanizationTransition()}
+          style={{ width: '100%' }}
         >
-          {romanText}
-        </motion.span>
+          {(() => {
+            if ((isActive || isPlaceholder) && line.words && line.words.length > 0) {
+              const romanWordsMatch = romanText.match(/\S+\s*/g);
+              
+              if (romanWordsMatch && romanWordsMatch.length > 0) {
+                let mappedWords = [];
+
+                if (romanWordsMatch.length === line.words.length) {
+                  // 1-to-1 match
+                  mappedWords = romanWordsMatch.map((rw, i) => ({
+                    text: rw,
+                    startTime: line.words![i].startTime,
+                    endTime: line.words![i].endTime,
+                  }));
+                } else {
+                  // Fallback: character-length proportional mapping
+                  const totalChars = romanText.length;
+                  const totalDuration = (line.words[line.words.length - 1].endTime ?? 0) - line.words[0].startTime;
+                  
+                  let currentStartTime = line.words[0].startTime;
+                  mappedWords = romanWordsMatch.map((rw, i) => {
+                    const durationRatio = rw.length / totalChars;
+                    const duration = totalDuration * durationRatio;
+                    const wordObj = {
+                      text: rw,
+                      startTime: currentStartTime,
+                      endTime: currentStartTime + duration,
+                    };
+                    currentStartTime += duration;
+                    return wordObj;
+                  });
+                }
+
+                const romanLine: LrcLine = {
+                  time: line.time,
+                  text: romanText,
+                  isPlaceholder: false,
+                  words: mappedWords
+                };
+
+                return <KaraokeLine line={romanLine} currentTime={currentTime} isActive={isActive} />;
+              }
+            }
+            return <span>{romanText}</span>;
+          })()}
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 }

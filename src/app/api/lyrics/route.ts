@@ -31,7 +31,104 @@ export async function GET(request: Request) {
   try {
     let fallbackPlainLyrics: string | null | undefined = null;
 
-    // 1. Coba /api/get dulu kalau ada durasi
+    // 1. Coba Netease (music.163.com) dulu karena punya YRC (karaoke lyrics)
+    try {
+      const fetchNeteaseLrc = async (searchQuery: string, searchTitle: string) => {
+        const url = `https://music.163.com/api/search/get?s=${encodeURIComponent(searchQuery)}&type=1&limit=10`;
+        const res = await fetch(url, { headers: { 'Referer': 'https://music.163.com' } });
+        const data = await res.json();
+        
+        if (data?.result?.songs?.length > 0) {
+          const songs = data.result.songs;
+          const normArtist = normKey(cleanArtist);
+          const normTitle = normKey(searchTitle);
+          
+          let bestSong;
+          
+          if (durationParam) {
+            const targetMs = Number.parseInt(durationParam, 10) * 1000;
+            if (Number.isFinite(targetMs)) {
+              let closestDiff = Infinity;
+              for (const s of songs) {
+                const trackMs = s.duration || s.dt || 0;
+                if (!trackMs) continue;
+                const diff = Math.abs(trackMs - targetMs);
+                const artistMatch = s.artists?.some((a: any) => normKey(a.name) === normArtist);
+                
+                // Check if duration is within 3 seconds and artist matches
+                if (diff < closestDiff && diff < 3000 && artistMatch) {
+                  closestDiff = diff;
+                  bestSong = s;
+                }
+              }
+            }
+          }
+          
+          if (!bestSong) bestSong = songs.find((s: any) => s.artists?.some((a: any) => normKey(a.name) === normArtist));
+          if (!bestSong) bestSong = songs.find((s: any) => normKey(s.name) === normTitle);
+          
+          if (bestSong?.id) {
+            const lyricUrl = `https://music.163.com/api/song/lyric/v1?id=${bestSong.id}&lv=-1&kv=-1&tv=-1&yv=-1`;
+            const lyricRes = await fetch(lyricUrl, { headers: { 'Referer': 'https://music.163.com' } });
+            const lyricData = await lyricRes.json();
+            
+            if (lyricData?.yrc?.lyric) {
+              // If it has YRC, this is our holy grail!
+              return { type: 'yrc', lyrics: lyricData.yrc.lyric };
+            }
+            
+            const lrc = lyricData?.lrc?.lyric;
+            if (lrc) {
+              const lines = lrc.split('\n');
+              const timestampedLines = lines.filter((line: string) => {
+                const match = line.match(/\[\d{2}:\d{2}\.\d{2,3}\]/);
+                const content = line.replace(/\[.*?\]/g, '').trim();
+                return match && content.length > 0;
+              });
+              
+              if (timestampedLines.length >= 3) return { type: 'lrc', lyrics: lrc };
+            }
+          }
+        }
+        return null;
+      };
+
+      let syncedLrc = await fetchNeteaseLrc(cleanTitle + ' ' + cleanArtist, cleanTitle);
+      if (!syncedLrc && primaryArtist !== cleanArtist) {
+        syncedLrc = await fetchNeteaseLrc(cleanTitle + ' ' + primaryArtist, cleanTitle);
+      }
+      
+      // 1.5 Fallback ke iTunes JP untuk terjemahan judul
+      if (!syncedLrc) {
+        try {
+          let itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(cleanArtist + ' ' + cleanTitle)}&country=jp&entity=song&limit=1`;
+          let itunesRes = await fetch(itunesUrl);
+          let itunesData = await itunesRes.json();
+          
+          if (!itunesData.results?.length && primaryArtist !== cleanArtist) {
+            itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(primaryArtist + ' ' + cleanTitle)}&country=jp&entity=song&limit=1`;
+            itunesRes = await fetch(itunesUrl);
+            itunesData = await itunesRes.json();
+          }
+
+          const jpTrackName = itunesData.results?.[0]?.trackName;
+          
+          if (jpTrackName && normKey(jpTrackName) !== normKey(cleanTitle)) {
+            syncedLrc = await fetchNeteaseLrc(jpTrackName + ' ' + cleanArtist, jpTrackName);
+          }
+        } catch (e) {
+          console.error('iTunes JP fallback failed:', e);
+        }
+      }
+
+      if (syncedLrc) {
+        return NextResponse.json({ synced: true, type: syncedLrc.type, lyrics: syncedLrc.lyrics });
+      }
+    } catch (err) {
+      console.error('Netease search failed:', err);
+    }
+
+    // 2. Fallback ke lrclib.net /api/get kalau Netease gagal
     if (durationParam) {
       const getParams = new URLSearchParams({
         track_name: cleanTitle,
@@ -52,15 +149,14 @@ export async function GET(request: Request) {
       if (getRes.ok) {
         const getData = (await getRes.json()) as LrcLibTrack;
         if (getData.syncedLyrics) {
-          return NextResponse.json({ synced: true, lyrics: getData.syncedLyrics });
+          return NextResponse.json({ synced: true, type: 'lrc', lyrics: getData.syncedLyrics });
         } else if (getData.plainLyrics) {
-          // Keep as fallback instead of returning immediately, so we can try searching and Netease for synced
           fallbackPlainLyrics = getData.plainLyrics;
         }
       }
     }
 
-    // 2. Fallback ke /api/search kalau /api/get gagal atau gak dapet synced lyrics
+    // 3. Fallback ke lrclib.net /api/search kalau /api/get gagal
     let searchUrl = `https://lrclib.net/api/search?track_name=${encodeURIComponent(cleanTitle)}&artist_name=${encodeURIComponent(cleanArtist)}`;
     let searchRes = await fetch(searchUrl);
     let searchData = (await searchRes.json()) as LrcLibTrack[];
@@ -86,7 +182,7 @@ export async function GET(request: Request) {
               const trackDuration = Number(track.duration);
               if (!Number.isFinite(trackDuration)) continue;
               const diff = Math.abs(trackDuration - targetDuration);
-              if (diff <= 5 && diff < closestDiff) {
+              if (diff < closestDiff) {
                 closestDiff = diff;
                 bestMatch = track;
               }
@@ -102,84 +198,12 @@ export async function GET(request: Request) {
     }
 
     if (bestMatch?.syncedLyrics) {
-      return NextResponse.json({ synced: true, lyrics: bestMatch.syncedLyrics });
+      return NextResponse.json({ synced: true, type: 'lrc', lyrics: bestMatch.syncedLyrics });
     }
 
-      // 3. Fallback ke Netease kalau lrclib gak dapet synced lyrics
-      try {
-        const fetchNeteaseLrc = async (searchQuery: string, searchTitle: string) => {
-          const url = `https://music.163.com/api/search/get?s=${encodeURIComponent(searchQuery)}&type=1&limit=10`;
-          const res = await fetch(url, { headers: { 'Referer': 'https://music.163.com' } });
-          const data = await res.json();
-          
-          if (data?.result?.songs?.length > 0) {
-            const songs = data.result.songs;
-            const normArtist = normKey(cleanArtist);
-            const normTitle = normKey(searchTitle);
-            
-            let bestSong = songs.find((s: any) => s.artists?.some((a: any) => normKey(a.name) === normArtist));
-            if (!bestSong) bestSong = songs.find((s: any) => normKey(s.name) === normTitle);
-            
-            if (bestSong?.id) {
-              const lyricUrl = `https://music.163.com/api/song/lyric?id=${bestSong.id}&lv=1&kv=1&tv=-1`;
-              const lyricRes = await fetch(lyricUrl, { headers: { 'Referer': 'https://music.163.com' } });
-              const lyricData = await lyricRes.json();
-              const lrc = lyricData?.lrc?.lyric;
-              
-              if (lrc) {
-                const lines = lrc.split('\n');
-                const timestampedLines = lines.filter((line: string) => {
-                  const match = line.match(/\[\d{2}:\d{2}\.\d{2,3}\]/);
-                  const content = line.replace(/\[.*?\]/g, '').trim();
-                  return match && content.length > 0;
-                });
-                
-                if (timestampedLines.length >= 3) return lrc;
-              }
-            }
-          }
-          return null;
-        };
-
-        let syncedLrc = await fetchNeteaseLrc(cleanTitle + ' ' + cleanArtist, cleanTitle);
-        if (!syncedLrc && primaryArtist !== cleanArtist) {
-          syncedLrc = await fetchNeteaseLrc(cleanTitle + ' ' + primaryArtist, cleanTitle);
-        }
-        
-        // 3.5 Fallback ke iTunes JP untuk terjemahan judul (mengatasi judul Inggris dari YouTube Music yang aslinya bahasa Jepang)
-        if (!syncedLrc) {
-          try {
-            let itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(cleanArtist + ' ' + cleanTitle)}&country=jp&entity=song&limit=1`;
-            let itunesRes = await fetch(itunesUrl);
-            let itunesData = await itunesRes.json();
-            
-            if (!itunesData.results?.length && primaryArtist !== cleanArtist) {
-              itunesUrl = `https://itunes.apple.com/search?term=${encodeURIComponent(primaryArtist + ' ' + cleanTitle)}&country=jp&entity=song&limit=1`;
-              itunesRes = await fetch(itunesUrl);
-              itunesData = await itunesRes.json();
-            }
-
-            const jpTrackName = itunesData.results?.[0]?.trackName;
-            
-            if (jpTrackName && normKey(jpTrackName) !== normKey(cleanTitle)) {
-              syncedLrc = await fetchNeteaseLrc(jpTrackName + ' ' + cleanArtist, jpTrackName);
-            }
-          } catch (e) {
-            console.error('iTunes JP fallback failed:', e);
-          }
-        }
-
-        if (syncedLrc) {
-          return NextResponse.json({ synced: true, lyrics: syncedLrc });
-        }
-      } catch (err) {
-        console.error('Netease search failed:', err);
-      }
-
-      // Kalau Netease juga gak ada synced lyrics, balikin plain lyrics dari lrclib kalau ada
-      if (fallbackPlainLyrics) {
-        return NextResponse.json({ synced: false, lyrics: fallbackPlainLyrics });
-      }
+    if (fallbackPlainLyrics) {
+      return NextResponse.json({ synced: false, type: 'lrc', lyrics: fallbackPlainLyrics });
+    }
 
     // 3. Fallback ke lyrics.ovh kalau lrclib tetep gak nemu
     let ovhUrl = `https://api.lyrics.ovh/v1/${encodeURIComponent(cleanArtist)}/${encodeURIComponent(cleanTitle)}`;
@@ -193,7 +217,7 @@ export async function GET(request: Request) {
     if (ovhRes.ok) {
       const ovhData = await ovhRes.json();
       if (ovhData.lyrics) {
-        return NextResponse.json({ synced: false, lyrics: ovhData.lyrics });
+        return NextResponse.json({ synced: false, type: 'lrc', lyrics: ovhData.lyrics });
       }
     }
 

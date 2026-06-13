@@ -11,8 +11,7 @@ import {
   useToggleLikedSong,
 } from '@/hooks/useMusicLibrary';
 import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react';
-
-const LYRICS_SYNC_OFFSET_SEC = 0;
+import { getEffectiveTime } from '@/lib/lyrics/lyricsOffsetStore';
 
 export function useNowPlaying(isOpen: boolean) {
   const {
@@ -33,8 +32,9 @@ export function useNowPlaying(isOpen: boolean) {
     radioMeta,
   } = usePlayer();
 
-  const { lines, isSynced, isLoading: isLyricsLoading } = useLyrics(currentTrack);
-  const romanizations = useRomanization(lines, currentTrack?.id ?? null);
+  const trackId = currentTrack?.id ?? null;
+  const { lines, isSynced, isLoading: isLyricsLoading } = useLyrics(currentTrack, duration);
+  const romanizations = useRomanization(lines, trackId);
   const { user, signInWithGoogle } = useAuth();
   const { likedSet } = useLikedSongsIndex();
   const { data: playlists = [], isLoading: isPlaylistsLoading } = useLibraryPlaylists();
@@ -56,17 +56,17 @@ export function useNowPlaying(isOpen: boolean) {
 
   const activeIndex = useMemo(() => {
     if (!isSynced || lines.length === 0) return -1;
-    const lyricTime = Math.max(0, currentTime - LYRICS_SYNC_OFFSET_SEC);
-    if (lyricTime < lines[0].time) return -1;
+    const effectiveTime = getEffectiveTime(currentTime, trackId);
+    if (effectiveTime < lines[0].time) return -1;
     let lo = 0;
     let hi = lines.length - 1;
     while (lo < hi) {
       const mid = Math.floor((lo + hi + 1) / 2);
-      if (lines[mid].time <= lyricTime) lo = mid;
+      if (lines[mid].time <= effectiveTime) lo = mid;
       else hi = mid - 1;
     }
     return lo;
-  }, [currentTime, isSynced, lines]);
+  }, [currentTime, isSynced, lines, trackId]);
 
 
 
@@ -165,6 +165,7 @@ export function useNowPlaying(isOpen: boolean) {
   };
 
   return {
+    trackId,
     currentTrack,
     isPlaying,
     isResolving,

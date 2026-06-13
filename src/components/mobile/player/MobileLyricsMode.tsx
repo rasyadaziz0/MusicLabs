@@ -21,12 +21,13 @@ interface MobileLyricsModeProps {
   currentTime: number;
   romanizations?: Map<number, string>;
   nowPlayingProps: any; // The original props from MobileNowPlayingUI to pass to MoreMenu
+  trackId: string | null;
 }
 
 export function MobileLyricsMode({
   currentTrack, coverUrl, artistNames, isLiked, toggleLikeMutation, handleToggleLike,
   lines, activeIndex, isSynced, isLyricsLoading, mobileLyricsScrollRef, seek, currentTime, romanizations,
-  nowPlayingProps
+  nowPlayingProps, trackId
 }: MobileLyricsModeProps) {
   return (
     <>
@@ -94,6 +95,7 @@ export function MobileLyricsMode({
           hideHeader
           currentTime={currentTime}
           romanizations={romanizations}
+          trackId={trackId}
         />
       </div>
     </>
