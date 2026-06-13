@@ -73,6 +73,7 @@ interface LiquidGlassCardProps {
   shadowIntensity?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
   borderRadius?: string;
   glowIntensity?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  style?: React.CSSProperties;
 }
 
 export const LiquidGlassCard = ({
@@ -88,6 +89,7 @@ export const LiquidGlassCard = ({
   borderRadius = '32px',
   glowIntensity = 'sm',
   shadowIntensity = 'md',
+  style,
   ...props
 }: LiquidGlassCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -211,6 +213,7 @@ export const LiquidGlassCard = ({
           borderRadius,
           ...(width && !expandable && { width }),
           ...(height && !expandable && { height }),
+          ...style,
         }}
         {...motionProps}
         {...props}

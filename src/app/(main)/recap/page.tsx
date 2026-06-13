@@ -2,14 +2,16 @@
 
 import { useEffect, useRef, useMemo } from 'react';
 import Image from 'next/image';
-import { Music, Clock, Mic2, Play, Disc3 } from 'lucide-react';
+import { Music, Clock, Mic2, Play, Disc3, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import gsap from 'gsap';
 import { useAuth } from '@/context/AuthContext';
 import { useReplayMonthly } from '@/hooks/useReplayMonthly';
+import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 import { usePlayer } from '@/context/PlayerContext';
 import { StatCard, TopTrackCard, TopArtistCard } from '@/components/recap/RecapCards';
 import { CustomSelect } from '@/components/ui/CustomSelect';
+import { ScrollArrows } from '@/components/ui/ScrollArrows';
 
 // ── Helpers ─────────────────────────────────────────────────
 
@@ -47,6 +49,10 @@ export default function RecapPage() {
   } = useReplayMonthly();
 
   const years = useMemo(() => generateYears(), []);
+
+  const milestonesScroll = useHorizontalScroll();
+  const topSongsScroll = useHorizontalScroll();
+  const topArtistsScroll = useHorizontalScroll();
 
   // Disable future months in the current year
   const currentData = new Date();
@@ -175,8 +181,17 @@ export default function RecapPage() {
 
                   {/* Milestones (Stats) */}
                   <section>
-                    <h2 className="text-[26px] md:text-[32px] font-bold text-white mb-6 tracking-tight">Milestones</h2>
-                    <div className="flex overflow-x-auto md:overflow-visible gap-4 md:gap-5 pb-6 md:pb-0 scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0">
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-[26px] md:text-[32px] font-bold text-white tracking-tight">Milestones</h2>
+                    </div>
+                    <div className="relative group/section">
+                      <ScrollArrows 
+                        canScrollLeft={milestonesScroll.canScrollLeft} 
+                        canScrollRight={milestonesScroll.canScrollRight} 
+                        onScrollLeft={() => milestonesScroll.scroll('left')} 
+                        onScrollRight={() => milestonesScroll.scroll('right')} 
+                      />
+                      <div ref={milestonesScroll.scrollRef} className="flex overflow-x-auto md:overflow-visible gap-4 md:gap-5 pb-6 md:pb-0 scrollbar-hide -mx-4 px-4 md:-ml-[296px] md:pl-[296px] md:-mr-[40px] md:pr-[40px]" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                       <StatCard
                         label="Plays"
                         value={stats.totalTracks}
@@ -210,12 +225,22 @@ export default function RecapPage() {
                         delay={0.2}
                       />
                     </div>
+                    </div>
                   </section>
 
                   {/* Top Songs */}
                   <section>
-                    <h2 className="text-[26px] md:text-[32px] font-bold text-white mb-6 tracking-tight">Top Songs</h2>
-                    <div className="flex overflow-x-auto gap-4 md:gap-6 pb-6 scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0">
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-[26px] md:text-[32px] font-bold text-white tracking-tight">Top Songs</h2>
+                    </div>
+                    <div className="relative group/section">
+                      <ScrollArrows 
+                        canScrollLeft={topSongsScroll.canScrollLeft} 
+                        canScrollRight={topSongsScroll.canScrollRight} 
+                        onScrollLeft={() => topSongsScroll.scroll('left')} 
+                        onScrollRight={() => topSongsScroll.scroll('right')} 
+                      />
+                      <div ref={topSongsScroll.scrollRef} className="flex overflow-x-auto gap-4 md:gap-6 pb-6 scrollbar-hide -mx-4 px-4 md:-ml-[296px] md:pl-[296px] md:-mr-[40px] md:pr-[40px]" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                       {topTracks.map((song, i) => (
                         <TopTrackCard
                           key={song.id}
@@ -226,22 +251,34 @@ export default function RecapPage() {
                         />
                       ))}
                     </div>
+                    </div>
                   </section>
 
                   {/* Top Artists */}
                   {topArtists.length > 0 && (
                     <section>
-                      <h2 className="text-[26px] md:text-[32px] font-bold text-white mb-6 tracking-tight">Top Artists</h2>
-                      <div className="flex overflow-x-auto gap-6 md:gap-8 pb-6 scrollbar-hide -mx-5 px-5 md:mx-0 md:px-0">
+                      <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-[26px] md:text-[32px] font-bold text-white tracking-tight">Top Artists</h2>
+                      </div>
+                      <div className="relative group/section">
+                        <ScrollArrows 
+                          canScrollLeft={topArtistsScroll.canScrollLeft} 
+                          canScrollRight={topArtistsScroll.canScrollRight} 
+                          onScrollLeft={() => topArtistsScroll.scroll('left')} 
+                          onScrollRight={() => topArtistsScroll.scroll('right')} 
+                        />
+                        <div ref={topArtistsScroll.scrollRef} className="flex overflow-x-auto gap-6 md:gap-8 pb-6 scrollbar-hide -mx-4 px-4 md:-ml-[296px] md:pl-[296px] md:-mr-[40px] md:pr-[40px]" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                         {topArtists.map((artist, i) => (
                           <TopArtistCard
                             key={artist.name}
+                            id={artist.id}
                             name={artist.name}
                             imageUrl={artist.imageUrl}
                             rank={i + 1}
                             delay={0.4 + i * 0.1}
                           />
                         ))}
+                      </div>
                       </div>
                     </section>
                   )}

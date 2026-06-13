@@ -1,0 +1,46 @@
+{
+  "sidebar": {
+    "home": "Home",
+    "search": "Search",
+    "library": "Library",
+    "radio": "Live Radio",
+    "identify": "Identify Song",
+    "recently_added": "Recently Added",
+    "new_playlist": "New Playlist",
+    "albums": "Albums",
+    "songs": "Songs",
+    "made_for_you": "Made for You",
+    "playlists": "Playlists",
+    "all_playlists": "All Playlists",
+    "favourite_songs": "Favourite Songs"
+  },
+  "settings": {
+    "title": "Settings",
+    "save": "Save",
+    "search_discovery": "Search & Discovery",
+    "search_region": "Search Region",
+    "ui_language": "App Language",
+    "lyrics": "Lyrics",
+    "font_size": "Font Size",
+    "romanization": "Romanization",
+    "romanization_desc": "Show romanized lyrics for non-Latin scripts (Japanese, Korean, etc.)",
+    "privacy_social": "Privacy & Social",
+    "public_profile": "Public Profile",
+    "public_profile_desc": "Allow anyone to see your profile and public playlists",
+    "show_now_playing": "Show Now Playing",
+    "show_now_playing_desc": "Let followers see what you're currently listening to",
+    "show_recently_played": "Show Recently Played",
+    "show_recently_played_desc": "Display your recent listening activity on your profile",
+    "account": "Account",
+    "connected_accounts": "Connected Accounts",
+    "clear_history": "Clear Listening History",
+    "sign_out": "Sign Out",
+    "delete_account": "Delete Account"
+  },
+  "search": {
+    "placeholder": "Search for songs, artists, albums...",
+    "artists": "Artists",
+    "albums": "Albums",
+    "songs": "Songs"
+  }
+}

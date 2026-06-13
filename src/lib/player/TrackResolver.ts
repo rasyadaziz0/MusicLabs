@@ -69,7 +69,7 @@ export class TrackResolver {
     const controller = this.controller!;
 
     try {
-      const videoId = await resolveToYoutubeId(track.name, artistName, track.id, { signal });
+      const videoId = await resolveToYoutubeId(track.name, artistName, track.id, { signal, duration: track.duration });
 
       if (getCurrentTrackId() !== track.id) {
         return { type: 'error' };
@@ -115,7 +115,7 @@ export class TrackResolver {
       // 1. Try cached or fresh video ID → HTML5 audio stream
       let videoId: string | null = PlayerCache.getFallbackVideoId(track.id);
       if (!videoId) {
-        videoId = await resolveToYoutubeId(track.name, artistName, track.id, { signal });
+        videoId = await resolveToYoutubeId(track.name, artistName, track.id, { signal, duration: track.duration });
       }
 
       if (getCurrentTrackId() !== track.id) return { type: 'error' };
@@ -147,7 +147,7 @@ export class TrackResolver {
           if (!fallbackVideoId) {
             fallbackVideoId = await resolveToYoutubeId(
               track.name, artistName, track.id,
-              { signal: fallbackSignal }
+              { signal: fallbackSignal, duration: track.duration }
             );
           }
 
@@ -187,7 +187,7 @@ export class TrackResolver {
       const headers = await this.getAuthHeaders();
 
       const response = await fetch(
-        `/api/audio/resolve?title=${encodeURIComponent(track.name)}&artist=${encodeURIComponent(artistName)}&trackId=${encodeURIComponent(track.id)}&fallback=1`,
+        `/api/audio/resolve?title=${encodeURIComponent(track.name)}&artist=${encodeURIComponent(artistName)}&trackId=${encodeURIComponent(track.id)}&duration=${track.duration}&fallback=1`,
         { signal, headers }
       );
 

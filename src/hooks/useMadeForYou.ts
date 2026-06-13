@@ -26,19 +26,19 @@ export function useMadeForYou() {
 
   const onRepeatQuery = useQuery({
     queryKey: ['made-for-you-on-repeat', user?.id],
-    queryFn: () => getMostPlayedSongs(user!.id, 12),
+    queryFn: () => getMostPlayedSongs(user!.id, 30),
     enabled: Boolean(user?.id),
   });
 
   const missedHitsQuery = useQuery({
     queryKey: ['made-for-you-missed-hits', user?.id],
-    queryFn: () => getOlderTopSongs(user!.id, { recentDays: 14, lookbackDays: 90, limit: 12 }),
+    queryFn: () => getOlderTopSongs(user!.id, { recentDays: 14, lookbackDays: 90, limit: 30 }),
     enabled: Boolean(user?.id),
   });
 
   const lateNightQuery = useQuery({
     queryKey: ['made-for-you-late-night', user?.id],
-    queryFn: () => getSongsPlayedBetweenHours(user!.id, 22, 5, 12),
+    queryFn: () => getSongsPlayedBetweenHours(user!.id, 22, 5, 30),
     enabled: Boolean(user?.id),
   });
 
@@ -50,12 +50,12 @@ export function useMadeForYou() {
 
   const sections = buildPersonalizedSections({
     onRepeat: onRepeatQuery.data ?? [],
-    fromYourLikes: likedSongsQuery.data?.slice(0, 12) ?? [],
+    fromYourLikes: likedSongsQuery.data?.slice(0, 30) ?? [],
     missedHits: missedHitsQuery.data ?? [],
     lateNightMix: (lateNightQuery.data?.length ?? 0) > 0
       ? lateNightQuery.data ?? []
-      : recentSongsQuery.data?.slice(0, 12) ?? [],
-    focusMix: focusMixQuery.data?.slice(0, 12) ?? [],
+      : recentSongsQuery.data?.slice(0, 30) ?? [],
+    focusMix: focusMixQuery.data?.slice(0, 30) ?? [],
   });
 
   return {

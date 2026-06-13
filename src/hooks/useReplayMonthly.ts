@@ -8,6 +8,7 @@ import { Song } from '@/types/music';
 import { useAuth } from '@/context/AuthContext';
 
 export interface ReplayArtist {
+  id: string;
   name: string;
   imageUrl: string | undefined;
   trackCount: number;
@@ -47,15 +48,18 @@ async function fetchReplayData(
   const songMap = new Map(songs.map((s) => [s.id, s]));
 
   // 3. Top tracks — keep in RPC order (play count desc)
-  const topTracks = trackIds
+  const validTracks = trackIds
     .map((id) => songMap.get(id))
-    .filter(Boolean)
-    .slice(0, 10) as Song[];
+    .filter(Boolean) as Song[];
+
+  const topTracks = validTracks.length > 0
+    ? Array.from({ length: Math.max(20, validTracks.length) }, (_, i) => validTracks[i % validTracks.length]).slice(0, 30)
+    : [];
 
   // 4. Aggregate artists using the exact counts from the DB
   const artistCounts = new Map<
     string,
-    { name: string; imageUrl: string | undefined; count: number }
+    { id: string; name: string; imageUrl: string | undefined; count: number }
   >();
 
   for (const row of rows) {
@@ -70,11 +74,11 @@ async function fetchReplayData(
       primaryArtist.image?.[primaryArtist.image.length - 1]?.url ?? undefined;
 
     if (existing) {
-      // Sum the actual play_count from DB
       existing.count += Number(row.play_count);
       if (!existing.imageUrl && imgUrl) existing.imageUrl = imgUrl;
     } else {
       artistCounts.set(primaryArtist.name, {
+        id: primaryArtist.id,
         name: primaryArtist.name,
         imageUrl: imgUrl,
         count: Number(row.play_count),
@@ -85,7 +89,7 @@ async function fetchReplayData(
   const topArtists: ReplayArtist[] = Array.from(artistCounts.values())
     .sort((a, b) => b.count - a.count)
     .slice(0, 5)
-    .map((a) => ({ name: a.name, imageUrl: a.imageUrl, trackCount: a.count }));
+    .map((a) => ({ id: a.id, name: a.name, imageUrl: a.imageUrl, trackCount: a.count }));
 
   // 5. Stats
   // Since we only fetched top 50, estimating minutes using total_plays and avg duration of top 50

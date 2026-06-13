@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Heart, MoreHorizontal } from 'lucide-react';
+import { Heart, MoreHorizontal, Play, Shuffle, Share } from 'lucide-react';
 import { usePlayer } from '@/context/PlayerContext';
 import { useAuth } from '@/context/AuthContext';
 import { useLikedSongs } from '@/hooks/useMusicLibrary';
@@ -12,24 +12,44 @@ import TrackLikeButton from '@/components/ui/TrackLikeButton';
 import AddToQueueButton from '@/components/ui/AddToQueueButton';
 import AddToPlaylistButton from '@/components/ui/AddToPlaylistButton';
 
+import { useState, useRef, useEffect } from 'react';
+import toast from 'react-hot-toast';
+
 export default function LikedSongsPage() {
   const { user, signInWithGoogle } = useAuth();
   const { playTrack, shufflePlay } = usePlayer();
   const { data: likedSongs = [], isLoading } = useLikedSongs();
+  
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success('Link copied to clipboard!');
+    setIsMenuOpen(false);
+  };
 
   return (
     <>
       <div className="space-y-8">
         <AppleMusicHeader
-          title={<>Favourite Songs <span className="text-[#FF2D55] text-xl ml-1">★</span></>}
+          title={<div className="flex items-center gap-2">Favourite Songs <Heart className="text-red-500" fill="currentColor" size={24} /></div>}
           description="Updated Today"
           cover={
             <>
               <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent opacity-50"></div>
               <div className="w-48 h-48 md:w-56 md:h-56 bg-[#f5f5f7] rounded-xl flex items-center justify-center shadow-inner relative z-10">
-                <svg viewBox="0 0 24 24" fill="#FF2D55" className="w-32 h-32 drop-shadow-md">
-                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                </svg>
+                <Heart size={80} className="text-red-500 drop-shadow-md" fill="currentColor" strokeWidth={1.5} />
               </div>
             </>
           }
@@ -38,9 +58,44 @@ export default function LikedSongsPage() {
           isSaved={true}
           backHref="/library"
           topRightActions={
-            <button className="w-10 h-10 rounded-full border border-white/20 hover:bg-white/10 flex items-center justify-center transition-colors text-white">
-              <MoreHorizontal size={18} />
-            </button>
+            <div className="relative" ref={menuRef}>
+              <button 
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="w-10 h-10 rounded-full border border-white/20 hover:bg-white/10 flex items-center justify-center transition-colors text-white"
+              >
+                <MoreHorizontal size={18} />
+              </button>
+
+              {isMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl z-50 py-1 flex flex-col overflow-hidden">
+                  <button 
+                    onClick={() => {
+                      if (likedSongs.length > 0) playTrack(likedSongs[0], likedSongs);
+                      setIsMenuOpen(false);
+                    }} 
+                    className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors flex items-center gap-3"
+                  >
+                    <Play size={16} fill="currentColor" /> Play All
+                  </button>
+                  <button 
+                    onClick={() => {
+                      if (likedSongs.length > 0) shufflePlay(likedSongs);
+                      setIsMenuOpen(false);
+                    }} 
+                    className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors flex items-center gap-3"
+                  >
+                    <Shuffle size={16} /> Shuffle Play
+                  </button>
+                  <div className="h-px bg-white/10 my-1 mx-2" />
+                  <button 
+                    onClick={handleShare} 
+                    className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors flex items-center gap-3"
+                  >
+                    <Share size={16} /> Share Link
+                  </button>
+                </div>
+              )}
+            </div>
           }
         />
 
@@ -69,8 +124,8 @@ export default function LikedSongsPage() {
           <AppleMusicTrackList
             tracks={likedSongs}
             onPlayTrack={playTrack}
-            showStar={true}
-            showAlbum={false}
+            showHeart={true}
+            showAlbum={true}
             renderTrackOptions={(song, closeMenu) => (
               <>
                 <TrackLikeButton track={song} asMenuItem />
@@ -97,7 +152,7 @@ export default function LikedSongsPage() {
             </Link>
           </div>
         )}
-        </div>
+      </div>
     </>
   );
 }

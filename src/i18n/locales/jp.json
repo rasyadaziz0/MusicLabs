@@ -1,0 +1,49 @@
+{
+  "sidebar": {
+    "search": "検索",
+    "home": "ホーム",
+    "library": "ライブラリ",
+    "radio": "ライブラジオ",
+    "identify": "曲を認識",
+    "recently_added": "最近追加した項目",
+    "new_playlist": "新しいプレイリスト",
+    "albums": "アルバム",
+    "songs": "曲",
+    "made_for_you": "メイド・フォー・ユー",
+    "playlists": "プレイリスト",
+    "all_playlists": "すべてのプレイリスト",
+    "favourite_songs": "お気に入りの曲"
+  },
+  "settings": {
+    "title": "設定",
+    "save": "保存",
+    "search_discovery": "検索と発見",
+    "search_region": "検索地域",
+    "ui_language": "アプリの言語",
+    "lyrics": "歌詞",
+    "font_size": "文字サイズ",
+    "romanization": "ローマ字表記",
+    "romanization_desc": "非ラテン文字（日本語、韓国語など）の歌詞をローマ字で表示する",
+    "privacy_social": "プライバシーとソーシャル",
+    "public_profile": "公開プロフィール",
+    "public_profile_desc": "プロフィールと公開プレイリストを誰でも見られるようにする",
+    "show_now_playing": "再生中の曲を表示",
+    "show_now_playing_desc": "フォロワーに今聴いている曲を見せる",
+    "show_recently_played": "最近再生した曲を表示",
+    "show_recently_played_desc": "プロフィールに最近のリスニング履歴を表示する",
+    "account": "アカウント",
+    "connected_accounts": "接続済みのアカウント",
+    "clear_history": "再生履歴を消去",
+    "sign_out": "ログアウト",
+    "delete_account": "アカウントを削除"
+  },
+  "search": {
+    "placeholder": "曲、アーティスト、アルバムを検索...",
+    "placeholder_short": "検索",
+    "artists": "アーティスト",
+    "albums": "アルバム",
+    "songs": "曲",
+    "music": "音楽",
+    "users": "ユーザー"
+  }
+}

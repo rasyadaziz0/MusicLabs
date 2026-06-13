@@ -10,7 +10,7 @@ interface AccountSettingsSectionProps {
 export function AccountSettingsSection({ handleSignOut }: AccountSettingsSectionProps) {
   return (
     <div data-animate className="px-5 md:px-8 mt-10 mb-8">
-      <h2 className="text-[20px] font-bold text-white tracking-tight mb-4">Account</h2>
+      <h2 className="text-[13px] font-semibold text-white/40 uppercase tracking-wider px-1 mb-2.5">Account</h2>
       <div className="bg-white/[0.03] rounded-2xl border border-white/[0.06] overflow-hidden">
         <Link
           href="/profile/edit"
@@ -22,16 +22,16 @@ export function AccountSettingsSection({ handleSignOut }: AccountSettingsSection
           </span>
           <ChevronRight size={18} className="text-white/20" />
         </Link>
-        <button
+        <Link
+          href="/settings"
           className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-white/[0.06] transition-colors border-b border-white/[0.04]"
-          onClick={() => {/* future */}}
         >
           <span className="flex items-center gap-3 text-[15px] text-white/90">
             <Settings size={18} className="text-[#FA243C]" />
-            Preferences
+            Settings
           </span>
           <ChevronRight size={18} className="text-white/20" />
-        </button>
+        </Link>
         <button
           className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-white/[0.06] transition-colors"
           onClick={handleSignOut}

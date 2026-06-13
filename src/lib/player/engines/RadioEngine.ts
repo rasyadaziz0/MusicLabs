@@ -22,6 +22,7 @@ export interface RadioEngineCallbacks {
 
 export class RadioEngine {
   private audio: HTMLAudioElement | null = null;
+  private hls: Hls | null = null;
   private metaInterval: NodeJS.Timeout | null = null;
   private callbacks: RadioEngineCallbacks;
   private _listeners?: {
@@ -34,16 +35,7 @@ export class RadioEngine {
     this.callbacks = callbacks;
   }
 
-  // ── Playback ──
-
-  /**
-   * Start playing a radio stream using plain HTML5 Audio + Icecast metadata polling.
-   *
-   * @param track       The radio Song (must have `radioStreamUrl`)
-   * @param volume      Current volume level (0–1)
-   * @param getCurrentTrackId  Returns the ID of the track the player currently considers
-   *                           active — used to guard metadata updates against stale polls
-   */
+  // ── Playback ── 
   play(
     track: Song,
     volume: number,
@@ -65,47 +57,79 @@ export class RadioEngine {
     audio.volume = volume;
     this.audio = audio;
 
-    let hls: Hls | null = null;
     let hasFallenBack = false;
 
-    const setupStream = (url: string) => {
+    const setupStream = (url: string, useProxy: boolean = false) => {
+      const targetUrl = useProxy ? `/api/radio/proxy?url=${encodeURIComponent(url)}` : url;
+
       if (url.includes('.m3u8') && Hls.isSupported()) {
-        hls = new Hls({
+        const hlsInstance = new Hls({
           startLevel: -1,
           debug: false,
         });
-        hls.loadSource(url);
-        hls.attachMedia(audio);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          audio.play().catch(console.error);
+        this.hls = hlsInstance;
+        
+        hlsInstance.loadSource(targetUrl);
+        hlsInstance.attachMedia(audio);
+        hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+          // Guard: Only play if this audio element is still the active one
+          if (this.audio === audio) {
+            audio.play().catch(console.error);
+          }
         });
-        hls.on(Hls.Events.ERROR, (event, data) => {
-          void event; // event name unused — only data.fatal matters
+        hlsInstance.on(Hls.Events.ERROR, (event, data) => {
           if (data.fatal) {
-            console.error('HLS error:', data);
-            handleFallback();
+            if (!hasFallenBack) {
+              // On the first try, a fatal error (especially network) is almost certainly CORS.
+              // We must fallback to the proxy immediately instead of trying to recover.
+              console.warn('Initial HLS error (likely CORS), falling back to proxy...', data);
+              handleFallback();
+              return;
+            }
+
+            // On the fallback (proxied) stream, try to recover from temporary network/media errors
+            switch (data.type) {
+              case Hls.ErrorTypes.NETWORK_ERROR:
+                console.warn('HLS network error on proxy, trying to recover...', data);
+                hlsInstance?.startLoad();
+                break;
+              case Hls.ErrorTypes.MEDIA_ERROR:
+                console.warn('HLS media error on proxy, trying to recover...', data);
+                hlsInstance?.recoverMediaError();
+                break;
+              default:
+                console.error('HLS unrecoverable error:', data);
+                handleFallback();
+                break;
+            }
           }
         });
       } else {
-        // Native fallback (Safari supports HLS natively)
-        audio.src = url;
-        audio.play().catch(console.error);
+        // Native fallback (Safari supports HLS natively, plus normal Icecast streams)
+        audio.src = targetUrl;
+        // Guard: Only play if this audio element is still the active one
+        if (this.audio === audio) {
+          audio.play().catch(console.error);
+        }
       }
     };
 
     const handleFallback = () => {
-      if (!hasFallenBack && streamUrl !== track.url && track.url) {
+      if (!hasFallenBack) {
         hasFallenBack = true;
-        console.log('Trying fallback URL:', track.url);
-        if (hls) {
-          hls.destroy();
-          hls = null;
+        console.log('HLS failed. Trying fallback with CORS proxy for URL:', streamUrl);
+        if (this.hls) {
+          this.hls.destroy();
+          this.hls = null;
         }
-        setupStream(track.url);
+        setupStream(streamUrl, true);
+      } else if (streamUrl !== track.url && track.url) {
+        console.log('Trying secondary fallback URL:', track.url);
+        setupStream(track.url, true);
       } else {
         // Fallback exhausted or unavailable
         if (this.callbacks.onError) {
-          this.callbacks.onError('Stream offline');
+          this.callbacks.onError('Stream offline or blocked by CORS');
         }
       }
     };
@@ -113,10 +137,6 @@ export class RadioEngine {
     const handlePlay = () => this.callbacks.onPlay();
     const handlePause = () => this.callbacks.onPause();
     const handleError = () => {
-      console.error('Radio stream error:', audio.src);
-      if (audio.error) {
-        console.error('Error code:', audio.error.code, 'Message:', audio.error.message);
-      }
       handleFallback();
     };
 
@@ -158,6 +178,10 @@ export class RadioEngine {
 
   /** Stop any active radio stream playback & metadata polling */
   stop(): void {
+    if (this.hls) {
+      this.hls.destroy();
+      this.hls = null;
+    }
     if (this.audio) {
       if (this._listeners) {
         const { handlePlay, handlePause, handleError } = this._listeners;

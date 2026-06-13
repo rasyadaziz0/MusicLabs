@@ -2,6 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { Radio as RadioIcon, Loader2, Maximize2 } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { getBestImageUrl } from '@/lib/api/musicApi';
 import toast from 'react-hot-toast';
@@ -23,11 +24,12 @@ export interface DesktopTrackInfoProps {
   duration: number;
   seek: (val: number) => void;
   setIsNowPlayingOpen: (open: boolean) => void;
+  isVolumeSliderOpen?: boolean;
 }
 
 export default function DesktopTrackInfo({
   currentTrack, hasTrack, isRadio, radioMeta, isResolving,
-  currentTime, duration, seek, setIsNowPlayingOpen
+  currentTime, duration, seek, setIsNowPlayingOpen, isVolumeSliderOpen
 }: DesktopTrackInfoProps) {
   const { setSleepTimer, clearSleepTimer, sleepTimerEndTime } = usePlayer();
   const [isMenuOpen, React_setIsMenuOpen] = React.useState(false);
@@ -111,7 +113,35 @@ export default function DesktopTrackInfo({
                     </span>
                   ) : (
                     <span className="text-[11px] text-white/70 truncate leading-[14px]">
-                      {currentTrack.artists?.primary?.map((a: any) => a.name).join(', ')} {currentTrack.album?.name ? `— ${currentTrack.album.name}` : ''}
+                      {currentTrack.artists?.primary?.map((a: any, i: number) => (
+                        <span 
+                          key={a.id}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Link 
+                            href={`/artist/${a.id}`} 
+                            className="hover:underline hover:text-white transition-colors"
+                          >
+                            {a.name}
+                          </Link>
+                          {i < currentTrack.artists.primary.length - 1 && ', '}
+                        </span>
+                      ))}
+                      {currentTrack.album?.name && currentTrack.album?.id && (
+                        <>
+                          {' — '}
+                          <Link 
+                            href={`/album/${currentTrack.album.id}`} 
+                            className="hover:underline hover:text-white transition-colors"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {currentTrack.album.name}
+                          </Link>
+                        </>
+                      )}
+                      {currentTrack.album?.name && !currentTrack.album?.id && (
+                        ` — ${currentTrack.album.name}`
+                      )}
                     </span>
                   )}
                 </>
@@ -120,7 +150,13 @@ export default function DesktopTrackInfo({
 
             {/* Three Dots Menu */}
             {!isRadio && (
-              <div className="relative flex items-center justify-center pl-2" ref={menuRef}>
+              <div 
+                className={cn(
+                  "relative flex items-center justify-center pl-2 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
+                  isVolumeSliderOpen ? "opacity-0 pointer-events-none scale-95" : "opacity-100 scale-100"
+                )} 
+                ref={menuRef}
+              >
                 <button
                   onClick={(e) => {
                     if (!hasTrack) return;

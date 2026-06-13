@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
+import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
 
 interface AuthActionResult {
   error: string | null;
@@ -18,7 +19,13 @@ interface AuthContextType {
   signOut: () => Promise<AuthActionResult>;
   resetPasswordForEmail: (email: string) => Promise<AuthActionResult>;
   updatePassword: (password: string) => Promise<AuthActionResult>;
-  updateProfile: (data: { username?: string; name?: string; bio?: string; avatarUrl?: string }) => Promise<AuthActionResult>;
+  updateProfile: (data: {
+    username?: string; name?: string; bio?: string; avatarUrl?: string;
+    bannerUrl?: string;
+    socialInstagram?: string; socialTwitter?: string; socialTiktok?: string;
+    isPublic?: boolean; showNowPlaying?: boolean; showRecentlyPlayed?: boolean;
+    lyricsFontSize?: string; romanizationEnabled?: boolean;
+  }) => Promise<AuthActionResult>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -166,7 +173,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error: null };
   };
 
-  const updateProfile = async (data: { username?: string; name?: string; bio?: string; avatarUrl?: string }) => {
+  const updateProfile = async (data: { 
+    username?: string; name?: string; bio?: string; avatarUrl?: string;
+    bannerUrl?: string;
+    socialInstagram?: string; socialTwitter?: string; socialTiktok?: string;
+    isPublic?: boolean; showNowPlaying?: boolean; showRecentlyPlayed?: boolean;
+    lyricsFontSize?: string; romanizationEnabled?: boolean;
+  }) => {
     const authUpdateData: any = {};
     if (data.name !== undefined) authUpdateData.name = data.name;
     if (data.avatarUrl !== undefined) authUpdateData.avatar_url = data.avatarUrl;
@@ -203,13 +216,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (data.name !== undefined) profileUpdates.display_name = data.name;
       if (data.bio !== undefined) profileUpdates.bio = data.bio;
       if (data.avatarUrl !== undefined) profileUpdates.avatar_url = data.avatarUrl;
+      if (data.bannerUrl !== undefined) profileUpdates.banner_url = data.bannerUrl;
+      if (data.socialInstagram !== undefined) profileUpdates.social_instagram = data.socialInstagram;
+      if (data.socialTwitter !== undefined) profileUpdates.social_twitter = data.socialTwitter;
+      if (data.socialTiktok !== undefined) profileUpdates.social_tiktok = data.socialTiktok;
+      if (data.isPublic !== undefined) profileUpdates.is_public = data.isPublic;
+      if (data.showNowPlaying !== undefined) profileUpdates.show_now_playing = data.showNowPlaying;
+      if (data.showRecentlyPlayed !== undefined) profileUpdates.show_recently_played = data.showRecentlyPlayed;
+      if (data.lyricsFontSize !== undefined) profileUpdates.lyrics_font_size = data.lyricsFontSize;
+      if (data.romanizationEnabled !== undefined) profileUpdates.romanization_enabled = data.romanizationEnabled;
 
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update(profileUpdates)
-        .eq('id', userData.user.id);
-        
-      if (profileError) {
+      try {
+        await ProfileRepository.getInstance().updateProfile(userData.user.id, profileUpdates);
+      } catch (profileError) {
         console.error('Auth updateProfile gagal (profiles):', profileError);
         // We still updated auth, so maybe we don't throw, or we return error
       }

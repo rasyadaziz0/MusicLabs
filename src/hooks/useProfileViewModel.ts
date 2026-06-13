@@ -4,8 +4,10 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
 import { useLibraryPlaylists, useLikedSongs } from '@/hooks/useMusicLibrary';
 import { getRecentPlays, getListeningStats } from '@/lib/supabase/music';
+import { getSongsByIds } from '@/lib/api/musicApi';
+import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
 import { useFollowCounts } from '@/hooks/useFollow';
-import { getUserProfile } from '@/lib/supabase/social';
+import { UserProfile } from '@/types/profile';
 import { useRouter } from 'next/navigation';
 
 export function useProfileViewModel() {
@@ -31,7 +33,7 @@ export function useProfileViewModel() {
 
   const { data: profile } = useQuery({
     queryKey: ['userProfile', user?.id],
-    queryFn: () => getUserProfile(user!.id),
+    queryFn: () => ProfileRepository.getInstance().getProfile(user!.id),
     enabled: !!user?.id,
   });
 

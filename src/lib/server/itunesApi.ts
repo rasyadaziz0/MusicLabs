@@ -76,10 +76,10 @@ export function mapITunesToSong(item: ITunesResult): Song {
   };
 }
 
-export async function searchITunesTracks(query: string, limit = 25): Promise<Song[]> {
+export async function searchITunesTracks(query: string, limit = 25, country = 'ID'): Promise<Song[]> {
   const fetchTunes = async (q: string, l: number) => {
     const res = await fetch(
-      `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=music&entity=song&limit=${l}`,
+      `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=music&entity=song&limit=${l}&country=${country}`,
       { next: { revalidate: 300 } }
     );
     if (!res.ok) return [];
@@ -130,10 +130,10 @@ export async function searchITunesTracks(query: string, limit = 25): Promise<Son
   }
 }
 
-export async function searchITunesArtists(query: string, limit = 5) {
+export async function searchITunesArtists(query: string, limit = 5, country = 'ID') {
   try {
     const res = await fetch(
-      `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=musicArtist&limit=${limit}`,
+      `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=musicArtist&limit=${limit}&country=${country}`,
       { next: { revalidate: 300 } }
     );
     if (!res.ok) return [];
@@ -150,9 +150,38 @@ export async function searchITunesArtists(query: string, limit = 5) {
   }
 }
 
+export async function searchITunesAlbums(query: string, limit = 10, country = 'ID') {
+  try {
+    const res = await fetch(
+      `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=album&limit=${limit}&country=${country}`,
+      { next: { revalidate: 300 } }
+    );
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.results || []).map((album: ITunesResult) => {
+      const cover = album.artworkUrl100?.replace('100x100bb', '600x600bb') || '';
+      return {
+        id: `itunes-album-${album.collectionId}`,
+        title: album.collectionName || 'Unknown Album',
+        artist: album.artistName || 'Unknown Artist',
+        cover: cover,
+        cover_small: album.artworkUrl100 || '',
+        cover_medium: album.artworkUrl100?.replace('100x100bb', '300x300bb') || '',
+        cover_big: cover,
+        cover_xl: cover,
+        nb_tracks: album.trackCount || 0,
+        release_date: album.releaseDate || '',
+        album_type: album.collectionType?.toLowerCase() || 'album',
+      };
+    });
+  } catch {
+    return [];
+  }
+}
+
 export async function getITunesTrack(itunesId: string): Promise<Song | null> {
   try {
-    const res = await fetch(`https://itunes.apple.com/lookup?id=${itunesId}`, { next: { revalidate: 300 } });
+    const res = await fetch(`https://itunes.apple.com/lookup?id=${itunesId}&country=ID`, { next: { revalidate: 300 } });
     if (!res.ok) return null;
     const data = await res.json();
     if (data.results && data.results.length > 0) {
@@ -166,7 +195,7 @@ export async function getITunesTrack(itunesId: string): Promise<Song | null> {
 
 export async function getITunesArtist(itunesId: string) {
   try {
-    const res = await fetch(`https://itunes.apple.com/lookup?id=${itunesId}`, { next: { revalidate: 300 } });
+    const res = await fetch(`https://itunes.apple.com/lookup?id=${itunesId}&country=ID`, { next: { revalidate: 300 } });
     if (!res.ok) return null;
     const data = await res.json();
     const artist = data.results?.[0];
@@ -194,7 +223,7 @@ export async function getITunesArtist(itunesId: string) {
 export async function getITunesArtistTopTracks(itunesId: string, limit = 50): Promise<Song[]> {
   try {
     const res = await fetch(
-      `https://itunes.apple.com/lookup?id=${itunesId}&entity=song&limit=${limit}`,
+      `https://itunes.apple.com/lookup?id=${itunesId}&entity=song&limit=${limit}&country=ID`,
       { next: { revalidate: 300 } }
     );
     if (!res.ok) return [];
@@ -211,7 +240,7 @@ export async function getITunesArtistTopTracks(itunesId: string, limit = 50): Pr
 export async function getITunesArtistAlbums(itunesId: string, limit = 50) {
   try {
     const res = await fetch(
-      `https://itunes.apple.com/lookup?id=${itunesId}&entity=album&limit=${limit}`,
+      `https://itunes.apple.com/lookup?id=${itunesId}&entity=album&limit=${limit}&country=ID`,
       { next: { revalidate: 300 } }
     );
     if (!res.ok) return [];
@@ -244,7 +273,7 @@ export async function getITunesArtistAlbums(itunesId: string, limit = 50) {
 export async function getITunesAlbum(itunesId: string) {
   try {
     const res = await fetch(
-      `https://itunes.apple.com/lookup?id=${itunesId}&entity=song`,
+      `https://itunes.apple.com/lookup?id=${itunesId}&entity=song&country=ID`,
       { next: { revalidate: 300 } }
     );
     if (!res.ok) return null;
@@ -287,7 +316,7 @@ export async function getITunesPreviewUrl(
   try {
     const query = artist ? `${artist} ${title}` : title;
     const res = await fetch(
-      `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=1`,
+      `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=1&country=ID`,
       { next: { revalidate: 300 } }
     );
     if (!res.ok) return null;

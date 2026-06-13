@@ -7,14 +7,13 @@ import gsap from 'gsap';
 import { usePlayer } from '@/context/PlayerContext';
 import { useAuth } from '@/context/AuthContext';
 import { useQuery } from '@tanstack/react-query';
+import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
 import { getRecentPlays } from '@/lib/supabase/music';
 import { getSongsByIds } from '@/lib/api/musicApi';
 import { useLibraryPlaylists, useLikedSongs } from '@/hooks/useMusicLibrary';
 import { useFollowCounts } from '@/hooks/useFollow';
-import { getUserProfile } from '@/lib/supabase/social';
+import { UserProfile } from '@/types/profile';
 import FollowListModal from '@/components/social/FollowListModal';
-
-import type { UserProfile } from '@/lib/supabase/social';
 import type { PlaylistRecord } from '@/lib/supabase/music';
 import type { Song } from '@/types/music';
 
@@ -56,7 +55,7 @@ export default function MyProfile({ initialData }: MyProfileProps) {
   // Use React Query with initialData to keep data fresh after mutations
   const { data: profile } = useQuery({
     queryKey: ['userProfile', initialData.userId],
-    queryFn: () => getUserProfile(initialData.userId),
+    queryFn: () => ProfileRepository.getInstance().getProfile(initialData.userId),
     initialData: initialData.profile,
   });
 

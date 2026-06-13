@@ -1,0 +1,49 @@
+{
+  "sidebar": {
+    "search": "검색",
+    "home": "홈",
+    "library": "보관함",
+    "radio": "라이브 라디오",
+    "identify": "노래 찾기",
+    "recently_added": "최근 추가된 항목",
+    "new_playlist": "새 플레이리스트",
+    "albums": "앨범",
+    "songs": "곡",
+    "made_for_you": "나만을 위한 맞춤",
+    "playlists": "플레이리스트",
+    "all_playlists": "모든 플레이리스트",
+    "favourite_songs": "좋아요 표시한 곡"
+  },
+  "settings": {
+    "title": "설정",
+    "save": "저장",
+    "search_discovery": "검색 및 둘러보기",
+    "search_region": "검색 지역",
+    "ui_language": "앱 언어",
+    "lyrics": "가사",
+    "font_size": "글꼴 크기",
+    "romanization": "로마자 표기",
+    "romanization_desc": "비 라틴 문자(한국어, 일본어 등) 가사를 로마자로 표시합니다",
+    "privacy_social": "개인정보 및 소셜",
+    "public_profile": "공개 프로필",
+    "public_profile_desc": "모든 사람이 내 프로필과 공개 플레이리스트를 볼 수 있도록 허용합니다",
+    "show_now_playing": "재생 중인 곡 표시",
+    "show_now_playing_desc": "팔로워에게 내가 지금 듣고 있는 곡을 보여줍니다",
+    "show_recently_played": "최근 재생한 항목 표시",
+    "show_recently_played_desc": "프로필에 최근 감상 활동을 표시합니다",
+    "account": "계정",
+    "connected_accounts": "연결된 계정",
+    "clear_history": "청취 기록 지우기",
+    "sign_out": "로그아웃",
+    "delete_account": "계정 삭제"
+  },
+  "search": {
+    "placeholder": "곡, 아티스트, 앨범 검색...",
+    "placeholder_short": "검색",
+    "artists": "아티스트",
+    "albums": "앨범",
+    "songs": "곡",
+    "music": "음악",
+    "users": "사용자"
+  }
+}

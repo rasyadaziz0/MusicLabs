@@ -1,6 +1,7 @@
 'use client';
 
 import { Search as SearchIcon } from 'lucide-react';
+import { useTranslation } from '@/context/LanguageContext';
 
 interface SearchHeaderProps {
   inputValue: string;
@@ -11,6 +12,7 @@ interface SearchHeaderProps {
 }
 
 export function SearchHeader({ inputValue, setInputValue, searchMode, setSearchMode, onCommit }: SearchHeaderProps) {
+  const { t } = useTranslation();
   return (
     <div className="mb-10 pt-2 flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div className="relative group w-full md:w-[320px] lg:w-[400px]">
@@ -26,7 +28,7 @@ export function SearchHeader({ inputValue, setInputValue, searchMode, setSearchM
               e.currentTarget.blur();
             }
           }}
-          placeholder="Search"
+          placeholder={t('search.placeholder_short') || 'Search'}
           className="bg-white/[0.08] border border-white/[0.04] rounded-[8px] py-[6px] pl-9 pr-4 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-white/20 focus:bg-white/[0.12] transition-all text-white placeholder:text-white/50"
         />
       </div>

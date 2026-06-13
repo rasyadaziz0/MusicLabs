@@ -1,0 +1,46 @@
+{
+  "sidebar": {
+    "home": "Beranda",
+    "search": "Cari",
+    "library": "Koleksi",
+    "radio": "Radio Siaran",
+    "identify": "Tebak Lagu",
+    "recently_added": "Baru Ditambahkan",
+    "new_playlist": "Playlist Baru",
+    "albums": "Album",
+    "songs": "Lagu",
+    "made_for_you": "Dibuat Untukmu",
+    "playlists": "Playlist",
+    "all_playlists": "Semua Playlist",
+    "favourite_songs": "Lagu Favorit"
+  },
+  "settings": {
+    "title": "Pengaturan",
+    "save": "Simpan",
+    "search_discovery": "Pencarian & Penemuan",
+    "search_region": "Wilayah Pencarian",
+    "ui_language": "Bahasa Aplikasi",
+    "lyrics": "Lirik",
+    "font_size": "Ukuran Huruf",
+    "romanization": "Romanisasi",
+    "romanization_desc": "Tampilkan lirik alfabet untuk huruf non-Latin (Jepang, Korea, dll.)",
+    "privacy_social": "Privasi & Sosial",
+    "public_profile": "Profil Publik",
+    "public_profile_desc": "Izinkan siapa saja melihat profil dan playlist publik Anda",
+    "show_now_playing": "Tampilkan Sedang Diputar",
+    "show_now_playing_desc": "Biar pengikut tahu apa yang sedang Anda dengarkan",
+    "show_recently_played": "Tampilkan Riwayat Putar",
+    "show_recently_played_desc": "Tampilkan aktivitas mendengarkan terakhir Anda di profil",
+    "account": "Akun",
+    "connected_accounts": "Akun Terhubung",
+    "clear_history": "Hapus Riwayat Putar",
+    "sign_out": "Keluar",
+    "delete_account": "Hapus Akun"
+  },
+  "search": {
+    "placeholder": "Cari lagu, artis, album...",
+    "artists": "Artis",
+    "albums": "Album",
+    "songs": "Lagu"
+  }
+}

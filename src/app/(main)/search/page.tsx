@@ -80,6 +80,7 @@ function SearchPageContent() {
     isArtistNameSongsLoading,
     rankedSongs,
     rankedArtists,
+    rankedAlbums,
     displayedSongs,
     selectedArtist,
     topResult,
@@ -107,6 +108,7 @@ function SearchPageContent() {
             <MusicSearchResults
               isLoading={isLoading}
               rankedArtists={rankedArtists}
+              rankedAlbums={rankedAlbums}
               displayedSongs={displayedSongs}
               query={query}
               isArtistSongsLoading={isArtistSongsLoading}

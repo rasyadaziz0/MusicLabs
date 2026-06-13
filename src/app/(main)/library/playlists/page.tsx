@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useLibraryPlaylists } from '@/hooks/useMusicLibrary';
-import { Star, ChevronLeft } from 'lucide-react';
+import { Heart, ChevronLeft } from 'lucide-react';
 
 const gradients = [
   'from-[#87B4E5] to-[#121921]', // Blue
@@ -50,13 +50,11 @@ export default function AllPlaylistsPage() {
           
           {/* Favourite Songs Card */}
           <Link href="/library/liked" className="group flex flex-col gap-2">
-            <div className="relative aspect-square rounded-xl overflow-hidden bg-[#F5F5F7] flex items-center justify-center transition-transform duration-300 group-hover:scale-[1.02] shadow-md">
+            <div className="relative aspect-square rounded-xl overflow-hidden bg-[#FA243C] flex items-center justify-center transition-transform duration-300 group-hover:scale-[1.02] shadow-md">
               <div className="absolute top-0 left-0 w-full h-full bg-black/0 transition-colors group-hover:bg-black/5 z-10" />
-              {/* Large Red Star - manually drawn or lucide scaled */}
-              <div className="relative w-[45%] h-[45%]">
-                <svg viewBox="0 0 24 24" className="w-full h-full text-[#FA243C]" fill="currentColor" stroke="currentColor" strokeWidth="2">
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                </svg>
+              {/* Large Red Heart */}
+              <div className="text-white">
+                <Heart size={64} fill="currentColor" strokeWidth={1.5} />
               </div>
             </div>
             <div className="mt-1 px-0.5">

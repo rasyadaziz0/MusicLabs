@@ -7,7 +7,7 @@ import { ChevronLeft } from 'lucide-react';
 import FollowListModal from '@/components/social/FollowListModal';
 import OtherProfileHero from './OtherProfileHero';
 import OtherProfilePlaylists from './OtherProfilePlaylists';
-import type { UserProfile } from '@/lib/supabase/social';
+import { UserProfile } from '@/types/profile';
 import type { PlaylistRecord } from '@/lib/supabase/music';
 
 export interface OtherProfileInitialData {
@@ -81,6 +81,7 @@ export default function OtherProfile({ initialData }: OtherProfileProps) {
           profile={profile}
           followerCount={followerCount}
           followingCount={followingCount}
+          playlistCount={publicPlaylists.length}
           isFollowing={isFollowing}
           isFollowStatusLoading={false}
           openFollowModal={openFollowModal}

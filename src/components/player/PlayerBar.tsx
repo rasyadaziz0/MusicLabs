@@ -86,6 +86,16 @@ export default function PlayerBar({ isMobile }: PlayerBarProps) {
     }
   }, [isNowPlayingOpen]);
 
+  // Add body class to shift scroll arrows when right sidebar is open
+  useEffect(() => {
+    if (isLyricsOpen || isQueueOpen) {
+      document.body.classList.add('right-sidebar-open');
+    } else {
+      document.body.classList.remove('right-sidebar-open');
+    }
+    return () => document.body.classList.remove('right-sidebar-open');
+  }, [isLyricsOpen, isQueueOpen]);
+
   const toggleMute = () => {
     if (isMuted) {
       setVolume(prevVolume);

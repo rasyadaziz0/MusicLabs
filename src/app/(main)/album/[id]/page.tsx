@@ -125,7 +125,7 @@ export default function AlbumPage() {
         <AppleMusicTrackList
           tracks={albumTracks}
           onPlayTrack={playTrack}
-          showStar={false}
+          showHeart={false}
           showAlbum={false} // don't show album name in an album page
           renderTrackOptions={(song, closeMenu) => (
             <>

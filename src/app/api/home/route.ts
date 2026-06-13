@@ -10,18 +10,22 @@ export async function GET() {
   try {
     const client = await getYtMusicClient();
     
-    // Temporarily suppress console.error to hide ZodError spam from ytmusic-api
+    // Temporarily suppress console outputs to hide ZodError spam from ytmusic-api
     const originalConsoleError = console.error;
-    console.error = (...args: any[]) => {
-      if (args[0] && typeof args[0] === 'object' && args[0].name === 'ZodError') return;
-      originalConsoleError(...args);
-    };
+    const originalConsoleWarn = console.warn;
+    const originalConsoleLog = console.log;
+    
+    console.error = () => {};
+    console.warn = () => {};
+    console.log = () => {};
 
     let sections: any[] = [];
     try {
       sections = await client.getHomeSections();
     } finally {
       console.error = originalConsoleError;
+      console.warn = originalConsoleWarn;
+      console.log = originalConsoleLog;
     }
     
     // Pick the first section with songs as "Trending Songs" or fallback to an empty array

@@ -5,9 +5,10 @@ import { getBestImageUrl } from '@/lib/api/musicApi';
 import { getPlaylistById } from '@/lib/supabase/music';
 import { usePlaylistTracks, useRemoveTrackFromPlaylist, useTogglePinPlaylist, useDeletePlaylist, useReorderPlaylistTracks } from '@/hooks/useMusicLibrary';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getUserProfile } from '@/lib/supabase/social';
+import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
+import { UserProfile } from '@/types/profile';
 import toast from 'react-hot-toast';
-import { Plus, Trash2, Pin, MoreHorizontal, Share, Edit2, UserPlus } from 'lucide-react';
+import { Plus, Trash2, Pin, MoreHorizontal, Share, Edit2, UserPlus, Upload, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
@@ -21,6 +22,8 @@ import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase/client';
 import CollaboratorModal from '@/components/playlist/CollaboratorModal';
 import { usePlaylistCollaborators } from '@/hooks/useCollaborators';
+import { uploadImage } from '@/lib/utils/uploadImage';
+import { PlaylistRepository } from '@/lib/supabase/repositories/PlaylistRepository';
 
 export default function PlaylistPage() {
   const { id } = useParams();
@@ -37,7 +40,6 @@ export default function PlaylistPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { data: collaborators = [] } = usePlaylistCollaborators(playlistId);
-
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -89,7 +91,7 @@ export default function PlaylistPage() {
   const { data: ownerProfile } = useQuery({
     queryKey: ['user-profile', playlist?.user_id],
     queryFn: async () => {
-      return getUserProfile(playlist!.user_id);
+      return ProfileRepository.getInstance().getProfile(playlist!.user_id);
     },
     enabled: Boolean(playlist?.user_id),
   });
@@ -130,13 +132,15 @@ export default function PlaylistPage() {
         subtitle={playlist?.user_id ? `${playlist.user_id === user?.id ? (user?.user_metadata?.name || 'You') : (ownerProfile?.display_name || ownerProfile?.username || 'Unknown User')}${collaborators.length > 0 ? ` & ${collaborators.length} collaborators` : ''}` : 'Unknown'}
         description={playlist ? `Updated ${formatDistanceToNow(new Date(playlist.updated_at || playlist.created_at || new Date()), { addSuffix: true })}` : ''}
         cover={
-          coverUrl ? (
-            <Image src={coverUrl} alt={playlist?.name || 'Playlist cover'} fill priority className="object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-void">
-              <Plus size={64} className="text-white/20" />
-            </div>
-          )
+          <div className="relative w-full h-full group">
+            {coverUrl ? (
+              <Image src={coverUrl} alt={playlist?.name || 'Playlist cover'} fill priority className="object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-void">
+                <Plus size={64} className="text-white/20" />
+              </div>
+            )}
+          </div>
         }
         onPlay={() => playlistTracks.length > 0 && playTrack(playlistTracks[0], playlistTracks)}
         onShuffle={() => playlistTracks.length > 0 && shufflePlay(playlistTracks)}
@@ -211,7 +215,7 @@ export default function PlaylistPage() {
         <AppleMusicTrackList
           tracks={playlistTracks}
           onPlayTrack={playTrack}
-          showStar={false}
+          showHeart={false}
           showAlbum={true}
           isReorderable={canEdit}
           onReorder={(oldIndex, newIndex) => {

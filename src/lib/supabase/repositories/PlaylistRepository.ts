@@ -17,6 +17,7 @@ export interface PlaylistRecord {
 }
 
 export interface PlaylistTrackRow {
+  id?: string;
   playlist_id: string;
   track_id: string;
   position: number;
@@ -58,6 +59,18 @@ export class PlaylistRepository {
     );
   }
 
+  async getPublicPlaylists(userId: string): Promise<PlaylistRecord[]> {
+    const { data, error } = await this.supabase
+      .from('playlists')
+      .select('id, user_id, name, description, cover_url, is_public, created_at')
+      .eq('user_id', userId)
+      .eq('is_public', true)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return (data ?? []) as PlaylistRecord[];
+  }
+
   async getPlaylistById(playlistId: string): Promise<PlaylistRecord> {
     const { data, error } = await this.supabase
       .from('playlists')
@@ -92,6 +105,15 @@ export class PlaylistRepository {
     return data as PlaylistRecord;
   }
 
+  async updatePlaylist(playlistId: string, updates: Partial<PlaylistRecord>): Promise<void> {
+    const { error } = await this.supabase
+      .from('playlists')
+      .update(updates)
+      .eq('id', playlistId);
+
+    if (error) throw error;
+  }
+
   async togglePinPlaylist(playlistId: string, currentPinStatus: boolean): Promise<boolean> {
     const { error } = await this.supabase
       .from('playlists')
@@ -115,7 +137,7 @@ export class PlaylistRepository {
   async getPlaylistTrackIds(playlistId: string): Promise<PlaylistTrackRow[]> {
     const { data, error } = await this.supabase
       .from('playlist_tracks')
-      .select('playlist_id, track_id, position')
+      .select('id, playlist_id, track_id, position')
       .eq('playlist_id', playlistId)
       .order('position', { ascending: true });
 
@@ -125,9 +147,17 @@ export class PlaylistRepository {
 
   async getPlaylistTracks(playlistId: string): Promise<Song[]> {
     const rows = await this.getPlaylistTrackIds(playlistId);
+    if (rows.length === 0) return [];
+    
     const trackIds = rows.map((row) => row.track_id);
-    if (trackIds.length === 0) return [];
-    return getSongsByIds(trackIds);
+    const songs = await getSongsByIds(trackIds);
+    
+    // Attach the unique playlist_track id and map back to maintain order & duplicates
+    return rows.map(row => {
+      const song = songs.find(s => s.id === row.track_id);
+      if (!song) return null;
+      return { ...song, uniqueId: row.id };
+    }).filter(Boolean) as Song[];
   }
 
   async getAllPlaylistTracksForUser(userId: string): Promise<Song[]> {

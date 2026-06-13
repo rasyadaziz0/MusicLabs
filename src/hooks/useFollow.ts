@@ -2,17 +2,9 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import {
-  followUser,
-  unfollowUser,
-  isFollowing,
-  getFollowCounts,
-  getFollowersList,
-  getFollowingList,
-  searchUsers,
-  type FollowCounts,
-  type UserProfile,
-} from '@/lib/supabase/social';
+import { SocialRepository } from '@/lib/supabase/repositories/SocialRepository';
+import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
+import { type FollowCounts, type UserProfile } from '@/types/profile';
 
 // ── Check if current user follows target ─────────────────────
 export function useFollowStatus(targetUserId: string | null) {
@@ -20,7 +12,10 @@ export function useFollowStatus(targetUserId: string | null) {
 
   return useQuery({
     queryKey: ['follow-status', user?.id, targetUserId],
-    queryFn: () => isFollowing(user!.id, targetUserId!),
+    queryFn: async () => {
+      if (!user || !targetUserId) return false;
+      return SocialRepository.getInstance().isFollowing(user.id, targetUserId);
+    },
     enabled: Boolean(user?.id && targetUserId && user.id !== targetUserId),
   });
 }
@@ -29,7 +24,7 @@ export function useFollowStatus(targetUserId: string | null) {
 export function useFollowCounts(userId: string | null) {
   return useQuery<FollowCounts>({
     queryKey: ['follow-counts', userId],
-    queryFn: () => getFollowCounts(userId!),
+    queryFn: () => SocialRepository.getInstance().getFollowCounts(userId!),
     enabled: Boolean(userId),
   });
 }
@@ -38,7 +33,7 @@ export function useFollowCounts(userId: string | null) {
 export function useFollowersList(userId: string | null) {
   return useQuery<UserProfile[]>({
     queryKey: ['followers-list', userId],
-    queryFn: () => getFollowersList(userId!),
+    queryFn: () => SocialRepository.getInstance().getFollowers(userId!),
     enabled: Boolean(userId),
   });
 }
@@ -47,7 +42,7 @@ export function useFollowersList(userId: string | null) {
 export function useFollowingList(userId: string | null) {
   return useQuery<UserProfile[]>({
     queryKey: ['following-list', userId],
-    queryFn: () => getFollowingList(userId!),
+    queryFn: () => SocialRepository.getInstance().getFollowing(userId!),
     enabled: Boolean(userId),
   });
 }
@@ -66,10 +61,10 @@ export function useToggleFollow() {
       currentlyFollowing: boolean;
     }) => {
       if (currentlyFollowing) {
-        await unfollowUser(targetUserId);
+        await SocialRepository.getInstance().unfollowUser(targetUserId);
         return false; // now NOT following
       } else {
-        await followUser(targetUserId);
+        await SocialRepository.getInstance().followUser(targetUserId);
         return true; // now following
       }
     },
@@ -88,7 +83,7 @@ export function useToggleFollow() {
 export function useSearchUsers(query: string) {
   return useQuery<UserProfile[]>({
     queryKey: ['search-users', query],
-    queryFn: () => searchUsers(query),
+    queryFn: () => ProfileRepository.getInstance().searchUsers(query),
     enabled: query.trim().length >= 2,
     staleTime: 30_000,
   });

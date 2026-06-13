@@ -6,6 +6,7 @@ import { getBestImageUrl } from '@/lib/api/musicApi';
 import TrackLikeButton from '@/components/ui/TrackLikeButton';
 import AddToPlaylistButton from '@/components/ui/AddToPlaylistButton';
 import AddToQueueButton from '@/components/ui/AddToQueueButton';
+import { EqualizerIcon } from '@/components/ui/EqualizerIcon';
 
 export function TopSongRow({
   song,
@@ -62,11 +63,7 @@ export function TopSongRow({
         )}
         {isCurrentlyPlaying && (
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-            <div className="flex items-end gap-[2px] h-3">
-              <span className="w-[3px] bg-[#FA243C] rounded-full animate-[barBounce_0.8s_ease-in-out_infinite]" style={{ height: '60%' }} />
-              <span className="w-[3px] bg-[#FA243C] rounded-full animate-[barBounce_0.8s_ease-in-out_infinite_0.2s]" style={{ height: '100%' }} />
-              <span className="w-[3px] bg-[#FA243C] rounded-full animate-[barBounce_0.8s_ease-in-out_infinite_0.4s]" style={{ height: '40%' }} />
-            </div>
+            <EqualizerIcon isPlaying={true} color="red" />
           </div>
         )}
       </div>

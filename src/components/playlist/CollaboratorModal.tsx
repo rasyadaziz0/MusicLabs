@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { X, Search, UserPlus, Check } from 'lucide-react';
 import Image from 'next/image';
-import { searchUsers, UserProfile } from '@/lib/supabase/social';
+import { UserProfile } from '@/types/profile';
 import { usePlaylistCollaborators, useAddCollaborator, useRemoveCollaborator } from '@/hooks/useCollaborators';
+import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
 import { useAuth } from '@/context/AuthContext';
 
 interface CollaboratorModalProps {
@@ -29,7 +30,7 @@ export default function CollaboratorModal({ playlistId, isOpen, onClose }: Colla
     const timer = setTimeout(async () => {
       setIsSearching(true);
       try {
-        const results = await searchUsers(query, 10);
+        const results = await ProfileRepository.getInstance().searchUsers(query, 10);
         // Exclude current user from results
         setSearchResults(results.filter(u => u.id !== user?.id));
       } catch (err) {

@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
-import { getArtistSongs, searchArtists, searchSongs } from '@/lib/api/musicApi';
+import { getArtistSongs, searchArtists, searchSongs, searchAlbums } from '@/lib/api/musicApi';
 import { Song } from '@/types/music';
 
 export function normalizeSearchText(value: string) {
@@ -61,17 +61,25 @@ export interface RawSearchArtistResult {
 
 const EMPTY_SONGS: Song[] = [];
 const EMPTY_ARTISTS: SearchArtistResult[] = [];
+const EMPTY_ALBUMS: any[] = [];
 
 export function useMusicSearch(query: string) {
   const [selectedArtistId, setSelectedArtistId] = useState<string | null>(null);
 
+  const searchRegion = typeof window !== 'undefined' ? localStorage.getItem('searchRegion') || 'ID' : 'ID';
+
   const { data: searchResults, isLoading } = useQuery({
-    queryKey: ['search', query],
+    queryKey: ['search', query, searchRegion],
     queryFn: async () => {
-      if (query.length <= 2) return { songs: [], artists: [] };
+      if (query.length <= 2) return { songs: [], artists: [], albums: [] };
 
       const safeQuery = normalizeSearchText(query) || query;
-      const [songsData, artistsData] = await Promise.all([searchSongs(safeQuery), searchArtists(safeQuery)]);
+      
+      const [songsData, artistsData, albumsData] = await Promise.all([
+        searchSongs(safeQuery, 20, searchRegion),
+        searchArtists(safeQuery, 1, searchRegion),
+        searchAlbums(safeQuery, 10, searchRegion)
+      ]);
       const normalizedArtists: SearchArtistResult[] = (artistsData?.results ?? [])
         .map((artist: RawSearchArtistResult) => ({
           id: artist?.id,
@@ -84,6 +92,7 @@ export function useMusicSearch(query: string) {
       return {
         songs: songsData?.results ?? [],
         artists: normalizedArtists,
+        albums: albumsData?.results ?? [],
       };
     },
     enabled: query.length > 2,
@@ -91,6 +100,7 @@ export function useMusicSearch(query: string) {
 
   const songs: Song[] = searchResults?.songs ?? EMPTY_SONGS;
   const artists: SearchArtistResult[] = searchResults?.artists ?? EMPTY_ARTISTS;
+  const albums: any[] = searchResults?.albums ?? EMPTY_ALBUMS;
 
   const rankedSongsWithScore = useMemo(() => {
     const normalizedQuery = normalizeSearchText(query);
@@ -147,6 +157,7 @@ export function useMusicSearch(query: string) {
 
   const rankedSongs = useMemo(() => rankedSongsWithScore.map(i => i.song), [rankedSongsWithScore]);
   const rankedArtists = useMemo(() => rankedArtistsWithScore.map(i => i.artist).slice(0, 8), [rankedArtistsWithScore]);
+  const rankedAlbums = albums.slice(0, 8);
 
   const selectedArtist = rankedArtists.find((artist: SearchArtistResult) => artist.id === selectedArtistId) ?? null;
 
@@ -191,6 +202,7 @@ export function useMusicSearch(query: string) {
     isArtistNameSongsLoading,
     rankedSongs,
     rankedArtists,
+    rankedAlbums,
     displayedSongs,
     selectedArtist,
     selectedArtistId,

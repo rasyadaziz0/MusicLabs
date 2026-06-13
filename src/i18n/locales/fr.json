@@ -1,0 +1,49 @@
+{
+  "sidebar": {
+    "search": "Rechercher",
+    "home": "Accueil",
+    "library": "Bibliothèque",
+    "radio": "Radio en direct",
+    "identify": "Identifier",
+    "recently_added": "Ajouts récents",
+    "new_playlist": "Nouvelle playlist",
+    "albums": "Albums",
+    "songs": "Titres",
+    "made_for_you": "Conçu pour vous",
+    "playlists": "Playlists",
+    "all_playlists": "Toutes les playlists",
+    "favourite_songs": "Coups de cœur"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "save": "Enregistrer",
+    "search_discovery": "Recherche et découverte",
+    "search_region": "Région de recherche",
+    "ui_language": "Langue de l'appli",
+    "lyrics": "Paroles",
+    "font_size": "Taille de police",
+    "romanization": "Romanisation",
+    "romanization_desc": "Afficher les paroles romanisées pour les écritures non latines (japonais, coréen, etc.)",
+    "privacy_social": "Confidentialité et réseaux",
+    "public_profile": "Profil public",
+    "public_profile_desc": "Autoriser quiconque à voir votre profil et vos playlists publiques",
+    "show_now_playing": "Afficher En cours de lecture",
+    "show_now_playing_desc": "Laisser vos abonnés voir ce que vous écoutez",
+    "show_recently_played": "Afficher Écoutés récemment",
+    "show_recently_played_desc": "Afficher votre activité d'écoute récente sur votre profil",
+    "account": "Compte",
+    "connected_accounts": "Comptes connectés",
+    "clear_history": "Effacer l'historique d'écoute",
+    "sign_out": "Déconnexion",
+    "delete_account": "Supprimer le compte"
+  },
+  "search": {
+    "placeholder": "Rechercher des titres, artistes, albums...",
+    "placeholder_short": "Rechercher",
+    "artists": "Artistes",
+    "albums": "Albums",
+    "songs": "Titres",
+    "music": "Musique",
+    "users": "Utilisateurs"
+  }
+}

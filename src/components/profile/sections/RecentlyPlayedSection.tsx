@@ -1,6 +1,8 @@
 'use client';
 
+import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { HorizontalScrollSection } from '@/components/ui/HorizontalScrollSection';
 import { getBestImageUrl } from '@/lib/api/musicApi';
 import { Song } from '@/types/music';
@@ -14,13 +16,12 @@ export function RecentlyPlayedSection({ recentlyPlayed, playTrack }: RecentlyPla
   if (recentlyPlayed.length === 0) return null;
 
   return (
-    <div data-animate className="px-5 md:px-8">
+    <div data-animate className="mt-10">
       <HorizontalScrollSection title="Recently Played">
         {recentlyPlayed.map((song: Song, index: number) => (
-          <button
+          <div
             key={`${song.id}-recent-${index}`}
-            type="button"
-            className="group flex-shrink-0 w-[150px] md:w-[170px] text-left"
+            className="group flex-shrink-0 w-[150px] md:w-[170px] text-left cursor-pointer"
             onClick={() => playTrack(song, recentlyPlayed)}
           >
             <div className="relative aspect-square rounded-xl overflow-hidden mb-2.5 bg-white/5 border border-white/5 shadow-sm">
@@ -38,10 +39,23 @@ export function RecentlyPlayedSection({ recentlyPlayed, playTrack }: RecentlyPla
             <p className="text-white font-medium text-[13px] line-clamp-1 leading-snug">
               {song.name}
             </p>
-            <p className="text-white/40 text-[12px] line-clamp-1 mt-0.5">
-              {song.artists.primary.map((a) => a.name).join(', ')}
+            <p className="text-white/40 text-[12px] line-clamp-1 mt-0.5 pointer-events-auto">
+              {song.artists.primary.map((a: any, i: number) => (
+                <span 
+                  key={a.id}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Link
+                    href={`/artist/${a.id}`}
+                    className="hover:underline hover:text-white transition-colors"
+                  >
+                    {a.name}
+                  </Link>
+                  {i < song.artists.primary.length - 1 && ', '}
+                </span>
+              ))}
             </p>
-          </button>
+          </div>
         ))}
       </HorizontalScrollSection>
     </div>

@@ -1,20 +1,23 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { getUserProfile, getPublicPlaylists, type UserProfile } from '@/lib/supabase/social';
+import { UserProfile } from '@/types/profile';
 import { PlaylistRecord } from '@/lib/supabase/music';
 import { useFollowCounts, useFollowStatus } from './useFollow';
+import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
+import { PlaylistRepository } from '@/lib/supabase/repositories/PlaylistRepository';
+import { supabase } from '@/lib/supabase/client';
 
 export function useUserProfile(userId: string | null) {
   const profileQuery = useQuery<UserProfile | null>({
     queryKey: ['user-profile', userId],
-    queryFn: () => getUserProfile(userId!),
+    queryFn: () => ProfileRepository.getInstance().getProfile(userId!),
     enabled: Boolean(userId),
   });
 
   const playlistsQuery = useQuery<PlaylistRecord[]>({
     queryKey: ['user-public-playlists', userId],
-    queryFn: () => getPublicPlaylists(userId!) as Promise<PlaylistRecord[]>,
+    queryFn: () => new PlaylistRepository(supabase).getPublicPlaylists(userId!) as Promise<PlaylistRecord[]>,
     enabled: Boolean(userId),
   });
 

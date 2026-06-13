@@ -150,6 +150,11 @@ export async function checkRateLimit(
     return checkLocalRateLimit(identifier, config);
   }
 
+  // Production without Upstash = all requests blocked (fail-closed)
+  console.error(
+    '[RATE_LIMIT] CRITICAL: UPSTASH_REDIS_REST_URL and/or UPSTASH_REDIS_REST_TOKEN not set in production. All rate-limited requests will be BLOCKED.'
+  );
+
   return {
     allowed: false,
     limit,

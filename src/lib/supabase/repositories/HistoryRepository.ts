@@ -44,12 +44,12 @@ export class HistoryRepository {
       .select('track_id')
       .eq('user_id', userId)
       .order('played_at', { ascending: false })
-      .limit(30);
+      .limit(100);
 
     if (error) throw error;
 
     const rawIds = (data ?? []).map((row) => row.track_id);
-    const uniqueIds = Array.from(new Set(rawIds)).slice(0, 15);
+    const uniqueIds = Array.from(new Set(rawIds)).slice(0, 30);
 
     if (uniqueIds.length === 0) return [];
     return getSongsByIds(uniqueIds);
@@ -212,5 +212,14 @@ export class HistoryRepository {
 
     if (ids.length === 0) return [];
     return getSongsByIds(ids);
+  }
+
+  async clearHistory(userId: string): Promise<void> {
+    const { error } = await this.supabase
+      .from('listening_history')
+      .delete()
+      .eq('user_id', userId);
+
+    if (error) throw error;
   }
 }

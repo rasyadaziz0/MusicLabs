@@ -103,7 +103,7 @@ export default function LibraryPage() {
         ) : playlists.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-6 md:gap-x-6 md:gap-y-8">
             {/* Added Favourite Songs pseudo-playlist to recently added for filler if wanted, but using pure playlists for now */}
-            {playlists.slice(0, 12).map((playlist) => (
+            {playlists.slice(0, 30).map((playlist) => (
               <Link key={playlist.id} href={`/playlist/${playlist.id}`} className="group flex flex-col gap-2">
                 <div className="relative aspect-square rounded-xl md:rounded-2xl overflow-hidden bg-white/5 shadow-md border border-white/5 transition-transform duration-300 group-hover:scale-[1.02]">
                    {playlist.cover_url ? (

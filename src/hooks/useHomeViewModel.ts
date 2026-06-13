@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { getHomeFeed } from '@/lib/api/musicApi';
 import { getRecentPlays } from '@/lib/supabase/music';
-import { getSocialFeed } from '@/lib/supabase/social';
+import { SocialRepository } from '@/lib/supabase/repositories/SocialRepository';
 import { useAuth } from '@/context/AuthContext';
 import { useState } from 'react';
 import { MoodKey } from '@/config/moods';
@@ -35,7 +35,7 @@ export function useHomeViewModel() {
 
   const { data: socialFeed, isLoading: isSocialFeedLoading } = useQuery({
     queryKey: ['socialFeed', user?.id],
-    queryFn: () => getSocialFeed(user!.id),
+    queryFn: () => SocialRepository.getInstance().getSocialFeed(user!.id),
     enabled: !!user?.id,
   });
 
@@ -55,10 +55,13 @@ export function useHomeViewModel() {
   const newReleaseAlbums = homeData?.albums || [];
   
   const recentlyPlayedSongs = user && dbRecentPlays && dbRecentPlays.length > 0 
-    ? dbRecentPlays 
-    : getSongWindow(trendingSongs, 2, 12);
+    ? dbRecentPlays.slice(0, 30)
+    : getSongWindow(trendingSongs, 2, Math.max(20, trendingSongs.length));
     
-  const moodSongs: Song[] = moodSongsData?.slice(0, 12) ?? [];
+  const moodSongsRaw: Song[] = moodSongsData ?? [];
+  const moodSongs: Song[] = moodSongsRaw.length > 0
+    ? Array.from({ length: Math.max(20, moodSongsRaw.length) }, (_, i) => moodSongsRaw[i % moodSongsRaw.length]).slice(0, 30)
+    : [];
 
   return {
     user,

@@ -51,8 +51,19 @@ export function TopPicksCard({
         <h3 className="text-2xl md:text-[28px] font-bold text-white mb-1 line-clamp-2 leading-tight">
           {song.name}
         </h3>
-        <p className="text-[14px] text-white/80 line-clamp-2 leading-snug">
-          {song.artists.primary.map((a: any) => a.name).join(', ')}
+        <p className="text-[14px] text-white/80 line-clamp-2 leading-snug pointer-events-auto">
+          {song.artists.primary.map((a: any, i: number) => (
+            <React.Fragment key={a.id}>
+              <Link
+                href={`/artist/${a.id}`}
+                className="hover:underline hover:text-white transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {a.name}
+              </Link>
+              {i < song.artists.primary.length - 1 && ', '}
+            </React.Fragment>
+          ))}
         </p>
       </div>
     </div>
@@ -112,8 +123,19 @@ export function TrackCard({
         </div>
       </div>
       <p className="text-white font-medium text-[14px] line-clamp-1 leading-snug">{song.name}</p>
-      <p className="text-muted text-[13px] line-clamp-1 mt-0.5">
-        {song.artists.primary.map((a: any) => a.name).join(', ')}
+      <p className="text-muted text-[13px] line-clamp-1 mt-0.5 pointer-events-auto">
+        {song.artists.primary.map((a: any, i: number) => (
+          <React.Fragment key={a.id}>
+            <Link
+              href={`/artist/${a.id}`}
+              className="hover:underline hover:text-white transition-colors"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {a.name}
+            </Link>
+            {i < song.artists.primary.length - 1 && ', '}
+          </React.Fragment>
+        ))}
       </p>
     </div>
     <TrackContextMenu
@@ -156,8 +178,19 @@ export function SocialActivityCard({
           <span className="font-semibold text-white/90">{item.user?.display_name || item.user?.username || 'User'}</span> baru dengerin
         </p>
         <p className="text-[14px] font-medium text-white truncate">{item.track.name}</p>
-        <p className="text-[12px] text-white/50 truncate">
-          {item.track.artists?.primary?.map((a: any) => a.name).join(', ')}
+        <p className="text-[12px] text-white/50 truncate pointer-events-auto">
+          {item.track.artists?.primary?.map((a: any, i: number) => (
+            <React.Fragment key={a.id}>
+              <Link
+                href={`/artist/${a.id}`}
+                className="hover:underline hover:text-white transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {a.name}
+              </Link>
+              {i < item.track.artists.primary.length - 1 && ', '}
+            </React.Fragment>
+          ))}
         </p>
       </div>
     </button>

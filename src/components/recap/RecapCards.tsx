@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import { Play, Mic2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getBestImageUrl } from '@/lib/api/musicApi';
@@ -71,7 +72,7 @@ export function TopTrackCard({
       transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
       className="group relative flex flex-col gap-3 w-[140px] md:w-[160px] flex-shrink-0"
     >
-      <div 
+      <div
         className="relative aspect-square squircle overflow-hidden bg-white/5 cursor-pointer shadow-lg transition-transform duration-300 group-hover:scale-105 group-hover:shadow-2xl"
         onClick={onPlay}
       >
@@ -89,7 +90,7 @@ export function TopTrackCard({
           {rank}
         </div>
       </div>
-      
+
       <div className="px-1">
         <p className="text-[15px] font-bold text-white truncate leading-snug cursor-pointer hover:underline" onClick={onPlay}>
           {song.name}
@@ -102,38 +103,43 @@ export function TopTrackCard({
 
 // ── Artist Card ─────────────────────────────────────────
 export function TopArtistCard({
+  id,
   name,
   imageUrl,
   rank,
   delay,
 }: {
+  id?: string;
   name: string;
   imageUrl: string | undefined;
   rank: number;
   delay: number;
 }) {
+  const href = id ? `/artist/${id}` : `/search?q=${encodeURIComponent(name)}`;
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
-      className="flex-shrink-0 w-[140px] md:w-[160px] group"
-    >
-      <div className="relative aspect-square rounded-full overflow-hidden bg-white/5 shadow-lg border-2 border-transparent group-hover:border-white/20 transition-all duration-300 group-hover:scale-105">
-        {imageUrl ? (
-          <Image src={imageUrl} alt={name} fill sizes="160px" className="object-cover" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#FA243C]/20 to-[#2F2FE4]/20">
-            <Mic2 size={40} className="text-white/30" />
+    <Link href={href}>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
+        className="flex-shrink-0 w-[140px] md:w-[160px] group"
+      >
+        <div className="relative aspect-square rounded-full overflow-hidden bg-white/5 shadow-lg border-2 border-transparent group-hover:border-white/20 transition-all duration-300 group-hover:scale-105">
+          {imageUrl ? (
+            <Image src={imageUrl} alt={name} fill sizes="160px" className="object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#FA243C]/20 to-[#2F2FE4]/20">
+              <Mic2 size={40} className="text-white/30" />
+            </div>
+          )}
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-white font-bold text-[13px] border border-white/10 shadow-lg">
+            #{rank}
           </div>
-        )}
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-white font-bold text-[13px] border border-white/10 shadow-lg">
-          #{rank}
         </div>
-      </div>
-      <p className="text-[16px] font-bold text-center text-white mt-4 truncate px-2">
-        {name}
-      </p>
-    </motion.div>
+        <p className="text-[16px] font-bold text-center text-white mt-4 truncate px-2 group-hover:underline">
+          {name}
+        </p>
+      </motion.div>
+    </Link>
   );
 }

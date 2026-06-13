@@ -1,13 +1,43 @@
-import { Users, UserCheck, Globe, Share2 } from 'lucide-react';
+import { Users, UserCheck, Globe, Share2, CheckCircle2, ListMusic } from 'lucide-react';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 import FollowButton from '@/components/ui/FollowButton';
+
+// TikTok icon
+function TikTokIcon({ size = 14, className = '' }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1v-3.5a6.37 6.37 0 0 0-.79-.05A6.34 6.34 0 0 0 3.15 15a6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.34-6.34V8.69a8.35 8.35 0 0 0 4.76 1.49V6.69h-1z" />
+    </svg>
+  );
+}
+
+// Instagram icon
+function InstagramIcon({ size = 14, className = '' }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+    </svg>
+  );
+}
+
+// X/Twitter icon
+function XIcon({ size = 14, className = '' }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
 
 interface OtherProfileHeroProps {
   userId: string;
   profile: any;
   followerCount: number;
   followingCount: number;
+  playlistCount?: number;
   isFollowing: boolean;
   isFollowStatusLoading: boolean;
   openFollowModal: (tab: 'followers' | 'following') => void;
@@ -18,11 +48,16 @@ export default function OtherProfileHero({
   profile,
   followerCount,
   followingCount,
+  playlistCount = 0,
   isFollowing,
   isFollowStatusLoading,
   openFollowModal,
 }: OtherProfileHeroProps) {
   const displayName = profile.display_name || profile.username || 'User';
+  const usernameDisplay = profile.username;
+  const bio = profile.bio;
+  const bannerUrl = profile.banner_url;
+  const avatarUrl = profile.avatar_url;
   const initials = displayName
     .split(' ')
     .map((w: string) => w[0])
@@ -30,53 +65,106 @@ export default function OtherProfileHero({
     .toUpperCase()
     .slice(0, 2);
 
+  // Social links
+  const hasSocials = profile?.social_instagram || profile?.social_twitter || profile?.social_tiktok;
+
   return (
-    <div data-animate className="relative overflow-hidden">
-      {/* Background gradient */}
+    <div data-animate className="relative overflow-hidden rounded-[2rem] md:rounded-[2.5rem] mx-4 md:mx-8 mt-0.5 shadow-2xl">
+      {/* Banner / Background */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-[#FA243C]/[0.04] blur-[120px]" />
+        {bannerUrl ? (
+          <>
+            <Image
+              src={bannerUrl}
+              alt="Profile Banner"
+              fill
+              className="object-cover"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-[#121212]" />
+          </>
+        ) : (
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-[#FA243C]/[0.06] blur-[120px]" />
+        )}
       </div>
 
-      <div className="relative flex flex-col items-center pt-4 md:pt-8 pb-8 px-6">
+      <div className={`relative flex flex-col items-center pb-8 px-6 sm:px-10 ${bannerUrl ? 'pt-12 md:pt-16 mt-16 md:mt-24' : 'pt-10 md:pt-14 mt-8'} bg-black/30 backdrop-blur-xl border border-white/10 shadow-2xl rounded-[2rem] md:rounded-[2.5rem] w-fit max-w-[95%] md:max-w-xl mx-auto mb-8 md:mb-12 transition-all`}>
         {/* Avatar */}
-        <div className="relative">
-          <div className="relative w-[120px] h-[120px] md:w-[150px] md:h-[150px] rounded-full overflow-hidden ring-[3px] ring-white/10 ring-offset-4 ring-offset-black/0 shadow-[0_0_40px_rgba(250,36,60,0.08)]">
-            {profile.avatar_url ? (
-              <Image
-                src={profile.avatar_url}
-                alt={displayName}
-                fill
-                sizes="150px"
-                className="object-cover"
-                priority
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-[#FA243C] to-[#FF6275] flex items-center justify-center">
-                <span className="text-white text-4xl md:text-5xl font-bold tracking-tight">
-                  {initials}
-                </span>
-              </div>
-            )}
+        <div className="relative group">
+          <div className="relative w-[120px] h-[120px] md:w-[160px] md:h-[160px] rounded-full overflow-hidden ring-[3px] ring-[#FA243C]/30 ring-offset-4 ring-offset-black/0 shadow-[0_0_60px_rgba(250,36,60,0.15)]">
+            <Image
+              src={avatarUrl || `https://ui-avatars.com/api/?name=${initials}&background=random`}
+              alt={displayName}
+              fill
+              sizes="160px"
+              className="object-cover"
+              priority
+            />
           </div>
+          {profile?.username?.toLowerCase() === 'rasyadaziz' && (
+            <div className="absolute -bottom-2 -right-2 bg-[#FA243C] text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-lg border-2 border-[#121212] flex items-center gap-1 z-20 pointer-events-none">
+              <CheckCircle2 size={10} className="text-white" />
+              Developer
+            </div>
+          )}
         </div>
 
         {/* Name */}
         <div className="flex items-center gap-3 mt-5">
-          <h1 className="text-[26px] md:text-[32px] font-bold tracking-tight text-white">
+          <h1 className="text-[28px] md:text-[34px] font-bold tracking-tight text-white">
             {displayName}
           </h1>
         </div>
 
-        {profile.username && profile.display_name && (
-          <p className="text-[13px] text-white/40 mt-1">
-            @{profile.username}
+        {usernameDisplay && (
+          <p className="text-[14px] text-white/40 mt-1">
+            @{usernameDisplay}
           </p>
         )}
 
-        {profile.bio && (
+        {bio && (
           <p className="text-[14px] text-white/70 mt-3 max-w-sm text-center leading-relaxed">
-            {profile.bio}
+            {bio}
           </p>
+        )}
+
+        {/* Social Links */}
+        {hasSocials && (
+          <div className="flex items-center gap-3 mt-3">
+            {profile?.social_instagram && (
+              <a
+                href={`https://instagram.com/${profile.social_instagram.replace('@', '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] flex items-center justify-center transition-colors"
+                title="Instagram"
+              >
+                <InstagramIcon size={14} className="text-white/60" />
+              </a>
+            )}
+            {profile?.social_twitter && (
+              <a
+                href={`https://x.com/${profile.social_twitter.replace('@', '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] flex items-center justify-center transition-colors"
+                title="X / Twitter"
+              >
+                <XIcon size={13} className="text-white/60" />
+              </a>
+            )}
+            {profile?.social_tiktok && (
+              <a
+                href={`https://tiktok.com/@${profile.social_tiktok.replace('@', '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-full bg-white/[0.06] hover:bg-white/[0.12] flex items-center justify-center transition-colors"
+                title="TikTok"
+              >
+                <TikTokIcon size={13} className="text-white/60" />
+              </a>
+            )}
+          </div>
         )}
 
         {/* Badge & Share */}
@@ -100,39 +188,23 @@ export default function OtherProfileHero({
         </div>
 
         {/* Stats row */}
-        <div className="flex items-center gap-8 md:gap-12 mt-6">
+        <div className="flex items-center gap-3 sm:gap-6 mt-7 w-full justify-center overflow-x-auto scrollbar-hide max-w-full">
+          <StatItem value={playlistCount} label="Playlists" icon={<ListMusic size={15} className="text-[#FA243C]" />} />
+          <div className="w-px h-8 bg-white/10 shrink-0" />
           <button
             type="button"
             onClick={() => openFollowModal('followers')}
-            className="flex flex-col items-center gap-1 group cursor-pointer"
+            className="group cursor-pointer shrink-0"
           >
-            <div className="flex items-center gap-1.5">
-              <Users size={15} className="text-[#FA243C]" />
-              <span className="text-[22px] md:text-[26px] font-bold text-white tabular-nums group-hover:text-[#FA243C] transition-colors">
-                {followerCount >= 1000 ? `${(followerCount / 1000).toFixed(1)}k` : followerCount}
-              </span>
-            </div>
-            <span className="text-[11px] font-semibold text-white/40 uppercase tracking-wider group-hover:text-white/60 transition-colors">
-              Followers
-            </span>
+            <StatItem value={followerCount} label="Followers" icon={<Users size={15} className="text-[#FA243C]" />} clickable />
           </button>
-
-          <div className="w-px h-8 bg-white/10" />
-
+          <div className="w-px h-8 bg-white/10 shrink-0" />
           <button
             type="button"
             onClick={() => openFollowModal('following')}
-            className="flex flex-col items-center gap-1 group cursor-pointer"
+            className="group cursor-pointer shrink-0"
           >
-            <div className="flex items-center gap-1.5">
-              <UserCheck size={15} className="text-[#FA243C]" />
-              <span className="text-[22px] md:text-[26px] font-bold text-white tabular-nums group-hover:text-[#FA243C] transition-colors">
-                {followingCount >= 1000 ? `${(followingCount / 1000).toFixed(1)}k` : followingCount}
-              </span>
-            </div>
-            <span className="text-[11px] font-semibold text-white/40 uppercase tracking-wider group-hover:text-white/60 transition-colors">
-              Following
-            </span>
+            <StatItem value={followingCount} label="Following" icon={<UserCheck size={15} className="text-[#FA243C]" />} clickable />
           </button>
         </div>
 
@@ -146,6 +218,33 @@ export default function OtherProfileHero({
           />
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ── Stat Item Sub-component ───────────────────────────────── */
+function StatItem({
+  value,
+  label,
+  icon,
+  clickable = false,
+}: {
+  value: number;
+  label: string;
+  icon: React.ReactNode;
+  clickable?: boolean;
+}) {
+  return (
+    <div className={`flex flex-col items-center gap-1 ${clickable ? 'group-hover:opacity-80 transition-opacity' : ''}`}>
+      <div className="flex items-center gap-1.5">
+        {icon}
+        <span className={`text-[18px] md:text-[20px] font-bold text-white tabular-nums ${clickable ? 'group-hover:text-[#FA243C] transition-colors' : ''}`}>
+          {value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value}
+        </span>
+      </div>
+      <span className={`text-[10px] font-semibold text-white/40 uppercase tracking-wider ${clickable ? 'group-hover:text-white/60 transition-colors' : ''}`}>
+        {label}
+      </span>
     </div>
   );
 }

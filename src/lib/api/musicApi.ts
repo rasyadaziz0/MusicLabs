@@ -22,14 +22,17 @@ async function apiFetchInternal<T>(path: string): Promise<T> {
 
 // ── Search ─────────────────────────────────────────────────────────
 
-export const searchSongs = (q: string, page = 1) =>
-  apiFetchInternal<any>(`/api/search/songs?query=${encodeURIComponent(q)}&page=${page}&limit=20`);
+export const searchSongs = (q: string, limit = 20, country = 'ID') =>
+  apiFetchInternal<any>(`/api/search/songs?query=${encodeURIComponent(q)}&limit=${limit}&country=${country}`);
 
-export const searchArtists = (q: string, page = 1) =>
-  apiFetchInternal<any>(`/api/search/artists?query=${encodeURIComponent(q)}&page=${page}&limit=20`);
+export const searchArtists = (q: string, limit = 20, country = 'ID') =>
+  apiFetchInternal<any>(`/api/search/artists?query=${encodeURIComponent(q)}&limit=${limit}&country=${country}`);
 
-export const searchAll = (q: string) =>
-  apiFetchInternal<any>(`/api/search?q=${encodeURIComponent(q)}`);
+export const searchAll = (q: string, country = 'ID') =>
+  apiFetchInternal<any>(`/api/search?q=${encodeURIComponent(q)}&country=${country}`);
+
+export const searchAlbums = (q: string, limit = 20, country = 'ID') =>
+  apiFetchInternal<any>(`/api/search/albums?query=${encodeURIComponent(q)}&limit=${limit}&country=${country}`);
 
 // ── Home feed (YT Music) ──────────────────────────────────────────
 

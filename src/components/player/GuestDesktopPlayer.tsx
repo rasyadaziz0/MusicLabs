@@ -1,6 +1,6 @@
 'use client';
 
-import { Play, Pause, SkipForward, SkipBack, Shuffle, Repeat, Volume2, Loader2, Star, X } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, Shuffle, Repeat, Volume2, Loader2, Heart, X } from 'lucide-react';
 import { formatTime } from '@/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -80,7 +80,7 @@ export function GuestDesktopPlayer({
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, paddingTop: 4, flexShrink: 0 }}>
               <button onClick={handleToggleLike} disabled={toggleLikeMutation?.isPending} style={{ background: 'none', border: 'none', color: isLiked ? '#e0a030' : 'rgba(255,255,255,0.5)', cursor: 'pointer', padding: 0, display: 'flex' }}>
-                {toggleLikeMutation?.isPending ? <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} /> : <Star size={20} fill={isLiked ? 'currentColor' : 'none'} />}
+                {toggleLikeMutation?.isPending ? <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} /> : <Heart size={20} fill={isLiked ? 'currentColor' : 'none'} />}
               </button>
               <MoreMenu {...props} />
             </div>

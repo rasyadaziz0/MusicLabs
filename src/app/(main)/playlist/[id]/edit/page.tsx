@@ -6,8 +6,11 @@ import { useAuth } from '@/context/AuthContext';
 import { useUpdatePlaylist } from '@/hooks/useMusicLibrary';
 import { getPlaylistById } from '@/lib/supabase/music';
 import { useQuery } from '@tanstack/react-query';
-import { Music, AlertCircle, Loader2 } from 'lucide-react';
+import { Music, AlertCircle, Loader2, Upload } from 'lucide-react';
 import Image from 'next/image';
+import { uploadImage } from '@/lib/utils/uploadImage';
+import toast from 'react-hot-toast';
+import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
 
 export default function EditPlaylistPage() {
   const router = useRouter();
@@ -23,8 +26,26 @@ export default function EditPlaylistPage() {
     isPublic: false,
   });
   const [errorMessage, setErrorMessage] = useState('');
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
   const friendlyUpdatePlaylistError =
     'Playlist belum bisa diupdate sekarang. Coba lagi sebentar lagi.';
+
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingCover(true);
+    try {
+      const url = await uploadImage(file, 'playlists', playlistId);
+      setForm((current) => ({ ...current, coverUrl: url }));
+      toast.success('Cover uploaded successfully!');
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || 'Failed to upload cover');
+    } finally {
+      setIsUploadingCover(false);
+    }
+  };
 
   const { data: playlist, isLoading } = useQuery({
     queryKey: ['playlist', playlistId],
@@ -135,15 +156,11 @@ export default function EditPlaylistPage() {
                 <span className="text-white/90 text-xs font-semibold tracking-wider">PREVIEW</span>
               </div>
             </div>
-            <input
-              type="text"
-              value={form.coverUrl}
-              onChange={(event) =>
-                setForm((current) => ({ ...current, coverUrl: event.target.value }))
-              }
-              placeholder="Paste Image URL here..."
-              className="w-full sm:w-56 text-[13px] bg-white/5 border border-white/10 rounded-md px-3 py-2 text-white placeholder:text-white/30 focus:outline-none focus:border-[#FA243C]/50 focus:bg-white/10 transition-colors"
-            />
+            <label className="cursor-pointer inline-flex items-center justify-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 rounded-full transition-colors text-white text-[13px] font-medium w-full sm:w-56 mt-2">
+              {isUploadingCover ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+              {isUploadingCover ? 'Uploading...' : 'Upload Cover'}
+              <input type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} disabled={isUploadingCover} />
+            </label>
           </div>
 
           {/* Right: Info Inputs */}
@@ -180,24 +197,12 @@ export default function EditPlaylistPage() {
               />
             </div>
 
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                role="switch"
-                aria-checked={form.isPublic}
-                onClick={() => setForm(prev => ({ ...prev, isPublic: !prev.isPublic }))}
-                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${form.isPublic ? 'bg-[#FA243C]' : 'bg-white/10'}`}
-              >
-                <span
-                  aria-hidden="true"
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${form.isPublic ? 'translate-x-5' : 'translate-x-0'}`}
-                />
-              </button>
-              <div>
-                <span className="text-[14px] font-medium text-white">Public Playlist</span>
-                <p className="text-[12px] text-white/50">Allow anyone to listen to this playlist</p>
-              </div>
-            </div>
+            <ToggleSwitch
+              checked={form.isPublic}
+              onChange={(checked) => setForm(prev => ({ ...prev, isPublic: checked }))}
+              label="Public Playlist"
+              description="Allow anyone to listen to this playlist"
+            />
 
             {errorMessage && (
               <div className="flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-[13px] text-red-200">

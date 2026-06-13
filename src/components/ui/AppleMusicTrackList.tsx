@@ -2,33 +2,20 @@ import { useState, useEffect, ReactNode, useRef } from 'react';
 import Image from 'next/image';
 import { Song } from '@/types/music';
 import { getBestImageUrl } from '@/lib/api/musicApi';
-import { Star, MoreHorizontal, GripVertical } from 'lucide-react';
+import { Heart, MoreHorizontal, GripVertical } from 'lucide-react';
 import Link from 'next/link';
 import { usePlayer } from '@/context/PlayerContext';
 import { TrackContextMenu } from './TrackContextMenu';
-import { motion } from 'framer-motion';
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-  useSortable,
-} from '@dnd-kit/sortable';
+import { EqualizerIcon } from '@/components/ui/EqualizerIcon';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, } from '@dnd-kit/core';
+import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable, } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis, restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { CSS } from '@dnd-kit/utilities';
 
 export interface AppleMusicTrackListProps {
   tracks: Song[];
   onPlayTrack: (track: Song, allTracks: Song[]) => void;
-  showStar?: boolean;
+  showHeart?: boolean;
   showAlbum?: boolean;
   hideHeader?: boolean;
   renderTrackOptions?: (track: Song, closeMenu: () => void) => ReactNode;
@@ -37,14 +24,14 @@ export interface AppleMusicTrackListProps {
   onReorder?: (oldIndex: number, newIndex: number) => void;
 }
 
-function SortableTrackItem({ 
-  song, 
-  index, 
+function SortableTrackItem({
+  song,
+  index,
   children,
   isReorderable
-}: { 
-  song: Song, 
-  index: number, 
+}: {
+  song: Song,
+  index: number,
   children: (dragProps: any) => React.ReactNode,
   isReorderable: boolean
 }) {
@@ -55,7 +42,7 @@ function SortableTrackItem({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: song.id, disabled: !isReorderable });
+  } = useSortable({ id: song.uniqueId || `${song.id}-${index}`, disabled: !isReorderable });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -72,32 +59,10 @@ function SortableTrackItem({
   );
 }
 
-const EqualizerIcon = ({ isPlaying }: { isPlaying: boolean }) => {
-  const bars = [1, 2, 3, 4];
-  return (
-    <div className="flex items-end justify-center gap-[2px] h-3 w-3">
-      {bars.map((bar) => (
-        <motion.div
-          key={bar}
-          className="w-[2px] bg-white rounded-t-sm origin-bottom"
-          initial={{ height: "20%" }}
-          animate={{ height: isPlaying ? ["20%", "100%", "40%", "80%", "20%"] : "20%" }}
-          transition={{
-            duration: 0.8,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: bar * 0.15,
-          }}
-        />
-      ))}
-    </div>
-  );
-};
-
 export function AppleMusicTrackList({
   tracks,
   onPlayTrack,
-  showStar = false,
+  showHeart = false,
   showAlbum = true,
   hideHeader = false,
   renderTrackOptions,
@@ -108,7 +73,7 @@ export function AppleMusicTrackList({
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ track: Song | null, x: number, y: number, isOpen: boolean }>({ track: null, x: 0, y: 0, isOpen: false });
   const { currentTrack, isPlaying } = usePlayer();
-  
+
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const touchStartPos = useRef<{ x: number, y: number } | null>(null);
   const suppressClickRef = useRef<boolean>(false);
@@ -143,7 +108,7 @@ export function AppleMusicTrackList({
     if (isReorderable) return;
     const touch = e.touches[0];
     touchStartPos.current = { x: touch.clientX, y: touch.clientY };
-    
+
     longPressTimer.current = setTimeout(() => {
       suppressClickRef.current = true;
       setContextMenu({ track: song, x: touch.clientX, y: touch.clientY, isOpen: true });
@@ -157,7 +122,7 @@ export function AppleMusicTrackList({
     const touch = e.touches[0];
     const dx = touch.clientX - touchStartPos.current.x;
     const dy = touch.clientY - touchStartPos.current.y;
-    
+
     if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
@@ -184,7 +149,7 @@ export function AppleMusicTrackList({
       {/* Table Header */}
       {!hideHeader && (
         <div className="flex items-center gap-4 px-4 py-2 border-b border-white/10 text-[13px] font-semibold text-white/50 uppercase tracking-wider mb-2">
-          {showStar && <div className="w-6 flex-shrink-0"></div>}
+          {showHeart && <div className="w-6 flex-shrink-0"></div>}
           <div className="flex-1 min-w-0">Song</div>
           <div className="hidden md:block w-1/4 min-w-0">Artist</div>
           {showAlbum && <div className="hidden md:block w-1/4 min-w-0">Album</div>}
@@ -210,124 +175,129 @@ export function AppleMusicTrackList({
         modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
       >
         <SortableContext
-          items={tracks.map(t => t.id)}
+          items={tracks.map((t, index) => t.uniqueId || `${t.id}-${index}`)}
           strategy={verticalListSortingStrategy}
         >
           <div className="space-y-1">
             {tracks.map((song, index) => {
               const isCurrentTrack = currentTrack?.id === song.id;
-              
+              const uniqueKey = song.uniqueId || `${song.id}-${index}`;
+
               return (
-              <SortableTrackItem key={song.id} song={song} index={index} isReorderable={isReorderable}>
-                {({ attributes, listeners }) => (
-                  <div
-                    onClick={() => handleTrackClick(song, tracks)}
-                    onContextMenu={(e) => handleContextMenu(e, song)}
-                    onTouchStart={(e) => handleTouchStart(e, song)}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
-                    onTouchCancel={handleTouchEnd}
-                    style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}
-                    className={`group flex items-center gap-4 rounded-xl px-4 py-2.5 cursor-pointer transition-colors ${
-                      isCurrentTrack 
-                        ? 'bg-[#D80F1D] text-white' 
+                <SortableTrackItem key={uniqueKey} song={song} index={index} isReorderable={isReorderable}>
+                  {({ attributes, listeners }) => (
+                    <div
+                      onClick={() => handleTrackClick(song, tracks)}
+                      onContextMenu={(e) => handleContextMenu(e, song)}
+                      onTouchStart={(e) => handleTouchStart(e, song)}
+                      onTouchMove={handleTouchMove}
+                      onTouchEnd={handleTouchEnd}
+                      onTouchCancel={handleTouchEnd}
+                      style={{ WebkitTouchCallout: 'none', userSelect: 'none' }}
+                      className={`group flex items-center gap-4 rounded-xl px-4 py-2.5 cursor-pointer transition-colors ${isCurrentTrack
+                        ? 'bg-[#D80F1D] text-white'
                         : 'hover:bg-white/10'
-                    }`}
-                    {...(isReorderable ? { ...attributes, ...listeners } : {})}
-                  >
+                        }`}
+                      {...(isReorderable ? { ...attributes, ...listeners } : {})}
+                    >
 
-            {showStar && (
-              <div className="w-6 flex-shrink-0 flex justify-center text-[#FF2D55]">
-                <Star size={12} fill="currentColor" />
-              </div>
-            )}
-            
-            <div className="flex-1 min-w-0 flex items-center gap-3">
-              <div className="relative h-10 w-10 flex-shrink-0 rounded bg-white/10 overflow-hidden shadow-sm">
-                {getBestImageUrl(song.image) ? (
-                  <Image
-                    src={getBestImageUrl(song.image)!}
-                    alt={song.name}
-                    fill
-                    sizes="40px"
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-primary/40 to-void" />
-                )}
-                
-                {isCurrentTrack && (
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                    <EqualizerIcon isPlaying={isPlaying} />
-                  </div>
-                )}
-              </div>
-              <span className="truncate text-sm font-medium text-white">
-                {song.name}
-              </span>
-            </div>
-            
-            <div className={`hidden md:block w-1/4 min-w-0 truncate text-sm transition-colors ${isCurrentTrack ? 'text-white' : 'text-white/70'}`}>
-              {song.artists.primary.map((a, i) => (
-                <span key={a.id}>
-                  <Link
-                    href={`/artist/${a.id}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="hover:underline hover:text-white transition-colors"
-                  >
-                    {a.name}
-                  </Link>
-                  {i < song.artists.primary.length - 1 && ', '}
-                </span>
-              ))}
-            </div>
+                      {showHeart && (
+                        <div className={`w-6 flex-shrink-0 flex justify-center ${isCurrentTrack ? 'text-white' : 'text-[#FA243C]'}`}>
+                          <Heart size={12} fill="currentColor" />
+                        </div>
+                      )}
 
-            {showAlbum && (
-              <div className={`hidden md:block w-1/4 min-w-0 truncate text-sm transition-colors ${isCurrentTrack ? 'text-white' : 'text-white/70'}`}>
-                {song.album.id ? (
-                  <Link
-                    href={`/album/${song.album.id}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="hover:underline hover:text-white transition-colors"
-                  >
-                    {song.album.name}
-                  </Link>
-                ) : (
-                  song.album.name
-                )}
-              </div>
-            )}
-            
-            <div className={`w-12 md:w-16 flex-shrink-0 text-right text-xs ${isCurrentTrack ? 'text-white' : 'text-white/50 group-hover:text-white/70'}`}>
-              {Math.floor(song.duration / 60)}:{(song.duration % 60).toString().padStart(2, '0')}
-            </div>
+                      <div className="flex-1 min-w-0 flex items-center gap-3">
+                        <div className="relative h-10 w-10 flex-shrink-0 rounded bg-white/10 overflow-hidden shadow-sm">
+                          {getBestImageUrl(song.image) ? (
+                            <Image
+                              src={getBestImageUrl(song.image)!}
+                              alt={song.name}
+                              fill
+                              sizes="40px"
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-primary/40 to-void" />
+                          )}
 
-            {renderTrackOptions && (
-              <div className="w-8 flex-shrink-0 relative flex items-center justify-center">
-                <button 
-                  className={`transition-all hover:text-white md:opacity-0 md:group-hover:opacity-100 ${activeMenuId === song.id ? '!opacity-100 text-white' : 'opacity-100 text-white/50'}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveMenuId(activeMenuId === song.id ? null : song.id);
-                  }}
-                >
-                  <MoreHorizontal size={18} />
-                </button>
+                          {isCurrentTrack && (
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                              <EqualizerIcon isPlaying={isPlaying} color="red" />
+                            </div>
+                          )}
+                        </div>
+                        <span className="truncate text-sm font-medium text-white">
+                          {song.name}
+                        </span>
+                      </div>
 
-                {activeMenuId === song.id && (
-                  <div 
-                    className="absolute right-0 top-full mt-1 w-56 bg-[#1a1a1a] border border-white/10 rounded-lg shadow-2xl z-50 py-1 flex flex-col"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {renderTrackOptions(song, () => setActiveMenuId(null))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-                )}
-              </SortableTrackItem>
-            )})}
+                      <div className={`hidden md:block w-1/4 min-w-0 truncate text-sm transition-colors ${isCurrentTrack ? 'text-white' : 'text-white/70'} pointer-events-auto relative z-10`}>
+                        {song.artists.primary.map((a, i) => (
+                          <span
+                            key={a.id}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Link
+                              href={`/artist/${a.id}`}
+                              className="hover:underline hover:text-white transition-colors"
+                            >
+                              {a.name}
+                            </Link>
+                            {i < song.artists.primary.length - 1 && ', '}
+                          </span>
+                        ))}
+                      </div>
+
+                      {showAlbum && (
+                        <div
+                          className={`hidden md:block w-1/4 min-w-0 truncate text-sm transition-colors ${isCurrentTrack ? 'text-white' : 'text-white/70'} pointer-events-auto relative z-10`}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {song.album.id ? (
+                            <Link
+                              href={`/album/${song.album.id}`}
+                              className="hover:underline hover:text-white transition-colors"
+                            >
+                              {song.album.name}
+                            </Link>
+                          ) : (
+                            song.album.name
+                          )}
+                        </div>
+                      )}
+
+                      <div className={`w-12 md:w-16 flex-shrink-0 text-right text-xs ${isCurrentTrack ? 'text-white' : 'text-white/50 group-hover:text-white/70'}`}>
+                        {Math.floor(song.duration / 60)}:{(song.duration % 60).toString().padStart(2, '0')}
+                      </div>
+
+                      {renderTrackOptions && (
+                        <div className="w-8 flex-shrink-0 relative flex items-center justify-center">
+                          <button
+                            className={`transition-all hover:text-white md:opacity-0 md:group-hover:opacity-100 ${activeMenuId === song.id ? '!opacity-100 text-white' : 'opacity-100 text-white/50'}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveMenuId(activeMenuId === song.id ? null : song.id);
+                            }}
+                          >
+                            <MoreHorizontal size={18} />
+                          </button>
+
+                          {activeMenuId === song.id && (
+                            <div
+                              className="absolute right-0 top-full mt-1 w-56 bg-[#1a1a1a] border border-white/10 rounded-lg shadow-2xl z-50 py-1 flex flex-col"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              {renderTrackOptions(song, () => setActiveMenuId(null))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </SortableTrackItem>
+              )
+            })}
           </div>
         </SortableContext>
       </DndContext>

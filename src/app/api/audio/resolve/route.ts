@@ -147,6 +147,7 @@ export async function GET(request: NextRequest) {
     // Filter and score results
     const targetTitle = normalizeText(title).trim();
     const targetArtist = normalizeText(artist || '').trim();
+    const targetDuration = parseInt(request.nextUrl.searchParams.get('duration') || '0', 10);
 
     const rankedSongs = searchResults.songs.contents.map((song: any, index: number) => {
       let score = 100 - index * 5;
@@ -165,6 +166,27 @@ export async function GET(request: NextRequest) {
       if (!targetTitle.includes('cover') && songTitle.includes('cover')) score -= 30;
       if (!targetTitle.includes('karaoke') && songTitle.includes('karaoke')) score -= 30;
       if (!targetTitle.includes('remix') && songTitle.includes('remix')) score -= 20;
+
+      // Penalize duration mismatches
+      if (targetDuration > 0) {
+        let songSeconds = 0;
+        if (typeof song.duration?.seconds === 'number') {
+          songSeconds = song.duration.seconds;
+        } else if (song.duration?.text) {
+          const parts = song.duration.text.split(':').map(Number);
+          if (parts.length === 2) songSeconds = parts[0] * 60 + parts[1];
+          else if (parts.length === 3) songSeconds = parts[0] * 3600 + parts[1] * 60 + parts[2];
+        }
+
+        if (songSeconds > 0) {
+          const diff = Math.abs(songSeconds - targetDuration);
+          if (diff > 15) {
+            score -= diff; // Heavy penalty: e.g. 15 mins vs 3 mins -> diff = 720. score -= 720
+          } else {
+            score += 10;
+          }
+        }
+      }
 
       return { song, score };
     }).sort((a, b) => b.score - a.score);

@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Play, Pause, SkipForward, SkipBack, Volume2, Volume, Loader2, Star, MessageSquare, ListMusic } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, Volume2, Volume, Loader2, Heart, MessageSquare, ListMusic } from 'lucide-react';
 import { formatTime } from '@/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -76,7 +76,7 @@ export function GuestMobilePlayer({
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, paddingTop: 2, flexShrink: 0 }}>
           <button onClick={handleToggleLike} disabled={toggleLikeMutation?.isPending} style={{ background: 'none', border: 'none', color: isLiked ? '#FA243C' : 'rgba(255,255,255,0.5)', cursor: 'pointer', padding: 4, display: 'flex' }}>
-            {toggleLikeMutation?.isPending ? <Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} /> : <Star size={24} fill={isLiked ? 'currentColor' : 'none'} />}
+            {toggleLikeMutation?.isPending ? <Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} /> : <Heart size={24} fill={isLiked ? 'currentColor' : 'none'} />}
           </button>
           <MoreMenu {...props} openMenuUpward={true} />
         </div>

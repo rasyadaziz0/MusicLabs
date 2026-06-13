@@ -1,12 +1,14 @@
 import { createClient } from './server';
-import type { UserProfile, FollowCounts } from './social';
+import type { UserProfile, FollowCounts } from '@/types/profile';
 import type { PlaylistRecord } from './music';
+
+const PROFILE_COLUMNS = 'id, username, display_name, bio, avatar_url, banner_url, social_instagram, social_twitter, social_tiktok, is_public, show_now_playing, show_recently_played, lyrics_font_size, romanization_enabled, created_at';
 
 export async function getServerProfileByUsername(username: string): Promise<UserProfile | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, username, display_name, bio, avatar_url, created_at')
+    .select(PROFILE_COLUMNS)
     .eq('username', username)
     .maybeSingle();
 
@@ -21,7 +23,7 @@ export async function getServerUserProfile(userId: string): Promise<UserProfile 
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, username, display_name, bio, avatar_url, created_at')
+    .select(PROFILE_COLUMNS)
     .eq('id', userId)
     .single();
 

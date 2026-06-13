@@ -94,6 +94,7 @@ export default function DesktopPlayerBar({
           duration={duration}
           seek={seek}
           setIsNowPlayingOpen={setIsNowPlayingOpen}
+          isVolumeSliderOpen={isVolumeSliderOpen}
         />
 
         <DesktopExtraControls

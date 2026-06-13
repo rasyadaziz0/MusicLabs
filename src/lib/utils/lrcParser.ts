@@ -11,11 +11,6 @@ export interface LrcLine {
   words?: LrcWord[];
   bgText?: string;
 }
-
-/**
- * Parse an LRC string into timestamped lines.
- * Supports standard `[mm:ss.xx]` tags and optional enhanced word-level `<mm:ss.xx>` tags.
- */
 export function parseLRC(lrc: string): LrcLine[] {
   if (!lrc) return [];
   const lines = lrc.split('\n');
@@ -110,11 +105,6 @@ export function addInstrumentalPlaceholders(
   return result.sort((a, b) => a.time - b.time);
 }
 
-/**
- * Split each LrcLine's text into individual words with estimated timing.
- * Timing is proportional to character count within the line's duration.
- * Call this AFTER addInstrumentalPlaceholders, passing the full sorted lines array.
- */
 export function addWordTimings(lines: LrcLine[]): LrcLine[] {
   if (lines.length === 0) return lines;
 
@@ -140,9 +130,6 @@ export function addWordTimings(lines: LrcLine[]): LrcLine[] {
           ? rawGap * 0.75
           : rawGap * 0.6;
 
-    // 2. Character-based heuristic: ensure there's enough time to read/sing the characters.
-    // Allow up to 0.6 seconds per "weight" (giving slow songs enough time to finish their sweep),
-    // but never exceed 95% of the raw gap to avoid overlapping the next line.
     const weightBasedDuration = Math.min(totalWeight * 0.6, rawGap * 0.95);
 
     // Take the larger of the two estimates, but enforce absolute limits (min 2s, max 14s).
@@ -167,15 +154,8 @@ export function addWordTimings(lines: LrcLine[]): LrcLine[] {
   });
 }
 
-/**
- * Split text into words, handling both space-separated languages and CJK characters.
- * CJK characters are treated as individual "words" for per-character animation.
- */
 function splitTextIntoWords(text: string): string[] {
-  // Regex to identify CJK character blocks vs space-separated words
-  // CJK: \u3000-\u9FFF, \uAC00-\uD7AF (Korean), \uF900-\uFAFF
   const tokens: string[] = [];
-  // Split on word boundaries, keeping CJK as individual characters
   const segments = text.match(/[\u3000-\u9FFF\uAC00-\uD7AF\uF900-\uFAFF]|[^\s\u3000-\u9FFF\uAC00-\uD7AF\uF900-\uFAFF]+|\s+/g);
 
   if (!segments) return [text];

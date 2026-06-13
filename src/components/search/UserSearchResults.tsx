@@ -1,7 +1,7 @@
 'use client';
 
 import UserCard from '@/components/ui/UserCard';
-import { UserProfile } from '@/lib/supabase/social';
+import { UserProfile } from '@/types/profile';
 
 interface UserSearchResultsProps {
   isUsersLoading: boolean;

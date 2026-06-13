@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { Sparkles } from 'lucide-react';
+import { ScrollArrows } from '@/components/ui/ScrollArrows';
 import { User } from '@supabase/supabase-js';
+import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 
 interface MobileStationsSectionProps {
   user: User | null;
@@ -8,14 +10,23 @@ interface MobileStationsSectionProps {
 }
 
 export function MobileStationsSection({ user, discoverPlaylistId }: MobileStationsSectionProps) {
+  const { scrollRef, canScrollLeft, canScrollRight, scroll } = useHorizontalScroll();
+
   if (!user) return null;
 
   return (
     <section className="px-2 pt-4 md:hidden">
-      <div className="flex items-center gap-1 mb-4">
+      <div className="flex items-center justify-between mb-4">
         <h2 className="text-[20px] font-bold text-white">Made For You</h2>
       </div>
-      <div className="flex overflow-x-auto gap-4 pb-2 scrollbar-hide -mx-4 px-4">
+      <div className="relative group/section">
+        <ScrollArrows 
+          canScrollLeft={canScrollLeft} 
+          canScrollRight={canScrollRight} 
+          onScrollLeft={() => scroll('left')} 
+          onScrollRight={() => scroll('right')} 
+        />
+      <div ref={scrollRef} className="flex overflow-x-auto gap-4 pb-2 scrollbar-hide -mx-4 px-4" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
         {/* Made For You Card */}
         <Link href="/made-for-you" className="group flex-shrink-0 w-[160px] text-left">
           <div className="relative aspect-square rounded-[12px] overflow-hidden mb-3 border border-white/10 shadow-lg">
@@ -102,6 +113,7 @@ export function MobileStationsSection({ user, discoverPlaylistId }: MobileStatio
             <p className="text-muted text-[13px] line-clamp-1 mt-0.5">Butuh history lagu</p>
           </div>
         )}
+      </div>
       </div>
     </section>
   );

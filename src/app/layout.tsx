@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { PlayerProvider } from "@/context/PlayerContext";
 import { ArtworkColorsProvider } from "@/context/ArtworkColorsContext";
+import { LanguageProvider } from "@/context/LanguageContext";
 import QueryProvider from "@/context/QueryProvider";
 import PWARegistration from "@/components/PWARegistration";
 import YouTubePlayerMount from "@/components/YouTubePlayerMount";
@@ -55,18 +56,20 @@ export default function RootLayout({
       lang="en"
       className={`${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable} h-full antialiased dark`}
     >
-      <body className="min-h-full bg-void text-white selection:bg-primary/30" suppressHydrationWarning>
+      <body className="min-h-full bg-void text-white selection:bg-primary/30 select-none overflow-x-hidden" suppressHydrationWarning>
         <LiquidGlassFilters />
         <PWARegistration />
         <QueryProvider>
-          <AuthProvider>
-            <PlayerProvider>
-              <ArtworkColorsProvider>
-                {children}
-                <YouTubePlayerMount />
-              </ArtworkColorsProvider>
-            </PlayerProvider>
-          </AuthProvider>
+          <LanguageProvider>
+            <AuthProvider>
+              <PlayerProvider>
+                <ArtworkColorsProvider>
+                  {children}
+                  <YouTubePlayerMount />
+                </ArtworkColorsProvider>
+              </PlayerProvider>
+            </AuthProvider>
+          </LanguageProvider>
         </QueryProvider>
         <Analytics />
         <Toaster 

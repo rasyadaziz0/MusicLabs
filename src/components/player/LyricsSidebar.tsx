@@ -10,7 +10,7 @@ import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { LyricStyleManager } from './lyrics/LyricStyleManager';
 import { SidebarKaraokeWord } from './lyrics/SidebarKaraokeWord';
-import { LiquidGlassCard } from '@/components/ui/LiquidGlass';
+import { GlassBar } from '@/components/ui/LiquidGlass';
 import './lyrics/sidebar.css';
 
 interface LyricsSidebarProps {
@@ -52,17 +52,11 @@ export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
             overflow: 'hidden',
           }}
         >
-          {/* Dark Overlay for Text Readability */}
-          <div className="absolute inset-0 bg-black/45" />
-
-          <LiquidGlassCard
-            glowIntensity="none"
-            shadowIntensity="none"
-            blurIntensity="xl"
-            borderRadius="0px"
-            className="absolute inset-0 w-full h-full flex flex-col"
-            draggable={false}
+          <GlassBar
+            className="absolute inset-0 w-full h-full border-none"
+            style={{ backgroundColor: 'rgba(32, 32, 33, 0.5)', borderRadius: '0px', boxShadow: 'none' }}
           >
+            <div className="flex flex-col h-full w-full relative">
             {/* Top fade */}
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '80px', background: 'linear-gradient(to bottom, rgba(14,14,16,0.7) 0%, transparent 100%)', zIndex: 3, pointerEvents: 'none' }} />
 
@@ -135,8 +129,9 @@ export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
                   <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.3)', margin: 0 }}>No lyrics available</p>
                 </div>
               )}
+              </div>
             </div>
-          </LiquidGlassCard>
+          </GlassBar>
         </motion.div>
       )}
     </AnimatePresence>
