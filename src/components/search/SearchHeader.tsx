@@ -28,20 +28,20 @@ export function SearchHeader({ inputValue, setInputValue, searchMode, setSearchM
               e.currentTarget.blur();
             }
           }}
-          placeholder={t('search.placeholder_short') || 'Search'}
+          placeholder={t('search input') || 'Search'}
           className="bg-white/[0.08] border border-white/[0.04] rounded-[8px] py-[6px] pl-9 pr-4 w-full text-[13px] focus:outline-none focus:ring-1 focus:ring-white/20 focus:bg-white/[0.12] transition-all text-white placeholder:text-white/50"
         />
       </div>
 
       {/* Toggle Music / Users */}
       <div className="flex bg-white/[0.06] rounded-[6px] p-[2px] border border-white/[0.04]">
-        <button 
+        <button
           onClick={() => setSearchMode('music')}
           className={`px-5 py-1 text-[13px] font-medium rounded-[4px] transition-colors ${searchMode === 'music' ? 'bg-white/20 text-white shadow-sm' : 'text-white/60 hover:text-white'}`}
         >
           Music
         </button>
-        <button 
+        <button
           onClick={() => setSearchMode('users')}
           className={`px-5 py-1 text-[13px] font-medium rounded-[4px] transition-colors ${searchMode === 'users' ? 'bg-white/20 text-white shadow-sm' : 'text-white/60 hover:text-white'}`}
         >

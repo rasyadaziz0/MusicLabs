@@ -12,6 +12,7 @@ import {
 } from '@/lib/supabase/server-fetches';
 import OtherProfile from '@/components/profile/OtherProfile';
 import MyProfile from '@/components/profile/MyProfile';
+import PrivateProfileView from '@/components/profile/PrivateProfileView';
 
 interface PageProps {
   params: Promise<{ username: string }>;
@@ -67,6 +68,16 @@ export default async function ProfilePage({ params }: PageProps) {
             followingCount: followCounts.following,
           },
         }}
+      />
+    );
+  }
+
+  // ── Private Profile Guard ──
+  if (!targetProfile.is_public) {
+    return (
+      <PrivateProfileView
+        profile={targetProfile}
+        isLoggedIn={Boolean(currentUser)}
       />
     );
   }

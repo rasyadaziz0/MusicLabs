@@ -25,7 +25,7 @@ export function parseLRC(lrc: string): LrcLine[] {
     const matches = [...line.matchAll(timeRegex)];
     if (matches.length === 0) continue;
     const stripped = line.replace(timeRegex, '').replace(/\[[^\]]+\]/g, '').trim();
-    
+
     // Skip Netease metadata / credit lines (so they don't trigger Chinese romanization on Indo/English songs)
     if (/^(作词|作曲|编曲|制作人|混音|母带|企划|吉他|和声|演唱|OP|SP|发行|出品|录音|监制|设计|Vocal)\s*[:：]/.test(stripped)) {
       continue;
@@ -33,7 +33,7 @@ export function parseLRC(lrc: string): LrcLine[] {
 
     const textNoSpaces = stripped.replace(/\s+/g, '');
     const isPlaceholder = stripped.length === 0 || (textNoSpaces.length > 0 && /^[●·.…♪■◼⬛▪]+$/.test(textNoSpaces));
-    let text = isPlaceholder ? '...' : stripped;
+    let text = isPlaceholder ? '●●●' : stripped;
     let bgText: string | undefined;
 
     if (!isPlaceholder) {
@@ -50,12 +50,26 @@ export function parseLRC(lrc: string): LrcLine[] {
       const msStr = match[3].padEnd(3, '0');
       const ms = parseInt(msStr);
       const shiftedTime = minutes * 60 + seconds + ms / 1000 + offsetMs / 1000;
-      result.push({
-        time: Math.max(0, shiftedTime),
+      const lineTime = Math.max(0, shiftedTime);
+
+      // Build placeholder words so KaraokeLine renders animated circles
+      const entry: LrcLine = {
+        time: lineTime,
         text,
         isPlaceholder,
         bgText,
-      });
+      };
+
+      if (isPlaceholder) {
+        // Dummy words; real durations will be set by addInstrumentalPlaceholders or estimateLineDurations
+        entry.words = [
+          { text: '●', startTime: lineTime, endTime: lineTime + 1 },
+          { text: ' ●', startTime: lineTime + 1, endTime: lineTime + 2 },
+          { text: ' ●', startTime: lineTime + 2, endTime: lineTime + 3 },
+        ];
+      }
+
+      result.push(entry);
     }
   }
   return result.sort((a, b) => a.time - b.time);
@@ -128,55 +142,67 @@ interface InstrumentalOptions {
   gapThresholdSec?: number;
 }
 
+// ── Instrumental placeholder detection ──────────────────────────────
+
+const SEC_PER_CHAR = 1 / 4;   // ~4 char/s singing speed (singing is slower than speaking)
+const MAX_VOCAL = 10;          // max estimated vocal duration per line
+const MIN_VOCAL = 2.5;         // minimum vocal duration — even short lines take ~2.5s to sing
+const INSTR_GAP = 5;           // gap after vocal end > this = instrumental (avoids false positives)
+const INTRO_GAP = 5;
+
+function vocalEnd(line: LrcLine, type: 'yrc' | 'lrc'): number {
+  // YRC: use the ACTUAL end time of the last word
+  if (type === 'yrc' && line.words?.length) {
+    return Math.max(...line.words.map(w => w.endTime));
+  }
+  // LRC: estimate from character count, NOT from gap to next line
+  const chars = (line.text || '').replace(/\s+/g, '').length;
+  const est = Math.min(Math.max(chars * SEC_PER_CHAR, MIN_VOCAL), MAX_VOCAL);
+  return line.time + est;
+}
+
+function makeDots(start: number, end: number): LrcLine {
+  const d = end - start;
+  return {
+    time: start, duration: d, text: '●●●', isPlaceholder: true,
+    words: [
+      { text: '●',  startTime: start,            endTime: start + d * 0.33 },
+      { text: ' ●', startTime: start + d * 0.33, endTime: start + d * 0.66 },
+      { text: ' ●', startTime: start + d * 0.66, endTime: start + d },
+    ],
+  };
+}
+
 export function addInstrumentalPlaceholders(
   sourceLines: LrcLine[],
-  options: InstrumentalOptions = {}
+  type: 'yrc' | 'lrc' = 'lrc',
 ): LrcLine[] {
-  if (sourceLines.length === 0) return [];
+  const real = [...sourceLines].filter(l => !l.isPlaceholder).sort((a, b) => a.time - b.time);
+  if (real.length === 0) return sourceLines;
 
-  const introThreshold = options.introThresholdSec ?? 10;
-  const gapThreshold = options.gapThresholdSec ?? 10;
-  const lines = [...sourceLines].sort((a, b) => a.time - b.time);
-  const result: LrcLine[] = [];
+  const out: LrcLine[] = [];
 
-  if (lines[0].time > introThreshold) {
-    result.push({ time: 0, text: '...', isPlaceholder: true });
+  // Intro: no vocals before the first lyric line
+  if (real[0].time > INTRO_GAP) {
+    out.push(makeDots(0.3, real[0].time - 0.4));
   }
 
-  for (let index = 0; index < lines.length; index += 1) {
-    const current = lines[index];
-    const next = lines[index + 1];
-    result.push(current);
+  for (let i = 0; i < real.length; i++) {
+    out.push(real[i]);
+    const next = real[i + 1];
+    if (!next) break;
 
-    if (!next) continue;
+    const end = vocalEnd(real[i], type);
+    const instrumentalGap = next.time - end;   // ← REAL gap after vocal ends
 
-    const rawGap = next.time - current.time;
-    // We already estimated duration for LRC, or exact for YRC.
-    // If not, just fallback logic for placeholders
-    const currentDuration = current.duration || (rawGap < 4 ? rawGap * 0.9 : rawGap < 8 ? rawGap * 0.75 : rawGap * 0.6);
-    const remainingSilence = rawGap - currentDuration;
-
-    if (remainingSilence > gapThreshold) {
-      const placeholderTime = current.time + currentDuration + 1;
-      const placeholderDuration = Math.max(0, next.time - placeholderTime);
-
-      const words: LrcWord[] = [
-        { text: '●', startTime: placeholderTime, endTime: placeholderTime + placeholderDuration * 0.33 },
-        { text: ' ●', startTime: placeholderTime + placeholderDuration * 0.33, endTime: placeholderTime + placeholderDuration * 0.66 },
-        { text: ' ●', startTime: placeholderTime + placeholderDuration * 0.66, endTime: placeholderTime + placeholderDuration },
-      ];
-
-      result.push({
-        time: placeholderTime,
-        duration: placeholderDuration,
-        text: '● ● ●',
-        isPlaceholder: true,
-        words,
-      });
+    if (instrumentalGap > INSTR_GAP) {
+      const start = end + 0.4;
+      const stop = next.time - 0.4;
+      if (stop - start > 1.2) out.push(makeDots(start, stop));
     }
   }
 
-  return result.sort((a, b) => a.time - b.time);
+  return out.sort((a, b) => a.time - b.time);
 }
 
 export function estimateLineDurations(lines: LrcLine[]): LrcLine[] {

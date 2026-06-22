@@ -42,5 +42,8 @@
     "artists": "Artis",
     "albums": "Album",
     "songs": "Lagu"
+  },
+  "profile": {
+    "now_playing": "SEDANG DIPUTAR"
   }
 }

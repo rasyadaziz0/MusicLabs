@@ -45,5 +45,8 @@
     "songs": "曲",
     "music": "音楽",
     "users": "ユーザー"
+  },
+  "profile": {
+    "now_playing": "再生中"
   }
 }

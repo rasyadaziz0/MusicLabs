@@ -201,11 +201,11 @@ export function ProfileHero({
         </button>
 
         {/* Stats row */}
-        <div className="flex items-center gap-3 sm:gap-6 mt-7 w-full justify-center overflow-x-auto scrollbar-hide max-w-full">
+        <div className="flex items-center flex-wrap gap-3 sm:gap-6 mt-7 w-full justify-center max-w-full">
           <StatItem value={stats.playlistCount} label="Playlists" icon={<ListMusic size={15} className="text-[#FA243C]" />} />
-          <div className="w-px h-8 bg-white/10 shrink-0" />
+          <div className="w-px h-8 bg-white/10 shrink-0 hidden sm:block" />
           <StatItem value={stats.likedCount} label="Liked" icon={<Heart size={15} className="text-[#FA243C]" />} />
-          <div className="w-px h-8 bg-white/10 shrink-0" />
+          <div className="w-px h-8 bg-white/10 shrink-0 hidden sm:block" />
           <button
             type="button"
             onClick={() => { setFollowModalTab('followers'); setFollowModalOpen(true); }}
@@ -213,7 +213,7 @@ export function ProfileHero({
           >
             <StatItem value={stats.followerCount} label="Followers" icon={<Users size={15} className="text-[#FA243C]" />} clickable />
           </button>
-          <div className="w-px h-8 bg-white/10 shrink-0" />
+          <div className="w-px h-8 bg-white/10 shrink-0 hidden sm:block" />
           <button
             type="button"
             onClick={() => { setFollowModalTab('following'); setFollowModalOpen(true); }}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { parseLRC, LrcLine, addInstrumentalPlaceholders, parseYRC } from '@/lib/utils/lrcParser';
+import { parseLRC, LrcLine, addInstrumentalPlaceholders, parseYRC, estimateLineDurations } from '@/lib/utils/lrcParser';
 import { Song } from '@/types/music';
 
 // ── In-memory cache & dedup ──────────────────────────────────────
@@ -96,18 +96,21 @@ export function useLyrics(currentTrack: Song | null, actualDuration: number = 0)
 
             if (!res || !res.ok) return null;
 
-            const data: { lyrics?: string; synced?: boolean; type?: string } = await res.json();
+            const data: { lyrics?: string; synced?: boolean; type?: string; source?: string } = await res.json();
 
             if (data.lyrics) {
               if (data.synced) {
                 let parsedLines: LrcLine[];
                 if (data.type === 'yrc') {
+                  // Netease YRC: true word-level karaoke (real per-word timestamps)
                   parsedLines = parseYRC(data.lyrics);
                 } else {
+                  // All LRC sources (Netease, LRClib): line-by-line sync only
+                  // No estimated karaoke — estimated word timings are inaccurate
                   parsedLines = parseLRC(data.lyrics);
-                  // parsedLines = estimateLineDurations(parsedLines); // Disabled karaoke for normal LRC
                 }
-                const withPlaceholders = addInstrumentalPlaceholders(parsedLines);
+                const lyricsType = (data.type === 'yrc' ? 'yrc' : 'lrc') as 'yrc' | 'lrc';
+                const withPlaceholders = addInstrumentalPlaceholders(parsedLines, lyricsType);
                 return { lines: withPlaceholders, isSynced: true };
               } else {
                 const splitLines = data.lyrics.split('\n').map((text, i) => ({

@@ -6,6 +6,7 @@ import { RadioMeta } from '@/lib/player/engines/RadioEngine';
 import { PlayerController, PlayerState, INITIAL_STATE } from '@/lib/player/PlayerController';
 import { useAuth } from './AuthContext';
 import { useMediaSession } from '@/hooks/useMediaSession';
+import { usePresenceBroadcast } from '@/hooks/usePresenceBroadcast';
 
 // ─── Context type (unchanged — no consumer changes needed) ───
 
@@ -83,6 +84,9 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     controllerRef.current?.syncIsPlaying(state.isPlaying);
   }, [state.isPlaying]);
+
+  // ── Broadcast "Now Playing" presence to Supabase ──
+  usePresenceBroadcast(state.currentTrack, state.isPlaying);
 
   // ── Stable callbacks (delegate to controller) ──
 

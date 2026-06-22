@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { useSettings } from '@/context/SettingsContext';
 import { useTranslation } from '@/context/LanguageContext';
 
 import { ChevronLeft, Loader2, Save } from 'lucide-react';
@@ -21,15 +22,16 @@ import { AccountSettings } from '@/components/settings/AccountSettings';
 export default function SettingsPage() {
   const router = useRouter();
   const { user, updateProfile, signOut, loading } = useAuth();
+  const { settings, updateSettings } = useSettings();
   const { t, locale, setLocale } = useTranslation();
-  // Privacy settings
-  const [isPublic, setIsPublic] = useState(true);
-  const [showNowPlaying, setShowNowPlaying] = useState(false);
-  const [showRecentlyPlayed, setShowRecentlyPlayed] = useState(true);
+  // Privacy settings — initialize from global settings context
+  const [isPublic, setIsPublic] = useState(settings.isPublic);
+  const [showNowPlaying, setShowNowPlaying] = useState(settings.showNowPlaying);
+  const [showRecentlyPlayed, setShowRecentlyPlayed] = useState(settings.showRecentlyPlayed);
 
   // Lyrics settings
-  const [lyricsFontSize, setLyricsFontSize] = useState('medium');
-  const [romanizationEnabled, setRomanizationEnabled] = useState(false);
+  const [lyricsFontSize, setLyricsFontSize] = useState<string>(settings.lyricsFontSize);
+  const [romanizationEnabled, setRomanizationEnabled] = useState(settings.romanizationEnabled);
 
   // Search Settings
   const [searchRegion, setSearchRegion] = useState('ID');
@@ -93,6 +95,14 @@ export default function SettingsPage() {
       setError(updateError);
       setIsSubmitting(false);
     } else {
+      // Update global settings context so changes take effect immediately
+      updateSettings({
+        isPublic,
+        showNowPlaying,
+        showRecentlyPlayed,
+        lyricsFontSize: lyricsFontSize as 'small' | 'medium' | 'large',
+        romanizationEnabled,
+      });
       toast.success('Profile updated!');
       router.push('/profile');
     }

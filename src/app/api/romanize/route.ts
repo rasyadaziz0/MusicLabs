@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
 
     for (let i = 0; i < lines.length; i++) {
       const text = lines[i].trim();
-      if (!text || text === '...') continue;
+      if (!text || text === '●●●' || text === '...' || /^[●·.…♪]+$/.test(text)) continue;
       if (hasNonLatinChars(text) && !isLikelyIndonesian(text)) {
         indicesToRomanize.push(i);
         textsToRomanize.push(text);

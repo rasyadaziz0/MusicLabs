@@ -7,6 +7,7 @@ import { ChevronLeft } from 'lucide-react';
 import FollowListModal from '@/components/social/FollowListModal';
 import OtherProfileHero from './OtherProfileHero';
 import OtherProfilePlaylists from './OtherProfilePlaylists';
+import NowPlayingCard from './NowPlayingCard';
 import { UserProfile } from '@/types/profile';
 import type { PlaylistRecord } from '@/lib/supabase/music';
 
@@ -86,6 +87,13 @@ export default function OtherProfile({ initialData }: OtherProfileProps) {
           isFollowStatusLoading={false}
           openFollowModal={openFollowModal}
         />
+
+        {/* Now Playing Card — shows if user has enabled show_now_playing */}
+        {profile.show_now_playing && (
+          <div data-animate className="px-5 md:px-8">
+            <NowPlayingCard userId={userId} />
+          </div>
+        )}
 
         {/* Divider */}
         <div className="px-5 md:px-8">

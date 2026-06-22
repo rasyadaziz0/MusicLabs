@@ -29,10 +29,11 @@ export class KaraokeWordAnimator {
   private animate = () => {
     this.isAnimating = true;
 
-    // Extrapolate time for 60fps smoothness between React 250ms ticks
+    // Extrapolate time for 60fps smoothness between React state updates
     const now = performance.now();
     const delta = (now - this.lastSystemTime) / 1000;
-    let renderTime = this.baseTime + delta;
+    // Cap extrapolation to 80ms (~1 frame at 60fps) to avoid running ahead of audio
+    let renderTime = this.baseTime + Math.min(delta, 0.08);
 
     if (this.lastRenderTime !== null) {
       if (renderTime < this.lastRenderTime && (this.lastRenderTime - renderTime) < 1.0) {

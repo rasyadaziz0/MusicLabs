@@ -45,5 +45,8 @@
     "songs": "Titres",
     "music": "Musique",
     "users": "Utilisateurs"
+  },
+  "profile": {
+    "now_playing": "EN LECTURE"
   }
 }

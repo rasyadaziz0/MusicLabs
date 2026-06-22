@@ -42,5 +42,8 @@
     "artists": "Artists",
     "albums": "Albums",
     "songs": "Songs"
+  },
+  "profile": {
+    "now_playing": "NOW PLAYING"
   }
 }

@@ -7,6 +7,8 @@ import { useState, useEffect } from 'react';
 import { LyricsHeader } from './lyrics/LyricsHeader';
 import { LyricLine } from './lyrics/LyricLine';
 import { LyricsSkeleton } from './lyrics/LyricsSkeleton';
+import { LyricStyleManager } from './lyrics/LyricStyleManager';
+import { useSettings } from '@/context/SettingsContext';
 import './LyricsUI.css';
 
 interface LyricsUIProps {
@@ -36,9 +38,13 @@ export default function LyricsUI({
   romanizations,
   trackId,
 }: LyricsUIProps) {
-  const [showRomanization, setShowRomanization] = useState(true);
+  const { settings } = useSettings();
+  const [showRomanization, setShowRomanization] = useState(settings.romanizationEnabled);
   const [isUserScrolling, setIsUserScrolling] = useState(false);
   const hasRomanizations = romanizations && romanizations.size > 0;
+
+  // Sync font size setting to LyricStyleManager
+  LyricStyleManager.setFontSize(settings.lyricsFontSize);
 
   useEffect(() => {
     const el = scrollRef.current;

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Syne, DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { SettingsProvider } from "@/context/SettingsContext";
 import { PlayerProvider } from "@/context/PlayerContext";
 import { ArtworkColorsProvider } from "@/context/ArtworkColorsContext";
 import { LanguageProvider } from "@/context/LanguageContext";
@@ -62,12 +63,14 @@ export default function RootLayout({
         <QueryProvider>
           <LanguageProvider>
             <AuthProvider>
+              <SettingsProvider>
               <PlayerProvider>
                 <ArtworkColorsProvider>
                   {children}
                   <YouTubePlayerMount />
                 </ArtworkColorsProvider>
               </PlayerProvider>
+              </SettingsProvider>
             </AuthProvider>
           </LanguageProvider>
         </QueryProvider>

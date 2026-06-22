@@ -4,6 +4,7 @@ import { usePlayer } from '@/context/PlayerContext';
 import { useLyrics } from '@/hooks/useLyrics';
 import { useLyricsScroll } from '@/hooks/useLyricsScroll';
 import { useRomanization } from '@/hooks/useRomanization';
+import { useSettings } from '@/context/SettingsContext';
 import { Music2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -20,12 +21,16 @@ interface LyricsSidebarProps {
 
 export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
   const { currentTrack, currentTime, seek, duration } = usePlayer();
+  const { settings } = useSettings();
   const trackId = currentTrack?.id ?? null;
   const { lines, isSynced, isLoading } = useLyrics(currentTrack, duration);
   const { activeIndex, scrollRef } = useLyricsScroll({ lines, isSynced, currentTime, trackId });
   const romanizations = useRomanization(lines, trackId);
   const popupRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
+
+  // Sync font size setting
+  LyricStyleManager.setFontSize(settings.lyricsFontSize);
 
   useEffect(() => { setMounted(true); }, []);
 

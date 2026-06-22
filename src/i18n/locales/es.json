@@ -45,5 +45,8 @@
     "songs": "Canciones",
     "music": "Música",
     "users": "Usuarios"
+  },
+  "profile": {
+    "now_playing": "REPRODUCIENDO"
   }
 }
