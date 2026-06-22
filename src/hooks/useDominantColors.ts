@@ -194,21 +194,51 @@ async function extractColors(imageUrl: string): Promise<DominantColors> {
           return;
         }
 
-        // Median-cut into 8 buckets, pick best 4
-        const buckets = medianCut([...pixels], 3); // 2^3 = 8 buckets
+        // Median-cut into 16 buckets (depth 4) to ensure we find accents, not just the background
+        const buckets = medianCut([...pixels], 4); 
         const rawColors = buckets
+          .filter(b => b.length > 0)
           .map(b => ({ color: averageBucket(b), count: b.length }))
           .sort((a, b) => b.count - a.count); // Most populated first
 
-        // Pick 4: boost saturation for vibrancy
-        const selected = rawColors.slice(0, 4).map(c => boostSaturation(c.color, 1.4));
+        // Pick 4 DIVERSE colors. If they are too similar, skip.
+        const diverseColors: { color: RGB; count: number }[] = [];
+        for (const rc of rawColors) {
+          let isDistinct = true;
+          for (const dc of diverseColors) {
+            // Calculate color distance (Euclidean in RGB)
+            const dist = Math.sqrt(
+              Math.pow(rc.color.r - dc.color.r, 2) +
+              Math.pow(rc.color.g - dc.color.g, 2) +
+              Math.pow(rc.color.b - dc.color.b, 2)
+            );
+            // If it's too similar to an already picked color, skip it
+            if (dist < 45) {
+              isDistinct = false;
+              break;
+            }
+          }
+          if (isDistinct || diverseColors.length === 0) {
+            diverseColors.push(rc);
+            if (diverseColors.length >= 4) break;
+          }
+        }
 
-        // Pad if less than 4
+        // If we didn't find 4 distinct colors, just pad with the remaining raw colors
+        for (const rc of rawColors) {
+          if (diverseColors.length >= 4) break;
+          if (!diverseColors.includes(rc)) diverseColors.push(rc);
+        }
+
+        // Boost saturation for vibrancy
+        const selected = diverseColors.slice(0, 4).map(c => boostSaturation(c.color, 1.4));
+
+        // Pad if still less than 4
         while (selected.length < 4) {
           selected.push({ r: 40, g: 30, b: 70 });
         }
 
-        // Calculate overall luminance from raw dominant
+        // Calculate overall luminance from the originally most populated colors (not just the diverse ones)
         const avgLum = rawColors.slice(0, 4).reduce(
           (sum, c) => sum + relativeLuminance(c.color) * c.count, 0
         ) / rawColors.slice(0, 4).reduce((sum, c) => sum + c.count, 0);

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { parseLRC, LrcLine, addInstrumentalPlaceholders, parseYRC, estimateLineDurations } from '@/lib/utils/lrcParser';
+import { parseLRC, LrcLine, addInstrumentalPlaceholders, parseYRC } from '@/lib/utils/lrcParser';
 import { Song } from '@/types/music';
 
 // ── In-memory cache & dedup ──────────────────────────────────────
@@ -75,6 +75,7 @@ export function useLyrics(currentTrack: Song | null, actualDuration: number = 0)
               title: track.name,
               artist: artistName,
               duration: stabilizedDuration.toString(),
+              t: Date.now().toString(),
             });
             if (albumName) {
               params.append('album', albumName);
@@ -104,7 +105,7 @@ export function useLyrics(currentTrack: Song | null, actualDuration: number = 0)
                   parsedLines = parseYRC(data.lyrics);
                 } else {
                   parsedLines = parseLRC(data.lyrics);
-                  parsedLines = estimateLineDurations(parsedLines);
+                  // parsedLines = estimateLineDurations(parsedLines); // Disabled karaoke for normal LRC
                 }
                 const withPlaceholders = addInstrumentalPlaceholders(parsedLines);
                 return { lines: withPlaceholders, isSynced: true };

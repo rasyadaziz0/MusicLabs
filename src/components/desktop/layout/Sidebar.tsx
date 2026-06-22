@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, LayoutGrid, Radio, Clock, Mic, SquareStack, Music, UserSquare, Search, ChevronDown, ChevronRight, Pin, Heart, LogOut, PlusSquare, Sparkles } from 'lucide-react';
+import { Home, LayoutGrid, Radio, Clock, Mic, SquareStack, Music, UserSquare, Search, ChevronDown, ChevronRight, Pin, Heart, LogOut, PlusSquare, Sparkles, AudioLines } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLibraryPlaylists } from '@/hooks/useMusicLibrary';
 import { useDiscoverWeekly } from '@/hooks/useDiscoverWeekly';
@@ -10,8 +10,6 @@ import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/context/LanguageContext';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-
-import IdentifyButton from '../../identify/IdentifyButton';
 import { GlassBar } from '@/components/ui/LiquidGlass';
 
 const navItems = [
@@ -103,7 +101,10 @@ export default function Sidebar() {
               <Radio size={18} className="text-[#FA243C]" />
               <span>{t('sidebar.radio')}</span>
             </Link>
-            <IdentifyButton variant="sidebar" />
+            <Link href="/identify" className={navLinkClass(pathname === '/identify')}>
+              <AudioLines size={18} className="text-[#FA243C]" />
+              <span>Identify Song</span>
+            </Link>
           </div>
 
           {/* Library — only show for logged-in users */}

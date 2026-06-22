@@ -25,6 +25,12 @@ export function parseLRC(lrc: string): LrcLine[] {
     const matches = [...line.matchAll(timeRegex)];
     if (matches.length === 0) continue;
     const stripped = line.replace(timeRegex, '').replace(/\[[^\]]+\]/g, '').trim();
+    
+    // Skip Netease metadata / credit lines (so they don't trigger Chinese romanization on Indo/English songs)
+    if (/^(作词|作曲|编曲|制作人|混音|母带|企划|吉他|和声|演唱|OP|SP|发行|出品|录音|监制|设计|Vocal)\s*[:：]/.test(stripped)) {
+      continue;
+    }
+
     const textNoSpaces = stripped.replace(/\s+/g, '');
     const isPlaceholder = stripped.length === 0 || (textNoSpaces.length > 0 && /^[●·.…♪■◼⬛▪]+$/.test(textNoSpaces));
     let text = isPlaceholder ? '...' : stripped;
@@ -95,6 +101,11 @@ export function parseYRC(yrc: string): LrcLine[] {
     }
 
     if (words.length > 0) {
+      // Skip Netease metadata / credit lines
+      if (/^(作词|作曲|编曲|制作人|混音|母带|企划|吉他|和声|演唱|OP|SP|发行|出品|录音|监制|设计|Vocal)\s*[:：]/.test(fullText.trim())) {
+        continue;
+      }
+
       // Check if the entire line consists of placeholder characters (dots, bullets, squares, etc.)
       const textNoSpaces = fullText.replace(/\s+/g, '');
       const isPlaceholder = textNoSpaces.length > 0 && /^[●·.…♪■◼⬛▪]+$/.test(textNoSpaces);

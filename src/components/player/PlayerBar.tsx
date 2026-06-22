@@ -54,29 +54,7 @@ export default function PlayerBar({ isMobile }: PlayerBarProps) {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [isQueueOpen, setIsQueueOpen] = useState(false);
   const [isLyricsOpen, setIsLyricsOpen] = useState(false);
-  const [sleepRemaining, setSleepRemaining] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-
-  // Sleep Timer Countdown
-  useEffect(() => {
-    if (!sleepTimerEndTime) {
-      setSleepRemaining(null);
-      return;
-    }
-    const updateRemaining = () => {
-      const rem = sleepTimerEndTime - Date.now();
-      if (rem <= 0) {
-        setSleepRemaining(null);
-      } else {
-        const mins = Math.floor(rem / 60000);
-        const secs = Math.floor((rem % 60000) / 1000);
-        setSleepRemaining(`${mins}:${secs.toString().padStart(2, '0')}`);
-      }
-    };
-    updateRemaining();
-    const interval = setInterval(updateRemaining, 1000);
-    return () => clearInterval(interval);
-  }, [sleepTimerEndTime]);
 
   // Automatically close sidebars when Now Playing is opened
   useEffect(() => {
@@ -137,12 +115,7 @@ export default function PlayerBar({ isMobile }: PlayerBarProps) {
         </div>
       )}
 
-      {sleepRemaining && (
-        <div className="fixed bottom-[90px] md:bottom-[80px] right-6 bg-black/80 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.5)] text-xs font-mono text-white z-[100] animate-in slide-in-from-right-4 fade-in duration-300 flex items-center gap-2">
-          <Timer size={14} className="text-[#FA243C]" />
-          <span>{sleepRemaining}</span>
-        </div>
-      )}
+
 
       {isMobile ? (
         <MobilePlayerBar

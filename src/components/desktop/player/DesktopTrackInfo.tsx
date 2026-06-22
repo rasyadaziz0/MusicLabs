@@ -13,6 +13,8 @@ import AddToQueueButton from '@/components/ui/AddToQueueButton';
 import { usePlayer } from '@/context/PlayerContext';
 import { ContextMenu } from '@/components/ui/context-menu/ContextMenu';
 import { ContextMenuItem, ContextMenuDivider } from '@/components/ui/context-menu/ContextMenuItem';
+import { SleepTimerCountdown } from '@/components/player/SleepTimerCountdown';
+
 
 export interface DesktopTrackInfoProps {
   currentTrack: any;
@@ -36,15 +38,7 @@ export default function DesktopTrackInfo({
   const menuRef = React.useRef<HTMLDivElement>(null);
   const [menuPosition, setMenuPosition] = React.useState<{ x: number; y: number } | null>(null);
 
-  React.useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        React_setIsMenuOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+
 
   const handleShare = () => {
     if (!currentTrack?.album?.id) return;
@@ -158,6 +152,7 @@ export default function DesktopTrackInfo({
                 ref={menuRef}
               >
                 <button
+                  onMouseDown={(e) => e.stopPropagation()}
                   onClick={(e) => {
                     if (!hasTrack) return;
                     if (isMenuOpen) {
@@ -208,8 +203,13 @@ export default function DesktopTrackInfo({
                       <ContextMenuDivider />
 
                       <div className="px-3 py-2">
-                        <div className="text-[12px] text-white/50 mb-2 flex items-center gap-1.5">
-                          <Timer size={14} /> Sleep Timer
+                        <div className="text-[12px] text-white/50 mb-2 flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
+                            <Timer size={14} /> Sleep Timer
+                          </div>
+                          {sleepTimerEndTime && (
+                            <SleepTimerCountdown endTime={sleepTimerEndTime} />
+                          )}
                         </div>
                         <div className="flex flex-wrap gap-1.5">
                           {[15, 30, 45, 60].map(mins => (
