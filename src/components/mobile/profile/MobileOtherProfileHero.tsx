@@ -44,19 +44,21 @@ export default function MobileOtherProfileHero({
 
   return (
     <div data-animate className="relative w-[calc(100%+2rem)] -mx-4 -mt-4 pt-4 pb-6 px-5 text-white bg-transparent">
-      {/* Background with blur (Optional overlay, now covers the whole screen) */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden h-[250px] -z-10">
+      {/* Banner Background */}
+      <div className="absolute inset-x-0 top-0 pointer-events-none overflow-hidden h-[220px] -z-10">
         <Image
           src={bannerUrl || avatarUrl || `https://ui-avatars.com/api/?name=${initials}&background=random`}
-          alt="Background"
+          alt="Banner Background"
           fill
-          className="object-cover opacity-20 blur-[40px] scale-110"
+          className={`object-cover ${bannerUrl ? 'opacity-80 blur-0' : 'opacity-55 blur-[15px]'} scale-105 transition-all duration-300`}
+          priority
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#111115]" />
+        {/* Gradient overlay to fade banner into background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-[#111115]/50 to-[#111115]" />
       </div>
 
       {/* Top Navbar */}
-      <div className="flex items-center justify-between mb-0 pt-0">
+      <div className="flex items-center justify-between mb-0 pt-0 relative z-50">
         <button
           onClick={() => {
             if (window.history.length > 2) {

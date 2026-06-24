@@ -126,6 +126,7 @@ export default function MyProfile({ initialData, isMobile }: MyProfileProps) {
           user={user}
           profile={profile ?? initialData.profile}
           stats={stats}
+          handleSignOut={handleSignOut}
           setFollowModalOpen={setFollowModalOpen}
           setFollowModalTab={setFollowModalTab}
         />
@@ -157,7 +158,7 @@ export default function MyProfile({ initialData, isMobile }: MyProfileProps) {
         playTrack={playTrack}
       />
 
-      <AccountSettingsSection handleSignOut={handleSignOut} />
+      {!isMobile && <AccountSettingsSection handleSignOut={handleSignOut} />}
 
       {/* Follow List Modal */}
       <FollowListModal

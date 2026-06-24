@@ -1,10 +1,12 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { gooeyToast as toast } from 'goey-toast';
-import { LogOut, ListMusic, Heart, Users, UserCheck, User, Share2, ArrowLeft, Globe, CheckCircle2, Menu, Bell } from 'lucide-react';
+import { LogOut, ListMusic, Heart, Users, UserCheck, User, Share2, ArrowLeft, Globe, CheckCircle2, Menu, Bell, Settings, Edit3, X, ChevronRight } from 'lucide-react';
 import { UserProfile } from '@/types/profile';
 import { TikTokIcon, InstagramIcon, XIcon } from '@/components/icons/SocialIcons';
 
@@ -31,6 +33,13 @@ export function MobileProfileHero({
   setFollowModalOpen,
 }: ProfileHeroProps) {
   const router = useRouter();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const avatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url?.trim().replace(/^`+|`+$/g, '');
   const bannerUrl = profile?.banner_url;
   const displayName = profile?.display_name || profile?.username || user.user_metadata?.name || user.user_metadata?.full_name || 'User';
@@ -48,19 +57,21 @@ export function MobileProfileHero({
 
   return (
     <div data-animate className="relative w-[calc(100%+2rem)] -mx-4 -mt-4 pt-4 pb-6 px-5 text-white bg-transparent">
-      {/* Background with blur */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden h-[250px] -z-10">
+      {/* Banner Background */}
+      <div className="absolute inset-x-0 top-0 pointer-events-none overflow-hidden h-[220px] -z-10">
         <Image
           src={bannerUrl || avatarUrl || `https://ui-avatars.com/api/?name=${initials}&background=random`}
-          alt="Background"
+          alt="Banner Background"
           fill
-          className="object-cover opacity-20 blur-[40px] scale-110"
+          className={`object-cover ${bannerUrl ? 'opacity-80 blur-0' : 'opacity-55 blur-[15px]'} scale-105 transition-all duration-300`}
+          priority
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#111115]" />
+        {/* Gradient overlay to fade banner into background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-[#111115]/50 to-[#111115]" />
       </div>
 
       {/* Top Navbar */}
-      <div className="flex items-center justify-between mb-0 pt-0">
+      <div className="flex items-center justify-between mb-0 pt-0 relative z-50">
         <button
           onClick={() => {
             if (window.history.length > 2) {
@@ -77,7 +88,10 @@ export function MobileProfileHero({
           <button className="text-white hover:text-white/80 transition-colors">
             <Bell size={24} />
           </button>
-          <button className="text-white hover:text-white/80 transition-colors">
+          <button 
+            onClick={() => setIsSidebarOpen(true)}
+            className="text-white hover:text-white/80 transition-colors"
+          >
             <Menu size={24} />
           </button>
         </div>
@@ -172,6 +186,80 @@ export function MobileProfileHero({
           </a>
         )}
       </div>
+
+      {/* Sidebar Overlay via Portal */}
+      {mounted && createPortal(
+        <div 
+          className={`fixed inset-0 flex justify-end transition-opacity duration-300 ${
+            isSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          }`}
+          style={{ zIndex: 99999 }}
+        >
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+          
+          {/* Sidebar Panel */}
+          <div 
+            className={`relative w-[75%] max-w-[320px] h-full bg-[#111115] border-l border-white/10 flex flex-col transition-transform duration-300 ease-out ${
+              isSidebarOpen ? 'translate-x-0' : 'translate-x-full'
+            }`}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-5 border-b border-white/5">
+              <span className="font-bold text-lg text-white">Menu</span>
+              <button 
+                onClick={() => setIsSidebarOpen(false)}
+                className="p-2 -mr-2 text-white/50 hover:text-white transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto py-2">
+              <Link 
+                href="/profile/edit"
+                onClick={() => setIsSidebarOpen(false)}
+                className="flex items-center gap-4 px-6 py-4 hover:bg-white/5 transition-colors group"
+              >
+                <Edit3 size={22} className="text-white/50 group-hover:text-white transition-colors" />
+                <span className="font-medium text-[16px] text-white/90 group-hover:text-white transition-colors">Edit Profile</span>
+                <ChevronRight size={18} className="ml-auto text-white/20 group-hover:text-white/50 transition-colors" />
+              </Link>
+              
+              <Link 
+                href="/settings"
+                onClick={() => setIsSidebarOpen(false)}
+                className="flex items-center gap-4 px-6 py-4 hover:bg-white/5 transition-colors group"
+              >
+                <Settings size={22} className="text-white/50 group-hover:text-white transition-colors" />
+                <span className="font-medium text-[16px] text-white/90 group-hover:text-white transition-colors">Settings</span>
+                <ChevronRight size={18} className="ml-auto text-white/20 group-hover:text-white/50 transition-colors" />
+              </Link>
+            </div>
+            
+            {/* Footer / Logout */}
+            {handleSignOut && (
+              <div className="p-6 border-t border-white/5">
+                <button 
+                  onClick={() => {
+                    setIsSidebarOpen(false);
+                    handleSignOut();
+                  }}
+                  className="flex items-center justify-center gap-3 w-full px-4 py-3.5 rounded-[12px] bg-white/5 text-[#FA243C] hover:bg-[#FA243C]/10 transition-colors font-semibold text-[15px]"
+                >
+                  <LogOut size={20} />
+                  <span>Log Out</span>
+                </button>
+              </div>
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
 
     </div>
   );

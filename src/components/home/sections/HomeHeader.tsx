@@ -16,7 +16,7 @@ export function HomeHeader({ user, isProfileOpen, setIsProfileOpen, handleSignOu
       <header className="flex items-center justify-between">
         <h1 className="text-[34px] font-bold tracking-tight text-white mb-2">Home</h1>
         {user && (
-          <div className="relative z-50 md:hidden mb-2">
+          <div className="relative z-50 mb-2">
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               className="w-9 h-9 rounded-full overflow-hidden bg-white/10 relative border border-white/10"
