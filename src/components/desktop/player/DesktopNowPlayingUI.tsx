@@ -1,19 +1,19 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X, Play, Pause, SkipForward, SkipBack, Shuffle, Repeat,
-  Volume2, Loader2, Heart
+  Volume2, Loader2, Heart, Ellipsis
 } from 'lucide-react';
 import { getBestImageUrl } from '@/lib/api/musicApi';
 import { formatTime } from '@/lib/utils';
 import LyricsUI from '@/components/player/LyricsUI';
 import GuestGate from '@/components/auth/GuestGate';
+import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { NowPlayingUIProps } from '@/components/player/NowPlayingUI';
-import { MoreMenu } from '@/components/player/NowPlayingUI';
 import { DynamicGradientBackground } from '@/components/player/DynamicGradientBackground';
 
 const css = `
@@ -43,6 +43,8 @@ export default function DesktopNowPlayingUI(props: NowPlayingUIProps) {
     handleToggleLike,
     isGuestGateOpen, guestGateAction, setIsGuestGateOpen,
   } = props;
+
+  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
 
   if (!currentTrack) return null;
   const progress = duration ? (currentTime / duration) * 100 : 0;
@@ -126,7 +128,32 @@ export default function DesktopNowPlayingUI(props: NowPlayingUIProps) {
                     <button onClick={handleToggleLike} disabled={toggleLikeMutation.isPending} style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: 'none', color: isLiked ? '#fa233b' : '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }} onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'} onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}>
                       {toggleLikeMutation.isPending ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Heart size={16} fill={isLiked ? 'currentColor' : 'none'} strokeWidth={isLiked ? 0 : 2} />}
                     </button>
-                    <MoreMenu {...props} />
+                    <div ref={props.moreMenuRef}>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (!props.isMoreMenuOpen) {
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            setMenuPosition({ x: rect.right - 224, y: rect.bottom + 8 });
+                            props.setIsMoreMenuOpen(true);
+                          } else {
+                            props.setIsMoreMenuOpen(false);
+                          }
+                        }} 
+                        style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }} onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.2)'} onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                      >
+                        <Ellipsis size={18} />
+                      </button>
+                      {props.isMoreMenuOpen && (
+                        <TrackContextMenu
+                          track={currentTrack}
+                          isOpen={props.isMoreMenuOpen}
+                          position={menuPosition}
+                          onClose={() => props.setIsMoreMenuOpen(false)}
+                          showPlayerControls={true}
+                        />
+                      )}
+                    </div>
                   </div>
                 </div>
 

@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 import { useAddTrackToPlaylist, useLibraryPlaylists } from '@/hooks/useMusicLibrary';
 import { ContextMenuItem } from './context-menu/ContextMenuItem';
+import { gooeyToast as toast } from 'goey-toast';
 
 interface AddToPlaylistButtonProps {
   track: Song;
@@ -57,12 +58,19 @@ export default function AddToPlaylistButton({ track, className, asMenuItem = fal
     setIsOpen((open) => !open);
   };
 
-  const handleAdd = async (playlistId: string) => {
+  const handleAdd = async (playlistId: string, playlistName: string) => {
     setSelectedPlaylistId(playlistId);
     addMutation.mutate(
       { playlistId, trackId: track.id },
       {
-        onSuccess: () => {
+        onSuccess: (status) => {
+          if (status === 'ALREADY_EXISTS') {
+            toast('Already in Playlist', {
+              description: `This track is already in ${playlistName}.`
+            });
+          } else {
+            toast.success(`Added to ${playlistName}`);
+          }
           setIsOpen(false);
           setTimeout(() => setSelectedPlaylistId(null), 1200);
         },
@@ -122,7 +130,7 @@ export default function AddToPlaylistButton({ track, className, asMenuItem = fal
                   <button
                     key={playlist.id}
                     type="button"
-                    onClick={() => handleAdd(playlist.id)}
+                    onClick={() => handleAdd(playlist.id, playlist.name)}
                     disabled={addMutation.isPending}
                     className="group flex w-full items-center justify-between rounded-lg px-2 py-2 text-left text-[13px] transition-colors hover:bg-white/10 disabled:opacity-60"
                   >

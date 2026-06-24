@@ -171,7 +171,7 @@ export class PlaylistRepository {
     return trackLists.flat();
   }
 
-  async addTrackToPlaylist(playlistId: string, trackId: string): Promise<boolean> {
+  async addTrackToPlaylist(playlistId: string, trackId: string): Promise<'SUCCESS' | 'ALREADY_EXISTS'> {
     const { data: existingRow, error: existingError } = await this.supabase
       .from('playlist_tracks')
       .select('playlist_id')
@@ -180,7 +180,7 @@ export class PlaylistRepository {
       .maybeSingle();
 
     if (existingError) throw existingError;
-    if (existingRow) return false;
+    if (existingRow) return 'ALREADY_EXISTS';
 
     const { data: lastRow, error: positionError } = await this.supabase
       .from('playlist_tracks')
@@ -199,7 +199,7 @@ export class PlaylistRepository {
     });
 
     if (error) throw error;
-    return true;
+    return 'SUCCESS';
   }
 
   async removeTrackFromPlaylist(playlistId: string, trackId: string): Promise<void> {

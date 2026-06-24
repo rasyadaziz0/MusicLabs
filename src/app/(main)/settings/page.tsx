@@ -7,7 +7,7 @@ import { useSettings } from '@/context/SettingsContext';
 import { useTranslation } from '@/context/LanguageContext';
 
 import { ChevronLeft, Loader2, Save } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { gooeyToast as toast } from 'goey-toast';
 import { supabase } from '@/lib/supabase/client';
 import { DeleteAccountModal } from '@/components/profile/DeleteAccountModal';
 import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
@@ -78,7 +78,9 @@ export default function SettingsPage() {
     localStorage.setItem('searchRegion', searchRegion);
 
     if (!user) {
-      toast.success('Settings saved locally!');
+      toast.success('Settings saved locally!', {
+        description: 'Your preferences have been updated on this device.'
+      });
       setIsSubmitting(false);
       return;
     }
@@ -103,7 +105,9 @@ export default function SettingsPage() {
         lyricsFontSize: lyricsFontSize as 'small' | 'medium' | 'large',
         romanizationEnabled,
       });
-      toast.success('Profile updated!');
+      toast.success('Profile updated!', {
+        description: 'Your changes have been saved and synced successfully.'
+      });
       router.push('/profile');
     }
   };
@@ -113,7 +117,9 @@ export default function SettingsPage() {
     setIsClearingHistory(true);
     try {
       await new HistoryRepository(supabase).clearHistory(user.id);
-      toast.success('Listening history cleared!');
+      toast.success('Listening history cleared!', {
+        description: 'Your recent tracks have been removed.'
+      });
     } catch {
       toast.error('Failed to clear history.');
     } finally {

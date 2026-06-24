@@ -9,7 +9,7 @@ import { usePlayer } from '@/context/PlayerContext';
 import { getSong } from '@/lib/api/musicApi';
 import { Song } from '@/types/music';
 import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
-import toast from 'react-hot-toast';
+import { gooeyToast as toast } from 'goey-toast';
 import { useTranslation } from '@/context/LanguageContext';
 
 interface PresenceData {

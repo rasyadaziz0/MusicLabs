@@ -168,7 +168,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json({ error: 'No related songs found via fallback' }, { status: 404 });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Related API error:', error);
     return NextResponse.json({ error: 'Failed to fetch related tracks' }, { status: 500 });
   }

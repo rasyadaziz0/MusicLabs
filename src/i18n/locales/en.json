@@ -39,9 +39,12 @@
   },
   "search": {
     "placeholder": "Search for songs, artists, albums...",
+    "placeholder_short": "Search",
     "artists": "Artists",
     "albums": "Albums",
-    "songs": "Songs"
+    "songs": "Songs",
+    "music": "Music",
+    "users": "Users"
   },
   "profile": {
     "now_playing": "NOW PLAYING"

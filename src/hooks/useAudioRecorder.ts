@@ -130,9 +130,9 @@ export function useAudioRecorder(): UseAudioRecorderReturn {
             }
           }, durationMs);
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Mic Error:', err);
-        const errorDetails = err?.name ? `${err.name}: ${err.message}` : String(err);
+        const errorDetails = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
         const msg = `Gagal akses mic (${errorDetails}). Pastikan mic tidak sedang dipakai aplikasi lain (Zoom/Discord) atau coba restart browser.`;
         setError(msg);
         cleanup();

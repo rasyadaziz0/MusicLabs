@@ -242,8 +242,8 @@ export async function GET(request: NextRequest) {
         },
       }
     );
-  } catch (error: any) {
-    console.error('YouTube search failed:', error.message);
+  } catch (error: unknown) {
+    console.error('YouTube search failed:', error instanceof Error ? error.message : error);
     return NextResponse.json({ error: 'Failed to search YouTube' }, { status: 500 });
   }
 }

@@ -117,14 +117,14 @@ export class RadioEngine {
     const handleFallback = () => {
       if (!hasFallenBack) {
         hasFallenBack = true;
-        console.log('HLS failed. Trying fallback with CORS proxy for URL:', streamUrl);
+        console.debug('HLS failed. Trying fallback with CORS proxy for URL:', streamUrl);
         if (this.hls) {
           this.hls.destroy();
           this.hls = null;
         }
         setupStream(streamUrl, true);
       } else if (streamUrl !== track.url && track.url) {
-        console.log('Trying secondary fallback URL:', track.url);
+        console.debug('Trying secondary fallback URL:', track.url);
         setupStream(track.url, true);
       } else {
         // Fallback exhausted or unavailable

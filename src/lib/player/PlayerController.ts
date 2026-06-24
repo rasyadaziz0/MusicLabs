@@ -1,5 +1,5 @@
 import { Song } from '@/types/music';
-import toast from 'react-hot-toast';
+import { gooeyToast as toast } from 'goey-toast';
 import { YouTubeEngine } from './engines/YouTubeEngine';
 import { Html5Engine } from './engines/Html5Engine';
 import { RadioEngine, RadioMeta } from './engines/RadioEngine';

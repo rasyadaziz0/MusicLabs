@@ -53,12 +53,13 @@ export async function GET(request: Request) {
       try {
         await generateDiscoverWeeklyForUser(supabaseAdmin, profile.id);
         results.successCount++;
-      } catch (err: any) {
-        if (err.message === 'insufficient_history') {
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (msg === 'insufficient_history') {
           results.skippedCount++;
         } else {
           results.failedCount++;
-          results.errors.push({ userId: profile.id, error: err.message });
+          results.errors.push({ userId: profile.id, error: msg });
           console.error(`Discover Weekly generation failed for user ${profile.id}:`, err);
         }
       }
@@ -68,7 +69,7 @@ export async function GET(request: Request) {
       message: 'Discover Weekly generation completed',
       results,
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Discover Weekly cron error:', err);
     return NextResponse.json(
       { error: 'Failed to execute Discover Weekly cron job' },

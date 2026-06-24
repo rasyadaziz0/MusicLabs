@@ -7,7 +7,7 @@ import { useCreatePlaylist } from '@/hooks/useMusicLibrary';
 import { Music, AlertCircle, Loader2, Upload } from 'lucide-react';
 import Image from 'next/image';
 import { uploadImage } from '@/lib/utils/uploadImage';
-import toast from 'react-hot-toast';
+import { gooeyToast as toast } from 'goey-toast';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
 
 export default function CreatePlaylistPage() {
@@ -34,9 +34,9 @@ export default function CreatePlaylistPage() {
       const url = await uploadImage(file, 'playlists');
       setForm((current) => ({ ...current, coverUrl: url }));
       toast.success('Cover uploaded successfully!');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
-      toast.error(error.message || 'Failed to upload cover');
+      toast.error(error instanceof Error ? error.message : 'Failed to upload cover');
     } finally {
       setIsUploadingCover(false);
     }

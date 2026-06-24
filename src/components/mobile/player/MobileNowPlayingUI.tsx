@@ -21,6 +21,7 @@ export default function MobileNowPlayingUI(props: NowPlayingUIProps) {
     isLyricsOpen, setIsLyricsOpen, mobileLyricsScrollRef,
     handleToggleLike,
     isGuestGateOpen, guestGateAction, setIsGuestGateOpen,
+    isShuffled, repeatMode, toggleShuffle, cycleRepeatMode,
   } = props;
 
   const dragControls = useDragControls();
@@ -100,7 +101,6 @@ export default function MobileNowPlayingUI(props: NowPlayingUIProps) {
                 seek={seek}
                 currentTime={currentTime}
                 romanizations={props.romanizations}
-                nowPlayingProps={props}
                 trackId={props.trackId ?? null}
               />
             ) : (
@@ -115,7 +115,6 @@ export default function MobileNowPlayingUI(props: NowPlayingUIProps) {
                   toggleLikeMutation={toggleLikeMutation}
                   handleToggleLike={handleToggleLike}
                   onClose={onClose}
-                  nowPlayingProps={props}
                 />
               </div>
             )}
@@ -137,6 +136,10 @@ export default function MobileNowPlayingUI(props: NowPlayingUIProps) {
               isLyricsOpen={isLyricsOpen}
               setIsLyricsOpen={setIsLyricsOpen}
               linesLength={lines.length}
+              isShuffled={isShuffled}
+              repeatMode={repeatMode}
+              toggleShuffle={toggleShuffle}
+              cycleRepeatMode={cycleRepeatMode}
             />
 
           </div>

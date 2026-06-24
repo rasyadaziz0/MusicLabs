@@ -8,10 +8,10 @@ export default function PWARegistration() {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js').then(
           (registration) => {
-            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            console.debug('ServiceWorker registration successful with scope: ', registration.scope);
           },
           (err) => {
-            console.log('ServiceWorker registration failed: ', err);
+            console.warn('ServiceWorker registration failed: ', err);
           }
         );
       });

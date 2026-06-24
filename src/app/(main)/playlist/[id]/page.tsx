@@ -7,7 +7,7 @@ import { usePlaylistTracks, useRemoveTrackFromPlaylist, useTogglePinPlaylist, us
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
 import { UserProfile } from '@/types/profile';
-import toast from 'react-hot-toast';
+import { gooeyToast as toast } from 'goey-toast';
 import { Plus, Trash2, Pin, MoreHorizontal, Share, Edit2, UserPlus, Upload, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';

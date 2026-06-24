@@ -86,8 +86,8 @@ export function useRomanization(
               signal: controller.signal,
             });
             if (res.ok) break;
-          } catch (e: any) {
-            if (e.name === 'AbortError') throw e;
+          } catch (e: unknown) {
+            if (e instanceof DOMException && e.name === 'AbortError') throw e;
           }
           attempt++;
           if (attempt < 3) await new Promise(r => setTimeout(r, 1000 * attempt));

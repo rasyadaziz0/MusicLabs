@@ -30,6 +30,10 @@ export function useNowPlaying(isOpen: boolean) {
     addToQueue,
     isRadio,
     radioMeta,
+    isShuffled,
+    repeatMode,
+    toggleShuffle,
+    cycleRepeatMode,
   } = usePlayer();
 
   const trackId = currentTrack?.id ?? null;
@@ -179,6 +183,10 @@ export function useNowPlaying(isOpen: boolean) {
     seek,
     setVolume,
     addToQueue,
+    isShuffled,
+    repeatMode,
+    toggleShuffle,
+    cycleRepeatMode,
     lines,
     isSynced,
     romanizations,

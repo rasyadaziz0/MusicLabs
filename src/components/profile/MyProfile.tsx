@@ -19,6 +19,7 @@ import type { Song } from '@/types/music';
 
 // Imported Sections
 import { ProfileHero } from './sections/ProfileHero';
+import { MobileProfileHero } from '@/components/mobile/profile/MobileProfileHero';
 import { RecentlyPlayedSection } from './sections/RecentlyPlayedSection';
 import { PlaylistsSection } from './sections/PlaylistsSection';
 import { FavoriteSongsSection } from './sections/FavoriteSongsSection';
@@ -41,9 +42,10 @@ export interface MyProfileInitialData {
 
 interface MyProfileProps {
   initialData: MyProfileInitialData;
+  isMobile?: boolean;
 }
 
-export default function MyProfile({ initialData }: MyProfileProps) {
+export default function MyProfile({ initialData, isMobile }: MyProfileProps) {
   const router = useRouter();
   const { user, signOut, loading: authLoading } = useAuth();
   const { playTrack } = usePlayer();
@@ -119,14 +121,24 @@ export default function MyProfile({ initialData }: MyProfileProps) {
 
   return (
     <div ref={containerRef} className="pb-32 pt-2 max-w-[1400px] mx-auto">
-      <ProfileHero
-        user={user}
-        profile={profile ?? initialData.profile}
-        stats={stats}
-        handleSignOut={handleSignOut}
-        setFollowModalOpen={setFollowModalOpen}
-        setFollowModalTab={setFollowModalTab}
-      />
+      {isMobile ? (
+        <MobileProfileHero
+          user={user}
+          profile={profile ?? initialData.profile}
+          stats={stats}
+          setFollowModalOpen={setFollowModalOpen}
+          setFollowModalTab={setFollowModalTab}
+        />
+      ) : (
+        <ProfileHero
+          user={user}
+          profile={profile ?? initialData.profile}
+          stats={stats}
+          handleSignOut={handleSignOut}
+          setFollowModalOpen={setFollowModalOpen}
+          setFollowModalTab={setFollowModalTab}
+        />
+      )}
 
       {/* Divider */}
       <div className="px-5 md:px-8">

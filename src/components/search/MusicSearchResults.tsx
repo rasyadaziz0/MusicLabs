@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { Search as SearchIcon, Share, Link2, ChevronRight, Play, MoreHorizontal } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { gooeyToast as toast } from 'goey-toast';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';

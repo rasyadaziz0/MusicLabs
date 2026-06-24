@@ -5,14 +5,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { getBestImageUrl } from '@/lib/api/musicApi';
-import toast from 'react-hot-toast';
+import { gooeyToast as toast } from 'goey-toast';
 import { MoreHorizontal, Share, Link2, Timer } from 'lucide-react';
 import TrackLikeButton from '@/components/ui/TrackLikeButton';
+import { formatTime } from '@/lib/utils';
+import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
 import AddToPlaylistButton from '@/components/ui/AddToPlaylistButton';
 import AddToQueueButton from '@/components/ui/AddToQueueButton';
 import { usePlayer } from '@/context/PlayerContext';
-import { ContextMenu } from '@/components/ui/context-menu/ContextMenu';
-import { ContextMenuItem, ContextMenuDivider } from '@/components/ui/context-menu/ContextMenuItem';
 import { SleepTimerCountdown } from '@/components/player/SleepTimerCountdown';
 
 
@@ -43,14 +43,18 @@ export default function DesktopTrackInfo({
   const handleShare = () => {
     if (!currentTrack?.album?.id) return;
     navigator.clipboard.writeText(`${window.location.origin}/album/${currentTrack.album.id}`);
-    toast.success('Album link copied to clipboard!');
+    toast.success('Album link copied to clipboard!', {
+      description: 'You can now share this album anywhere.'
+    });
     React_setIsMenuOpen(false);
   };
 
   const handleCopyLink = () => {
     if (!currentTrack) return;
     navigator.clipboard.writeText(`${window.location.origin}/search?q=${encodeURIComponent(currentTrack.name)}`);
-    toast.success('Song search link copied!');
+    toast.success('Song search link copied!', {
+      description: 'You can now share this track anywhere.'
+    });
     React_setIsMenuOpen(false);
   };
 
@@ -169,77 +173,16 @@ export default function DesktopTrackInfo({
                   <MoreHorizontal size={18} strokeWidth={2.5} />
                 </button>
 
-                <ContextMenu
+                <TrackContextMenu
+                  track={currentTrack}
                   isOpen={isMenuOpen}
+                  position={menuPosition}
                   onClose={() => {
                     React_setIsMenuOpen(false);
                     setMenuPosition(null);
                   }}
-                  position={menuPosition}
-                  className="w-56 py-1.5"
-                >
-                  {currentTrack && (
-                    <>
-                      <AddToPlaylistButton track={currentTrack} asMenuItem />
-                      <AddToQueueButton track={currentTrack} showText />
-                      
-                      <ContextMenuDivider />
-                      
-                      <TrackLikeButton track={currentTrack} asMenuItem />
-                      
-                      <ContextMenuDivider />
-                      
-                      <ContextMenuItem
-                        icon={<Share size={15} />}
-                        label="Share"
-                        onClick={handleShare}
-                      />
-                      <ContextMenuItem
-                        icon={<Link2 size={15} />}
-                        label="Copy Link"
-                        onClick={handleCopyLink}
-                      />
-
-                      <ContextMenuDivider />
-
-                      <div className="px-3 py-2">
-                        <div className="text-[12px] text-white/50 mb-2 flex items-center justify-between">
-                          <div className="flex items-center gap-1.5">
-                            <Timer size={14} /> Sleep Timer
-                          </div>
-                          {sleepTimerEndTime && (
-                            <SleepTimerCountdown endTime={sleepTimerEndTime} />
-                          )}
-                        </div>
-                        <div className="flex flex-wrap gap-1.5">
-                          {[15, 30, 45, 60].map(mins => (
-                            <button
-                              key={mins}
-                              onClick={() => {
-                                setSleepTimer(mins);
-                                React_setIsMenuOpen(false);
-                              }}
-                              className="flex-1 text-[11px] bg-white/10 hover:bg-white/20 text-white px-1 py-1 rounded transition-colors text-center"
-                            >
-                              {mins}m
-                            </button>
-                          ))}
-                          {sleepTimerEndTime && (
-                            <button
-                              onClick={() => {
-                                clearSleepTimer();
-                                React_setIsMenuOpen(false);
-                              }}
-                              className="w-full mt-1.5 text-[11px] bg-[#FA243C]/20 hover:bg-[#FA243C]/40 text-[#FA243C] py-1.5 rounded transition-colors"
-                            >
-                              Batalkan Timer
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </ContextMenu>
+                  showPlayerControls={true}
+                />
               </div>
             )}
           </div>

@@ -1,11 +1,12 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Play, Pause, SkipForward, SkipBack, Volume2, Volume, Loader2, Heart, MessageSquare, ListMusic } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, Volume2, Volume, Loader2, Heart, MessageSquare, ListMusic, Ellipsis } from 'lucide-react';
 import { formatTime } from '@/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MoreMenu } from '@/components/player/NowPlayingUI';
+import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
+import { useState, useRef } from 'react';
 
 export function GuestMobilePlayer({
   props,
@@ -24,6 +25,9 @@ export function GuestMobilePlayer({
     seek, setVolume, handleToggleLike, isLiked, toggleLikeMutation,
     isRadio, radioMeta, setIsGuestGateOpen
   } = props;
+
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
 
   return (
     <div style={{ position: 'relative', zIndex: 10, height: '100%', display: 'flex', flexDirection: 'column', padding: 'env(safe-area-inset-top, 12px) 28px env(safe-area-inset-bottom, 24px)', paddingTop: 'max(env(safe-area-inset-top, 12px), 12px)' }}>
@@ -78,7 +82,24 @@ export function GuestMobilePlayer({
           <button onClick={handleToggleLike} disabled={toggleLikeMutation?.isPending} style={{ background: 'none', border: 'none', color: isLiked ? '#FA243C' : 'rgba(255,255,255,0.5)', cursor: 'pointer', padding: 4, display: 'flex' }}>
             {toggleLikeMutation?.isPending ? <Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} /> : <Heart size={24} fill={isLiked ? 'currentColor' : 'none'} />}
           </button>
-          <MoreMenu {...props} openMenuUpward={true} />
+          <div ref={moreMenuRef}>
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMoreMenuOpen(!isMoreMenuOpen);
+              }} 
+              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', padding: 4, display: 'flex' }}
+            >
+              <Ellipsis size={24} />
+            </button>
+            <TrackContextMenu
+              track={currentTrack}
+              isOpen={isMoreMenuOpen}
+              position={null}
+              onClose={() => setIsMoreMenuOpen(false)}
+              showPlayerControls={true}
+            />
+          </div>
         </div>
       </div>
 

@@ -25,8 +25,9 @@
     "@vercel/analytics": "^2.0.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
-    "framer-motion": "^12.38.0",
+    "framer-motion": "^12.41.0",
     "genius-lyrics": "^4.4.7",
+    "goey-toast": "^0.5.0",
     "gsap": "^3.15.0",
     "hls.js": "^1.6.16",
     "icecast-metadata-js": "^1.2.9",
@@ -37,7 +38,7 @@
     "play-dl": "^1.9.7",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "react-hot-toast": "^2.6.0",
+    "react-easy-crop": "^6.0.2",
     "sharp": "^0.35.1",
     "tailwind-merge": "^3.5.0",
     "youtube-ext": "^1.1.25",
@@ -54,7 +55,8 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.9"
   },
   "optionalDependencies": {
     "@img/sharp-linux-x64": "^0.35.1"

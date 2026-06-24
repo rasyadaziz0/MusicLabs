@@ -39,9 +39,12 @@
   },
   "search": {
     "placeholder": "Cari lagu, artis, album...",
+    "placeholder_short": "Cari",
     "artists": "Artis",
     "albums": "Album",
-    "songs": "Lagu"
+    "songs": "Lagu",
+    "music": "Musik",
+    "users": "Pengguna"
   },
   "profile": {
     "now_playing": "SEDANG DIPUTAR"

@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
 import {
   getServerProfileByUsername,
   getServerCurrentUser,
@@ -29,6 +30,12 @@ export default async function ProfilePage({ params }: PageProps) {
 
   const username = decodedUsername.substring(1); // remove the '@'
 
+  // Detect mobile
+  const headersList = await headers();
+  const userAgent = headersList.get('user-agent') || '';
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(userAgent);
+
+
   // Fetch target profile and current user in parallel
   const [targetProfile, currentUser] = await Promise.all([
     getServerProfileByUsername(username),
@@ -54,6 +61,7 @@ export default async function ProfilePage({ params }: PageProps) {
 
     return (
       <MyProfile
+        isMobile={isMobile}
         initialData={{
           userId: currentUser.id,
           profile: targetProfile,
@@ -93,6 +101,7 @@ export default async function ProfilePage({ params }: PageProps) {
 
   return (
     <OtherProfile
+      isMobile={isMobile}
       initialData={{
         userId: targetProfile.id,
         profile: targetProfile,

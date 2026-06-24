@@ -33,7 +33,7 @@ export default function MobilePlayerBar({
 
   return (
     <GlassBar
-      className="md:hidden fixed bottom-[104px] left-4 right-4 h-[60px] rounded-[22px] z-40 cursor-pointer"
+      className="fixed bottom-[104px] left-4 right-4 h-[60px] rounded-[22px] z-40 cursor-pointer"
       onClick={() => setIsNowPlayingOpen(true)}
     >
       <div className="flex items-center w-full h-full px-3 gap-3">

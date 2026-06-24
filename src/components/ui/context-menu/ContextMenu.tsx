@@ -40,8 +40,12 @@ export function ContextMenu({
       if (e.key === 'Escape') onClose();
     };
 
-    const handleScroll = () => {
-      if (!isMobile) onClose();
+    const handleScroll = (e: Event) => {
+      if (isMobile) return;
+      if (menuRef.current && menuRef.current.contains(e.target as Node)) {
+        return;
+      }
+      onClose();
     };
 
     document.addEventListener('mousedown', handleOutsideClick);
@@ -131,7 +135,7 @@ export function ContextMenu({
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.15, ease: "easeOut" }}
-          className={cn("fixed z-[100] w-60 bg-[#1a1a1c] border border-white/10 rounded-xl shadow-2xl overflow-hidden backdrop-blur-xl", className)}
+          className={cn("fixed z-[100] w-60 bg-[#1a1a1c] border border-white/10 rounded-xl shadow-2xl backdrop-blur-xl", className)}
           style={{
             left: position.x,
             top: position.y,

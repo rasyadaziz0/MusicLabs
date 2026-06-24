@@ -6,6 +6,7 @@ import gsap from 'gsap';
 import { ChevronLeft } from 'lucide-react';
 import FollowListModal from '@/components/social/FollowListModal';
 import OtherProfileHero from './OtherProfileHero';
+import MobileOtherProfileHero from '@/components/mobile/profile/MobileOtherProfileHero';
 import OtherProfilePlaylists from './OtherProfilePlaylists';
 import NowPlayingCard from './NowPlayingCard';
 import { UserProfile } from '@/types/profile';
@@ -23,9 +24,10 @@ export interface OtherProfileInitialData {
 
 interface OtherProfileProps {
   initialData: OtherProfileInitialData;
+  isMobile?: boolean;
 }
 
-export default function OtherProfile({ initialData }: OtherProfileProps) {
+export default function OtherProfile({ initialData, isMobile }: OtherProfileProps) {
   const {
     userId,
     profile,
@@ -40,6 +42,8 @@ export default function OtherProfile({ initialData }: OtherProfileProps) {
 
   const [followModalOpen, setFollowModalOpen] = useState(false);
   const [followModalTab, setFollowModalTab] = useState<'followers' | 'following'>('followers');
+  
+  const hasSocials = !!(profile.social_instagram || profile.social_twitter || profile.social_tiktok);
 
   // GSAP entrance animation
   useEffect(() => {
@@ -67,26 +71,40 @@ export default function OtherProfile({ initialData }: OtherProfileProps) {
   return (
     <>
       <div ref={containerRef} className="pb-32 pt-2 max-w-[1400px] mx-auto">
-        {/* ── Back Button ─────────────────────────────────────── */}
-        <div className="px-5 md:px-8 pt-2 mb-2">
-          <button
-            onClick={() => router.back()}
-            className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-colors"
-          >
-            <ChevronLeft size={20} className="text-white" />
-          </button>
-        </div>
+        {/* ── Back Button (Desktop) ─────────────────────────────── */}
+        {!isMobile && (
+          <div className="px-5 md:px-8 pt-2 mb-2 hidden md:block">
+            <button
+              onClick={() => router.back()}
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 transition-colors"
+            >
+              <ChevronLeft size={20} className="text-white" />
+            </button>
+          </div>
+        )}
 
-        <OtherProfileHero
-          userId={userId}
-          profile={profile}
-          followerCount={followerCount}
-          followingCount={followingCount}
-          playlistCount={publicPlaylists.length}
-          isFollowing={isFollowing}
-          isFollowStatusLoading={false}
-          openFollowModal={openFollowModal}
-        />
+        {isMobile ? (
+          <MobileOtherProfileHero
+            userId={profile.id}
+            profile={profile}
+            followerCount={followerCount}
+            followingCount={followingCount}
+            playlistCount={publicPlaylists.length}
+            isFollowing={isFollowing}
+            openFollowModal={openFollowModal}
+          />
+        ) : (
+          <OtherProfileHero
+            userId={userId}
+            profile={profile}
+            followerCount={followerCount}
+            followingCount={followingCount}
+            playlistCount={publicPlaylists.length}
+            isFollowing={isFollowing}
+            isFollowStatusLoading={false}
+            openFollowModal={openFollowModal}
+          />
+        )}
 
         {/* Now Playing Card — shows if user has enabled show_now_playing */}
         {profile.show_now_playing && (

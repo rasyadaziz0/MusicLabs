@@ -2,10 +2,11 @@
 
 import { usePlayer } from '@/context/PlayerContext';
 import { getAlbum } from '@/lib/api/musicApi';
-import toast from 'react-hot-toast';
+import { gooeyToast as toast } from 'goey-toast';
 import { useQuery } from '@tanstack/react-query';
 import { MoreHorizontal, Share } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import TrackLikeButton from '@/components/ui/TrackLikeButton';
@@ -80,7 +81,15 @@ export default function AlbumPage() {
       {/* Hero Section */}
       <AppleMusicHeader
         title={album?.title || 'Unknown Album'}
-        subtitle={album?.artist || 'Unknown Artist'}
+        subtitle={
+          album?.artist_id ? (
+            <Link href={`/artist/${album.artist_id}`} className="hover:underline hover:text-white transition-colors">
+              {album.artist || 'Unknown Artist'}
+            </Link>
+          ) : (
+            album?.artist || 'Unknown Artist'
+          )
+        }
         description={releaseYear ? `Released ${releaseYear} • ${albumTracks.length} Songs` : `${albumTracks.length} Songs`}
         cover={
           coverUrl ? (

@@ -1,9 +1,10 @@
 'use client';
 
 import Image from 'next/image';
-import { Loader2, Heart } from 'lucide-react';
+import { Loader2, Heart, Ellipsis } from 'lucide-react';
 import LyricsUI from '@/components/player/LyricsUI';
-import { MoreMenu } from '@/components/player/NowPlayingUI';
+import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
+import { useState, useRef } from 'react';
 
 interface MobileLyricsModeProps {
   currentTrack: any;
@@ -20,15 +21,16 @@ interface MobileLyricsModeProps {
   seek: (time: number) => void;
   currentTime: number;
   romanizations?: Map<number, string>;
-  nowPlayingProps: any; // The original props from MobileNowPlayingUI to pass to MoreMenu
   trackId: string | null;
 }
 
 export function MobileLyricsMode({
   currentTrack, coverUrl, artistNames, isLiked, toggleLikeMutation, handleToggleLike,
-  lines, activeIndex, isSynced, isLyricsLoading, mobileLyricsScrollRef, seek, currentTime, romanizations,
-  nowPlayingProps, trackId
+  lines, activeIndex, isSynced, isLyricsLoading, mobileLyricsScrollRef, seek, currentTime, romanizations, trackId
 }: MobileLyricsModeProps) {
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
+
   return (
     <>
       {/* Mini header: artwork + info */}
@@ -76,7 +78,27 @@ export function MobileLyricsMode({
               : <Heart size={20} fill={isLiked ? 'currentColor' : 'none'} />
             }
           </button>
-          <MoreMenu {...nowPlayingProps} openMenuUpward={false} />
+          <div ref={moreMenuRef}>
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMoreMenuOpen(!isMoreMenuOpen);
+              }} 
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer', padding: 4,
+                color: 'rgba(255,255,255,0.5)', display: 'flex',
+              }}
+            >
+              <Ellipsis size={20} />
+            </button>
+            <TrackContextMenu
+              track={currentTrack}
+              isOpen={isMoreMenuOpen}
+              position={null}
+              onClose={() => setIsMoreMenuOpen(false)}
+              showPlayerControls={true}
+            />
+          </div>
         </div>
       </div>
 

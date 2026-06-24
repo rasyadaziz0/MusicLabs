@@ -285,3 +285,29 @@ body {
 #main-content-wrapper .overflow-x-auto {
   transition: margin-right 300ms ease-in-out, padding-right 300ms ease-in-out;
 }
+
+/* ── Settings Input (Profile Edit) ────────────────────────────── */
+.settings-input {
+  width: 100%;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: white;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.settings-input:focus {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.settings-input::placeholder {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+/* ── Goey Toast Fixes ─────────────────────────────────────────── */
+.gooey-description {
+  padding-bottom: 12px !important;
+}

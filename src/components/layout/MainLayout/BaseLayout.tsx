@@ -21,13 +21,13 @@ export default function BaseLayout({
       )}
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-        <main className="flex-1 overflow-y-auto overflow-x-hidden pb-36 md:pb-0 relative z-0">
-          <div id="main-content-wrapper" className="p-4 md:py-8 md:pr-8 md:pl-[288px] w-full pb-6 md:pb-8 transition-[padding] duration-300 ease-in-out">
+        <main className={`flex-1 overflow-y-auto overflow-x-hidden relative z-0 ${!isMobile ? 'pb-36 md:pb-0' : 'pb-36'}`}>
+          <div id="main-content-wrapper" className={`p-4 w-full transition-[padding] duration-300 ease-in-out ${!isMobile ? 'md:py-8 md:pr-8 md:pl-[288px] pb-6 md:pb-8' : 'pb-6'}`}>
             {children}
           </div>
         </main>
 
-        <div className="absolute bottom-0 left-0 right-0 z-50 pointer-events-none pb-0 md:pb-6 flex flex-col items-center md:pl-[288px]">
+        <div className={`absolute bottom-0 left-0 right-0 z-50 pointer-events-none flex flex-col items-center ${!isMobile ? 'pb-0 md:pb-6 md:pl-[288px]' : 'pb-0'}`}>
           <div className="pointer-events-auto w-full md:w-max">
             <PlayerBar isMobile={isMobile} />
           </div>

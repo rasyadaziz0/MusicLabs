@@ -112,9 +112,11 @@ export async function getGeminiRecommendations(
       }
 
       return suggestions;
-    } catch (err: any) {
+    } catch (err: unknown) {
       lastError = err;
-      const status = err?.status ?? err?.response?.status ?? 0;
+      const errObj = err as Record<string, unknown>;
+      const resObj = errObj?.response as Record<string, unknown> | undefined;
+      const status = (errObj?.status as number) ?? (resObj?.status as number) ?? 0;
       const isRetryable = status === 503 || status === 429 || status >= 500;
 
       if (!isRetryable || attempt === MAX_RETRIES - 1) {

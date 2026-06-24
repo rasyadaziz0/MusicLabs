@@ -284,8 +284,8 @@ export async function GET(request: NextRequest) {
           fallbackPlainConfidence = syncedLrc.confidence ?? 50;
         }
       }
-    } catch (err: any) {
-      if (err.name === 'TimeoutError') {
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'TimeoutError') {
         console.warn('Netease search timed out (>15s)');
       } else {
         console.error('Netease search failed:', err);
@@ -405,8 +405,8 @@ export async function GET(request: NextRequest) {
           headers: { 'Cache-Control': 'public, max-age=86400, s-maxage=86400' }
         });
       }
-    } catch (err: any) {
-      if (err.name === 'TimeoutError') {
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'TimeoutError') {
         console.warn('lrclib search timed out (>15s)');
       } else {
         console.error('lrclib search failed:', err);
@@ -433,8 +433,8 @@ export async function GET(request: NextRequest) {
           });
         }
       }
-    } catch (err: any) {
-      if (err.name === 'TimeoutError') {
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'TimeoutError') {
         console.warn('lyrics.ovh search timed out (>10s)');
       } else {
         console.error('lyrics.ovh search failed:', err);

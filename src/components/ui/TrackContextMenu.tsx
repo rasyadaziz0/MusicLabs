@@ -2,29 +2,31 @@
 
 import { useState, useEffect } from 'react';
 import { Song } from '@/types/music';
-import { PlaySquare, Heart, ListPlus, Disc3, Mic2, Share, Radio } from 'lucide-react';
+import { PlaySquare, Heart, ListPlus, Disc3, Mic2, Share, Radio, Link2, Timer, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { usePlayer } from '@/context/PlayerContext';
 import Image from 'next/image';
 import { getBestImageUrl } from '@/lib/api/musicApi';
 import { useAuth } from '@/context/AuthContext';
 import { useLikedSongsIndex, useToggleLikedSong } from '@/hooks/useMusicLibrary';
-import toast from 'react-hot-toast';
+import { gooeyToast as toast } from 'goey-toast';
 import { resolveToYoutubeId } from '@/lib/youtube';
 import { PlaylistSubMenu } from './context-menu/PlaylistSubMenu';
 import { ContextMenu } from './context-menu/ContextMenu';
 import { ContextMenuItem, ContextMenuDivider } from './context-menu/ContextMenuItem';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 interface TrackContextMenuProps {
   track: Song | null;
   isOpen: boolean;
   position: { x: number; y: number } | null;
   onClose: () => void;
+  showPlayerControls?: boolean;
 }
 
-export function TrackContextMenu({ track, isOpen, position, onClose }: TrackContextMenuProps) {
+export function TrackContextMenu({ track, isOpen, position, onClose, showPlayerControls }: TrackContextMenuProps) {
   const router = useRouter();
-  const { playNext, addToQueue, playTrack, isAutoplayEnabled, toggleAutoplay } = usePlayer();
+  const { playNext, addToQueue, playTrack, isAutoplayEnabled, toggleAutoplay, setSleepTimer, clearSleepTimer, sleepTimerEndTime } = usePlayer();
   const { user, signInWithGoogle } = useAuth();
 
   // Likes
@@ -68,7 +70,9 @@ export function TrackContextMenu({ track, isOpen, position, onClose }: TrackCont
       }
     } else {
       navigator.clipboard.writeText(window.location.href);
-      toast.success('Link copied to clipboard');
+      toast.success('Link copied to clipboard', {
+        description: 'You can now share this track anywhere.'
+      });
     }
   };
 
@@ -122,8 +126,11 @@ export function TrackContextMenu({ track, isOpen, position, onClose }: TrackCont
   const hasAlbum = !!track.album.id;
   const hasArtist = track.artists.primary.length > 0 && !!track.artists.primary[0].id;
 
+  const isMobile = useIsMobile();
+  const flyOutDirection = position && typeof window !== 'undefined' && position.x > window.innerWidth / 2 ? 'left' : 'right';
+
   const renderMenuItems = () => {
-    if (showPlaylists) {
+    if (showPlaylists && isMobile) {
       return (
         <PlaylistSubMenu 
           track={track} 
@@ -154,11 +161,34 @@ export function TrackContextMenu({ track, isOpen, position, onClose }: TrackCont
           onClick={(e) => { e.stopPropagation(); handleLike(); onClose(); }}
           danger={isLiked}
         />
-        <ContextMenuItem
-          icon={<ListPlus size={15} />}
-          label="Add to a Playlist"
-          onClick={(e) => { e.stopPropagation(); setShowPlaylists(true); }}
-        />
+
+        <div 
+          className="relative"
+          onMouseEnter={() => !isMobile && setShowPlaylists(true)}
+          onMouseLeave={() => !isMobile && setShowPlaylists(false)}
+        >
+          <ContextMenuItem
+            icon={<ListPlus size={15} />}
+            label="Add to a Playlist"
+            onClick={(e) => { e.stopPropagation(); if(isMobile) setShowPlaylists(true); }}
+            rightElement={!isMobile && <ChevronRight size={14} />}
+            className={!isMobile && showPlaylists ? "bg-white/10" : ""}
+          />
+          {!isMobile && showPlaylists && (
+            <div 
+              className={`absolute top-0 ${flyOutDirection === 'left' ? 'right-full mr-1' : 'left-full ml-1'} w-56 bg-[#1a1a1c] border border-white/10 rounded-xl shadow-2xl backdrop-blur-xl`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <PlaylistSubMenu 
+                track={track} 
+                onClose={onClose} 
+                onBack={() => setShowPlaylists(false)} 
+                hideHeader
+              />
+            </div>
+          )}
+        </div>
+
         <ContextMenuItem
           icon={<Radio size={15} />}
           label="Create Station"
@@ -189,6 +219,56 @@ export function TrackContextMenu({ track, isOpen, position, onClose }: TrackCont
           label="Share"
           onClick={() => handleAction(handleShare)}
         />
+        <ContextMenuItem
+          icon={<Link2 size={15} />}
+          label="Copy Link"
+          onClick={() => {
+            navigator.clipboard.writeText(`${window.location.origin}/search?q=${encodeURIComponent(track.name)}`);
+            toast.success('Link copied to clipboard');
+            onClose();
+          }}
+        />
+
+        {showPlayerControls && (
+          <>
+            <ContextMenuDivider />
+            <div className="px-3 py-2">
+              <div className="text-[12px] text-white/50 mb-2 flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <Timer size={14} /> Sleep Timer
+                </div>
+                {sleepTimerEndTime && (
+                  <span className="text-white/80 font-medium">Active</span>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {[15, 30, 45, 60].map(mins => (
+                  <button
+                    key={mins}
+                    onClick={() => {
+                      setSleepTimer(mins);
+                      onClose();
+                    }}
+                    className="flex-1 text-[11px] bg-white/10 hover:bg-white/20 text-white px-1 py-1 rounded transition-colors text-center"
+                  >
+                    {mins}m
+                  </button>
+                ))}
+                {sleepTimerEndTime && (
+                  <button
+                    onClick={() => {
+                      clearSleepTimer();
+                      onClose();
+                    }}
+                    className="w-full mt-1.5 text-[11px] bg-[#FA243C]/20 hover:bg-[#FA243C]/40 text-[#FA243C] py-1.5 rounded transition-colors"
+                  >
+                    Batalkan Timer
+                  </button>
+                )}
+              </div>
+            </div>
+          </>
+        )}
       </div>
     );
   };

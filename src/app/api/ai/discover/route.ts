@@ -32,7 +32,7 @@ export async function POST() {
     // 2. Call the generator with the authenticated server client
     const result = await generateDiscoverWeeklyForUser(supabase, user.id);
     return NextResponse.json(result);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Discover Weekly generation error:', err);
     return NextResponse.json(
       { error: 'Failed to generate Discover Weekly' },
@@ -100,7 +100,7 @@ export async function GET() {
         ready: hasEnoughHistory(uniqueCount),
       },
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('Discover Weekly status error:', err);
     return NextResponse.json(
       { error: 'Failed to check Discover Weekly status' },

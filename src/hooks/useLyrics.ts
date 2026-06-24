@@ -87,7 +87,7 @@ export function useLyrics(currentTrack: Song | null, actualDuration: number = 0)
               try {
                 res = await fetch(`/api/lyrics?${params.toString()}`);
                 if (res.ok || res.status === 404) break;
-              } catch (e: any) {
+              } catch (e: unknown) {
                 // Ignore network errors and retry
               }
               attempt++;

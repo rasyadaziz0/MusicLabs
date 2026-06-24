@@ -1,10 +1,11 @@
 'use client';
 
+import { useState, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Loader2, Heart } from 'lucide-react';
-import { MoreMenu } from '@/components/player/NowPlayingUI';
+import { Loader2, Heart, Ellipsis } from 'lucide-react';
+import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
 
 interface MobileArtworkModeProps {
   currentTrack: any;
@@ -15,12 +16,14 @@ interface MobileArtworkModeProps {
   toggleLikeMutation: any;
   handleToggleLike: (e?: any) => void;
   onClose: () => void;
-  nowPlayingProps: any; // The original props from MobileNowPlayingUI to pass to MoreMenu
 }
 
 export function MobileArtworkMode({
-  currentTrack, coverUrl, isPlaying, isPreview, isLiked, toggleLikeMutation, handleToggleLike, onClose, nowPlayingProps
+  currentTrack, coverUrl, isPlaying, isPreview, isLiked, toggleLikeMutation, handleToggleLike, onClose
 }: MobileArtworkModeProps) {
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
+
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
 
@@ -115,23 +118,35 @@ export function MobileArtworkMode({
         </div>
 
         {/* Like + More */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0, paddingTop: 2 }}>
-          <button
-            onClick={handleToggleLike}
-            disabled={toggleLikeMutation.isPending}
-            style={{
-              background: 'none', border: 'none', cursor: 'pointer',
-              padding: 4, display: 'flex',
-              color: isLiked ? '#FA243C' : 'rgba(255,255,255,0.5)',
-              transition: 'color 0.2s ease',
-            }}
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={handleToggleLike} 
+            className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white active:scale-95 transition-transform"
           >
-            {toggleLikeMutation.isPending
-              ? <Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} />
-              : <Heart size={24} fill={isLiked ? 'currentColor' : 'none'} strokeWidth={isLiked ? 0 : 1.8} />
+            {toggleLikeMutation.isPending 
+              ? <Loader2 size={20} className="animate-spin" /> 
+              : <Heart size={20} fill={isLiked ? 'currentColor' : 'none'} className={isLiked ? "text-[#fa233b]" : ""} strokeWidth={isLiked ? 0 : 2} />
             }
           </button>
-          <MoreMenu {...nowPlayingProps} openMenuUpward={true} />
+          
+          <div ref={moreMenuRef}>
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMoreMenuOpen(!isMoreMenuOpen);
+              }} 
+              className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white active:scale-95 transition-transform"
+            >
+              <Ellipsis size={20} />
+            </button>
+            <TrackContextMenu
+              track={currentTrack}
+              isOpen={isMoreMenuOpen}
+              position={null}
+              onClose={() => setIsMoreMenuOpen(false)}
+              showPlayerControls={true}
+            />
+          </div>
         </div>
       </div>
     </div>

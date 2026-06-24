@@ -11,6 +11,7 @@ interface FollowButtonProps {
   isFollowing: boolean;
   isLoading?: boolean;
   size?: 'sm' | 'md';
+  className?: string;
 }
 
 export default function FollowButton({
@@ -18,6 +19,7 @@ export default function FollowButton({
   isFollowing,
   isLoading = false,
   size = 'md',
+  className = '',
 }: FollowButtonProps) {
   const { user } = useAuth();
   const toggleFollow = useToggleFollow();
@@ -67,6 +69,7 @@ export default function FollowButton({
             : 'bg-white/[0.08] border border-white/15 text-white hover:bg-white/[0.12]'
           : 'bg-[#FA243C] border border-[#FA243C] text-white hover:bg-[#FA243C]/90 shadow-[0_0_20px_rgba(250,36,60,0.2)]'
         }
+        ${className}
       `}
     >
       {isMutating || isLoading ? (

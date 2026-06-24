@@ -153,9 +153,11 @@ ${numberedLines}`;
         responseText = result.response.text();
         lastError = null;
         break;
-      } catch (err: any) {
+      } catch (err: unknown) {
         lastError = err;
-        const status = err?.status ?? err?.response?.status ?? 0;
+        const errObj = err as Record<string, unknown>;
+        const resObj = errObj?.response as Record<string, unknown> | undefined;
+        const status = (errObj?.status as number) ?? (resObj?.status as number) ?? 0;
         const isRetryable = status === 503 || status === 429 || status >= 500;
 
         if (!isRetryable || attempt === MAX_RETRIES - 1) {
@@ -212,13 +214,12 @@ ${numberedLines}`;
         },
       }
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
     // Suppress harmless client-disconnect errors
-    if (
-      err?.code === 'ECONNRESET' ||
-      err?.name === 'AbortError' ||
-      request.signal?.aborted
-    ) {
+    const isAbort = (err instanceof Error && (err.name === 'AbortError')) ||
+      (err != null && typeof err === 'object' && 'code' in err && (err as Record<string, unknown>).code === 'ECONNRESET') ||
+      request.signal?.aborted;
+    if (isAbort) {
       return NextResponse.json({ error: 'Request aborted' }, { status: 499 });
     }
 

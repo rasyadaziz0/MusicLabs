@@ -1,11 +1,12 @@
 'use client';
 
-import { Play, Pause, SkipForward, SkipBack, Shuffle, Repeat, Volume2, Loader2, Heart, X } from 'lucide-react';
+import { Play, Pause, SkipForward, SkipBack, Shuffle, Repeat, Volume2, Loader2, Heart, X, Ellipsis } from 'lucide-react';
 import { formatTime } from '@/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { MoreMenu } from '@/components/player/NowPlayingUI';
+import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
+import { useState, useRef } from 'react';
 
 // We reuse the NowPlayingUIProps type but we can omit what we don't need or just pass it
 export function GuestDesktopPlayer({
@@ -23,6 +24,9 @@ export function GuestDesktopPlayer({
     seek, setVolume, handleToggleLike, isLiked, toggleLikeMutation,
     isRadio, radioMeta
   } = props;
+
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
 
   return (
     <>
@@ -82,7 +86,27 @@ export function GuestDesktopPlayer({
               <button onClick={handleToggleLike} disabled={toggleLikeMutation?.isPending} style={{ background: 'none', border: 'none', color: isLiked ? '#e0a030' : 'rgba(255,255,255,0.5)', cursor: 'pointer', padding: 0, display: 'flex' }}>
                 {toggleLikeMutation?.isPending ? <Loader2 size={20} style={{ animation: 'spin 1s linear infinite' }} /> : <Heart size={20} fill={isLiked ? 'currentColor' : 'none'} />}
               </button>
-              <MoreMenu {...props} />
+              <div ref={moreMenuRef}>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsMoreMenuOpen(!isMoreMenuOpen);
+                  }} 
+                  style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', padding: 0, display: 'flex' }}
+                >
+                  <Ellipsis size={20} />
+                </button>
+                <TrackContextMenu
+                  track={currentTrack}
+                  isOpen={isMoreMenuOpen}
+                  position={moreMenuRef.current ? { 
+                    x: moreMenuRef.current.getBoundingClientRect().right - 224, 
+                    y: moreMenuRef.current.getBoundingClientRect().bottom + 8 
+                  } : null}
+                  onClose={() => setIsMoreMenuOpen(false)}
+                  showPlayerControls={true}
+                />
+              </div>
             </div>
           </div>
 

@@ -3,9 +3,7 @@ import Image from 'next/image';
 import { Play, MoreHorizontal, Share } from 'lucide-react';
 import { Song } from '@/types/music';
 import { getBestImageUrl } from '@/lib/api/musicApi';
-import TrackLikeButton from '@/components/ui/TrackLikeButton';
-import AddToPlaylistButton from '@/components/ui/AddToPlaylistButton';
-import AddToQueueButton from '@/components/ui/AddToQueueButton';
+import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
 import { EqualizerIcon } from '@/components/ui/EqualizerIcon';
 
 export function TopSongRow({
@@ -86,28 +84,15 @@ export function TopSongRow({
         </button>
 
         {menuOpen && (
-          <div
-            className="absolute right-0 top-full mt-1 w-56 bg-[#2a2a2a] border border-white/10 rounded-xl shadow-2xl z-50 py-1 flex flex-col backdrop-blur-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <AddToPlaylistButton track={song} asMenuItem />
-            <div className="w-full">
-              <AddToQueueButton track={song} showText />
-            </div>
-            <div className="h-px bg-white/5 my-1 mx-3" />
-            <TrackLikeButton track={song} asMenuItem />
-            <div className="h-px bg-white/5 my-1 mx-3" />
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(`${window.location.origin}/search?q=${encodeURIComponent(song.name)}`);
-                setMenuOpen(false);
-              }}
-              className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between group/btn"
-            >
-              <span>Share Song</span>
-              <Share size={14} className="text-white/40 group-hover/btn:text-white/80 transition-colors" />
-            </button>
-          </div>
+          <TrackContextMenu
+            track={song}
+            isOpen={menuOpen}
+            position={menuRef.current ? { 
+              x: menuRef.current.getBoundingClientRect().right - 224, 
+              y: menuRef.current.getBoundingClientRect().bottom 
+            } : null}
+            onClose={() => setMenuOpen(false)}
+          />
         )}
       </div>
     </div>

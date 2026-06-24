@@ -164,6 +164,7 @@ export async function searchITunesAlbums(query: string, limit = 10, country = 'I
         id: `itunes-album-${album.collectionId}`,
         title: album.collectionName || 'Unknown Album',
         artist: album.artistName || 'Unknown Artist',
+        artist_id: album.artistId ? `itunes-artist-${album.artistId}` : null,
         cover: cover,
         cover_small: album.artworkUrl100 || '',
         cover_medium: album.artworkUrl100?.replace('100x100bb', '300x300bb') || '',
@@ -261,6 +262,7 @@ export async function getITunesArtistAlbums(itunesId: string, limit = 50) {
           cover_xl: cover,
           nb_tracks: album.trackCount || 0,
           artist: album.artistName || '',
+          artist_id: album.artistId ? `itunes-artist-${album.artistId}` : null,
           release_date: album.releaseDate || '',
           album_type: album.collectionType?.toLowerCase() || 'album',
         };
@@ -300,6 +302,7 @@ export async function getITunesAlbum(itunesId: string) {
       cover_xl: cover,
       nb_tracks: albumItem.trackCount || 0,
       artist: albumItem.artistName || '',
+      artist_id: albumItem.artistId ? `itunes-artist-${albumItem.artistId}` : null,
       release_date: albumItem.releaseDate || '',
       album_type: albumItem.collectionType?.toLowerCase() || 'album',
       tracks: tracks

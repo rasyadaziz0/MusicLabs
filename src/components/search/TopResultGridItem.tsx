@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { Search as SearchIcon, Play, MoreHorizontal } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { gooeyToast as toast } from 'goey-toast';
 import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
 import { getBestImageUrl, getArtistTopTracks } from '@/lib/api/musicApi';
 import { Song } from '@/types/music';

@@ -13,7 +13,7 @@ import AddToQueueButton from '@/components/ui/AddToQueueButton';
 import AddToPlaylistButton from '@/components/ui/AddToPlaylistButton';
 
 import { useState, useRef, useEffect } from 'react';
-import toast from 'react-hot-toast';
+import { gooeyToast as toast } from 'goey-toast';
 
 export default function LikedSongsPage() {
   const { user, signInWithGoogle } = useAuth();

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Loader2, Play, Pause, SkipForward, SkipBack, Volume2, Volume1, MessageSquare, ListMusic } from 'lucide-react';
+import { Loader2, Play, Pause, SkipForward, SkipBack, Volume2, Volume1, MessageSquare, ListMusic, Shuffle, Repeat } from 'lucide-react';
 import { formatTime } from '@/lib/utils';
 import QueuePopup from '@/components/player/QueuePopup';
 import { usePlayer } from '@/context/PlayerContext';
@@ -21,11 +21,16 @@ interface MobilePlayerControlsProps {
   isLyricsOpen: boolean;
   setIsLyricsOpen: (open: boolean) => void;
   linesLength: number;
+  isShuffled: boolean;
+  repeatMode: 'none' | 'one' | 'all';
+  toggleShuffle: () => void;
+  cycleRepeatMode: () => void;
 }
 
 export function MobilePlayerControls({
   duration, currentTime, seek, prevTrack, nextTrack, togglePlay,
-  isResolving, isPlaying, volume, setVolume, isLyricsOpen, setIsLyricsOpen, linesLength
+  isResolving, isPlaying, volume, setVolume, isLyricsOpen, setIsLyricsOpen, linesLength,
+  isShuffled, repeatMode, toggleShuffle, cycleRepeatMode
 }: MobilePlayerControlsProps) {
   const { isAutoplayEnabled, toggleAutoplay } = usePlayer();
   const [isDraggingProgress, setIsDraggingProgress] = useState(false);
@@ -87,8 +92,20 @@ export function MobilePlayerControls({
       {/* ── Playback Controls ── */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 12px', marginBottom: 28, marginTop: 4,
+        padding: '0 8px', marginBottom: 28, marginTop: 4,
       }}>
+        {/* Shuffle */}
+        <button
+          onClick={toggleShuffle}
+          style={{
+            background: 'none', border: 'none', 
+            color: isShuffled ? '#FA243C' : 'rgba(255,255,255,0.45)',
+            cursor: 'pointer', display: 'flex', padding: 8,
+          }}
+        >
+          <Shuffle size={24} strokeWidth={2.5} />
+        </button>
+
         {/* Skip Back */}
         <button
           onClick={prevTrack}
@@ -130,6 +147,29 @@ export function MobilePlayerControls({
           }}
         >
           <SkipForward size={34} fill="currentColor" strokeWidth={0} />
+        </button>
+
+        {/* Repeat */}
+        <button
+          onClick={cycleRepeatMode}
+          style={{
+            background: 'none', border: 'none',
+            color: repeatMode !== 'none' ? '#FA243C' : 'rgba(255,255,255,0.45)',
+            cursor: 'pointer', display: 'flex', padding: 8,
+            position: 'relative'
+          }}
+        >
+          <Repeat size={24} strokeWidth={2.5} />
+          {repeatMode === 'one' && (
+            <div style={{
+              position: 'absolute', top: 5, right: 2,
+              fontSize: 10, fontWeight: 800, color: '#FA243C',
+              background: '#1a1a2a', borderRadius: '50%',
+              width: 14, height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }}>
+              1
+            </div>
+          )}
         </button>
       </div>
 
