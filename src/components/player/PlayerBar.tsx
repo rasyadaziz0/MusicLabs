@@ -9,7 +9,9 @@ import { Timer } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import NowPlaying from './NowPlaying';
 import LyricsSidebar from './LyricsSidebar';
+import DeviceSidebar from './devices/DeviceSidebar';
 import GuestGate from '@/components/auth/GuestGate';
+import TapToStartOverlay from '@/components/player/TapToStartOverlay';
 
 const MobilePlayerBar = dynamic(() => import('@/components/mobile/player/MobilePlayerBar'), { ssr: false });
 const DesktopPlayerBar = dynamic(() => import('@/components/desktop/player/DesktopPlayerBar'), { ssr: false });
@@ -54,6 +56,7 @@ export default function PlayerBar({ isMobile }: PlayerBarProps) {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [isQueueOpen, setIsQueueOpen] = useState(false);
   const [isLyricsOpen, setIsLyricsOpen] = useState(false);
+  const [isDevicesOpen, setIsDevicesOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Automatically close sidebars when Now Playing is opened
@@ -61,18 +64,19 @@ export default function PlayerBar({ isMobile }: PlayerBarProps) {
     if (isNowPlayingOpen) {
       setIsLyricsOpen(false);
       setIsQueueOpen(false);
+      setIsDevicesOpen(false);
     }
   }, [isNowPlayingOpen]);
 
   // Add body class to shift scroll arrows when right sidebar is open
   useEffect(() => {
-    if (isLyricsOpen || isQueueOpen) {
+    if (isLyricsOpen || isQueueOpen || isDevicesOpen) {
       document.body.classList.add('right-sidebar-open');
     } else {
       document.body.classList.remove('right-sidebar-open');
     }
     return () => document.body.classList.remove('right-sidebar-open');
-  }, [isLyricsOpen, isQueueOpen]);
+  }, [isLyricsOpen, isQueueOpen, isDevicesOpen]);
 
   const toggleMute = () => {
     if (isMuted) {
@@ -107,6 +111,8 @@ export default function PlayerBar({ isMobile }: PlayerBarProps) {
           isOpen={isNowPlayingOpen}
           onClose={() => setIsNowPlayingOpen(false)}
           isMobile={isMobile}
+          isDevicesOpen={isDevicesOpen}
+          setIsDevicesOpen={setIsDevicesOpen}
         />
       )}
       {isError && (
@@ -114,7 +120,7 @@ export default function PlayerBar({ isMobile }: PlayerBarProps) {
           Lagu tidak tersedia
         </div>
       )}
-
+      <TapToStartOverlay />
 
 
       {isMobile ? (
@@ -128,6 +134,8 @@ export default function PlayerBar({ isMobile }: PlayerBarProps) {
           togglePlay={togglePlay}
           nextTrack={nextTrack}
           setIsNowPlayingOpen={setIsNowPlayingOpen}
+          isDevicesOpen={isDevicesOpen}
+          setIsDevicesOpen={setIsDevicesOpen}
         />
       ) : (
         <DesktopPlayerBar
@@ -159,14 +167,24 @@ export default function PlayerBar({ isMobile }: PlayerBarProps) {
           setIsQueueOpen={setIsQueueOpen}
           isLyricsOpen={isLyricsOpen}
           setIsLyricsOpen={setIsLyricsOpen}
+          isDevicesOpen={isDevicesOpen}
+          setIsDevicesOpen={setIsDevicesOpen}
         />
       )}
 
       {/* Lyrics Sidebar */}
-      {hasTrack && (
+      {!isMobile && hasTrack && (
         <LyricsSidebar
           isOpen={isLyricsOpen}
           onClose={() => setIsLyricsOpen(false)}
+        />
+      )}
+
+      {/* Devices Sidebar */}
+      {!isMobile && (
+        <DeviceSidebar
+          isOpen={isDevicesOpen}
+          onClose={() => setIsDevicesOpen(false)}
         />
       )}
 

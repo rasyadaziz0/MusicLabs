@@ -9,6 +9,8 @@ export type NowPlayingUIProps = NowPlayingState & {
   isOpen: boolean;
   onClose: () => void;
   isMobile?: boolean;
+  isDevicesOpen?: boolean;
+  setIsDevicesOpen?: (open: boolean) => void;
 };
 
 const MobileNowPlayingUI = dynamic(() => import('@/components/mobile/player/MobileNowPlayingUI'));

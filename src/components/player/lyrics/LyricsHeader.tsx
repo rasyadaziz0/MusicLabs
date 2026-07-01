@@ -24,31 +24,6 @@ export function LyricsHeader({
 
   return (
     <>
-      {/* Romanization Toggle Button */}
-      {hasRomanizations && (
-        <div style={{ position: 'absolute', bottom: hideHeader ? 20 : 40, right: hideHeader ? 20 : 32, zIndex: 50 }}>
-          <button
-            onClick={(e) => { e.stopPropagation(); onToggleRomanization(); }}
-            style={{
-              background: showRomanization ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.1)',
-              color: showRomanization ? '#111' : 'rgba(255,255,255,0.7)',
-              border: 'none',
-              borderRadius: 12,
-              padding: '6px 10px',
-              fontSize: 13,
-              fontWeight: 700,
-              cursor: 'pointer',
-              backdropFilter: 'blur(10px)',
-              WebkitBackdropFilter: 'blur(10px)',
-              transition: 'all 0.2s ease',
-              boxShadow: showRomanization ? '0 4px 12px rgba(0,0,0,0.15)' : 'none',
-            }}
-          >
-            A/文
-          </button>
-        </div>
-      )}
-
       {/* Header Info */}
       {!hideHeader && (
         <div

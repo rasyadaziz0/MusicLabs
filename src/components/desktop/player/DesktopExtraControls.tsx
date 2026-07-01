@@ -1,7 +1,8 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Volume2, VolumeX, MessageSquare, ListMusic } from 'lucide-react';
+import { Volume2, VolumeX, MessageSquare, ListMusic, MonitorSpeaker } from 'lucide-react';
 import QueuePopup from '@/components/player/QueuePopup';
+import { usePlayer } from '@/context/PlayerContext';
 
 export interface DesktopExtraControlsProps {
   currentTrack: any;
@@ -15,13 +16,17 @@ export interface DesktopExtraControlsProps {
   setIsQueueOpen: (open: boolean) => void;
   isLyricsOpen: boolean;
   setIsLyricsOpen: (open: boolean) => void;
+  isDevicesOpen?: boolean;
+  setIsDevicesOpen?: (open: boolean) => void;
 }
 
 export default function DesktopExtraControls({
   currentTrack, hasTrack, volume, setVolume, isMuted,
   isVolumeSliderOpen, setIsVolumeSliderOpen,
-  isQueueOpen, setIsQueueOpen, isLyricsOpen, setIsLyricsOpen
+  isQueueOpen, setIsQueueOpen, isLyricsOpen, setIsLyricsOpen,
+  isDevicesOpen, setIsDevicesOpen
 }: DesktopExtraControlsProps) {
+  const { connectedDevices, isActivePlayer } = (usePlayer() as any);
 
   return (
     <div className="flex items-center gap-[18px]">
@@ -34,9 +39,16 @@ export default function DesktopExtraControls({
           onClick={() => {
             if (!hasTrack) return;
             setIsLyricsOpen(!isLyricsOpen);
-            if (!isLyricsOpen) setIsQueueOpen(false);
+            if (!isLyricsOpen) {
+              setIsQueueOpen(false);
+              setIsDevicesOpen?.(false);
+            }
           }}
-          className={cn("transition-colors", hasTrack ? (isLyricsOpen ? "text-[#ff3b30]" : "text-white hover:text-white/80") : "text-white/15 pointer-events-none")}
+          className={cn(
+            "transition-colors cursor-pointer",
+            hasTrack ? (isLyricsOpen ? "text-[#ff3b30]" : "text-white/70 hover:text-white") : "text-white/20 pointer-events-none"
+          )}
+          title="Lirik"
         >
           <MessageSquare size={18} strokeWidth={2.5} />
         </button>
@@ -45,13 +57,43 @@ export default function DesktopExtraControls({
             onClick={() => {
               if (!hasTrack) return;
               setIsQueueOpen(!isQueueOpen);
-              if (!isQueueOpen) setIsLyricsOpen(false);
+              if (!isQueueOpen) {
+                setIsLyricsOpen(false);
+                setIsDevicesOpen?.(false);
+              }
             }}
-            className={cn("transition-colors", hasTrack ? (isQueueOpen ? "text-[#ff3b30]" : "text-white hover:text-white/80") : "text-white/15 pointer-events-none")}
+            className={cn(
+              "transition-colors cursor-pointer",
+              hasTrack ? (isQueueOpen ? "text-[#ff3b30]" : "text-white/70 hover:text-white") : "text-white/20 pointer-events-none"
+            )}
+            title="Daftar putar"
           >
             <ListMusic size={18} strokeWidth={2.5} />
           </button>
           <QueuePopup isOpen={isQueueOpen} onClose={() => setIsQueueOpen(false)} />
+        </div>
+
+        {/* Device Picker Button */}
+        <div className="relative flex items-center justify-center">
+          <button
+            onClick={() => {
+              setIsDevicesOpen?.(!isDevicesOpen);
+              if (!isDevicesOpen) {
+                setIsLyricsOpen(false);
+                setIsQueueOpen(false);
+              }
+            }}
+            className={cn(
+              "relative transition-colors cursor-pointer",
+              isDevicesOpen ? "text-[#ff3b30]" : !isActivePlayer ? "text-[#1db954]" : "text-white/70 hover:text-white"
+            )}
+            title="Hubungkan ke perangkat lain"
+          >
+            <MonitorSpeaker size={18} strokeWidth={2.5} />
+            {connectedDevices?.length > 1 && (
+              <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#1db954] ring-2 ring-[#121216] animate-pulse" />
+            )}
+          </button>
         </div>
       </div>
 
@@ -88,9 +130,10 @@ export default function DesktopExtraControls({
           <button 
             onClick={() => setIsVolumeSliderOpen(true)}
             className={cn(
-              "transition-colors flex-shrink-0 flex items-center justify-center w-[18px] h-full",
-              isVolumeSliderOpen ? "text-white" : "text-white/60 hover:text-white"
+              "transition-colors flex-shrink-0 flex items-center justify-center w-[18px] h-full cursor-pointer",
+              isVolumeSliderOpen ? "text-white" : "text-white/70 hover:text-white"
             )}
+            title="Volume"
           >
             {isMuted || volume === 0 ? <VolumeX size={18} strokeWidth={2.5} /> : <Volume2 size={18} strokeWidth={2.5} />}
           </button>

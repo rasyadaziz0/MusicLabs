@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
-import { Search, Bell, User as UserIcon, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Bell, User as UserIcon, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, useRef } from 'react';
@@ -29,13 +29,13 @@ export default function Header() {
     <header className="h-16 flex items-center justify-between px-4 md:px-8 sticky top-0 z-30 bg-void/50 backdrop-blur-md border-b border-white/5">
       <div className="flex items-center gap-4">
         <div className="hidden sm:flex items-center gap-2">
-          <button 
+          <button
             onClick={() => router.back()}
             className="w-8 h-8 rounded-full bg-black/40 flex items-center justify-center hover:bg-black/60 transition-colors"
           >
             <ChevronLeft size={20} />
           </button>
-          <button 
+          <button
             onClick={() => router.forward()}
             className="w-8 h-8 rounded-full bg-black/40 flex items-center justify-center hover:bg-black/60 transition-colors"
           >
@@ -51,12 +51,12 @@ export default function Header() {
         </button>
 
         {user ? (
-          <div className="flex items-center gap-3 bg-white/5 pl-1 pr-3 py-1 rounded-full border border-white/5 hover:bg-white/10 transition-colors cursor-pointer group">
+          <div className="flex lg:hidden items-center gap-3 bg-white/5 pl-1 pr-3 py-1 rounded-full border border-white/5 hover:bg-white/10 transition-colors cursor-pointer group">
             <div className="relative w-8 h-8 rounded-full overflow-hidden border border-white/10">
               {avatarUrl ? (
-                <Image 
-                  src={avatarUrl} 
-                  alt={user.user_metadata.name || 'User'} 
+                <Image
+                  src={avatarUrl}
+                  alt={user.user_metadata.name || 'User'}
                   fill
                   sizes="32px"
                   className="object-cover"
@@ -70,7 +70,7 @@ export default function Header() {
             <span className="text-sm font-medium hidden sm:block">
               {user.user_metadata?.name?.split(' ')[0]}
             </span>
-            <button 
+            <button
               onClick={(e) => {
                 e.stopPropagation();
                 signOut();
@@ -82,9 +82,9 @@ export default function Header() {
             </button>
           </div>
         ) : (
-          <button 
+          <button
             onClick={() => router.push('/login')}
-            className="px-6 py-2 bg-white text-black font-bold rounded-full hover:scale-105 transition-transform text-sm"
+            className="px-6 py-2 bg-white text-black font-bold rounded-full hover:scale-105 transition-transform text-sm lg:hidden"
           >
             Login
           </button>

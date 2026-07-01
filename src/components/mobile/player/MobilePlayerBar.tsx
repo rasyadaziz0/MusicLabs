@@ -1,10 +1,13 @@
 'use client';
 
-import { Loader2, Pause, Play, Radio as RadioIcon, SkipForward } from 'lucide-react';
+import React from 'react';
+import { Loader2, Pause, Play, Radio as RadioIcon, SkipForward, MonitorSpeaker } from 'lucide-react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { getBestImageUrl } from '@/lib/api/musicApi';
 import { GlassBar } from '@/components/ui/LiquidGlass';
+import { usePlayer } from '@/context/PlayerContext';
+import { cn } from '@/lib/utils';
 
 export interface MobilePlayerBarProps {
   currentTrack: any;
@@ -16,6 +19,8 @@ export interface MobilePlayerBarProps {
   togglePlay: () => void;
   nextTrack: () => void;
   setIsNowPlayingOpen: (open: boolean) => void;
+  isDevicesOpen?: boolean;
+  setIsDevicesOpen?: (open: boolean) => void;
 }
 
 export default function MobilePlayerBar({
@@ -27,8 +32,12 @@ export default function MobilePlayerBar({
   radioMeta,
   togglePlay,
   nextTrack,
-  setIsNowPlayingOpen
+  setIsNowPlayingOpen,
+  isDevicesOpen,
+  setIsDevicesOpen
 }: MobilePlayerBarProps) {
+  const { connectedDevices, isActivePlayer } = (usePlayer() as any);
+
   if (!currentTrack) return null;
 
   return (
@@ -38,77 +47,94 @@ export default function MobilePlayerBar({
     >
       <div className="flex items-center w-full h-full px-3 gap-3">
         <motion.div 
-        layoutId={`artwork-${currentTrack.id}`}
-        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-        style={{ borderRadius: 8 }}
-        className="relative w-11 h-11 overflow-hidden flex-shrink-0 shadow-md"
-      >
-        {isRadio ? (
-          <div className="w-full h-full bg-gradient-to-br from-[#FA243C]/30 to-[#FA243C]/10 flex items-center justify-center">
-            <RadioIcon size={20} className="text-[#FA243C]" />
-          </div>
-        ) : getBestImageUrl(currentTrack.image) ? (
-          <Image
-            src={getBestImageUrl(currentTrack.image)!}
-            alt={currentTrack.name}
-            fill
-            sizes="44px"
-            className="object-cover"
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-primary/40 to-void" />
-        )}
-      </motion.div>
-      <div className="flex-1 min-w-0 overflow-hidden flex flex-col justify-center">
-        {isRadio && (
-          <p className="text-[9px] text-[#FA243C] font-semibold uppercase tracking-wider mb-0.5 flex items-center gap-1">
-            <span className="relative flex h-1.5 w-1.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FA243C] opacity-75" /><span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#FA243C]" /></span>
-            Live Radio
-          </p>
-        )}
-        {!isRadio && isResolving && (
-          <p className="text-[9px] text-white/50 font-semibold uppercase tracking-wider mb-0.5 flex items-center gap-1">
-            <Loader2 size={8} className="animate-spin" />
-            Loading track…
-          </p>
-        )}
-        {!isRadio && !isResolving && isGuestPreview && (
-          <p className="text-[9px] text-[#FA243C] font-semibold uppercase tracking-wider mb-0.5">
-            Preview
-          </p>
-        )}
-        {!isRadio && !isResolving && !isGuestPreview && (
-          <p className="text-[9px] text-white/60 font-medium uppercase tracking-wider mb-0.5">
-            High Quality Audio
-          </p>
-        )}
-        <p className="text-[15px] font-bold truncate text-white leading-tight">
-          {isRadio && radioMeta?.title && radioMeta.title !== 'Connecting...' && radioMeta.title !== 'Live Radio'
-            ? radioMeta.title
-            : currentTrack.name}
-        </p>
-      </div>
-      <div className="flex items-center gap-4 pl-2 text-white pr-2">
-        <button
-          onClick={(e) => { e.stopPropagation(); togglePlay(); }}
-          disabled={isResolving}
-          className="hover:scale-105 transition-transform disabled:opacity-50"
+          layoutId={`artwork-${currentTrack.id}`}
+          transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+          style={{ borderRadius: 8 }}
+          className="relative w-11 h-11 overflow-hidden flex-shrink-0 shadow-md"
         >
-          {isResolving ? (
-            <Loader2 size={24} className="animate-spin" />
-          ) : isPlaying ? (
-            <Pause size={24} fill="currentColor" />
+          {isRadio ? (
+            <div className="w-full h-full bg-gradient-to-br from-[#FA243C]/30 to-[#FA243C]/10 flex items-center justify-center">
+              <RadioIcon size={20} className="text-[#FA243C]" />
+            </div>
+          ) : getBestImageUrl(currentTrack.image) ? (
+            <Image
+              src={getBestImageUrl(currentTrack.image)!}
+              alt={currentTrack.name}
+              fill
+              sizes="44px"
+              className="object-cover"
+            />
           ) : (
-            <Play size={24} fill="currentColor" className="ml-0.5" />
+            <div className="w-full h-full bg-gradient-to-br from-primary/40 to-void" />
           )}
-        </button>
-        <button
-          onClick={(e) => { e.stopPropagation(); nextTrack(); }}
-          className="hover:scale-105 transition-transform"
-        >
-          <SkipForward size={24} fill="currentColor" />
-        </button>
-      </div>
+        </motion.div>
+        <div className="flex-1 min-w-0 overflow-hidden flex flex-col justify-center">
+          {isRadio && (
+            <p className="text-[9px] text-[#FA243C] font-semibold uppercase tracking-wider mb-0.5 flex items-center gap-1">
+              <span className="relative flex h-1.5 w-1.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FA243C] opacity-75" /><span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#FA243C]" /></span>
+              Live Radio
+            </p>
+          )}
+          {!isRadio && isResolving && (
+            <p className="text-[9px] text-white/50 font-semibold uppercase tracking-wider mb-0.5 flex items-center gap-1">
+              <Loader2 size={8} className="animate-spin" />
+              Loading track…
+            </p>
+          )}
+          {!isRadio && !isResolving && isGuestPreview && (
+            <p className="text-[9px] text-[#FA243C] font-semibold uppercase tracking-wider mb-0.5">
+              Preview
+            </p>
+          )}
+          {!isRadio && !isResolving && !isGuestPreview && (
+            <p className="text-[9px] text-white/60 font-medium uppercase tracking-wider mb-0.5">
+              High Quality Audio
+            </p>
+          )}
+          <p className="text-[15px] font-bold truncate text-white leading-tight">
+            {isRadio && radioMeta?.title && radioMeta.title !== 'Connecting...' && radioMeta.title !== 'Live Radio'
+              ? radioMeta.title
+              : currentTrack.name}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 pl-1 text-white pr-1">
+          {/* Device Picker Button */}
+          <div className="relative flex items-center justify-center">
+            <button
+              onClick={(e) => { e.stopPropagation(); setIsDevicesOpen?.(!isDevicesOpen); }}
+              className={cn(
+                "relative transition-colors hover:scale-105 p-1.5",
+                isDevicesOpen ? "text-[#ff3b30]" : !isActivePlayer ? "text-[#1db954]" : "text-white/70 hover:text-white"
+              )}
+            >
+              <MonitorSpeaker size={18} />
+              {connectedDevices?.length > 1 && (
+                <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-[#1db954] ring-1 ring-black animate-pulse" />
+              )}
+            </button>
+          </div>
+
+          <button
+            onClick={(e) => { e.stopPropagation(); togglePlay(); }}
+            disabled={isResolving}
+            className="hover:scale-105 transition-transform disabled:opacity-50 p-1"
+          >
+            {isResolving ? (
+              <Loader2 size={24} className="animate-spin" />
+            ) : isPlaying ? (
+              <Pause size={24} fill="currentColor" />
+            ) : (
+              <Play size={24} fill="currentColor" className="ml-0.5" />
+            )}
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); nextTrack(); }}
+            className="hover:scale-105 transition-transform p-1"
+          >
+            <SkipForward size={24} fill="currentColor" />
+          </button>
+        </div>
       </div>
     </GlassBar>
   );

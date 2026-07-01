@@ -36,6 +36,8 @@ export interface DesktopPlayerBarProps {
   setIsQueueOpen: (open: boolean) => void;
   isLyricsOpen: boolean;
   setIsLyricsOpen: (open: boolean) => void;
+  isDevicesOpen?: boolean;
+  setIsDevicesOpen?: (open: boolean) => void;
 }
 
 export default function DesktopPlayerBar({
@@ -44,7 +46,8 @@ export default function DesktopPlayerBar({
   volume, setVolume, isMuted, isVolumeSliderOpen, setIsVolumeSliderOpen,
   setIsGuestGateOpen, isNowPlayingOpen, setIsNowPlayingOpen,
   isShuffled, toggleShuffle, repeatMode, cycleRepeatMode,
-  isQueueOpen, setIsQueueOpen, isLyricsOpen, setIsLyricsOpen
+  isQueueOpen, setIsQueueOpen, isLyricsOpen, setIsLyricsOpen,
+  isDevicesOpen, setIsDevicesOpen
 }: DesktopPlayerBarProps) {
   const hasTrack = !!currentTrack;
 
@@ -54,7 +57,7 @@ export default function DesktopPlayerBar({
         "hidden md:flex relative z-50 transition-all duration-300",
         isNowPlayingOpen && "opacity-0 pointer-events-none"
       )}
-      style={{ marginRight: isLyricsOpen || isQueueOpen ? '340px' : '0' }}
+      style={{ marginRight: isLyricsOpen || isQueueOpen || isDevicesOpen ? '340px' : '0' }}
     >
       <GlassBar className="h-[60px] rounded-full">
         <div className="flex items-center w-full h-full px-6">
@@ -109,6 +112,8 @@ export default function DesktopPlayerBar({
           setIsQueueOpen={setIsQueueOpen}
           isLyricsOpen={isLyricsOpen}
           setIsLyricsOpen={setIsLyricsOpen}
+          isDevicesOpen={isDevicesOpen}
+          setIsDevicesOpen={setIsDevicesOpen}
         />
 
         </div>

@@ -117,15 +117,16 @@ export function MobileArtworkMode({
           </motion.div>
         </div>
 
-        {/* Like + More */}
-        <div className="flex items-center gap-4">
+        {/* Apple Music Style: Star + More Pill/Circles */}
+        <div className="flex items-center gap-3 flex-shrink-0 ml-2">
           <button 
             onClick={handleToggleLike} 
-            className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white active:scale-95 transition-transform"
+            className="w-8 h-8 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-all shadow-md hover:bg-white/20"
+            title={isLiked ? "Hapus dari Favorit" : "Favorit"}
           >
             {toggleLikeMutation.isPending 
-              ? <Loader2 size={20} className="animate-spin" /> 
-              : <Heart size={20} fill={isLiked ? 'currentColor' : 'none'} className={isLiked ? "text-[#fa233b]" : ""} strokeWidth={isLiked ? 0 : 2} />
+              ? <Loader2 size={16} className="animate-spin text-white/80" /> 
+              : <Heart size={16} fill={isLiked ? '#FA243C' : 'none'} className={isLiked ? "text-[#FA243C]" : "text-white/80"} strokeWidth={isLiked ? 0 : 2} />
             }
           </button>
           
@@ -135,9 +136,10 @@ export function MobileArtworkMode({
                 e.stopPropagation();
                 setIsMoreMenuOpen(!isMoreMenuOpen);
               }} 
-              className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white active:scale-95 transition-transform"
+              className="w-8 h-8 rounded-full bg-white/15 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-all shadow-md hover:bg-white/20"
+              title="Lainnya"
             >
-              <Ellipsis size={20} />
+              <Ellipsis size={16} />
             </button>
             <TrackContextMenu
               track={currentTrack}

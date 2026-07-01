@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
 import { getBestImageUrl } from '@/lib/api/musicApi';
 import GuestGate from '@/components/auth/GuestGate';
@@ -11,6 +12,7 @@ import { MobileNowPlayingBackground } from '@/components/mobile/player/MobileNow
 import { MobileLyricsMode } from '@/components/mobile/player/MobileLyricsMode';
 import { MobileArtworkMode } from '@/components/mobile/player/MobileArtworkMode';
 import { MobilePlayerControls } from '@/components/mobile/player/MobilePlayerControls';
+import { MobileQueueMode } from '@/components/mobile/player/MobileQueueMode';
 
 export default function MobileNowPlayingUI(props: NowPlayingUIProps) {
   const {
@@ -24,6 +26,7 @@ export default function MobileNowPlayingUI(props: NowPlayingUIProps) {
     isShuffled, repeatMode, toggleShuffle, cycleRepeatMode,
   } = props;
 
+  const [isQueueOpen, setIsQueueOpen] = useState(false);
   const dragControls = useDragControls();
 
   if (!currentTrack) return null;
@@ -84,7 +87,24 @@ export default function MobileNowPlayingUI(props: NowPlayingUIProps) {
               </button>
             </div>
 
-            {isLyricsOpen ? (
+            {isQueueOpen ? (
+              /* ─────────────── QUEUE / PLAYING NEXT SHEET ─────────────── */
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                <MobileQueueMode
+                  currentTrack={currentTrack}
+                  coverUrl={coverUrl}
+                  artistNames={artistNames}
+                  isLiked={isLiked}
+                  handleToggleLike={handleToggleLike}
+                  onClose={() => setIsQueueOpen(false)}
+                  isShuffled={isShuffled}
+                  repeatMode={repeatMode}
+                  toggleShuffle={toggleShuffle}
+                  cycleRepeatMode={cycleRepeatMode}
+                  setIsDevicesOpen={props.setIsDevicesOpen}
+                />
+              </div>
+            ) : isLyricsOpen ? (
               /* ─────────────── LYRICS MODE ─────────────── */
               <MobileLyricsMode
                 currentTrack={currentTrack}
@@ -140,6 +160,10 @@ export default function MobileNowPlayingUI(props: NowPlayingUIProps) {
               repeatMode={repeatMode}
               toggleShuffle={toggleShuffle}
               cycleRepeatMode={cycleRepeatMode}
+              isQueueOpen={isQueueOpen}
+              setIsQueueOpen={setIsQueueOpen}
+              isDevicesOpen={props.isDevicesOpen}
+              setIsDevicesOpen={props.setIsDevicesOpen}
             />
 
           </div>

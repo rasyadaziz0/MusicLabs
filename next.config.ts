@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   serverExternalPackages: ['sharp'],
   reactCompiler: true,
-  allowedDevOrigins: ['127.0.0.1'],
+  allowedDevOrigins: ['127.0.0.1', 'localhost', '10.110.2.174'],
 
   // ── PAKSA binary sharp + libvips ikut ke serverless function ──
   outputFileTracingIncludes: {

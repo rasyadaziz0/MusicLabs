@@ -1,267 +1,225 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Loader2, Play, Pause, SkipForward, SkipBack, Volume2, Volume1, MessageSquare, ListMusic, Shuffle, Repeat } from 'lucide-react';
+import { Loader2, Play, Pause, SkipForward, SkipBack, Volume2, Volume1, MessageSquareQuote, ListMusic, Headphones } from 'lucide-react';
 import { formatTime } from '@/lib/utils';
-import QueuePopup from '@/components/player/QueuePopup';
+import { MobileAirPlayPopup } from '@/components/mobile/player/MobileAirPlayPopup';
 import { usePlayer } from '@/context/PlayerContext';
+import { IMobilePlayerControlsProps } from './MobilePlayerControls.types';
+import { MobilePlayerControlsController } from './MobilePlayerControlsController';
 
-interface MobilePlayerControlsProps {
-  duration: number | undefined;
-  currentTime: number;
-  seek: (time: number) => void;
-  prevTrack: () => void;
-  nextTrack: () => void;
-  togglePlay: () => void;
-  isResolving: boolean;
-  isPlaying: boolean;
-  volume: number;
-  setVolume: (v: number) => void;
-  isLyricsOpen: boolean;
-  setIsLyricsOpen: (open: boolean) => void;
-  linesLength: number;
-  isShuffled: boolean;
-  repeatMode: 'none' | 'one' | 'all';
-  toggleShuffle: () => void;
-  cycleRepeatMode: () => void;
-}
+export function MobilePlayerControls(props: IMobilePlayerControlsProps) {
+  const {
+    duration, currentTime, seek, prevTrack, nextTrack, togglePlay,
+    isResolving, isPlaying, volume, setVolume, isLyricsOpen, setIsLyricsOpen, linesLength,
+    isShuffled, repeatMode, toggleShuffle, cycleRepeatMode, isQueueOpen, setIsQueueOpen,
+    isDevicesOpen, setIsDevicesOpen, activeDevice, connectedDevices, isActivePlayer
+  } = props;
 
-export function MobilePlayerControls({
-  duration, currentTime, seek, prevTrack, nextTrack, togglePlay,
-  isResolving, isPlaying, volume, setVolume, isLyricsOpen, setIsLyricsOpen, linesLength,
-  isShuffled, repeatMode, toggleShuffle, cycleRepeatMode
-}: MobilePlayerControlsProps) {
-  const { isAutoplayEnabled, toggleAutoplay } = usePlayer();
-  const [isDraggingProgress, setIsDraggingProgress] = useState(false);
-  const [isQueueOpen, setIsQueueOpen] = useState(false);
+  const [isSeeking, setIsSeeking] = useState(false);
+  const [seekTime, setSeekTime] = useState(0);
+  const [localQueueOpen, setLocalQueueOpen] = useState(false);
+  const playerContext = usePlayer();
+  const controller = useMemo(() => new MobilePlayerControlsController(props, playerContext), [props, playerContext]);
+  const effectiveQueueOpen = isQueueOpen !== undefined ? isQueueOpen : localQueueOpen;
+  const effectiveSetQueueOpen = setIsQueueOpen || setLocalQueueOpen;
+  const displayTime = isSeeking ? seekTime : currentTime;
+  const progressPercent = controller.getProgressPercent(displayTime);
+  const remainingTime = controller.getRemainingTime(displayTime);
+  const myDevice = controller.myDevice;
 
-  const progress = duration ? (currentTime / duration) * 100 : 0;
+  const handleSeekStart = () => {
+    setIsSeeking(true);
+    setSeekTime(currentTime);
+  };
+
+  const handleSeekMove = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSeekTime(Number(e.target.value));
+  };
+
+  const handleSeekEnd = (e: React.MouseEvent<HTMLInputElement> | React.TouchEvent<HTMLInputElement>) => {
+    const val = Number((e.target as HTMLInputElement).value);
+    seek(val);
+    setIsSeeking(false);
+  };
 
   return (
-    <div style={{ flexShrink: 0 }}>
+    <div className="w-full flex flex-col justify-end am-player-controls pt-2 pb-6 px-7">
+      {/* 1. Progress Bar & Lossless Badge */}
+      <div className="w-full flex flex-col mb-6">
+        <div className="relative w-full h-7 flex items-center group">
+          <div className="absolute left-0 right-0 h-1 rounded-full bg-white/20 overflow-hidden pointer-events-none">
+            <motion.div
+              className="h-full bg-white/90 rounded-full"
+              style={{ width: `${progressPercent}%` }}
+              transition={isSeeking ? { duration: 0 } : { duration: 0.1, ease: 'linear' }}
+            />
+          </div>
 
-      {/* ── Progress Bar ── */}
-      <div style={{ marginBottom: 8 }}>
-        <div style={{
-          position: 'relative', height: 4,
-          background: 'rgba(255,255,255,0.18)', borderRadius: 2,
-        }}>
+          <motion.div
+            className="absolute h-3 w-3 rounded-full bg-white shadow-md pointer-events-none"
+            style={{ left: `calc(${progressPercent}% - 6px)` }}
+            animate={{ scale: isSeeking ? 1.5 : 1 }}
+            transition={{ duration: 0.1 }}
+          />
+
           <input
             type="range"
-            className="am-progress-range"
             min={0}
-            max={duration || 0}
-            value={currentTime}
-            onChange={e => seek(Number(e.target.value))}
-            onPointerDown={() => setIsDraggingProgress(true)}
-            onPointerUp={() => setIsDraggingProgress(false)}
+            max={duration || 100}
+            step={0.1}
+            value={displayTime}
+            onMouseDown={handleSeekStart}
+            onTouchStart={handleSeekStart}
+            onChange={handleSeekMove}
+            onMouseUp={handleSeekEnd}
+            onTouchEnd={handleSeekEnd}
+            className="absolute inset-0 w-full opacity-0 cursor-pointer z-10"
           />
-          <motion.div
-            style={{
-              position: 'absolute', height: '100%',
-              background: 'rgba(255,255,255,0.92)', borderRadius: 2,
-              width: `${progress}%`,
-            }}
-            transition={{ duration: isDraggingProgress ? 0 : 0.1 }}
-          >
-            {/* Knob that appears on active drag */}
-            <div style={{
-              position: 'absolute', right: -4, top: '50%',
-              transform: 'translateY(-50%)',
-              width: 8, height: 8,
-              background: '#fff', borderRadius: '50%',
-              boxShadow: '0 1px 4px rgba(0,0,0,0.25)',
-              transition: 'transform 0.15s ease',
-            }} />
-          </motion.div>
         </div>
-        <div style={{
-          display: 'flex', justifyContent: 'space-between',
-          marginTop: 8,
-          fontSize: 11, fontWeight: 500,
-          color: 'rgba(255,255,255,0.45)',
-          fontVariantNumeric: 'tabular-nums',
-          letterSpacing: '0.2px',
-        }}>
-          <span>{formatTime(currentTime)}</span>
-          <span>-{formatTime(Math.max((duration || 0) - currentTime, 0))}</span>
+
+        <div className="flex items-center justify-between mt-[-4px] text-[12px] font-semibold tracking-tight text-white/55 relative">
+          <span className="w-12 text-left font-mono">{formatTime(displayTime)}</span>
+
+          {/* Lossless Badge (Centered) */}
+          <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/15 backdrop-blur-md border border-white/10 shadow-sm text-white/90">
+            <span className="text-[10px] tracking-wider uppercase font-bold">~ Lossless</span>
+          </div>
+
+          <span className="w-12 text-right font-mono">
+            {remainingTime < 0 ? '-' : ''}{formatTime(Math.abs(remainingTime))}
+          </span>
         </div>
       </div>
 
-      {/* ── Playback Controls ── */}
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 8px', marginBottom: 28, marginTop: 4,
-      }}>
-        {/* Shuffle */}
-        <button
-          onClick={toggleShuffle}
-          style={{
-            background: 'none', border: 'none', 
-            color: isShuffled ? '#FA243C' : 'rgba(255,255,255,0.45)',
-            cursor: 'pointer', display: 'flex', padding: 8,
-          }}
-        >
-          <Shuffle size={24} strokeWidth={2.5} />
-        </button>
-
-        {/* Skip Back */}
+      {/* 2. Playback Controls (Huge Centered Apple Music iOS style) */}
+      <div className="w-full flex items-center justify-between px-6 mb-8 mt-1">
         <button
           onClick={prevTrack}
-          style={{
-            background: 'none', border: 'none', color: '#fff',
-            cursor: 'pointer', display: 'flex', padding: 8,
-          }}
+          className="text-white active:scale-85 transition-transform p-3 active:opacity-70"
+          title="Sebelumnya"
         >
-          <SkipBack size={34} fill="currentColor" strokeWidth={0} />
+          <SkipBack size={38} fill="currentColor" strokeWidth={0} />
         </button>
 
-        {/* Play / Pause */}
         <button
           onClick={togglePlay}
           disabled={isResolving}
-          style={{
-            background: 'none', border: 'none', color: '#fff',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', padding: 0,
-            opacity: isResolving ? 0.5 : 1,
-            transition: 'opacity 0.15s ease',
-          }}
+          className="w-20 h-20 flex items-center justify-center text-white active:scale-90 transition-transform active:opacity-80"
+          title={isPlaying ? 'Jeda' : 'Putar'}
         >
           {isResolving ? (
-            <Loader2 size={52} style={{ animation: 'spin 1s linear infinite' }} />
+            <Loader2 size={46} className="animate-spin text-white/80" />
           ) : isPlaying ? (
-            <Pause size={52} fill="currentColor" strokeWidth={0} />
+            <Pause size={56} fill="currentColor" strokeWidth={0} />
           ) : (
-            <Play size={52} fill="currentColor" strokeWidth={0} style={{ marginLeft: 4 }} />
+            <Play size={56} fill="currentColor" strokeWidth={0} className="ml-1" />
           )}
         </button>
 
-        {/* Skip Forward */}
         <button
           onClick={nextTrack}
-          style={{
-            background: 'none', border: 'none', color: '#fff',
-            cursor: 'pointer', display: 'flex', padding: 8,
-          }}
+          className="text-white active:scale-85 transition-transform p-3 active:opacity-70"
+          title="Selanjutnya"
         >
-          <SkipForward size={34} fill="currentColor" strokeWidth={0} />
-        </button>
-
-        {/* Repeat */}
-        <button
-          onClick={cycleRepeatMode}
-          style={{
-            background: 'none', border: 'none',
-            color: repeatMode !== 'none' ? '#FA243C' : 'rgba(255,255,255,0.45)',
-            cursor: 'pointer', display: 'flex', padding: 8,
-            position: 'relative'
-          }}
-        >
-          <Repeat size={24} strokeWidth={2.5} />
-          {repeatMode === 'one' && (
-            <div style={{
-              position: 'absolute', top: 5, right: 2,
-              fontSize: 10, fontWeight: 800, color: '#FA243C',
-              background: '#1a1a2a', borderRadius: '50%',
-              width: 14, height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center'
-            }}>
-              1
-            </div>
-          )}
+          <SkipForward size={38} fill="currentColor" strokeWidth={0} />
         </button>
       </div>
 
-      {/* ── Volume ── */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 10,
-        marginBottom: 24, padding: '0 2px',
-      }}>
-        <Volume1 size={16} color="rgba(255,255,255,0.4)" />
-        <div style={{
-          position: 'relative', flex: 1, height: 4,
-          background: 'rgba(255,255,255,0.15)', borderRadius: 2,
-        }}>
+      {/* 3. Volume Bar */}
+      <div className="w-full flex items-center gap-3.5 px-1 mb-8">
+        <Volume1 size={18} className="text-white/40 flex-shrink-0" />
+        <div className="relative flex-1 h-6 flex items-center">
+          <div className="absolute left-0 right-0 h-1 rounded-full bg-white/20 overflow-hidden pointer-events-none">
+            <div
+              className="h-full bg-white/80 rounded-full"
+              style={{ width: `${volume * 100}%` }}
+            />
+          </div>
           <input
             type="range"
-            className="am-vol-range"
-            min={0} max={1} step={0.01}
+            min={0}
+            max={1}
+            step={0.01}
             value={volume}
-            onChange={e => setVolume(Number(e.target.value))}
+            onChange={(e) => setVolume(Number(e.target.value))}
+            className="absolute inset-0 w-full opacity-0 cursor-pointer z-10"
           />
-          <div style={{
-            position: 'absolute', height: '100%',
-            width: `${volume * 100}%`,
-            background: 'rgba(255,255,255,0.85)', borderRadius: 2,
-            transition: 'width 0.05s linear',
-          }} />
         </div>
-        <Volume2 size={20} color="rgba(255,255,255,0.4)" />
+        <Volume2 size={18} className="text-white/40 flex-shrink-0" />
       </div>
 
-      {/* ── Bottom Actions: Lyrics | Queue ── */}
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 48px', position: 'relative',
-      }}>
-        {/* Lyrics Toggle */}
+      {/* 4. Bottom Actions (Exact Apple Music iOS Style) */}
+      <div className="w-full flex items-center justify-between px-6 pt-2 pb-1">
+        {/* Lyrics Toggle Button */}
         <button
-          onClick={() => setIsLyricsOpen(!isLyricsOpen)}
-          className="am-action-btn"
+          onClick={() => {
+            if (linesLength > 0) {
+              setIsLyricsOpen(!isLyricsOpen);
+              if (!isLyricsOpen) {
+                effectiveSetQueueOpen(false);
+                setIsDevicesOpen?.(false);
+              }
+            }
+          }}
           disabled={linesLength === 0}
-          style={{
-            color: isLyricsOpen ? '#fff' : 'rgba(255,255,255,0.45)',
-            opacity: linesLength > 0 ? 1 : 0.3,
-            position: 'relative',
-          }}
+          className={`w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90 outline-none ${isLyricsOpen
+            ? 'bg-white/30 backdrop-blur-md text-[#18261e] shadow-md font-bold'
+            : 'text-white/60 hover:text-white hover:bg-white/10'
+            } ${linesLength === 0 ? 'opacity-30 pointer-events-none' : ''}`}
+          title="Lirik"
         >
-          <MessageSquare
-            size={22}
-            fill={isLyricsOpen ? 'currentColor' : 'none'}
-            strokeWidth={isLyricsOpen ? 0 : 1.8}
-          />
-          {isLyricsOpen && (
-            <div style={{
-              position: 'absolute', bottom: 0, left: '50%',
-              transform: 'translateX(-50%)',
-              width: 4, height: 4, borderRadius: 2,
-              background: '#fff',
-            }} />
-          )}
+          <MessageSquareQuote size={21} strokeWidth={isLyricsOpen ? 2.3 : 1.9} />
         </button>
 
-        {/* Queue Toggle */}
+        {/* Center: AirPlay Route Apple Music Style */}
         <button
-          onClick={() => setIsQueueOpen(!isQueueOpen)}
-          className="am-action-btn"
-          style={{
-            color: isQueueOpen ? '#fff' : 'rgba(255,255,255,0.45)',
-            position: 'relative',
+          onClick={() => {
+            setIsDevicesOpen?.(!isDevicesOpen);
+            if (!isDevicesOpen) {
+              effectiveSetQueueOpen(false);
+            }
           }}
+          className="flex flex-col items-center justify-center gap-1 group active:scale-95 transition-all outline-none px-4 py-1 rounded-xl hover:bg-white/5"
+          title="Perangkat audio"
         >
-          <ListMusic size={22} strokeWidth={1.8} />
-          {isQueueOpen && (
-            <div style={{
-              position: 'absolute', bottom: 0, left: '50%',
-              transform: 'translateX(-50%)',
-              width: 4, height: 4, borderRadius: 2,
-              background: '#fff',
-            }} />
-          )}
+          <div className={`flex items-center justify-center transition-all ${isDevicesOpen ? 'text-[#1db954] scale-110' : 'text-white/90 group-hover:text-white'
+            }`}>
+            <Headphones size={20} strokeWidth={2} />
+          </div>
         </button>
 
-        {/* Queue Popup */}
-        {isQueueOpen && (
-          <div 
-            onClick={() => setIsQueueOpen(false)}
+        {/* Queue Toggle Button */}
+        <button
+          onClick={() => {
+            effectiveSetQueueOpen(!effectiveQueueOpen);
+            if (!effectiveQueueOpen) {
+              setIsLyricsOpen(false);
+              setIsDevicesOpen?.(false);
+            }
+          }}
+          className={`w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90 outline-none ${effectiveQueueOpen
+            ? 'bg-white/30 backdrop-blur-md text-[#18261e] shadow-md font-bold'
+            : 'text-white/60 hover:text-white hover:bg-white/10'
+            }`}
+          title="Daftar putar"
+        >
+          <ListMusic size={21} strokeWidth={effectiveQueueOpen ? 2.3 : 1.9} />
+        </button>
+
+        {/* AirPlay Devices Popup */}
+        {isDevicesOpen && (
+          <div
+            onClick={() => setIsDevicesOpen?.(false)}
             style={{
               position: 'fixed', inset: 0, zIndex: 100,
-              background: 'rgba(0,0,0,0.5)',
+              background: 'rgba(0,0,0,0.35)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20
             }}
           >
-            <div onClick={(e) => e.stopPropagation()}>
-              <QueuePopup isOpen={isQueueOpen} onClose={() => setIsQueueOpen(false)} />
+            <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[420px]">
+              <MobileAirPlayPopup onClose={() => setIsDevicesOpen?.(false)} />
             </div>
           </div>
         )}
