@@ -29,6 +29,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://music.rasyadazizan.site"),
   title: "AcadMusic",
   description: "Temukan musik favoritmu dengan mudah!",
   manifest: "/manifest.json",

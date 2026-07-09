@@ -22,12 +22,22 @@ const FOLDER_TO_DB_COLUMN: Record<string, { table: string; column: string; idCol
 function extractR2Key(publicUrl: string): string | null {
   try {
     const devUrl = process.env.NEXT_PUBLIC_R2_DEV_URL;
-    if (!devUrl) return null;
-    const baseUrl = devUrl.endsWith('/') ? devUrl.slice(0, -1) : devUrl;
-    if (!publicUrl.startsWith(baseUrl)) return null;
-    const key = publicUrl.slice(baseUrl.length + 1); // +1 for the "/"
-    if (!key || key.includes('..')) return null;
-    return key;
+    const knownPrefixes = [
+      devUrl,
+      'https://img.rasyadazizan.site',
+      'https://pub-a5593a1c76374ad6bcfeed25f8cd6e01.r2.dev',
+    ].filter(Boolean) as string[];
+
+    for (const prefix of knownPrefixes) {
+      const baseUrl = prefix.endsWith('/') ? prefix.slice(0, -1) : prefix;
+      if (publicUrl.startsWith(baseUrl)) {
+        const key = publicUrl.slice(baseUrl.length + 1); // +1 for the "/"
+        if (key && !key.includes('..')) {
+          return key;
+        }
+      }
+    }
+    return null;
   } catch {
     return null;
   }

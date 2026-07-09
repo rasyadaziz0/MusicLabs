@@ -21,7 +21,7 @@ function parseOriginList(raw: string | undefined) {
   if (!raw) return [];
   return raw
     .split(',')
-    .map((origin) => origin.trim())
+    .map((origin) => origin.trim().replace(/\/$/, ''))
     .filter(Boolean);
 }
 

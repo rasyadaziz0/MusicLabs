@@ -77,7 +77,7 @@ export default function MobileOtherProfileHero({
           </button>
           <button
             onClick={() => {
-              const appUrl = process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://music-labs-beryl.vercel.app');
+              const appUrl = process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://music.rasyadazizan.site');
               const url = profile?.username ? `${appUrl}/@${profile.username}` : `${appUrl}/user/${userId}`;
               navigator.clipboard.writeText(url);
               toast.success('Profile link copied to clipboard!');
@@ -159,7 +159,7 @@ export default function MobileOtherProfileHero({
         {/* Share Button */}
         <button
           onClick={() => {
-            const appUrl = process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://music-labs-beryl.vercel.app');
+            const appUrl = process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://music.rasyadazizan.site');
             const url = profile?.username ? `${appUrl}/@${profile.username}` : `${appUrl}/user/${userId}`;
             navigator.clipboard.writeText(url);
             toast.success('Profile link copied to clipboard!');
