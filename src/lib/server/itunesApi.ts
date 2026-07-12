@@ -1,4 +1,5 @@
 import { Song } from '@/types/music';
+import { ArtistParser } from '@/lib/utils/ArtistParser';
 
 // ── iTunes API helper ──────────────────────────────────────
 
@@ -47,25 +48,18 @@ export function mapITunesToSong(item: ITunesResult): Song {
       name: item.collectionName || '',
       url: '',
     },
-    artists: {
-      primary: [{
-        id: `itunes-artist-${item.artistId || ''}`,
-        name: item.artistName || 'Unknown Artist',
-        role: 'primary',
-        type: 'artist',
-        image: [],
-        url: item.artistLinkUrl || '',
-      }],
-      featured: [],
-      all: [{
-        id: `itunes-artist-${item.artistId || ''}`,
-        name: item.artistName || 'Unknown Artist',
-        role: 'primary',
-        type: 'artist',
-        image: [],
-        url: item.artistLinkUrl || '',
-      }],
-    },
+    artists: (() => {
+      const parsedArtists = ArtistParser.parse(
+        item.artistName,
+        'itunes-artist',
+        item.artistId ? `itunes-artist-${item.artistId}` : null
+      );
+      return {
+        primary: parsedArtists,
+        featured: [],
+        all: parsedArtists,
+      };
+    })(),
     image: [
       { quality: '500x500', url: artworkLarge },
       { quality: '150x150', url: artworkMedium },
@@ -196,6 +190,45 @@ export async function getITunesTrack(itunesId: string): Promise<Song | null> {
 
 export async function getITunesArtist(itunesId: string) {
   try {
+    const isSearchId = itunesId.startsWith('search-') || itunesId.startsWith('itunes-search-') || !/^\d+$/.test(itunesId);
+    if (isSearchId) {
+      const term = decodeURIComponent(itunesId.replace(/^itunes-search-|^search-/, ''));
+      const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=musicArtist&limit=1&country=ID`, { next: { revalidate: 300 } });
+      if (!res.ok) return null;
+      const data = await res.json();
+      const artist = data.results?.[0];
+      if (!artist) {
+        return {
+          id: `itunes-artist-${itunesId}`,
+          name: term,
+          link: '',
+          picture: '',
+          picture_small: '',
+          picture_medium: '',
+          picture_big: '',
+          picture_xl: '',
+          nb_album: 0,
+          nb_fan: 0,
+          genres: [],
+          popularity: 0,
+        };
+      }
+      return {
+        id: `itunes-artist-${artist.artistId}`,
+        name: artist.artistName,
+        link: artist.artistLinkUrl || '',
+        picture: '',
+        picture_small: '',
+        picture_medium: '',
+        picture_big: '',
+        picture_xl: '',
+        nb_album: 0,
+        nb_fan: 0,
+        genres: artist.primaryGenreName ? [artist.primaryGenreName] : [],
+        popularity: 0,
+      };
+    }
+
     const res = await fetch(`https://itunes.apple.com/lookup?id=${itunesId}&country=ID`, { next: { revalidate: 300 } });
     if (!res.ok) return null;
     const data = await res.json();
@@ -223,13 +256,15 @@ export async function getITunesArtist(itunesId: string) {
 
 export async function getITunesArtistTopTracks(itunesId: string, limit = 50): Promise<Song[]> {
   try {
-    const res = await fetch(
-      `https://itunes.apple.com/lookup?id=${itunesId}&entity=song&limit=${limit}&country=ID`,
-      { next: { revalidate: 300 } }
-    );
+    const isSearchId = itunesId.startsWith('search-') || itunesId.startsWith('itunes-search-') || !/^\d+$/.test(itunesId);
+    let url = `https://itunes.apple.com/lookup?id=${itunesId}&entity=song&limit=${limit}&country=ID`;
+    if (isSearchId) {
+      const term = decodeURIComponent(itunesId.replace(/^itunes-search-|^search-/, ''));
+      url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=song&limit=${limit}&country=ID`;
+    }
+    const res = await fetch(url, { next: { revalidate: 300 } });
     if (!res.ok) return [];
     const data = await res.json();
-    // The first result is the artist, the subsequent results are tracks
     return (data.results || [])
       .filter((item: ITunesResult) => item.wrapperType === 'track')
       .map(mapITunesToSong);
@@ -240,10 +275,13 @@ export async function getITunesArtistTopTracks(itunesId: string, limit = 50): Pr
 
 export async function getITunesArtistAlbums(itunesId: string, limit = 50) {
   try {
-    const res = await fetch(
-      `https://itunes.apple.com/lookup?id=${itunesId}&entity=album&limit=${limit}&country=ID`,
-      { next: { revalidate: 300 } }
-    );
+    const isSearchId = itunesId.startsWith('search-') || itunesId.startsWith('itunes-search-') || !/^\d+$/.test(itunesId);
+    let url = `https://itunes.apple.com/lookup?id=${itunesId}&entity=album&limit=${limit}&country=ID`;
+    if (isSearchId) {
+      const term = decodeURIComponent(itunesId.replace(/^itunes-search-|^search-/, ''));
+      url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=album&limit=${limit}&country=ID`;
+    }
+    const res = await fetch(url, { next: { revalidate: 300 } });
     if (!res.ok) return [];
     const data = await res.json();
 

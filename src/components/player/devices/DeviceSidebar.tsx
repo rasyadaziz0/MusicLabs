@@ -10,6 +10,7 @@ import { DeviceSidebarHeader } from './DeviceSidebarHeader';
 import { DeviceRow } from './DeviceRow';
 import { DeviceRenameFooter } from './DeviceRenameFooter';
 import { DeviceInfo } from '@/types/connect';
+import { getPortalRoot } from '@/lib/utils/portalRoot';
 
 export interface DeviceSidebarProps {
   isOpen: boolean;
@@ -46,7 +47,7 @@ export default function DeviceSidebar({ isOpen, onClose }: DeviceSidebarProps) {
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-          className="w-full md:w-[340px]"
+          className="w-full md:w-[340px] md:max-xl:w-[260px] md:portrait:w-[212px]"
           style={{
             position: 'fixed',
             top: 0,
@@ -120,5 +121,5 @@ export default function DeviceSidebar({ isOpen, onClose }: DeviceSidebarProps) {
     </AnimatePresence>
   );
 
-  return createPortal(content, document.body);
+  return createPortal(content, getPortalRoot());
 }

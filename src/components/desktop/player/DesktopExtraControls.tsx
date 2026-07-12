@@ -29,10 +29,10 @@ export default function DesktopExtraControls({
   const { connectedDevices, isActivePlayer } = (usePlayer() as any);
 
   return (
-    <div className="flex items-center gap-[18px]">
+    <div className="flex items-center gap-[18px] md:max-xl:gap-[10px] flex-shrink-0">
       {/* Icons container that fades out when volume slider opens */}
       <div className={cn(
-        "flex items-center gap-[18px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
+        "flex items-center gap-[18px] md:max-xl:gap-[10px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:portrait:hidden",
         isVolumeSliderOpen ? "opacity-0 pointer-events-none scale-95" : "opacity-100 scale-100"
       )}>
         <button
@@ -120,7 +120,7 @@ export default function DesktopExtraControls({
               )}
             >
               <div className="w-full h-[4px] bg-white/20 rounded-full relative flex items-center group/vol">
-                <input type="range" min={0} max={1} step={0.01} value={volume} onChange={(e) => setVolume(Number(e.target.value))} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 hover:scale-y-150 transition-transform" />
+                <input type="range" aria-label="Volume" min={0} max={1} step={0.01} value={volume} onChange={(e) => setVolume(Number(e.target.value))} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 hover:scale-y-150 transition-transform" />
                 <div className="absolute left-0 h-full bg-white rounded-full pointer-events-none group-hover/vol:bg-white" style={{ width: `${volume * 100}%` }} />
               </div>
             </div>

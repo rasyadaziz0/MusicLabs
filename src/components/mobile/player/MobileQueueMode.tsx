@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import Image from 'next/image';
 import { usePlayer } from '@/context/PlayerContext';
 import { QueuePopupController } from '@/components/player/QueuePopupController';
 import { getBestImageUrl } from '@/lib/api/musicApi';
 import { Heart, MoreHorizontal, Shuffle, Repeat, Infinity as InfinityIcon, Disc, Menu } from 'lucide-react';
+import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
 import {
   DndContext,
   closestCenter,
@@ -39,6 +40,9 @@ interface MobileQueueModeProps {
 
 // Exact Apple Music iOS Sortable Track Row
 function AppleMusicQueueRow({ track, onClick }: { track: any; onClick: () => void }) {
+  const [isRowMenuOpen, setIsRowMenuOpen] = useState(false);
+  const rowMenuRef = useRef<HTMLDivElement>(null);
+
   const {
     attributes,
     listeners,
@@ -66,7 +70,7 @@ function AppleMusicQueueRow({ track, onClick }: { track: any; onClick: () => voi
       onClick={onClick}
       className="flex items-center justify-between py-2 px-1 group active:bg-white/10 rounded-xl transition-all cursor-pointer select-none"
     >
-      <div className="flex items-center gap-3 min-w-0 flex-1 pr-3">
+      <div className="flex items-center gap-3 min-w-0 flex-1 pr-2">
         <div className="w-11 h-11 rounded-lg overflow-hidden relative flex-shrink-0 bg-white/10 shadow-sm border border-white/5">
           {imgUrl && (
             <Image src={imgUrl} alt={track.name} fill sizes="44px" className="object-cover" />
@@ -82,18 +86,41 @@ function AppleMusicQueueRow({ track, onClick }: { track: any; onClick: () => voi
         </div>
       </div>
 
-      {/* Drag Handle Apple Music iOS */}
-      <div
-        {...attributes}
-        {...listeners}
-        onClick={(e) => e.stopPropagation()}
-        className="p-2.5 text-white/30 hover:text-white/60 active:text-white transition-colors touch-none flex items-center justify-center cursor-grab active:cursor-grabbing"
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
-          <line x1="4" y1="8" x2="20" y2="8" />
-          <line x1="4" y1="12" x2="20" y2="12" />
-          <line x1="4" y1="16" x2="20" y2="16" />
-        </svg>
+      {/* Row Action: Three Dots & Drag Handle */}
+      <div className="flex items-center gap-0.5 flex-shrink-0">
+        <div ref={rowMenuRef} onClick={(e) => e.stopPropagation()}>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsRowMenuOpen(!isRowMenuOpen);
+            }}
+            className="p-2 text-white/45 hover:text-white transition-colors outline-none"
+            title="Lainnya"
+          >
+            <MoreHorizontal size={18} strokeWidth={2} />
+          </button>
+          <TrackContextMenu
+            track={track}
+            isOpen={isRowMenuOpen}
+            position={null}
+            onClose={() => setIsRowMenuOpen(false)}
+            showPlayerControls={false}
+          />
+        </div>
+
+        {/* Drag Handle Apple Music iOS */}
+        <div
+          {...attributes}
+          {...listeners}
+          onClick={(e) => e.stopPropagation()}
+          className="p-2.5 text-white/30 hover:text-white/60 active:text-white transition-colors touch-none flex items-center justify-center cursor-grab active:cursor-grabbing"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+            <line x1="4" y1="8" x2="20" y2="8" />
+            <line x1="4" y1="12" x2="20" y2="12" />
+            <line x1="4" y1="16" x2="20" y2="16" />
+          </svg>
+        </div>
       </div>
     </div>
   );
@@ -104,6 +131,9 @@ export function MobileQueueMode(props: MobileQueueModeProps) {
     currentTrack, coverUrl, artistNames, isLiked, handleToggleLike,
     isShuffled, repeatMode, toggleShuffle, cycleRepeatMode, setIsDevicesOpen
   } = props;
+
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
 
   const player = usePlayer();
   const controller = useMemo(() => new QueuePopupController(player), [player]);
@@ -147,12 +177,25 @@ export function MobileQueueMode(props: MobileQueueModeProps) {
             >
               <Heart size={16} fill={isLiked ? '#ff3b30' : 'none'} color={isLiked ? '#ff3b30' : 'currentColor'} strokeWidth={2} />
             </button>
-            <button
-              className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center active:scale-85 transition-all text-white/80 outline-none"
-              title="Lainnya"
-            >
-              <MoreHorizontal size={18} strokeWidth={2} />
-            </button>
+            <div ref={moreMenuRef} onClick={(e) => e.stopPropagation()}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsMoreMenuOpen(!isMoreMenuOpen);
+                }}
+                className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center active:scale-85 transition-all text-white/80 outline-none"
+                title="Lainnya"
+              >
+                <MoreHorizontal size={18} strokeWidth={2} />
+              </button>
+              <TrackContextMenu
+                track={currentTrack}
+                isOpen={isMoreMenuOpen}
+                position={null}
+                onClose={() => setIsMoreMenuOpen(false)}
+                showPlayerControls={true}
+              />
+            </div>
           </div>
         </div>
 

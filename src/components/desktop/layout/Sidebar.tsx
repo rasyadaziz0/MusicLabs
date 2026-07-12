@@ -64,9 +64,9 @@ export default function Sidebar() {
   const isGuest = !user;
 
   const navLinkClass = (isActive: boolean) => cn(
-    "flex items-center gap-3 px-3 py-1.5 mx-2 rounded-md transition-colors text-[13px] font-medium border",
+    "flex items-center gap-3 md:portrait:gap-2 px-3 md:portrait:px-2 py-1.5 mx-2 md:portrait:mx-1 rounded-md transition-colors text-[13px] md:portrait:text-[12px] font-medium border",
     isActive
-      ? "bg-[#FA243C]/10 text-[#FA243C] border-[#FA243C]"
+      ? "bg-[#FA243C]/20 text-white border-[#FA243C]"
       : "text-white/80 hover:bg-white/5 border-transparent"
   );
 
@@ -77,13 +77,13 @@ export default function Sidebar() {
 
   return (
     <GlassBar
-      className="hidden md:block w-64 h-full !border-0"
+      className="hidden md:block w-64 md:portrait:w-48 h-full !border-0 transition-[width] duration-300 ease-in-out"
       style={{ boxShadow: 'none', backgroundColor: 'rgba(32, 32, 33, 0.5)', border: 'none' }}
     >
       <div className="flex flex-col h-full pt-4 pb-4">
         {/* Logo */}
-        <div className="px-6 mb-6 flex items-center gap-1.5">
-          <span className="text-[20px] font-bold tracking-tight text-white mb-[2px]">AcadMusic</span>
+        <div className="px-6 md:portrait:px-4 mb-6 md:portrait:mb-4 flex items-center gap-1.5">
+          <span className="text-[20px] md:portrait:text-[17px] font-bold tracking-tight text-white mb-[2px]">AcadMusic</span>
         </div>
 
         {/* Navigation */}
@@ -101,16 +101,16 @@ export default function Sidebar() {
               <Radio size={18} className="text-[#FA243C]" />
               <span>{t('sidebar.radio')}</span>
             </Link>
-            <Link href="/identify" className={navLinkClass(pathname === '/identify')}>
+            {/* <Link href="/identify" className={navLinkClass(pathname === '/identify')}>
               <AudioLines size={18} className="text-[#FA243C]" />
               <span>Identify Song</span>
-            </Link>
+            </Link> */}
           </div>
 
           {/* Library — only show for logged-in users */}
           {!isGuest && (
             <div>
-              <p className="px-5 text-[11px] font-semibold text-muted/70 mb-2">{t('sidebar.library')}</p>
+              <p className="px-5 md:portrait:px-3 text-[11px] md:portrait:text-[10px] font-semibold text-muted/70 mb-2">{t('sidebar.library')}</p>
               <div className="space-y-0.5">
                 {/* Pins Section */}
                 <div className="mx-2 flex flex-col mb-1">
@@ -222,7 +222,7 @@ export default function Sidebar() {
                 </p>
                 <Link
                   href="/login"
-                  className="block w-full text-center py-2 rounded-lg bg-[#FA243C] text-white text-[13px] font-semibold hover:bg-[#FA243C]/90 transition-colors"
+                  className="block w-full text-center py-2 rounded-lg bg-[#d91d31] text-white text-[13px] font-semibold hover:bg-[#b01627] transition-colors"
                 >
                   Sign In
                 </Link>
@@ -233,16 +233,16 @@ export default function Sidebar() {
 
         {/* Footer Profile & Links */}
         {user ? (
-          <div className="flex items-center gap-3 px-4 group">
-            <Link href="/profile" className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-8 h-8 rounded-full overflow-hidden bg-white/10 relative flex-shrink-0">
+          <div className="flex items-center gap-3 md:portrait:gap-1.5 px-4 md:portrait:px-2 group">
+            <Link href="/profile" className="flex items-center gap-3 md:portrait:gap-1.5 flex-1 min-w-0">
+              <div className="w-8 h-8 md:portrait:w-7 md:portrait:h-7 rounded-full overflow-hidden bg-white/10 relative flex-shrink-0">
                 {user.user_metadata?.avatar_url ? (
                   <Image src={user.user_metadata.avatar_url.trim().replace(/^`+|`+$/g, '')} alt="User" fill sizes="36px" className="object-cover" />
                 ) : (
                   <div className="w-full h-full bg-[#FA243C]" />
                 )}
               </div>
-              <span className="text-[13px] font-semibold text-white/90 flex-1 truncate hover:text-white transition-colors">{user.user_metadata?.name || 'User'}</span>
+              <span className="text-[13px] md:portrait:text-[12px] font-semibold text-white/90 flex-1 truncate hover:text-white transition-colors">{user.user_metadata?.name || 'User'}</span>
             </Link>
             <button
               onClick={handleSignOut}

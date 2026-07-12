@@ -39,12 +39,12 @@ export function GuestMobilePlayer({
       </div>
 
       {/* Artwork */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px', minHeight: 0 }}>
         <motion.div
           layoutId={`artwork-${currentTrack.id}`}
           animate={{ scale: isPlaying ? 1 : 0.88 }}
           transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-          style={{ position: 'relative', width: '100%', maxWidth: 360, aspectRatio: '1', borderRadius: 12, overflow: 'hidden', background: '#1a1a2a', boxShadow: '0 24px 64px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.3)' }}
+          style={{ position: 'relative', width: '100%', maxWidth: 'min(100%, 360px, 38vh)', aspectRatio: '1 / 1', borderRadius: 12, overflow: 'hidden', background: '#1a1a2a', boxShadow: '0 24px 64px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.3)' }}
         >
           {coverUrl ? <Image src={coverUrl} alt={currentTrack.name} fill sizes="300px" style={{ objectFit: 'cover' }} priority /> : null}
           {isPreview && (
@@ -54,7 +54,7 @@ export function GuestMobilePlayer({
       </div>
 
       {/* Track info + actions */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 24, marginBottom: 20 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 14, marginBottom: 8, flexShrink: 0 }}>
         <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ fontSize: 21, fontWeight: 700, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', letterSpacing: '-0.4px', lineHeight: 1.25 }}>
             {isRadio && radioMeta?.title && radioMeta.title !== 'Connecting...' && radioMeta.title !== 'Live Radio'
@@ -107,9 +107,9 @@ export function GuestMobilePlayer({
       <div style={{ flexShrink: 0 }}>
         {/* Progress bar */}
         {!isRadio ? (
-          <div style={{ marginBottom: 8 }}>
+          <div style={{ marginBottom: 6 }}>
             <div style={{ position: 'relative', height: 4, background: 'rgba(255,255,255,0.18)', borderRadius: 2 }}>
-              <input type="range" className="np-range" min={0} max={duration || 0} value={currentTime} onChange={e => seek(Number(e.target.value))} />
+              <input type="range" aria-label="Seek time" className="np-range" min={0} max={duration || 0} value={currentTime} onChange={e => seek(Number(e.target.value))} />
               <div style={{ position: 'absolute', height: '100%', width: `${progress}%`, background: 'rgba(255,255,255,0.92)', borderRadius: 2 }}>
                 <div style={{ position: 'absolute', right: -4, top: '50%', transform: 'translateY(-50%)', width: 8, height: 8, background: '#fff', borderRadius: '50%', boxShadow: '0 1px 4px rgba(0,0,0,0.25)' }} />
               </div>
@@ -120,7 +120,7 @@ export function GuestMobilePlayer({
             </div>
           </div>
         ) : (
-          <div style={{ marginBottom: 8 }}>
+          <div style={{ marginBottom: 6 }}>
             <div style={{ position: 'relative', height: 4, background: '#FA243C33', borderRadius: 2, overflow: 'hidden' }}>
               <div style={{ height: '100%', width: '33%', background: '#FA243C66', borderRadius: 2, animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }} />
             </div>
@@ -128,7 +128,7 @@ export function GuestMobilePlayer({
         )}
 
         {/* Playback controls */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 12px', marginBottom: 28, marginTop: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 12px', marginBottom: 14, marginTop: 4 }}>
           {!isRadio ? (
             <button onClick={prevTrack} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', padding: 8 }}>
               <SkipBack size={34} fill="currentColor" strokeWidth={0} />
@@ -145,10 +145,10 @@ export function GuestMobilePlayer({
         </div>
 
         {/* Volume */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24, padding: '0 2px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, padding: '0 2px' }}>
           <Volume size={16} color="rgba(255,255,255,0.4)" />
           <div style={{ position: 'relative', flex: 1, height: 4, background: 'rgba(255,255,255,0.15)', borderRadius: 2 }}>
-            <input type="range" className="np-range" min={0} max={1} step={0.01} value={volume} onChange={e => setVolume(Number(e.target.value))} />
+            <input type="range" aria-label="Volume" className="np-range" min={0} max={1} step={0.01} value={volume} onChange={e => setVolume(Number(e.target.value))} />
             <div style={{ position: 'absolute', height: '100%', width: `${volume * 100}%`, background: 'rgba(255,255,255,0.85)', borderRadius: 2 }} />
           </div>
           <Volume2 size={20} color="rgba(255,255,255,0.4)" />

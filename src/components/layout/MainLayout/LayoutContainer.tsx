@@ -7,7 +7,8 @@ import MobileNav from '../../mobile/layout/MobileNav';
 export default async function LayoutContainer({ children }: { children: React.ReactNode }) {
   const headersList = await headers();
   const userAgent = headersList.get('user-agent') || '';
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(userAgent);
+  // Only true cellphones get Mobile UI. iPads and Tablets get the exact same UI as Desktop (isMobile = false).
+  const isMobile = /(?:iPhone|iPod|Windows Phone|Android.*Mobile|Mobi)/i.test(userAgent) && !/iPad/i.test(userAgent);
 
   if (isMobile) {
     return (

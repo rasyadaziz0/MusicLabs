@@ -13,6 +13,7 @@ import AddToQueueButton from '@/components/ui/AddToQueueButton';
 import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
 import { getBestImageUrl, getArtistTopTracks } from '@/lib/api/musicApi';
 import { Song } from '@/types/music';
+import { buildTrackPath } from '@/lib/utils/slugify';
 import { SearchArtistResult } from '@/hooks/useMusicSearch';
 import { usePlayer } from '@/context/PlayerContext';
 import { HorizontalScrollSection } from '@/components/ui/HorizontalScrollSection';
@@ -238,8 +239,10 @@ export function MusicSearchResults({
                       <Share size={15} className="text-white/40 group-hover:text-white/80 transition-colors" />
                     </button>
                     <button onClick={() => {
-                      navigator.clipboard.writeText(`${window.location.origin}/search?q=${encodeURIComponent(song.name)}`);
-                      toast.success('Song search link copied!');
+                      const artistName = song.artists?.primary?.[0]?.name || 'unknown';
+                      const trackUrl = `${window.location.origin}${buildTrackPath(artistName, song.name, song.id)}`;
+                      navigator.clipboard.writeText(trackUrl);
+                      toast.success('Song link copied!');
                       closeMenu();
                     }} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between group">
                       <span>Copy Link</span>

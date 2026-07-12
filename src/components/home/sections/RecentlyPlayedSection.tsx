@@ -40,6 +40,7 @@ export function RecentlyPlayedSection({ recentlyPlayedSongs, isRecentLoading, us
                 key={`${song.id}-recent-${index}`}
                 song={song}
                 onPlay={() => playTrack(song, recentlyPlayedSongs)}
+                priority={index < 4}
               />
             ))
           ) : (

@@ -1,5 +1,6 @@
 import YTMusic from 'ytmusic-api';
 import { Song } from '@/types/music';
+import { ArtistParser } from '@/lib/utils/ArtistParser';
 
 type YTMusicSong = {
   videoId?: string;
@@ -79,29 +80,15 @@ export function mapYtSongToAppSong(song: YTMusicSong): Song | null {
       name: albumName,
       url: `https://music.youtube.com/browse/${albumId}`,
     },
-    artists: {
-      primary: [
-        {
-          id: artistId,
-          name: artistName,
-          role: 'primary',
-          type: 'artist',
-          image: images,
-          url: `https://music.youtube.com/channel/${artistId}`,
-        },
-      ],
-      featured: [],
-      all: [
-        {
-          id: artistId,
-          name: artistName,
-          role: 'primary',
-          type: 'artist',
-          image: images,
-          url: `https://music.youtube.com/channel/${artistId}`,
-        },
-      ],
-    },
+    artists: (() => {
+      const parsed = ArtistParser.parse(
+        song.artist?.name || 'Unknown Artist',
+        'artist',
+        song.artist?.artistId || `artist-${song.videoId}`,
+        images
+      );
+      return { primary: parsed, featured: [], all: parsed };
+    })(),
     image: images,
     downloadUrl: [
       {
@@ -139,29 +126,15 @@ export function mapYoutubeApiToAppSong(item: any): Song | null {
     url: `https://www.youtube.com/watch?v=${videoId}`,
     copyright: '',
     album: { id: `album-${videoId}`, name: 'Single', url: '' },
-    artists: {
-      primary: [
-        {
-          id: `artist-${videoId}`,
-          name: artistName,
-          role: 'primary',
-          type: 'artist',
-          image: images,
-          url: '',
-        },
-      ],
-      featured: [],
-      all: [
-        {
-          id: `artist-${videoId}`,
-          name: artistName,
-          role: 'primary',
-          type: 'artist',
-          image: images,
-          url: '',
-        },
-      ],
-    },
+    artists: (() => {
+      const parsed = ArtistParser.parse(
+        artistName,
+        'artist',
+        `artist-${videoId}`,
+        images
+      );
+      return { primary: parsed, featured: [], all: parsed };
+    })(),
     image: images,
     downloadUrl: [
       {
@@ -217,29 +190,15 @@ export function mapUpNextToAppSong(item: any): Song | null {
     url: `https://music.youtube.com/watch?v=${videoId}`,
     copyright: '',
     album: { id: `album-${videoId}`, name: 'Single', url: '' },
-    artists: {
-      primary: [
-        {
-          id: `artist-${videoId}`,
-          name: artistName,
-          role: 'primary',
-          type: 'artist',
-          image: images,
-          url: '',
-        },
-      ],
-      featured: [],
-      all: [
-        {
-          id: `artist-${videoId}`,
-          name: artistName,
-          role: 'primary',
-          type: 'artist',
-          image: images,
-          url: '',
-        },
-      ],
-    },
+    artists: (() => {
+      const parsed = ArtistParser.parse(
+        item.artists || artistName,
+        'artist',
+        `artist-${videoId}`,
+        images
+      );
+      return { primary: parsed, featured: [], all: parsed };
+    })(),
     image: images,
     downloadUrl: [
       {

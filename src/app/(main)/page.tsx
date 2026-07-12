@@ -7,9 +7,11 @@ import { useDiscoverWeekly } from '@/hooks/useDiscoverWeekly';
 import { HomeHeader } from '@/components/home/sections/HomeHeader';
 import { TopPicksSection } from '@/components/home/sections/TopPicksSection';
 import { RecentlyPlayedSection } from '@/components/home/sections/RecentlyPlayedSection';
-import { MobileStationsSection } from '@/components/home/sections/MobileStationsSection';
-import { SocialFeedSection } from '@/components/home/sections/SocialFeedSection';
-import { MoodsSection } from '@/components/home/sections/MoodsSection';
+import dynamic from 'next/dynamic';
+
+const MobileStationsSection = dynamic(() => import('@/components/home/sections/MobileStationsSection').then(mod => mod.MobileStationsSection), { ssr: false });
+const SocialFeedSection = dynamic(() => import('@/components/home/sections/SocialFeedSection').then(mod => mod.SocialFeedSection), { ssr: false });
+const MoodsSection = dynamic(() => import('@/components/home/sections/MoodsSection').then(mod => mod.MoodsSection), { ssr: false });
 
 export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null);

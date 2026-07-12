@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { getBestImageUrl } from '@/lib/api/musicApi';
 import { gooeyToast as toast } from 'goey-toast';
+import { buildTrackPath } from '@/lib/utils/slugify';
 import { MoreHorizontal, Share, Link2, Timer } from 'lucide-react';
 import TrackLikeButton from '@/components/ui/TrackLikeButton';
 import { formatTime } from '@/lib/utils';
@@ -51,18 +52,20 @@ export default function DesktopTrackInfo({
 
   const handleCopyLink = () => {
     if (!currentTrack) return;
-    navigator.clipboard.writeText(`${window.location.origin}/search?q=${encodeURIComponent(currentTrack.name)}`);
-    toast.success('Song search link copied!', {
+    const artistName = currentTrack.artists?.primary?.[0]?.name || 'unknown';
+    const trackUrl = `${window.location.origin}${buildTrackPath(artistName, currentTrack.name, currentTrack.id)}`;
+    navigator.clipboard.writeText(trackUrl);
+    toast.success('Song link copied!', {
       description: 'You can now share this track anywhere.'
     });
     React_setIsMenuOpen(false);
   };
 
   return (
-    <div className="flex flex-col mx-8 w-[340px] justify-center group">
+    <div className="flex flex-col mx-8 md:max-xl:mx-3 md:portrait:mx-4 w-[340px] md:max-xl:w-auto md:max-xl:flex-1 md:max-xl:min-w-[120px] md:max-xl:max-w-[280px] md:portrait:max-w-none md:portrait:min-w-0 justify-center group">
       {hasTrack ? (
         <>
-          <div className="flex items-center gap-3 mb-1">
+          <div className="flex items-center gap-3 md:max-xl:gap-2 mb-1">
             <motion.div 
               layoutId={`artwork-${currentTrack.id}`}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
@@ -194,7 +197,7 @@ export default function DesktopTrackInfo({
               </div>
             ) : (
               <div className="w-full h-[2px] bg-white/[0.15] relative mt-[2px] group/progress rounded-full">
-                <input type="range" min={0} max={duration || 0} value={currentTime} onChange={(e) => seek(Number(e.target.value))} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 hover:h-3 hover:-top-[5px]" />
+                <input type="range" aria-label="Seek time" min={0} max={duration || 0} value={currentTime} onChange={(e) => seek(Number(e.target.value))} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 hover:h-3 hover:-top-[5px]" />
                 <div className="absolute h-full bg-white rounded-full transition-colors group-hover/progress:bg-white" style={{ width: `${(currentTime / (duration || 1)) * 100}%` }} />
               </div>
             )

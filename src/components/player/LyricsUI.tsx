@@ -2,8 +2,8 @@
 
 import { LrcLine } from '@/lib/utils/lrcParser';
 import { Song } from '@/types/music';
-import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { motion, animate } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
 import { LyricsHeader } from './lyrics/LyricsHeader';
 import { LyricLine } from './lyrics/LyricLine';
 import { LyricsSkeleton } from './lyrics/LyricsSkeleton';
@@ -70,6 +70,8 @@ export default function LyricsUI({
     };
   }, [scrollRef]);
 
+  const scrollAnimRef = useRef<any>(null);
+
   // Auto-scroll logic (moved from useNowPlaying to respect isUserScrolling)
   useEffect(() => {
     if (activeIndex < 0 || !scrollRef.current || isUserScrolling) return;
@@ -84,7 +86,20 @@ export default function LyricsUI({
       const offsetRatio = isMobile ? 0.20 : 0.20;
 
       const offset = el.offsetTop - (container.clientHeight * offsetRatio) + (el.clientHeight / 2);
-      container.scrollTo({ top: offset, behavior: 'smooth' });
+      
+      // Stop previous animation if any
+      if (scrollAnimRef.current) scrollAnimRef.current.stop();
+      
+      // Custom "santai" spring animation instead of native smooth scroll
+      scrollAnimRef.current = animate(container.scrollTop, offset, {
+        type: 'spring',
+        stiffness: 70, // Semakin kecil, semakin santai
+        damping: 20,   // Mengurangi mantul-mantul
+        mass: 1.5,
+        onUpdate: (latest) => {
+          container.scrollTop = latest;
+        }
+      });
     }
   }, [activeIndex, lines, scrollRef, isUserScrolling]);
 

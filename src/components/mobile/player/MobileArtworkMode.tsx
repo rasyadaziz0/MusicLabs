@@ -30,7 +30,7 @@ export function MobileArtworkMode({
       {/* ── Artwork ── */}
       <div style={{
         flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        padding: '0 4px',
+        padding: '0 4px', minHeight: 0,
       }}>
         <motion.div
           layoutId={`artwork-${currentTrack.id}`}
@@ -40,8 +40,8 @@ export function MobileArtworkMode({
           }}
           transition={{ type: 'spring', damping: 30, stiffness: 300 }}
           style={{
-            position: 'relative', width: '100%', maxWidth: 360,
-            aspectRatio: '1', borderRadius: 12,
+            position: 'relative', width: '100%', maxWidth: 'min(100%, 360px, 38vh)',
+            aspectRatio: '1 / 1', borderRadius: 12,
             overflow: 'hidden', background: '#1a1a2a',
             boxShadow: '0 24px 64px rgba(0,0,0,0.5), 0 8px 24px rgba(0,0,0,0.3)',
           }}
@@ -74,14 +74,14 @@ export function MobileArtworkMode({
       <div style={{
         display: 'flex', alignItems: 'center',
         justifyContent: 'space-between', gap: 12,
-        marginTop: 24, marginBottom: 20,
+        marginTop: 14, marginBottom: 8, flexShrink: 0,
       }}>
         <div style={{ minWidth: 0, flex: 1 }}>
           <motion.div
             key={currentTrack.id + '-title'}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: 'easeOut' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
             style={{
               fontSize: 21, fontWeight: 700, color: '#fff',
               whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
@@ -92,9 +92,9 @@ export function MobileArtworkMode({
           </motion.div>
           <motion.div
             key={currentTrack.id + '-artist'}
-            initial={{ opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.05, ease: 'easeOut' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
             style={{
               marginTop: 3, fontSize: 17, fontWeight: 500,
               color: 'rgba(255,255,255,0.55)',
@@ -117,7 +117,7 @@ export function MobileArtworkMode({
           </motion.div>
         </div>
 
-        {/* Apple Music Style: Star + More Pill/Circles */}
+        {/* Apple Music Style: Heart + More Pill/Circles */}
         <div className="flex items-center gap-3 flex-shrink-0 ml-2">
           <button 
             onClick={handleToggleLike} 

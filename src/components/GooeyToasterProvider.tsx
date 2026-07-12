@@ -1,9 +1,17 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { GooeyToaster } from 'goey-toast';
-import 'goey-toast/styles.css';
 
 export default function GooeyToasterProvider() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
   return (
     <GooeyToaster
       position="top-center"

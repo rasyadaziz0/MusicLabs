@@ -12,6 +12,7 @@ import {
 } from '@/hooks/useMusicLibrary';
 import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react';
 import { getEffectiveTime } from '@/lib/lyrics/lyricsOffsetStore';
+import { buildTrackPath } from '@/lib/utils/slugify';
 
 export function useNowPlaying(isOpen: boolean) {
   const {
@@ -106,12 +107,19 @@ export function useNowPlaying(isOpen: boolean) {
     toggleLikeMutation.mutate(currentTrack.id);
   };
 
+  const getTrackUrl = () => {
+    if (!currentTrack) return '';
+    const artistName = currentTrack.artists?.primary?.[0]?.name || 'unknown';
+    return `${window.location.origin}${buildTrackPath(artistName, currentTrack.name, currentTrack.id)}`;
+  };
+
   const handleShareAction = async () => {
     if (!currentTrack) return;
+    const trackUrl = getTrackUrl();
     const payload = {
       title: currentTrack.name,
       text: `${currentTrack.artists.primary.map((a) => a.name).join(', ')} - ${currentTrack.name}`,
-      url: currentTrack.url,
+      url: trackUrl,
     };
     try {
       if (typeof navigator !== 'undefined' && 'share' in navigator) {
@@ -121,7 +129,7 @@ export function useNowPlaying(isOpen: boolean) {
       }
       if (typeof navigator !== 'undefined' && 'clipboard' in navigator) {
         const cb = (navigator as Navigator & { clipboard?: Clipboard }).clipboard;
-        if (cb?.writeText) await cb.writeText(currentTrack.url);
+        if (cb?.writeText) await cb.writeText(trackUrl);
       }
       setIsMoreMenuOpen(false);
     } catch (error) {
@@ -132,9 +140,10 @@ export function useNowPlaying(isOpen: boolean) {
   const handleCopyLinkAction = async () => {
     if (!currentTrack) return;
     try {
+      const trackUrl = getTrackUrl();
       if (typeof navigator !== 'undefined' && 'clipboard' in navigator) {
         const cb = (navigator as Navigator & { clipboard?: Clipboard }).clipboard;
-        if (cb?.writeText) await cb.writeText(currentTrack.url);
+        if (cb?.writeText) await cb.writeText(trackUrl);
       }
       setIsMoreMenuOpen(false);
     } catch (error) {

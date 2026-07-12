@@ -11,6 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useLikedSongsIndex, useToggleLikedSong } from '@/hooks/useMusicLibrary';
 import { gooeyToast as toast } from 'goey-toast';
 import { resolveToYoutubeId } from '@/lib/youtube';
+import { buildTrackPath } from '@/lib/utils/slugify';
 import { PlaylistSubMenu } from './context-menu/PlaylistSubMenu';
 import { ContextMenu } from './context-menu/ContextMenu';
 import { ContextMenuItem, ContextMenuDivider } from './context-menu/ContextMenuItem';
@@ -57,19 +58,25 @@ export function TrackContextMenu({ track, isOpen, position, onClose, showPlayerC
     toggleLikeMutation.mutate(track.id);
   };
 
+  const getTrackUrl = () => {
+    const artistName = track.artists?.primary?.[0]?.name || 'unknown';
+    return `${window.location.origin}${buildTrackPath(artistName, track.name, track.id)}`;
+  };
+
   const handleShare = async () => {
+    const trackUrl = getTrackUrl();
     if (navigator.share) {
       try {
         await navigator.share({
           title: track.name,
           text: `Check out ${track.name} by ${track.artists.primary[0]?.name}`,
-          url: window.location.href, // or track.url
+          url: trackUrl,
         });
       } catch (err) {
         // user cancelled or error
       }
     } else {
-      navigator.clipboard.writeText(window.location.href);
+      navigator.clipboard.writeText(trackUrl);
       toast.success('Link copied to clipboard', {
         description: 'You can now share this track anywhere.'
       });
@@ -223,7 +230,7 @@ export function TrackContextMenu({ track, isOpen, position, onClose, showPlayerC
           icon={<Link2 size={15} />}
           label="Copy Link"
           onClick={() => {
-            navigator.clipboard.writeText(`${window.location.origin}/search?q=${encodeURIComponent(track.name)}`);
+            navigator.clipboard.writeText(getTrackUrl());
             toast.success('Link copied to clipboard');
             onClose();
           }}

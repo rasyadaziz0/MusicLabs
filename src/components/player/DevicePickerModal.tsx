@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { getPortalRoot } from '@/lib/utils/portalRoot';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Laptop, Smartphone, Tablet, X, Edit3, Check, Loader2, MonitorSpeaker, Volume2 } from 'lucide-react';
 import { usePlayer } from '@/context/PlayerContext';
@@ -201,5 +202,5 @@ export default function DevicePickerModal({ isOpen, onClose }: DevicePickerModal
     </AnimatePresence>
   );
 
-  return createPortal(content, document.body);
+  return createPortal(content, getPortalRoot());
 }

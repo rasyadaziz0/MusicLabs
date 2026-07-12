@@ -77,15 +77,14 @@ export async function GET(
           try {
             const url = await format.decipher(youtube.session.player);
             if (url) { audioUrl = url; break; }
-          } catch (e) {
-            console.warn('Manual decipher failed:', e instanceof Error ? e.message : e);
+          } catch {
+            // Suppress decipher warning noise
           }
         }
       }
 
       if (!audioUrl) {
         if (attempt === 0) {
-          console.warn('No URL found, retrying with fresh instance...');
           ytInstance = null;
           continue;
         }
@@ -103,13 +102,13 @@ export async function GET(
 
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : String(error);
-      console.error(`Audio proxy error (attempt ${attempt + 1}):`, msg);
 
       if (attempt === 0) {
         ytInstance = null;
         continue;
       }
 
+      console.error('Audio proxy final error:', msg);
       return NextResponse.json({ error: 'Failed to resolve audio stream', detail: msg }, { status: 500 });
     }
   }

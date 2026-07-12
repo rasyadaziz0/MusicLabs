@@ -45,9 +45,9 @@ export function MobilePlayerControls(props: IMobilePlayerControlsProps) {
   };
 
   return (
-    <div className="w-full flex flex-col justify-end am-player-controls pt-2 pb-6 px-7">
+    <div className="w-full flex flex-col justify-end am-player-controls pt-1 pb-2 flex-shrink-0">
       {/* 1. Progress Bar & Lossless Badge */}
-      <div className="w-full flex flex-col mb-6">
+      <div className="w-full flex flex-col mb-3">
         <div className="relative w-full h-7 flex items-center group">
           <div className="absolute left-0 right-0 h-1 rounded-full bg-white/20 overflow-hidden pointer-events-none">
             <motion.div
@@ -66,6 +66,7 @@ export function MobilePlayerControls(props: IMobilePlayerControlsProps) {
 
           <input
             type="range"
+            aria-label="Seek time"
             min={0}
             max={duration || 100}
             step={0.1}
@@ -94,7 +95,7 @@ export function MobilePlayerControls(props: IMobilePlayerControlsProps) {
       </div>
 
       {/* 2. Playback Controls (Huge Centered Apple Music iOS style) */}
-      <div className="w-full flex items-center justify-between px-6 mb-8 mt-1">
+      <div className="w-full flex items-center justify-between px-6 mb-3 mt-1">
         <button
           onClick={prevTrack}
           className="text-white active:scale-85 transition-transform p-3 active:opacity-70"
@@ -128,7 +129,7 @@ export function MobilePlayerControls(props: IMobilePlayerControlsProps) {
       </div>
 
       {/* 3. Volume Bar */}
-      <div className="w-full flex items-center gap-3.5 px-1 mb-8">
+      <div className="w-full flex items-center gap-3.5 px-1 mb-3">
         <Volume1 size={18} className="text-white/40 flex-shrink-0" />
         <div className="relative flex-1 h-6 flex items-center">
           <div className="absolute left-0 right-0 h-1 rounded-full bg-white/20 overflow-hidden pointer-events-none">
@@ -139,6 +140,7 @@ export function MobilePlayerControls(props: IMobilePlayerControlsProps) {
           </div>
           <input
             type="range"
+            aria-label="Volume"
             min={0}
             max={1}
             step={0.01}
@@ -151,7 +153,7 @@ export function MobilePlayerControls(props: IMobilePlayerControlsProps) {
       </div>
 
       {/* 4. Bottom Actions (Exact Apple Music iOS Style) */}
-      <div className="w-full flex items-center justify-between px-6 pt-2 pb-1">
+      <div className="w-full flex items-center justify-between px-6 pt-1 pb-1">
         {/* Lyrics Toggle Button */}
         <button
           onClick={() => {

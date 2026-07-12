@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { getPortalRoot } from '@/lib/utils/portalRoot';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { cn } from '@/lib/utils';
@@ -145,6 +146,6 @@ export function ContextMenu({
         </motion.div>
       )}
     </AnimatePresence>,
-    document.body
+    getPortalRoot()
   );
 }

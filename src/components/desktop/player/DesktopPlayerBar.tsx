@@ -51,73 +51,77 @@ export default function DesktopPlayerBar({
 }: DesktopPlayerBarProps) {
   const hasTrack = !!currentTrack;
 
+  const isRightDrawerOpen = isLyricsOpen || isQueueOpen || isDevicesOpen;
+
   return (
     <div
       className={cn(
-        "hidden md:flex relative z-50 transition-all duration-300",
+        "hidden md:flex fixed bottom-6 left-[288px] md:portrait:left-[212px] z-50 transition-all duration-[350ms] ease-[cubic-bezier(0.32,0.72,0,1)] pointer-events-none justify-center",
+        isRightDrawerOpen ? "right-[340px] md:max-xl:right-[260px] md:portrait:right-[212px]" : "right-0",
         isNowPlayingOpen && "opacity-0 pointer-events-none"
       )}
-      style={{ marginRight: isLyricsOpen || isQueueOpen || isDevicesOpen ? '340px' : '0' }}
     >
-      <GlassBar className="h-[60px] rounded-full">
-        <div className="flex items-center w-full h-full px-6">
+      <div className="pointer-events-auto w-max max-w-full md:max-xl:w-full md:max-xl:max-w-[620px] md:portrait:max-w-[520px] px-4 md:portrait:px-2 flex justify-center">
+        <GlassBar className="h-[60px] md:max-xl:h-[56px] rounded-full w-full transition-all duration-300">
+          <div className="flex items-center justify-between w-full h-full px-6 md:max-xl:px-4 md:portrait:px-2">
 
-        <DesktopPlaybackControls
-          hasTrack={hasTrack}
-          isPlaying={isPlaying}
-          isResolving={isResolving}
-          isShuffled={isShuffled}
-          repeatMode={repeatMode}
-          togglePlay={togglePlay}
-          nextTrack={nextTrack}
-          prevTrack={prevTrack}
-          toggleShuffle={toggleShuffle}
-          cycleRepeatMode={cycleRepeatMode}
-        />
+          <DesktopPlaybackControls
+            hasTrack={hasTrack}
+            isPlaying={isPlaying}
+            isResolving={isResolving}
+            isShuffled={isShuffled}
+            repeatMode={repeatMode}
+            togglePlay={togglePlay}
+            nextTrack={nextTrack}
+            prevTrack={prevTrack}
+            toggleShuffle={toggleShuffle}
+            cycleRepeatMode={cycleRepeatMode}
+          />
 
-        {/* Guest Preview CTA */}
-        {isGuestPreview && hasTrack && (
-          <div className="flex items-center mx-4">
-            <button
-              onClick={() => setIsGuestGateOpen(true)}
-              className="px-2.5 py-1 rounded-md bg-[#FA243C]/10 text-[#FA243C] text-[10px] font-bold uppercase tracking-wider hover:bg-[#FA243C]/20 transition-colors"
-            >
-              Preview
-            </button>
+          {/* Guest Preview CTA */}
+          {isGuestPreview && hasTrack && (
+            <div className="flex items-center mx-4">
+              <button
+                onClick={() => setIsGuestGateOpen(true)}
+                className="px-2.5 py-1 rounded-md bg-[#FA243C]/10 text-[#FA243C] text-[10px] font-bold uppercase tracking-wider hover:bg-[#FA243C]/20 transition-colors"
+              >
+                Preview
+              </button>
+            </div>
+          )}
+
+          <DesktopTrackInfo
+            currentTrack={currentTrack}
+            hasTrack={hasTrack}
+            isRadio={isRadio}
+            radioMeta={radioMeta}
+            isResolving={isResolving}
+            currentTime={currentTime}
+            duration={duration}
+            seek={seek}
+            setIsNowPlayingOpen={setIsNowPlayingOpen}
+            isVolumeSliderOpen={isVolumeSliderOpen}
+          />
+
+          <DesktopExtraControls
+            currentTrack={currentTrack}
+            hasTrack={hasTrack}
+            volume={volume}
+            setVolume={setVolume}
+            isMuted={isMuted}
+            isVolumeSliderOpen={isVolumeSliderOpen}
+            setIsVolumeSliderOpen={setIsVolumeSliderOpen}
+            isQueueOpen={isQueueOpen}
+            setIsQueueOpen={setIsQueueOpen}
+            isLyricsOpen={isLyricsOpen}
+            setIsLyricsOpen={setIsLyricsOpen}
+            isDevicesOpen={isDevicesOpen}
+            setIsDevicesOpen={setIsDevicesOpen}
+          />
+
           </div>
-        )}
-
-        <DesktopTrackInfo
-          currentTrack={currentTrack}
-          hasTrack={hasTrack}
-          isRadio={isRadio}
-          radioMeta={radioMeta}
-          isResolving={isResolving}
-          currentTime={currentTime}
-          duration={duration}
-          seek={seek}
-          setIsNowPlayingOpen={setIsNowPlayingOpen}
-          isVolumeSliderOpen={isVolumeSliderOpen}
-        />
-
-        <DesktopExtraControls
-          currentTrack={currentTrack}
-          hasTrack={hasTrack}
-          volume={volume}
-          setVolume={setVolume}
-          isMuted={isMuted}
-          isVolumeSliderOpen={isVolumeSliderOpen}
-          setIsVolumeSliderOpen={setIsVolumeSliderOpen}
-          isQueueOpen={isQueueOpen}
-          setIsQueueOpen={setIsQueueOpen}
-          isLyricsOpen={isLyricsOpen}
-          setIsLyricsOpen={setIsLyricsOpen}
-          isDevicesOpen={isDevicesOpen}
-          setIsDevicesOpen={setIsDevicesOpen}
-        />
-
-        </div>
-      </GlassBar>
+        </GlassBar>
+      </div>
     </div>
   );
 }

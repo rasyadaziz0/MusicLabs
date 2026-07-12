@@ -21,6 +21,7 @@ export function ScrollArrows({ canScrollLeft, canScrollRight, onScrollLeft, onSc
       {canScrollLeft && (
         <button
           onClick={onScrollLeft}
+          aria-label="Scroll left"
           className="hidden md:block absolute -left-[12px] top-1/2 -translate-y-1/2 z-20 w-10 h-10 p-0 m-0 border-none bg-transparent group/arrow"
         >
           <div className="w-full h-full opacity-0 group-hover/section:opacity-100 transition-opacity duration-300 [transform:translateZ(0)] will-change-opacity">
@@ -36,6 +37,7 @@ export function ScrollArrows({ canScrollLeft, canScrollRight, onScrollLeft, onSc
       {canScrollRight && (
         <button
           onClick={onScrollRight}
+          aria-label="Scroll right"
           className="scroll-arrow-right hidden md:block absolute -right-[24px] top-1/2 -translate-y-1/2 z-20 w-10 h-10 p-0 m-0 border-none bg-transparent group/arrow"
         >
           <div className="w-full h-full opacity-0 group-hover/section:opacity-100 transition-opacity duration-300 [transform:translateZ(0)] will-change-opacity">

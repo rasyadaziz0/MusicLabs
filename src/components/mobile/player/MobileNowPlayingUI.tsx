@@ -87,57 +87,84 @@ export default function MobileNowPlayingUI(props: NowPlayingUIProps) {
               </button>
             </div>
 
-            {isQueueOpen ? (
-              /* ─────────────── QUEUE / PLAYING NEXT SHEET ─────────────── */
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-                <MobileQueueMode
-                  currentTrack={currentTrack}
-                  coverUrl={coverUrl}
-                  artistNames={artistNames}
-                  isLiked={isLiked}
-                  handleToggleLike={handleToggleLike}
-                  onClose={() => setIsQueueOpen(false)}
-                  isShuffled={isShuffled}
-                  repeatMode={repeatMode}
-                  toggleShuffle={toggleShuffle}
-                  cycleRepeatMode={cycleRepeatMode}
-                  setIsDevicesOpen={props.setIsDevicesOpen}
-                />
-              </div>
-            ) : isLyricsOpen ? (
-              /* ─────────────── LYRICS MODE ─────────────── */
-              <MobileLyricsMode
-                currentTrack={currentTrack}
-                coverUrl={coverUrl}
-                artistNames={artistNames}
-                isLiked={isLiked}
-                toggleLikeMutation={toggleLikeMutation}
-                handleToggleLike={handleToggleLike}
-                lines={lines}
-                activeIndex={activeIndex}
-                isSynced={isSynced}
-                isLyricsLoading={isLyricsLoading}
-                mobileLyricsScrollRef={mobileLyricsScrollRef}
-                seek={seek}
-                currentTime={currentTime}
-                romanizations={props.romanizations}
-                trackId={props.trackId ?? null}
-              />
-            ) : (
-              /* ─────────────── ARTWORK MODE ─────────────── */
-              <div onPointerDown={(e) => dragControls.start(e)} style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-                <MobileArtworkMode
-                  currentTrack={currentTrack}
-                  coverUrl={coverUrl}
-                  isPlaying={isPlaying}
-                  isPreview={isPreview}
-                  isLiked={isLiked}
-                  toggleLikeMutation={toggleLikeMutation}
-                  handleToggleLike={handleToggleLike}
-                  onClose={onClose}
-                />
-              </div>
-            )}
+            {/* ─────────────── MIDDLE AREA: ARTWORK / LYRICS / QUEUE ─────────────── */}
+            <AnimatePresence mode="wait">
+              {isQueueOpen ? (
+                /* ─────────────── QUEUE / PLAYING NEXT SHEET ─────────────── */
+                <motion.div
+                  key="mobile-queue-mode"
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 40 }}
+                  transition={{ type: 'spring', damping: 28, stiffness: 280 }}
+                  style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}
+                >
+                  <MobileQueueMode
+                    currentTrack={currentTrack}
+                    coverUrl={coverUrl}
+                    artistNames={artistNames}
+                    isLiked={isLiked}
+                    handleToggleLike={handleToggleLike}
+                    onClose={() => setIsQueueOpen(false)}
+                    isShuffled={isShuffled}
+                    repeatMode={repeatMode}
+                    toggleShuffle={toggleShuffle}
+                    cycleRepeatMode={cycleRepeatMode}
+                    setIsDevicesOpen={props.setIsDevicesOpen}
+                  />
+                </motion.div>
+              ) : isLyricsOpen ? (
+                /* ─────────────── LYRICS MODE ─────────────── */
+                <motion.div
+                  key="mobile-lyrics-mode"
+                  initial={{ opacity: 0, y: 40 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 40 }}
+                  transition={{ type: 'spring', damping: 28, stiffness: 280 }}
+                  style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}
+                >
+                  <MobileLyricsMode
+                    currentTrack={currentTrack}
+                    coverUrl={coverUrl}
+                    artistNames={artistNames}
+                    isLiked={isLiked}
+                    toggleLikeMutation={toggleLikeMutation}
+                    handleToggleLike={handleToggleLike}
+                    lines={lines}
+                    activeIndex={activeIndex}
+                    isSynced={isSynced}
+                    isLyricsLoading={isLyricsLoading}
+                    mobileLyricsScrollRef={mobileLyricsScrollRef}
+                    seek={seek}
+                    currentTime={currentTime}
+                    romanizations={props.romanizations}
+                    trackId={props.trackId ?? null}
+                  />
+                </motion.div>
+              ) : (
+                /* ─────────────── ARTWORK MODE ─────────────── */
+                <motion.div
+                  key="mobile-artwork-mode"
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.96 }}
+                  transition={{ duration: 0.22, ease: 'easeOut' }}
+                  onPointerDown={(e) => dragControls.start(e)}
+                  style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}
+                >
+                  <MobileArtworkMode
+                    currentTrack={currentTrack}
+                    coverUrl={coverUrl}
+                    isPlaying={isPlaying}
+                    isPreview={isPreview}
+                    isLiked={isLiked}
+                    toggleLikeMutation={toggleLikeMutation}
+                    handleToggleLike={handleToggleLike}
+                    onClose={onClose}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* ═══════════════════════════════════════════
                 COMMON BOTTOM CONTROLS

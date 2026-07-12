@@ -3,6 +3,7 @@
 import { usePlayer } from '@/context/PlayerContext';
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
+import { getPortalRoot } from '@/lib/utils/portalRoot';
 import { AnimatePresence, motion } from 'framer-motion';
 import { GlassBar } from '@/components/ui/LiquidGlass';
 import {
@@ -63,7 +64,7 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-          className="w-full md:w-[340px]"
+          className="w-full md:w-[340px] md:max-xl:w-[260px] md:portrait:w-[212px]"
           style={{
             position: 'fixed',
             top: 0,
@@ -298,5 +299,5 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
     </AnimatePresence>
   );
 
-  return createPortal(content, document.body);
+  return createPortal(content, getPortalRoot());
 }

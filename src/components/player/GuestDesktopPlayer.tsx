@@ -114,7 +114,7 @@ export function GuestDesktopPlayer({
           {!isRadio ? (
             <div style={{ marginTop: 24 }}>
               <div style={{ position: 'relative', height: 4, background: 'rgba(255,255,255,0.2)', borderRadius: 2 }}>
-                <input type="range" className="np-range" min={0} max={duration || 0} value={currentTime} onChange={e => seek(Number(e.target.value))} />
+                <input type="range" aria-label="Seek time" className="np-range" min={0} max={duration || 0} value={currentTime} onChange={e => seek(Number(e.target.value))} />
                 <div style={{ position: 'absolute', height: '100%', width: `${progress}%`, background: '#fff', borderRadius: 2 }}>
                   <div style={{ position: 'absolute', right: -5, top: '50%', transform: 'translateY(-50%)', width: 10, height: 10, background: '#fff', borderRadius: '50%', boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }} />
                 </div>
@@ -167,7 +167,7 @@ export function GuestDesktopPlayer({
           <div style={{ marginTop: 24, display: 'flex', alignItems: 'center', gap: 12 }}>
             <Volume2 size={16} color="rgba(255,255,255,0.5)" />
             <div style={{ position: 'relative', flex: 1, height: 4, background: 'rgba(255,255,255,0.2)', borderRadius: 2 }}>
-              <input type="range" className="np-range" min={0} max={1} step={0.01} value={volume} onChange={e => setVolume(Number(e.target.value))} />
+              <input type="range" aria-label="Volume" className="np-range" min={0} max={1} step={0.01} value={volume} onChange={e => setVolume(Number(e.target.value))} />
               <div style={{ position: 'absolute', height: '100%', width: `${volume * 100}%`, background: '#fff', borderRadius: 2 }} />
             </div>
           </div>

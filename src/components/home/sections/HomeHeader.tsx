@@ -22,7 +22,7 @@ export function HomeHeader({ user, isProfileOpen, setIsProfileOpen, handleSignOu
               className="w-9 h-9 rounded-full overflow-hidden bg-white/10 relative border border-white/10"
             >
               {user.user_metadata?.avatar_url ? (
-                <Image src={user.user_metadata.avatar_url.trim().replace(/^`+|`+$/g, '')} alt="User" fill className="object-cover" />
+                <Image src={user.user_metadata.avatar_url.trim().replace(/^`+|`+$/g, '')} alt="User" fill sizes="36px" className="object-cover" />
               ) : (
                 <div className="w-full h-full bg-[#FA243C]" />
               )}

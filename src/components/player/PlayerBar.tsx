@@ -12,6 +12,8 @@ import LyricsSidebar from './LyricsSidebar';
 import DeviceSidebar from './devices/DeviceSidebar';
 import GuestGate from '@/components/auth/GuestGate';
 import TapToStartOverlay from '@/components/player/TapToStartOverlay';
+import { AnimatePresence } from 'framer-motion';
+import { MobileAirPlayPopup } from '@/components/mobile/player/MobileAirPlayPopup';
 
 const MobilePlayerBar = dynamic(() => import('@/components/mobile/player/MobilePlayerBar'), { ssr: false });
 const DesktopPlayerBar = dynamic(() => import('@/components/desktop/player/DesktopPlayerBar'), { ssr: false });
@@ -180,13 +182,32 @@ export default function PlayerBar({ isMobile }: PlayerBarProps) {
         />
       )}
 
-      {/* Devices Sidebar */}
+      {/* Devices Sidebar (Desktop) */}
       {!isMobile && (
         <DeviceSidebar
           isOpen={isDevicesOpen}
           onClose={() => setIsDevicesOpen(false)}
         />
       )}
+
+      {/* Devices Popup (Mobile — from mini player bar) */}
+      <AnimatePresence>
+        {isMobile && isDevicesOpen && !isNowPlayingOpen && (
+          <div
+            key="mobile-device-overlay"
+            onClick={() => setIsDevicesOpen(false)}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 100,
+              background: 'rgba(0,0,0,0.5)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+            }}
+          >
+            <div onClick={(e) => e.stopPropagation()} className="w-full max-w-[420px]">
+              <MobileAirPlayPopup onClose={() => setIsDevicesOpen(false)} />
+            </div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Guest Gate Modal */}
       <GuestGate

@@ -9,6 +9,7 @@ import { useMediaSession } from '@/hooks/useMediaSession';
 import { usePresenceBroadcast } from '@/hooks/usePresenceBroadcast';
 import { useSpotifyConnect } from '@/hooks/useSpotifyConnect';
 import { DeviceInfo, RemoteCommandType, HandoffPayload } from '@/types/connect';
+import '@/lib/utils/portalRoot';
 
 // ─── Context type ───
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { getPortalRoot } from '@/lib/utils/portalRoot';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -258,7 +259,7 @@ export function MobileProfileHero({
             )}
           </div>
         </div>,
-        document.body
+        getPortalRoot()
       )}
 
     </div>

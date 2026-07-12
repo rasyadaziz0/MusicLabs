@@ -40,6 +40,7 @@ export function TopPicksCard({
             fill
             sizes="160px"
             className="object-cover"
+            priority={index < 4}
           />
         </div>
       )}
@@ -74,9 +75,11 @@ export function TopPicksCard({
 export function TrackCard({
   song,
   onPlay,
+  priority = false,
 }: {
   song: Song;
   onPlay: () => void;
+  priority?: boolean;
 }) {
   const [contextMenu, setContextMenu] = useState<{ isOpen: boolean; x: number; y: number }>({ isOpen: false, x: 0, y: 0 });
 
@@ -101,6 +104,7 @@ export function TrackCard({
             fill
             sizes="180px"
             className="object-cover"
+            priority={priority}
           />
         )}
         {/* Dark overlay on hover */}
@@ -109,12 +113,14 @@ export function TrackCard({
         {/* Hover Actions */}
         <div className="absolute inset-x-0 bottom-0 p-2 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <button 
+            aria-label="Play"
             className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/60 hover:scale-105 transition-all shadow-md"
             onClick={(e) => { e.stopPropagation(); onPlay(); }}
           >
             <Play className="w-4 h-4 ml-0.5" fill="currentColor" />
           </button>
           <button 
+            aria-label="More options"
             className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/60 hover:scale-105 transition-all shadow-md"
             onClick={handleContextMenu}
           >

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Syne, DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import "goey-toast/styles.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { SettingsProvider } from "@/context/SettingsContext";
 import { PlayerProvider } from "@/context/PlayerContext";
@@ -30,22 +31,42 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://music.rasyadazizan.site"),
-  title: "AcadMusic",
-  description: "Temukan musik favoritmu dengan mudah!",
+  title: {
+    default: "AcadMusic - Streaming Musik Gratis dengan Lirik",
+    template: "%s | AcadMusic",
+  },
+  description: "Dengarkan jutaan lagu gratis dengan lirik, playlist kolaboratif, dan rekomendasi AI. Streaming musik tanpa batas di AcadMusic.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "AcadMusic",
   },
+  openGraph: {
+    type: "website",
+    siteName: "AcadMusic",
+    title: "AcadMusic - Streaming Musik Gratis dengan Lirik",
+    description: "Dengarkan jutaan lagu gratis dengan lirik, playlist kolaboratif, dan rekomendasi AI.",
+    locale: "id_ID",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AcadMusic - Streaming Musik Gratis",
+    description: "Dengarkan jutaan lagu gratis dengan lirik real-time, playlist kolaboratif, dan rekomendasi AI.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: "/",
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#2F2FE4",
+  themeColor: "#e02929ff",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 };
 
 export default function RootLayout({
@@ -57,6 +78,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable} h-full antialiased dark`}
+      suppressHydrationWarning
     >
       <body className="min-h-full bg-void text-white selection:bg-primary/30 select-none overflow-x-hidden" suppressHydrationWarning>
         <LiquidGlassFilters />
@@ -65,12 +87,12 @@ export default function RootLayout({
           <LanguageProvider>
             <AuthProvider>
               <SettingsProvider>
-              <PlayerProvider>
-                <ArtworkColorsProvider>
-                  {children}
-                  <YouTubePlayerMount />
-                </ArtworkColorsProvider>
-              </PlayerProvider>
+                <PlayerProvider>
+                  <ArtworkColorsProvider>
+                    {children}
+                    <YouTubePlayerMount />
+                  </ArtworkColorsProvider>
+                </PlayerProvider>
               </SettingsProvider>
             </AuthProvider>
           </LanguageProvider>

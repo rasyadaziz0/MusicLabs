@@ -9,7 +9,7 @@ import { GlassBar } from '@/components/ui/LiquidGlass';
 const navItems = [
   { icon: Home, label: 'Home', href: '/' },
   { icon: Radio, label: 'Radio', href: '/radio' },
-  { icon: AudioLines, label: 'Identify', href: '/identify' },
+  // { icon: AudioLines, label: 'Identify', href: '/identify' },
   { icon: Library, label: 'Library', href: '/library' },
 ];
 

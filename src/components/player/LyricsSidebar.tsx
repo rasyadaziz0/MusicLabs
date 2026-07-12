@@ -8,6 +8,7 @@ import { useSettings } from '@/context/SettingsContext';
 import { Music2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { getPortalRoot } from '@/lib/utils/portalRoot';
 import { AnimatePresence, motion } from 'framer-motion';
 import { LyricStyleManager } from './lyrics/LyricStyleManager';
 import { KaraokeLine } from './lyrics/KaraokeLine';
@@ -45,11 +46,11 @@ export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+          className="w-[340px] md:max-xl:w-[260px] md:portrait:w-[212px]"
           style={{
             position: 'fixed',
             top: 0,
             right: 0,
-            width: '340px',
             height: '100vh',
             display: 'flex',
             flexDirection: 'column',
@@ -140,5 +141,5 @@ export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
     </AnimatePresence>
   );
 
-  return createPortal(content, document.body);
+  return createPortal(content, getPortalRoot());
 }
