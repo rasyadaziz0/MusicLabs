@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Heart, MoreHorizontal, Play, Shuffle, Share } from 'lucide-react';
+import { Heart, MoreHorizontal, Play, Shuffle, Share, Link2 } from 'lucide-react';
 import { usePlayer } from '@/context/PlayerContext';
 import { useAuth } from '@/context/AuthContext';
 import { useLikedSongs } from '@/hooks/useMusicLibrary';
@@ -67,31 +67,50 @@ export default function LikedSongsPage() {
               </button>
 
               {isMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-48 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl z-50 py-1 flex flex-col overflow-hidden">
+                <div className="absolute right-0 top-full mt-2 w-56 bg-[#252525]/90 backdrop-blur-2xl border border-white/10 rounded-xl shadow-2xl z-50 py-1.5 flex flex-col overflow-hidden">
                   <button 
                     onClick={() => {
                       if (likedSongs.length > 0) playTrack(likedSongs[0], likedSongs);
                       setIsMenuOpen(false);
                     }} 
-                    className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors flex items-center gap-3"
+                    className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between"
                   >
-                    <Play size={16} fill="currentColor" /> Play All
+                    <span>Play All</span>
+                    <Play size={15} fill="currentColor" className="text-white/60" />
                   </button>
                   <button 
                     onClick={() => {
                       if (likedSongs.length > 0) shufflePlay(likedSongs);
                       setIsMenuOpen(false);
                     }} 
-                    className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors flex items-center gap-3"
+                    className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between"
                   >
-                    <Shuffle size={16} /> Shuffle Play
+                    <span>Shuffle Play</span>
+                    <Shuffle size={15} className="text-white/60" />
                   </button>
-                  <div className="h-px bg-white/10 my-1 mx-2" />
+                  
+                  <div className="my-1 border-t border-white/10 mx-3" />
+                  
                   <button 
                     onClick={handleShare} 
-                    className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors flex items-center gap-3"
+                    className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between"
                   >
-                    <Share size={16} /> Share Link
+                    <span>Share</span>
+                    <Share size={15} className="text-white/60" />
+                  </button>
+                  
+                  <div className="my-1 border-t border-white/10 mx-3" />
+                  
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(window.location.href);
+                      toast.success('Link copied to clipboard!');
+                      setIsMenuOpen(false);
+                    }} 
+                    className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between"
+                  >
+                    <span>Copy Link</span>
+                    <Link2 size={15} className="text-white/60" />
                   </button>
                 </div>
               )}

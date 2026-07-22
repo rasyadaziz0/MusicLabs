@@ -99,6 +99,7 @@ export default async function AlbumPage({ params }: PageProps) {
       />
 
       <AlbumPageClient
+        albumId={rawId}
         albumTitle={album.title || 'Unknown Album'}
         albumArtist={album.artist || 'Unknown Artist'}
         albumArtistId={album.artist_id || null}

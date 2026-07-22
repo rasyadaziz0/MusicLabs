@@ -8,7 +8,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
 import { UserProfile } from '@/types/profile';
 import { gooeyToast as toast } from 'goey-toast';
-import { Plus, Trash2, Pin, MoreHorizontal, Share, Edit2, UserPlus, Upload, Loader2 } from 'lucide-react';
+import { MoreHorizontal, Share, Edit2, Trash2, Pin, UserPlus, Code, Link2, Plus, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
@@ -19,6 +19,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { AppleMusicHeader } from '@/components/ui/AppleMusicHeader';
 import { AppleMusicTrackList } from '@/components/ui/AppleMusicTrackList';
 import { useAuth } from '@/context/AuthContext';
+import { escapeHtmlAttr } from '@/lib/utils/escapeHtml';
 import { supabase } from '@/lib/supabase/client';
 import CollaboratorModal from '@/components/playlist/CollaboratorModal';
 import { usePlaylistCollaborators } from '@/hooks/useCollaborators';
@@ -155,46 +156,80 @@ export default function PlaylistPage() {
             </button>
 
             {isMenuOpen && (
-              <div className="absolute right-0 top-full mt-2 w-56 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl z-50 py-1 flex flex-col overflow-hidden">
-                <button onClick={handleShare} className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors flex items-center gap-3">
-                  <Share size={16} /> Share Playlist
+              <div className="absolute right-0 top-full mt-2 w-56 bg-[#252525]/90 backdrop-blur-2xl border border-white/10 rounded-xl shadow-2xl z-50 py-1.5 flex flex-col overflow-hidden">
+                <button onClick={handleShare} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between">
+                  <span>Share</span>
+                  <Share size={15} className="text-white/60" />
+                </button>
+
+                <div className="my-1 border-t border-white/10 mx-3" />
+                
+                <button onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  toast.success('Link copied to clipboard!');
+                  setIsMenuOpen(false);
+                }} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between">
+                  <span>Copy Link</span>
+                  <Link2 size={15} className="text-white/60" />
+                </button>
+
+                <div className="my-1 border-t border-white/10 mx-3" />
+                
+                <button onClick={() => {
+                  if (playlist) {
+                    const appUrl = typeof window !== 'undefined' ? window.location.origin : '';
+                    const escapedTitle = escapeHtmlAttr(playlist.name);
+                    const src = `${appUrl}/embed/playlist/${playlist.id}`;
+                    const iframe = `<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="450" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="${src}" title="${escapedTitle}"></iframe>`;
+                    navigator.clipboard.writeText(iframe);
+                    toast.success('Embed code copied', {
+                      description: playlist.is_public ? 'Paste into any website to embed this playlist.' : 'Note: Only public playlists can be embedded.'
+                    });
+                    setIsMenuOpen(false);
+                  }
+                }} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between group">
+                  <span>Copy Embed Code</span>
+                  <Code size={15} className="text-white/60 group-hover:text-white transition-colors" />
                 </button>
 
                 {playlist?.user_id === user?.id && (
                   <>
+                    <div className="my-1 border-t border-white/10 mx-3" />
+
                     <button onClick={() => {
                       setIsCollaboratorModalOpen(true);
                       setIsMenuOpen(false);
-                    }} className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors flex items-center gap-3">
-                      <UserPlus size={16} /> Manage Collaborators
+                    }} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between">
+                      <span>Manage Collaborators</span>
+                      <UserPlus size={15} className="text-white/60" />
                     </button>
 
                     <button onClick={() => {
                       router.push(`/playlist/${playlist.id}/edit`);
                       setIsMenuOpen(false);
-                    }} className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors flex items-center gap-3">
-                      <Edit2 size={16} /> Edit Playlist
+                    }} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between">
+                      <span>Edit Playlist</span>
+                      <Edit2 size={15} className="text-white/60" />
                     </button>
 
                     <button onClick={() => {
                       togglePinMutation.mutate({ playlistId: playlist.id, currentPinStatus: !!playlist.is_pinned });
                       setIsMenuOpen(false);
-                    }} className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors flex items-center gap-3">
-                      <Pin size={16} className={playlist.is_pinned ? "text-primary" : ""} fill={playlist.is_pinned ? "currentColor" : "none"} />
-                      {playlist.is_pinned ? "Unpin Playlist" : "Pin Playlist"}
+                    }} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between">
+                      <span>{playlist.is_pinned ? 'Unpin Playlist' : 'Pin Playlist'}</span>
+                      <Pin size={15} className="text-white/60" />
                     </button>
 
-                    <div className="h-px bg-white/10 my-1 mx-2" />
+                    <div className="my-1 border-t border-white/10 mx-3" />
 
                     <button onClick={() => {
                       if (confirm('Are you sure you want to delete this playlist?')) {
-                        deletePlaylistMutation.mutate(playlist.id, {
-                          onSuccess: () => router.push('/library/playlists')
-                        });
+                        deletePlaylistMutation.mutate(playlist.id);
                       }
                       setIsMenuOpen(false);
-                    }} className="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-white/10 transition-colors flex items-center gap-3">
-                      <Trash2 size={16} /> Delete Playlist
+                    }} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-red-500 hover:bg-white/10 transition-colors flex items-center justify-between">
+                      <span>Delete Playlist</span>
+                      <Trash2 size={15} className="text-red-500/80" />
                     </button>
                   </>
                 )}

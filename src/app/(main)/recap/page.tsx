@@ -95,10 +95,10 @@ export default function RecapPage() {
   }
 
   return (
-    <div className="pb-32 max-w-[1200px] mx-auto">
+    <div className="pb-32 pt-2 space-y-10">
       {/* ── Hero ── */}
-      <div className="px-4 md:px-8 pt-4 md:pt-8">
-        <div ref={heroRef} className="am-replay-hero pt-12 pb-12 px-6 md:px-12 rounded-3xl border border-white/5 shadow-2xl">
+      <div className="px-2 md:px-0">
+        <div ref={heroRef} className="am-replay-hero pt-12 pb-12 px-6 md:px-12 rounded-3xl border border-white/5 shadow-2xl mx-2 md:mx-0">
 
           {/* Selectors */}
           <div className="relative z-50 flex flex-wrap items-center gap-3 mb-10" data-animate>
@@ -191,7 +191,7 @@ export default function RecapPage() {
                         onScrollLeft={() => milestonesScroll.scroll('left')} 
                         onScrollRight={() => milestonesScroll.scroll('right')} 
                       />
-                      <div ref={milestonesScroll.scrollRef} className="flex overflow-x-auto md:overflow-visible gap-4 md:gap-5 pb-6 md:pb-0 scrollbar-hide -mx-4 px-4 md:-ml-[296px] md:pl-[296px] md:-mr-[40px] md:pr-[40px]" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                      <div ref={milestonesScroll.scrollRef} className="flex overflow-x-auto gap-4 pb-6 scrollbar-hide -ml-[36px] pl-[36px] -mr-[36px] pr-[36px] md:-ml-[336px] md:pl-[336px] md:-mr-[80px] md:pr-[80px]" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                       <StatCard
                         label="Plays"
                         value={stats.totalTracks}
@@ -240,7 +240,7 @@ export default function RecapPage() {
                         onScrollLeft={() => topSongsScroll.scroll('left')} 
                         onScrollRight={() => topSongsScroll.scroll('right')} 
                       />
-                      <div ref={topSongsScroll.scrollRef} className="flex overflow-x-auto gap-4 md:gap-6 pb-6 scrollbar-hide -mx-4 px-4 md:-ml-[296px] md:pl-[296px] md:-mr-[40px] md:pr-[40px]" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                      <div ref={topSongsScroll.scrollRef} className="flex overflow-x-auto gap-4 md:gap-6 pb-6 scrollbar-hide -ml-[36px] pl-[36px] -mr-[36px] pr-[36px] md:-ml-[336px] md:pl-[336px] md:-mr-[80px] md:pr-[80px]" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                       {topTracks.map((song, i) => (
                         <TopTrackCard
                           key={song.id}
@@ -267,7 +267,7 @@ export default function RecapPage() {
                           onScrollLeft={() => topArtistsScroll.scroll('left')} 
                           onScrollRight={() => topArtistsScroll.scroll('right')} 
                         />
-                        <div ref={topArtistsScroll.scrollRef} className="flex overflow-x-auto gap-6 md:gap-8 pb-6 scrollbar-hide -mx-4 px-4 md:-ml-[296px] md:pl-[296px] md:-mr-[40px] md:pr-[40px]" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+                        <div ref={topArtistsScroll.scrollRef} className="flex overflow-x-auto gap-6 md:gap-8 pb-6 scrollbar-hide -ml-[36px] pl-[36px] -mr-[36px] pr-[36px] md:-ml-[336px] md:pl-[336px] md:-mr-[80px] md:pr-[80px]" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
                         {topArtists.map((artist, i) => (
                           <TopArtistCard
                             key={artist.name}

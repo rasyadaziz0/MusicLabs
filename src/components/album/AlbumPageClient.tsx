@@ -2,7 +2,8 @@
 
 import { usePlayer } from '@/context/PlayerContext';
 import { gooeyToast as toast } from 'goey-toast';
-import { MoreHorizontal, Share } from 'lucide-react';
+import { MoreHorizontal, Share, Code, Link2 } from 'lucide-react';
+import { escapeHtmlAttr } from '@/lib/utils/escapeHtml';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
@@ -14,6 +15,7 @@ import { AppleMusicHeader } from '@/components/ui/AppleMusicHeader';
 import { AppleMusicTrackList } from '@/components/ui/AppleMusicTrackList';
 
 interface AlbumPageClientProps {
+  albumId: string;
   albumTitle: string;
   albumArtist: string;
   albumArtistId: string | null;
@@ -24,6 +26,7 @@ interface AlbumPageClientProps {
 }
 
 export default function AlbumPageClient({
+  albumId,
   albumTitle,
   albumArtist,
   albumArtistId,
@@ -89,9 +92,32 @@ export default function AlbumPageClient({
             </button>
 
             {isMenuOpen && (
-              <div className="absolute right-0 top-full mt-2 w-56 bg-[#1a1a1a] border border-white/10 rounded-xl shadow-2xl z-50 py-1 flex flex-col overflow-hidden">
-                <button onClick={handleShare} className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/10 transition-colors flex items-center gap-3">
-                  <Share size={16} /> Share Album
+              <div className="absolute right-0 top-full mt-2 w-56 bg-[#252525]/90 backdrop-blur-2xl border border-white/10 rounded-xl shadow-2xl z-50 py-1.5 flex flex-col overflow-hidden">
+                <button onClick={handleShare} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between">
+                  <span>Share</span>
+                  <Share size={15} className="text-white/60" />
+                </button>
+                <div className="my-1 border-t border-white/10 mx-3" />
+                <button onClick={() => {
+                  navigator.clipboard.writeText(window.location.href);
+                  toast.success('Link copied to clipboard!');
+                  setIsMenuOpen(false);
+                }} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between">
+                  <span>Copy Link</span>
+                  <Link2 size={15} className="text-white/60" />
+                </button>
+                <div className="my-1 border-t border-white/10 mx-3" />
+                <button onClick={() => {
+                  const appUrl = typeof window !== 'undefined' ? window.location.origin : '';
+                  const escapedTitle = escapeHtmlAttr(albumTitle);
+                  const src = `${appUrl}/embed/album/${albumId}`;
+                  const iframe = `<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="450" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="${src}" title="${escapedTitle}"></iframe>`;
+                  navigator.clipboard.writeText(iframe);
+                  toast.success('Embed code copied', { description: 'Paste into any website to embed this album.' });
+                  setIsMenuOpen(false);
+                }} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between group">
+                  <span>Copy Embed Code</span>
+                  <Code size={15} className="text-white/60 group-hover:text-white transition-colors" />
                 </button>
               </div>
             )}

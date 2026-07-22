@@ -24,12 +24,9 @@ export function useLyrics(currentTrack: Song | null, actualDuration: number = 0)
   const trackRef = useRef(currentTrack);
   trackRef.current = currentTrack;
 
-  // We need actual audio duration to match the correct LRC from LRClib,
-  // avoiding the drift caused by using metadata duration (which often differs).
   const stabilizedDuration = Math.round(actualDuration);
 
   useEffect(() => {
-    // Clear old lyrics immediately when track changes to prevent stale state bugs
     setLines([]);
     setIsSynced(false);
 

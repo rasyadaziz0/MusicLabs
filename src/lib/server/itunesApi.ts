@@ -1,93 +1,23 @@
 import { Song } from '@/types/music';
-import { ArtistParser } from '@/lib/utils/ArtistParser';
+import { ITunesClient } from './itunes/ITunesClient';
+import { ITunesMapper } from './itunes/ITunesMapper';
+import { ITunesResult } from './itunes/types';
 
-// ── iTunes API helper ──────────────────────────────────────
-
-export interface ITunesResult {
-  trackId?: number;
-  trackName?: string;
-  artistName?: string;
-  collectionName?: string;
-  artworkUrl100?: string;
-  previewUrl?: string;
-  trackTimeMillis?: number;
-  releaseDate?: string;
-  primaryGenreName?: string;
-  trackViewUrl?: string;
-  artistId?: number;
-  collectionId?: number;
-  wrapperType?: string;
-  artistType?: string;
-  artistLinkUrl?: string;
-  collectionType?: string;
-  trackCount?: number;
-}
-
-export function mapITunesToSong(item: ITunesResult): Song {
-  // Upscale artwork: iTunes returns 100x100, replace to get 600x600
-  const artworkLarge = item.artworkUrl100?.replace('100x100bb', '600x600bb') || '';
-  const artworkMedium = item.artworkUrl100?.replace('100x100bb', '300x300bb') || '';
-
-  return {
-    id: `itunes-${item.trackId}`,
-    name: item.trackName || 'Unknown Title',
-    type: 'song',
-    year: item.releaseDate?.slice(0, 4) || '',
-    releaseDate: item.releaseDate || null,
-    duration: Math.round((item.trackTimeMillis || 0) / 1000),
-    label: '',
-    explicitContent: false,
-    playCount: 0,
-    language: '',
-    hasLyrics: false,
-    lyricsId: null,
-    url: item.trackViewUrl || '',
-    copyright: '',
-    album: {
-      id: `itunes-album-${item.collectionId || ''}`,
-      name: item.collectionName || '',
-      url: '',
-    },
-    artists: (() => {
-      const parsedArtists = ArtistParser.parse(
-        item.artistName,
-        'itunes-artist',
-        item.artistId ? `itunes-artist-${item.artistId}` : null
-      );
-      return {
-        primary: parsedArtists,
-        featured: [],
-        all: parsedArtists,
-      };
-    })(),
-    image: [
-      { quality: '500x500', url: artworkLarge },
-      { quality: '150x150', url: artworkMedium },
-    ].filter(i => i.url),
-    downloadUrl: [],
-    preview: item.previewUrl || '',
-    genre: item.primaryGenreName || '',
-  };
-}
+// Backward compatibility helper
+export const mapITunesToSong = ITunesMapper.toSong;
 
 export async function searchITunesTracks(query: string, limit = 25, country = 'ID'): Promise<Song[]> {
   const fetchTunes = async (q: string, l: number) => {
-    const res = await fetch(
-      `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=music&entity=song&limit=${l}&country=${country}`,
-      { next: { revalidate: 300 } }
-    );
-    if (!res.ok) return [];
-    const data = await res.json();
-    return (data.results || []).map(mapITunesToSong);
+    const qs = ITunesClient.buildQuery({ term: q, media: 'music', entity: 'song', limit: l, country });
+    const data = await ITunesClient.fetch<{ results: ITunesResult[] }>(`/search?${qs}`);
+    return (data?.results || []).map(ITunesMapper.toSong);
   };
 
   try {
-    // 1. Primary search: Use a larger limit so frontend getMatchScore can filter better
     const searchLimit = Math.max(limit, 50);
     let songs = await fetchTunes(query.trim(), searchLimit);
-    const existingIds = new Set(songs.map(s => s.id));
+    const existingIds = new Set(songs.map((s) => s.id));
 
-    // 2. Fallback: iTunes strict matching often fails on "Artist - Title" format
     if (query.includes('-')) {
       const parts = query.split('-');
       const titlePart = parts[parts.length - 1].trim();
@@ -101,11 +31,8 @@ export async function searchITunesTracks(query: string, limit = 25, country = 'I
           }
         }
       }
-    }
-    // 3. Fallback: If it's just a space-separated string with many words and few results
-    else if (songs.length < 10) {
+    } else if (songs.length < 10) {
       const words = query.split(' ').filter(Boolean);
-      // Try searching just the last 1-2 words assuming it's the title
       if (words.length > 2) {
         const titleGuess = words.slice(-2).join(' ');
         const fallbackSongs = await fetchTunes(titleGuess, searchLimit);
@@ -125,245 +52,120 @@ export async function searchITunesTracks(query: string, limit = 25, country = 'I
 }
 
 export async function searchITunesArtists(query: string, limit = 5, country = 'ID') {
-  try {
-    const res = await fetch(
-      `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=musicArtist&limit=${limit}&country=${country}`,
-      { next: { revalidate: 300 } }
-    );
-    if (!res.ok) return [];
-    const data = await res.json();
-    return (data.results || []).map((artist: ITunesResult) => ({
-      id: `itunes-artist-${artist.artistId}`,
-      title: artist.artistName || 'Unknown',
-      description: artist.primaryGenreName || 'Artist',
-      image: [], // iTunes doesn't return artist images in search
-      url: artist.artistLinkUrl || ''
-    }));
-  } catch {
-    return [];
-  }
+  const qs = ITunesClient.buildQuery({ term: query, media: 'music', entity: 'musicArtist', limit, country });
+  const data = await ITunesClient.fetch<{ results: ITunesResult[] }>(`/search?${qs}`);
+  return (data?.results || []).map(ITunesMapper.toArtistSearch);
 }
 
 export async function searchITunesAlbums(query: string, limit = 10, country = 'ID') {
-  try {
-    const res = await fetch(
-      `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=album&limit=${limit}&country=${country}`,
-      { next: { revalidate: 300 } }
-    );
-    if (!res.ok) return [];
-    const data = await res.json();
-    return (data.results || []).map((album: ITunesResult) => {
-      const cover = album.artworkUrl100?.replace('100x100bb', '600x600bb') || '';
-      return {
-        id: `itunes-album-${album.collectionId}`,
-        title: album.collectionName || 'Unknown Album',
-        artist: album.artistName || 'Unknown Artist',
-        artist_id: album.artistId ? `itunes-artist-${album.artistId}` : null,
-        cover: cover,
-        cover_small: album.artworkUrl100 || '',
-        cover_medium: album.artworkUrl100?.replace('100x100bb', '300x300bb') || '',
-        cover_big: cover,
-        cover_xl: cover,
-        nb_tracks: album.trackCount || 0,
-        release_date: album.releaseDate || '',
-        album_type: album.collectionType?.toLowerCase() || 'album',
-      };
-    });
-  } catch {
-    return [];
-  }
+  const qs = ITunesClient.buildQuery({ term: query, media: 'music', entity: 'album', limit, country });
+  const data = await ITunesClient.fetch<{ results: ITunesResult[] }>(`/search?${qs}`);
+  return (data?.results || []).map(ITunesMapper.toAlbumSearch);
 }
 
 export async function getITunesTrack(itunesId: string): Promise<Song | null> {
-  try {
-    const res = await fetch(`https://itunes.apple.com/lookup?id=${itunesId}&country=ID`, { next: { revalidate: 300 } });
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (data.results && data.results.length > 0) {
-      return mapITunesToSong(data.results[0]);
-    }
-    return null;
-  } catch {
-    return null;
+  const qs = ITunesClient.buildQuery({ id: itunesId, country: 'ID' });
+  const data = await ITunesClient.fetch<{ results: ITunesResult[] }>(`/lookup?${qs}`);
+  
+  if (data?.results && data.results.length > 0) {
+    return ITunesMapper.toSong(data.results[0]);
   }
+  return null;
 }
 
 export async function getITunesArtist(itunesId: string) {
-  try {
-    const isSearchId = itunesId.startsWith('search-') || itunesId.startsWith('itunes-search-') || !/^\d+$/.test(itunesId);
-    if (isSearchId) {
-      const term = decodeURIComponent(itunesId.replace(/^itunes-search-|^search-/, ''));
-      const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=musicArtist&limit=1&country=ID`, { next: { revalidate: 300 } });
-      if (!res.ok) return null;
-      const data = await res.json();
-      const artist = data.results?.[0];
-      if (!artist) {
-        return {
-          id: `itunes-artist-${itunesId}`,
-          name: term,
-          link: '',
-          picture: '',
-          picture_small: '',
-          picture_medium: '',
-          picture_big: '',
-          picture_xl: '',
-          nb_album: 0,
-          nb_fan: 0,
-          genres: [],
-          popularity: 0,
-        };
-      }
+  const isSearchId = itunesId.startsWith('search-') || itunesId.startsWith('itunes-search-') || !/^\d+$/.test(itunesId);
+
+  if (isSearchId) {
+    const term = decodeURIComponent(itunesId.replace(/^itunes-search-|^search-/, ''));
+    const qs = ITunesClient.buildQuery({ term, entity: 'musicArtist', limit: 1, country: 'ID' });
+    const data = await ITunesClient.fetch<{ results: ITunesResult[] }>(`/search?${qs}`);
+    const artist = data?.results?.[0];
+
+    if (!artist) {
       return {
-        id: `itunes-artist-${artist.artistId}`,
-        name: artist.artistName,
-        link: artist.artistLinkUrl || '',
-        picture: '',
-        picture_small: '',
-        picture_medium: '',
-        picture_big: '',
-        picture_xl: '',
-        nb_album: 0,
-        nb_fan: 0,
-        genres: artist.primaryGenreName ? [artist.primaryGenreName] : [],
-        popularity: 0,
+        id: `itunes-artist-${itunesId}`, name: term, link: '',
+        picture: '', picture_small: '', picture_medium: '', picture_big: '', picture_xl: '',
+        nb_album: 0, nb_fan: 0, genres: [], popularity: 0,
       };
     }
-
-    const res = await fetch(`https://itunes.apple.com/lookup?id=${itunesId}&country=ID`, { next: { revalidate: 300 } });
-    if (!res.ok) return null;
-    const data = await res.json();
-    const artist = data.results?.[0];
-    if (!artist) return null;
-
     return {
-      id: `itunes-artist-${artist.artistId}`,
-      name: artist.artistName,
-      link: artist.artistLinkUrl || '',
-      picture: '', // iTunes doesn't reliably return artist images
-      picture_small: '',
-      picture_medium: '',
-      picture_big: '',
-      picture_xl: '',
-      nb_album: 0,
-      nb_fan: 0,
-      genres: artist.primaryGenreName ? [artist.primaryGenreName] : [],
-      popularity: 0,
+      id: `itunes-artist-${artist.artistId}`, name: artist.artistName, link: artist.artistLinkUrl || '',
+      picture: '', picture_small: '', picture_medium: '', picture_big: '', picture_xl: '',
+      nb_album: 0, nb_fan: 0, genres: artist.primaryGenreName ? [artist.primaryGenreName] : [], popularity: 0,
     };
-  } catch {
-    return null;
   }
+
+  const qs = ITunesClient.buildQuery({ id: itunesId, country: 'ID' });
+  const data = await ITunesClient.fetch<{ results: ITunesResult[] }>(`/lookup?${qs}`);
+  const artist = data?.results?.[0];
+  if (!artist) return null;
+
+  return {
+    id: `itunes-artist-${artist.artistId}`, name: artist.artistName, link: artist.artistLinkUrl || '',
+    picture: '', picture_small: '', picture_medium: '', picture_big: '', picture_xl: '',
+    nb_album: 0, nb_fan: 0, genres: artist.primaryGenreName ? [artist.primaryGenreName] : [], popularity: 0,
+  };
 }
 
 export async function getITunesArtistTopTracks(itunesId: string, limit = 50): Promise<Song[]> {
-  try {
-    const isSearchId = itunesId.startsWith('search-') || itunesId.startsWith('itunes-search-') || !/^\d+$/.test(itunesId);
-    let url = `https://itunes.apple.com/lookup?id=${itunesId}&entity=song&limit=${limit}&country=ID`;
-    if (isSearchId) {
-      const term = decodeURIComponent(itunesId.replace(/^itunes-search-|^search-/, ''));
-      url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=song&limit=${limit}&country=ID`;
-    }
-    const res = await fetch(url, { next: { revalidate: 300 } });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return (data.results || [])
-      .filter((item: ITunesResult) => item.wrapperType === 'track')
-      .map(mapITunesToSong);
-  } catch {
-    return [];
+  const isSearchId = itunesId.startsWith('search-') || itunesId.startsWith('itunes-search-') || !/^\d+$/.test(itunesId);
+  
+  let path = `/lookup?id=${itunesId}&entity=song&limit=${limit}&country=ID`;
+  if (isSearchId) {
+    const term = decodeURIComponent(itunesId.replace(/^itunes-search-|^search-/, ''));
+    const qs = ITunesClient.buildQuery({ term, entity: 'song', limit, country: 'ID' });
+    path = `/search?${qs}`;
   }
+
+  const data = await ITunesClient.fetch<{ results: ITunesResult[] }>(path);
+  return (data?.results || [])
+    .filter((item) => item.wrapperType === 'track')
+    .map(ITunesMapper.toSong);
 }
 
 export async function getITunesArtistAlbums(itunesId: string, limit = 50) {
-  try {
-    const isSearchId = itunesId.startsWith('search-') || itunesId.startsWith('itunes-search-') || !/^\d+$/.test(itunesId);
-    let url = `https://itunes.apple.com/lookup?id=${itunesId}&entity=album&limit=${limit}&country=ID`;
-    if (isSearchId) {
-      const term = decodeURIComponent(itunesId.replace(/^itunes-search-|^search-/, ''));
-      url = `https://itunes.apple.com/search?term=${encodeURIComponent(term)}&entity=album&limit=${limit}&country=ID`;
-    }
-    const res = await fetch(url, { next: { revalidate: 300 } });
-    if (!res.ok) return [];
-    const data = await res.json();
-
-    // First result is artist, subsequent are collections (albums)
-    return (data.results || [])
-      .filter((item: ITunesResult) => item.wrapperType === 'collection')
-      .map((album: ITunesResult) => {
-        const cover = album.artworkUrl100?.replace('100x100bb', '600x600bb') || '';
-        return {
-          id: `itunes-album-${album.collectionId}`,
-          title: album.collectionName,
-          cover: cover,
-          cover_small: album.artworkUrl100 || '',
-          cover_medium: album.artworkUrl100?.replace('100x100bb', '300x300bb') || '',
-          cover_big: cover,
-          cover_xl: cover,
-          nb_tracks: album.trackCount || 0,
-          artist: album.artistName || '',
-          artist_id: album.artistId ? `itunes-artist-${album.artistId}` : null,
-          release_date: album.releaseDate || '',
-          album_type: album.collectionType?.toLowerCase() || 'album',
-        };
-      });
-  } catch {
-    return [];
+  const isSearchId = itunesId.startsWith('search-') || itunesId.startsWith('itunes-search-') || !/^\d+$/.test(itunesId);
+  
+  let path = `/lookup?id=${itunesId}&entity=album&limit=${limit}&country=ID`;
+  if (isSearchId) {
+    const term = decodeURIComponent(itunesId.replace(/^itunes-search-|^search-/, ''));
+    const qs = ITunesClient.buildQuery({ term, entity: 'album', limit, country: 'ID' });
+    path = `/search?${qs}`;
   }
+
+  const data = await ITunesClient.fetch<{ results: ITunesResult[] }>(path);
+
+  // First result is artist, subsequent are collections (albums)
+  return (data?.results || [])
+    .filter((item) => item.wrapperType === 'collection')
+    .map(ITunesMapper.toAlbumSearch);
 }
 
 export async function getITunesAlbum(itunesId: string) {
-  try {
-    const res = await fetch(
-      `https://itunes.apple.com/lookup?id=${itunesId}&entity=song&country=ID`,
-      { next: { revalidate: 300 } }
-    );
-    if (!res.ok) return null;
-    const data = await res.json();
+  const qs = ITunesClient.buildQuery({ id: itunesId, entity: 'song', country: 'ID' });
+  const data = await ITunesClient.fetch<{ results: ITunesResult[] }>(`/lookup?${qs}`);
+  const items = data?.results || [];
 
-    // First result is collection (album), subsequent are tracks
-    const items = data.results || [];
-    const albumItem = items.find((item: ITunesResult) => item.wrapperType === 'collection');
-    if (!albumItem) return null;
+  // First result is collection (album), subsequent are tracks
+  const albumItem = items.find((item) => item.wrapperType === 'collection');
+  if (!albumItem) return null;
 
-    const tracks = items
-      .filter((item: ITunesResult) => item.wrapperType === 'track')
-      .map(mapITunesToSong);
+  const tracks = items
+    .filter((item) => item.wrapperType === 'track')
+    .map(ITunesMapper.toSong);
 
-    const cover = albumItem.artworkUrl100?.replace('100x100bb', '600x600bb') || '';
-
-    return {
-      id: `itunes-album-${albumItem.collectionId}`,
-      title: albumItem.collectionName,
-      cover: cover,
-      cover_small: albumItem.artworkUrl100 || '',
-      cover_medium: albumItem.artworkUrl100?.replace('100x100bb', '300x300bb') || '',
-      cover_big: cover,
-      cover_xl: cover,
-      nb_tracks: albumItem.trackCount || 0,
-      artist: albumItem.artistName || '',
-      artist_id: albumItem.artistId ? `itunes-artist-${albumItem.artistId}` : null,
-      release_date: albumItem.releaseDate || '',
-      album_type: albumItem.collectionType?.toLowerCase() || 'album',
-      tracks: tracks
-    };
-  } catch {
-    return null;
-  }
+  const albumResponse = ITunesMapper.toAlbumSearch(albumItem);
+  return {
+    ...albumResponse,
+    artist: albumItem.artistName || '',
+    tracks: tracks,
+  };
 }
 
-export async function getITunesPreviewUrl(
-  title: string,
-  artist: string
-): Promise<string | null> {
-  try {
-    const query = artist ? `${artist} ${title}` : title;
-    const res = await fetch(
-      `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=1&country=ID`,
-      { next: { revalidate: 300 } }
-    );
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data.results?.[0]?.previewUrl || null;
-  } catch {
-    return null;
-  }
+export async function getITunesPreviewUrl(title: string, artist: string): Promise<string | null> {
+  const query = artist ? `${artist} ${title}` : title;
+  const qs = ITunesClient.buildQuery({ term: query, media: 'music', entity: 'song', limit: 1, country: 'ID' });
+  const data = await ITunesClient.fetch<{ results: ITunesResult[] }>(`/search?${qs}`);
+  return data?.results?.[0]?.previewUrl || null;
 }

@@ -2,15 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Syne, DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import "goey-toast/styles.css";
-import { AuthProvider } from "@/context/AuthContext";
-import { SettingsProvider } from "@/context/SettingsContext";
-import { PlayerProvider } from "@/context/PlayerContext";
-import { ArtworkColorsProvider } from "@/context/ArtworkColorsContext";
-import { LanguageProvider } from "@/context/LanguageContext";
-import QueryProvider from "@/context/QueryProvider";
-import PWARegistration from "@/components/PWARegistration";
-import YouTubePlayerMount from "@/components/YouTubePlayerMount";
-import { LiquidGlassFilters } from "@/components/ui/LiquidGlass";
+import ConditionalProviders from "@/components/ConditionalProviders";
 import { Analytics } from "@vercel/analytics/react";
 import GooeyToasterProvider from "@/components/GooeyToasterProvider";
 
@@ -32,10 +24,14 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://music.rasyadazizan.site"),
   title: {
-    default: "AcadMusic - Streaming Musik Gratis dengan Lirik",
+    default: "AcadMusic - Web Player",
     template: "%s | AcadMusic",
   },
-  description: "Dengarkan jutaan lagu gratis dengan lirik, playlist kolaboratif, dan rekomendasi AI. Streaming musik tanpa batas di AcadMusic.",
+  description: "Dengarkan jutaan lagu dengan lirik real-time, buat playlist, dan temukan musik baru dengan AI di AcadMusic.",
+  keywords: ["music streaming", "streaming musik", "lirik lagu", "realtime lyrics", "music player", "youtube music alternative", "acadmusic", "rasyad azizan"],
+  authors: [{ name: "Rasyad Azizan", url: "https://rasyadazizan.site" }],
+  applicationName: "AcadMusic",
+  generator: "Next.js",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -45,18 +41,37 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "AcadMusic",
-    title: "AcadMusic - Streaming Musik Gratis dengan Lirik",
-    description: "Dengarkan jutaan lagu gratis dengan lirik, playlist kolaboratif, dan rekomendasi AI.",
+    title: "AcadMusic - Web Player",
+    description: "Dengarkan jutaan lagu dengan lirik real-time dan temukan musik baru dengan AI di AcadMusic.",
     locale: "id_ID",
+    url: "https://music.rasyadazizan.site",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "AcadMusic - Modern Music Streaming",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "AcadMusic - Streaming Musik Gratis",
-    description: "Dengarkan jutaan lagu gratis dengan lirik real-time, playlist kolaboratif, dan rekomendasi AI.",
+    site: "@acadmusic",
+    creator: "@rasyadazizan",
+    title: "AcadMusic - Web Player",
+    description: "Dengarkan jutaan lagu dengan lirik real-time dan temukan musik baru dengan AI di AcadMusic.",
+    images: ["/og-image.jpg"],
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
   alternates: {
     canonical: "/",
@@ -81,25 +96,13 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full bg-void text-white selection:bg-primary/30 select-none overflow-x-hidden" suppressHydrationWarning>
-        <LiquidGlassFilters />
-        <PWARegistration />
-        <QueryProvider>
-          <LanguageProvider>
-            <AuthProvider>
-              <SettingsProvider>
-                <PlayerProvider>
-                  <ArtworkColorsProvider>
-                    {children}
-                    <YouTubePlayerMount />
-                  </ArtworkColorsProvider>
-                </PlayerProvider>
-              </SettingsProvider>
-            </AuthProvider>
-          </LanguageProvider>
-        </QueryProvider>
+        <ConditionalProviders>
+          {children}
+        </ConditionalProviders>
         <Analytics />
         <GooeyToasterProvider />
       </body>
     </html>
   );
 }
+

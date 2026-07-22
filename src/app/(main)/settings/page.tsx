@@ -18,6 +18,7 @@ import { SearchDiscoverySettings } from '@/components/settings/SearchDiscoverySe
 import { LyricsSettings } from '@/components/settings/LyricsSettings';
 import { PrivacySocialSettings } from '@/components/settings/PrivacySocialSettings';
 import { AccountSettings } from '@/components/settings/AccountSettings';
+import { AboutSettings } from '@/components/settings/AboutSettings';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -156,7 +157,7 @@ export default function SettingsPage() {
   ];
 
   return (
-    <div className="pb-32 pt-2 max-w-2xl mx-auto px-5 md:px-8">
+    <div className="pt-2 max-w-2xl mx-auto px-5 md:px-8 mb-8">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
@@ -223,7 +224,12 @@ export default function SettingsPage() {
       />
 
       {/* ═══════════════════════════════════════════════════════════
-          SECTION 5: ACCOUNT
+          SECTION 5: ABOUT
+         ═══════════════════════════════════════════════════════════ */}
+      <AboutSettings t={t} />
+
+      {/* ═══════════════════════════════════════════════════════════
+          SECTION 6: ACCOUNT
          ═══════════════════════════════════════════════════════════ */}
       <AccountSettings
         t={t}

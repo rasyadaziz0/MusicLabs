@@ -3,7 +3,7 @@
 import { LrcLine } from '@/lib/utils/lrcParser';
 import { Song } from '@/types/music';
 import { motion, animate } from 'framer-motion';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { LyricsHeader } from './lyrics/LyricsHeader';
 import { LyricLine } from './lyrics/LyricLine';
 import { LyricsSkeleton } from './lyrics/LyricsSkeleton';
@@ -45,6 +45,17 @@ export default function LyricsUI({
 
   // Sync font size setting to LyricStyleManager
   LyricStyleManager.setFontSize(settings.lyricsFontSize);
+
+  const onLineClickRef = useRef(onLineClick);
+  useEffect(() => {
+    onLineClickRef.current = onLineClick;
+  }, [onLineClick]);
+
+  const stableOnLineClick = useCallback((time: number, isPlaceholder?: boolean) => {
+    if (onLineClickRef.current) {
+      onLineClickRef.current(time, isPlaceholder);
+    }
+  }, []);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -157,11 +168,11 @@ export default function LyricsUI({
                   index={index}
                   activeIndex={activeIndex}
                   isSynced={isSynced}
-                  currentTime={currentTime}
+                  currentTime={index === activeIndex ? currentTime : 0}
                   isUserScrolling={isUserScrolling}
                   trackId={trackId}
                   romanText={showRomanization ? romanizations?.get(index) : undefined}
-                  onLineClick={onLineClick}
+                  onLineClick={stableOnLineClick}
                 />
               ))}
             </motion.div>

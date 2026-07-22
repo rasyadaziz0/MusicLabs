@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { Song } from '@/types/music';
-import { PlaySquare, Heart, ListPlus, Disc3, Mic2, Share, Radio, Link2, Timer, ChevronRight } from 'lucide-react';
+import { PlaySquare, Heart, ListPlus, Disc3, Mic2, Share, Radio, Link2, Timer, ChevronRight, Code } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { escapeHtmlAttr } from '@/lib/utils/escapeHtml';
 import { usePlayer } from '@/context/PlayerContext';
 import Image from 'next/image';
 import { getBestImageUrl } from '@/lib/api/musicApi';
@@ -139,10 +140,10 @@ export function TrackContextMenu({ track, isOpen, position, onClose, showPlayerC
   const renderMenuItems = () => {
     if (showPlaylists && isMobile) {
       return (
-        <PlaylistSubMenu 
-          track={track} 
-          onClose={onClose} 
-          onBack={() => setShowPlaylists(false)} 
+        <PlaylistSubMenu
+          track={track}
+          onClose={onClose}
+          onBack={() => setShowPlaylists(false)}
         />
       );
     }
@@ -169,7 +170,7 @@ export function TrackContextMenu({ track, isOpen, position, onClose, showPlayerC
           danger={isLiked}
         />
 
-        <div 
+        <div
           className="relative"
           onMouseEnter={() => !isMobile && setShowPlaylists(true)}
           onMouseLeave={() => !isMobile && setShowPlaylists(false)}
@@ -177,19 +178,19 @@ export function TrackContextMenu({ track, isOpen, position, onClose, showPlayerC
           <ContextMenuItem
             icon={<ListPlus size={15} />}
             label="Add to a Playlist"
-            onClick={(e) => { e.stopPropagation(); if(isMobile) setShowPlaylists(true); }}
+            onClick={(e) => { e.stopPropagation(); if (isMobile) setShowPlaylists(true); }}
             rightElement={!isMobile && <ChevronRight size={14} />}
             className={!isMobile && showPlaylists ? "bg-white/10" : ""}
           />
           {!isMobile && showPlaylists && (
-            <div 
+            <div
               className={`absolute top-0 ${flyOutDirection === 'left' ? 'right-full mr-1' : 'left-full ml-1'} w-56 bg-[#1a1a1c] border border-white/10 rounded-xl shadow-2xl backdrop-blur-xl`}
               onClick={(e) => e.stopPropagation()}
             >
-              <PlaylistSubMenu 
-                track={track} 
-                onClose={onClose} 
-                onBack={() => setShowPlaylists(false)} 
+              <PlaylistSubMenu
+                track={track}
+                onClose={onClose}
+                onBack={() => setShowPlaylists(false)}
                 hideHeader
               />
             </div>
@@ -232,6 +233,21 @@ export function TrackContextMenu({ track, isOpen, position, onClose, showPlayerC
           onClick={() => {
             navigator.clipboard.writeText(getTrackUrl());
             toast.success('Link copied to clipboard');
+            onClose();
+          }}
+        />
+        <ContextMenuItem
+          icon={<Code size={15} />}
+          label="Copy Embed Code"
+          onClick={() => {
+            const appUrl = typeof window !== 'undefined' ? window.location.origin : '';
+            const escapedTitle = escapeHtmlAttr(track.name);
+            const escapedArtist = track.artists?.primary?.[0]?.name ? escapeHtmlAttr(track.artists.primary[0].name) : '';
+            const embedTitle = `${escapedTitle} — ${escapedArtist} | AcadMusic Embed`;
+            const src = `${appUrl}/embed/track/${track.id}`;
+            const iframe = `<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="175" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="${src}" title="${embedTitle}"></iframe>`;
+            navigator.clipboard.writeText(iframe);
+            toast.success('Embed code copied', { description: 'Paste into any website to embed this track.' });
             onClose();
           }}
         />

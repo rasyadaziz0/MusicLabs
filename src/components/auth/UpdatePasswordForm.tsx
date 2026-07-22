@@ -183,6 +183,18 @@ export default function UpdatePasswordForm() {
             {isSubmitting ? 'Memperbarui...' : 'Perbarui Password'}
           </button>
         </form>
+
+        <p className="mt-8 text-center text-xs text-white/60 max-w-xs mx-auto leading-relaxed">
+          Dengan menggunakan layanan kami, kamu setuju dengan{' '}
+          <Link href="/terms" className="text-white/80 underline hover:text-white transition-colors">
+            Terms of Use
+          </Link>{' '}
+          dan{' '}
+          <Link href="/privacy" className="text-white/80 underline hover:text-white transition-colors">
+            Privacy Policy
+          </Link>{' '}
+          AcadMusic.
+        </p>
       </section>
     </main>
   );

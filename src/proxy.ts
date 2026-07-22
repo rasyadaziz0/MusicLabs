@@ -43,7 +43,7 @@ function routeRequiresAuth(pathname: string) {
 function hasAuthCookie(request: NextRequest) {
   const cookies = request.cookies.getAll();
   const hasCookie = cookies.some(
-    (c) => c.name.includes('auth-token') || c.name.includes('sb-') 
+    (c) => c.name.includes('auth-token') || c.name.includes('sb-')
   );
   if (hasCookie) return true;
 

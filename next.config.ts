@@ -35,6 +35,17 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        source: '/embed/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://s.ytimg.com; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; frame-src https://www.youtube.com; media-src https:; connect-src 'self' https:; object-src 'none'; base-uri 'self'; frame-ancestors *;",
+          },
+          // Override X-Frame-Options for legacy browsers that don't support CSP frame-ancestors
+          { key: 'X-Frame-Options', value: 'ALLOWALL' },
+        ],
+      },
+      {
         // HSTS only for production (non-localhost)
         source: '/(.*)',
         headers: [

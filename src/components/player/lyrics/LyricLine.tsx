@@ -18,7 +18,9 @@ interface LyricLineProps {
   onLineClick: (time: number, isPlaceholder?: boolean) => void;
 }
 
-export function LyricLine({
+import React from 'react';
+
+export const LyricLine = React.memo(function LyricLine({
   line,
   index,
   activeIndex,
@@ -142,4 +144,4 @@ export function LyricLine({
       )}
     </motion.div>
   );
-}
+});
