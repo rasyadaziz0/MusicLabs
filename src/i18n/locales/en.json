@@ -35,7 +35,22 @@
     "connected_accounts": "Connected Accounts",
     "clear_history": "Clear Listening History",
     "sign_out": "Sign Out",
-    "delete_account": "Delete Account"
+    "delete_account": "Delete Account",
+    "security": "Security",
+    "change_password": "Change Password",
+    "change_password_desc": "We'll send a secure link to your email to set or update your password. If you signed up with Google, this lets you also log in with email and password.",
+    "send_password_email": "Send password reset link",
+    "password_email_sent": "Email sent!",
+    "password_email_sent_desc": "Check your inbox and click the link to set your new password.",
+    "set_password": "Set Password",
+    "set_password_desc": "Create a password for your account so you can also log in manually.",
+    "create_password_button": "Set Password",
+    "new_password": "New Password",
+    "confirm_password": "Confirm Password",
+    "save_password": "Save Password",
+    "password_mismatch": "Passwords do not match",
+    "password_too_short": "Password must be at least 6 characters",
+    "password_updated": "Password updated successfully!"
   },
   "search": {
     "placeholder": "Search for songs, artists, albums...",

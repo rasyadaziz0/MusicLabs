@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Eye, EyeOff } from 'lucide-react';
+import TurnstileWidget from '@/components/auth/TurnstileWidget';
 
 export default function RegisterForm() {
   const { user, loading, signUpWithPassword, signInWithGoogle } = useAuth();
@@ -37,6 +38,7 @@ export default function RegisterForm() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState('');
 
   useEffect(() => {
     if (!loading && user) {
@@ -61,6 +63,9 @@ export default function RegisterForm() {
     if (password !== confirmPassword) {
       return 'Konfirmasi password tidak sama.';
     }
+    if (!captchaToken) {
+      return 'Tolong selesaikan verifikasi captcha.';
+    }
     return null;
   };
 
@@ -76,7 +81,7 @@ export default function RegisterForm() {
     }
 
     setIsSubmitting(true);
-    const { error } = await signUpWithPassword(email.trim(), password, fullName.trim());
+    const { error } = await signUpWithPassword(email.trim(), password, fullName.trim(), captchaToken);
     setIsSubmitting(false);
 
     if (error) {
@@ -210,6 +215,10 @@ export default function RegisterForm() {
               {successMessage}
             </p>
           )}
+
+          <div className="flex justify-center">
+            <TurnstileWidget onSuccess={(token) => setCaptchaToken(token)} />
+          </div>
 
           <button
             type="submit"

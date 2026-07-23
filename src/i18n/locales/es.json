@@ -35,7 +35,22 @@
     "connected_accounts": "Cuentas conectadas",
     "clear_history": "Borrar historial de escucha",
     "sign_out": "Cerrar sesión",
-    "delete_account": "Eliminar cuenta"
+    "delete_account": "Eliminar cuenta",
+    "security": "Seguridad",
+    "change_password": "Cambiar contraseña",
+    "change_password_desc": "Te enviaremos un enlace seguro a tu correo para establecer o actualizar tu contraseña. Si te registraste con Google, esto te permite también iniciar sesión con correo y contraseña.",
+    "send_password_email": "Enviar enlace para restablecer",
+    "password_email_sent": "¡Correo enviado!",
+    "password_email_sent_desc": "Revisa tu bandeja de entrada y haz clic en el enlace para establecer tu nueva contraseña.",
+    "set_password": "Establecer Contraseña",
+    "set_password_desc": "Crea una contraseña para tu cuenta para que también puedas iniciar sesión manualmente.",
+    "create_password_button": "Establecer Contraseña",
+    "new_password": "Nueva Contraseña",
+    "confirm_password": "Confirmar Contraseña",
+    "save_password": "Guardar Contraseña",
+    "password_mismatch": "Las contraseñas no coinciden",
+    "password_too_short": "La contraseña debe tener al menos 6 caracteres",
+    "password_updated": "¡Contraseña actualizada exitosamente!"
   },
   "search": {
     "placeholder": "Buscar canciones, artistas, álbumes...",

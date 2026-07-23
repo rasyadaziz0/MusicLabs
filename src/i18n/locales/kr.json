@@ -35,7 +35,22 @@
     "connected_accounts": "연결된 계정",
     "clear_history": "청취 기록 지우기",
     "sign_out": "로그아웃",
-    "delete_account": "계정 삭제"
+    "delete_account": "계정 삭제",
+    "security": "보안",
+    "change_password": "비밀번호 변경",
+    "change_password_desc": "비밀번호를 설정하거나 변경하기 위한 안전한 링크를 이메일로 보내드립니다. Google로 가입한 경우, 이메일과 비밀번호로도 로그인할 수 있게 됩니다.",
+    "send_password_email": "비밀번호 변경 링크 전송",
+    "password_email_sent": "이메일이 전송되었습니다!",
+    "password_email_sent_desc": "받은편지함을 확인하고 링크를 클릭하여 새 비밀번호를 설정하세요.",
+    "set_password": "비밀번호 설정",
+    "set_password_desc": "이메일로 로그인할 수 있도록 계정의 비밀번호를 생성하세요.",
+    "create_password_button": "비밀번호 설정",
+    "new_password": "새 비밀번호",
+    "confirm_password": "비밀번호 확인",
+    "save_password": "비밀번호 저장",
+    "password_mismatch": "비밀번호가 일치하지 않습니다",
+    "password_too_short": "비밀번호는 6자 이상이어야 합니다",
+    "password_updated": "비밀번호가 성공적으로 업데이트되었습니다!"
   },
   "search": {
     "placeholder": "곡, 아티스트, 앨범 검색...",

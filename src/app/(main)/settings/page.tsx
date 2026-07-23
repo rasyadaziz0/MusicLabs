@@ -19,6 +19,7 @@ import { LyricsSettings } from '@/components/settings/LyricsSettings';
 import { PrivacySocialSettings } from '@/components/settings/PrivacySocialSettings';
 import { AccountSettings } from '@/components/settings/AccountSettings';
 import { AboutSettings } from '@/components/settings/AboutSettings';
+import { SecuritySettings } from '@/components/settings/SecuritySettings';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -222,6 +223,11 @@ export default function SettingsPage() {
         showRecentlyPlayed={showRecentlyPlayed}
         setShowRecentlyPlayed={setShowRecentlyPlayed}
       />
+
+      {/* ═══════════════════════════════════════════════════════════
+          SECTION 4.5: SECURITY
+         ═══════════════════════════════════════════════════════════ */}
+      <SecuritySettings t={t} />
 
       {/* ═══════════════════════════════════════════════════════════
           SECTION 5: ABOUT

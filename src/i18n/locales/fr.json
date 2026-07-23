@@ -35,7 +35,22 @@
     "connected_accounts": "Comptes connectés",
     "clear_history": "Effacer l'historique d'écoute",
     "sign_out": "Déconnexion",
-    "delete_account": "Supprimer le compte"
+    "delete_account": "Supprimer le compte",
+    "security": "Sécurité",
+    "change_password": "Changer le mot de passe",
+    "change_password_desc": "Nous vous enverrons un lien sécurisé par e-mail pour définir ou modifier votre mot de passe. Si vous vous êtes inscrit avec Google, cela vous permet aussi de vous connecter avec e-mail et mot de passe.",
+    "send_password_email": "Envoyer le lien de réinitialisation",
+    "password_email_sent": "E-mail envoyé !",
+    "password_email_sent_desc": "Vérifiez votre boîte de réception et cliquez sur le lien pour configurer votre nouveau mot de passe.",
+    "set_password": "Créer un mot de passe",
+    "set_password_desc": "Créez un mot de passe pour pouvoir vous connecter manuellement.",
+    "create_password_button": "Créer le mot de passe",
+    "new_password": "Nouveau mot de passe",
+    "confirm_password": "Confirmer le mot de passe",
+    "save_password": "Enregistrer le mot de passe",
+    "password_mismatch": "Les mots de passe ne correspondent pas",
+    "password_too_short": "Le mot de passe doit comporter au moins 6 caractères",
+    "password_updated": "Mot de passe mis à jour avec succès !"
   },
   "search": {
     "placeholder": "Rechercher des titres, artistes, albums...",

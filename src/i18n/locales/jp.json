@@ -35,7 +35,22 @@
     "connected_accounts": "接続済みのアカウント",
     "clear_history": "再生履歴を消去",
     "sign_out": "ログアウト",
-    "delete_account": "アカウントを削除"
+    "delete_account": "アカウントを削除",
+    "security": "セキュリティ",
+    "change_password": "パスワードを変更",
+    "change_password_desc": "パスワードを設定または変更するための安全なリンクをメールでお送りします。Googleで登録した場合、メールとパスワードでもログインできるようになります。",
+    "send_password_email": "パスワードリセットリンクを送信",
+    "password_email_sent": "メールを送信しました！",
+    "password_email_sent_desc": "受信トレイを確認し、リンクをクリックして新しいパスワードを設定してください。",
+    "set_password": "パスワードを設定",
+    "set_password_desc": "手動でログインできるようにアカウントのパスワードを作成してください。",
+    "create_password_button": "パスワードを設定",
+    "new_password": "新しいパスワード",
+    "confirm_password": "パスワードの確認",
+    "save_password": "パスワードを保存",
+    "password_mismatch": "パスワードが一致しません",
+    "password_too_short": "パスワードは6文字以上である必要があります",
+    "password_updated": "パスワードが正常に更新されました！"
   },
   "search": {
     "placeholder": "曲、アーティスト、アルバムを検索...",

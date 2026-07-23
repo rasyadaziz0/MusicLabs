@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { FormEvent, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import TurnstileWidget from '@/components/auth/TurnstileWidget';
 
 export default function ForgotPasswordForm() {
   const { resetPasswordForEmail } = useAuth();
@@ -11,6 +12,7 @@ export default function ForgotPasswordForm() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState('');
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -25,9 +27,13 @@ export default function ForgotPasswordForm() {
       setErrorMessage('Format email tidak valid.');
       return;
     }
+    if (!captchaToken) {
+      setErrorMessage('Tolong selesaikan verifikasi captcha.');
+      return;
+    }
 
     setIsSubmitting(true);
-    const { error } = await resetPasswordForEmail(email.trim());
+    const { error } = await resetPasswordForEmail(email.trim(), captchaToken);
     setIsSubmitting(false);
 
     if (error) {
@@ -74,6 +80,10 @@ export default function ForgotPasswordForm() {
               {successMessage}
             </p>
           )}
+
+          <div className="flex justify-center">
+            <TurnstileWidget onSuccess={(token) => setCaptchaToken(token)} />
+          </div>
 
           <button
             type="submit"

@@ -14,10 +14,10 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signInWithGoogle: (redirectPath?: string) => Promise<AuthActionResult>;
-  signInWithPassword: (email: string, password: string) => Promise<AuthActionResult>;
-  signUpWithPassword: (email: string, password: string, fullName: string) => Promise<AuthActionResult>;
+  signInWithPassword: (email: string, password: string, captchaToken?: string) => Promise<AuthActionResult>;
+  signUpWithPassword: (email: string, password: string, fullName: string, captchaToken?: string) => Promise<AuthActionResult>;
   signOut: () => Promise<AuthActionResult>;
-  resetPasswordForEmail: (email: string) => Promise<AuthActionResult>;
+  resetPasswordForEmail: (email: string, captchaToken?: string) => Promise<AuthActionResult>;
   updatePassword: (password: string) => Promise<AuthActionResult>;
   updateProfile: (data: {
     username?: string; name?: string; bio?: string; avatarUrl?: string;
@@ -107,8 +107,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error: null };
   };
 
-  const signInWithPassword = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const signInWithPassword = async (email: string, password: string, captchaToken?: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ 
+      email, 
+      password,
+      options: captchaToken ? { captchaToken } : undefined
+    });
     if (error) {
       console.error('Auth signInWithPassword gagal:', error);
       // Jika error karena email belum dikonfirmasi, beri pesan spesifik
@@ -120,7 +124,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error: null };
   };
 
-  const signUpWithPassword = async (email: string, password: string, fullName: string) => {
+  const signUpWithPassword = async (email: string, password: string, fullName: string, captchaToken?: string) => {
     const callbackUrl = new URL('/auth/callback', window.location.origin);
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -128,6 +132,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       options: {
         data: { full_name: fullName },
         emailRedirectTo: callbackUrl.toString(),
+        ...(captchaToken ? { captchaToken } : {})
       },
     });
 
@@ -152,10 +157,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error: null };
   };
 
-  const resetPasswordForEmail = async (email: string) => {
+  const resetPasswordForEmail = async (email: string, captchaToken?: string) => {
     const callbackUrl = new URL('/update-password', window.location.origin);
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: callbackUrl.toString(),
+      ...(captchaToken ? { captchaToken } : {})
     });
     if (error) {
       console.error('Auth resetPasswordForEmail gagal:', error);

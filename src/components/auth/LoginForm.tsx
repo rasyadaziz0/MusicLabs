@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
+import TurnstileWidget from '@/components/auth/TurnstileWidget';
 
 export default function LoginForm() {
   const { user, loading, signInWithGoogle, signInWithPassword } = useAuth();
@@ -34,6 +35,7 @@ export default function LoginForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [failedAttempts, setFailedAttempts] = useState(0);
+  const [captchaToken, setCaptchaToken] = useState('');
 
   useEffect(() => {
     if (!loading && user) {
@@ -51,6 +53,9 @@ export default function LoginForm() {
     if (password.length < 6) {
       return 'Password minimal 6 karakter.';
     }
+    if (!captchaToken) {
+      return 'Tolong selesaikan verifikasi captcha.';
+    }
     return null;
   };
 
@@ -65,7 +70,7 @@ export default function LoginForm() {
     }
 
     setIsSubmitting(true);
-    const { error } = await signInWithPassword(email.trim(), password);
+    const { error } = await signInWithPassword(email.trim(), password, captchaToken);
     setIsSubmitting(false);
 
     if (error) {
@@ -167,6 +172,10 @@ export default function LoginForm() {
               )}
             </div>
           )}
+
+          <div className="flex justify-center">
+            <TurnstileWidget onSuccess={(token) => setCaptchaToken(token)} />
+          </div>
 
           <button
             type="submit"

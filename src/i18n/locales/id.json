@@ -35,7 +35,22 @@
     "connected_accounts": "Akun Terhubung",
     "clear_history": "Hapus Riwayat Putar",
     "sign_out": "Keluar",
-    "delete_account": "Hapus Akun"
+    "delete_account": "Hapus Akun",
+    "security": "Keamanan",
+    "change_password": "Ubah Password",
+    "change_password_desc": "Kami akan mengirim link aman ke email kamu untuk mengatur atau mengubah password. Kalau daftar pakai Google, ini memungkinkan kamu juga login pakai email dan password.",
+    "send_password_email": "Kirim link ubah password",
+    "password_email_sent": "Email terkirim!",
+    "password_email_sent_desc": "Cek inbox email kamu dan klik link-nya untuk mengatur password baru.",
+    "set_password": "Buat Password",
+    "set_password_desc": "Buat password untuk akun kamu agar bisa login manual dengan email.",
+    "create_password_button": "Buat Password",
+    "new_password": "Password Baru",
+    "confirm_password": "Konfirmasi Password",
+    "save_password": "Simpan Password",
+    "password_mismatch": "Password tidak cocok",
+    "password_too_short": "Password minimal 6 karakter",
+    "password_updated": "Password berhasil diperbarui!"
   },
   "search": {
     "placeholder": "Cari lagu, artis, album...",
