@@ -10,12 +10,19 @@ import { useMadeForYou } from '@/hooks/useMadeForYou';
 import { LibraryEmptyState } from '@/components/library/LibraryEmptyState';
 import { HorizontalScrollSection } from '@/components/ui/HorizontalScrollSection';
 import { TrackCard } from '@/components/home/HomeCards';
+import { useFeatureFlags } from '@/context/FeatureFlagsContext';
+import FeatureDisabled from '@/components/ui/FeatureDisabled';
 
 export default function MadeForYouPage() {
   const router = useRouter();
+  const { flags } = useFeatureFlags();
   const { user, signInWithGoogle } = useAuth();
   const { playTrack } = usePlayer();
   const { sections, discoverWeekly, isLoading, hasPersonalData } = useMadeForYou();
+
+  if (!flags.feature_ai_discover) {
+    return <FeatureDisabled />;
+  }
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-8 px-4 pb-32 pt-2 md:px-8 md:pt-8">

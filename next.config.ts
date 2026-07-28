@@ -107,6 +107,14 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: '*.rasyadazizan.site',
       },
+      {
+        protocol: 'https',
+        hostname: '*.spotifycdn.com', // Spotify Cover Arts
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.scdn.co', // Spotify Tracks Arts
+      },
     ],
   },
 };

@@ -6,8 +6,11 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { Eye, EyeOff } from 'lucide-react';
 import TurnstileWidget from '@/components/auth/TurnstileWidget';
+import { useFeatureFlags } from '@/context/FeatureFlagsContext';
+import FeatureDisabled from '@/components/ui/FeatureDisabled';
 
 export default function RegisterForm() {
+  const { flags } = useFeatureFlags();
   const { user, loading, signUpWithPassword, signInWithGoogle } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -111,9 +114,14 @@ export default function RegisterForm() {
           <p className="mt-1 text-sm text-muted">Udah muak sama platform yang banyak iklan? Yuk beralih ke AcadMusic</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="fullName" className="mb-1 block text-sm font-medium text-white/90">
+        {!flags.feature_manual_register && !flags.feature_google_login ? (
+          <FeatureDisabled />
+        ) : (
+          <>
+            {flags.feature_manual_register && (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="fullName" className="mb-1 block text-sm font-medium text-white/90">
               Username
             </label>
             <input
@@ -225,31 +233,40 @@ export default function RegisterForm() {
             disabled={isSubmitting || isGoogleLoading}
             className="w-full rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSubmitting ? 'Membuat akun...' : 'Daftar'}
-          </button>
-        </form>
+                  {isSubmitting ? 'Membuat akun...' : 'Daftar'}
+                </button>
+              </form>
+            )}
 
-        <div className="my-5 flex items-center gap-3">
-          <div className="h-px flex-1 bg-white/10" />
-          <span className="text-xs uppercase tracking-wider text-white/40">atau</span>
-          <div className="h-px flex-1 bg-white/10" />
-        </div>
+            {flags.feature_google_login && (
+              <>
+                {flags.feature_manual_register && (
+                  <div className="my-5 flex items-center gap-3">
+                    <div className="h-px flex-1 bg-white/10" />
+                    <span className="text-xs uppercase tracking-wider text-white/40">atau</span>
+                    <div className="h-px flex-1 bg-white/10" />
+                  </div>
+                )}
 
-        <button
-          type="button"
-          onClick={handleGoogleRegister}
-          disabled={isSubmitting || isGoogleLoading}
-          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isGoogleLoading ? 'Mengarahkan ke Google...' : 'Daftar dengan Google'}
-        </button>
+                <button
+                  type="button"
+                  onClick={handleGoogleRegister}
+                  disabled={isSubmitting || isGoogleLoading}
+                  className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isGoogleLoading ? 'Mengarahkan ke Google...' : 'Daftar dengan Google'}
+                </button>
+              </>
+            )}
 
-        <p className="mt-6 text-center text-sm text-muted">
-          Udah punya akun? ngapain kesini langsung aja{' '}
-          <Link href={`/login?next=${encodeURIComponent(nextPath)}`} className="font-semibold text-white hover:text-primary">
-            Masuk :)
-          </Link>
-        </p>
+            <p className="mt-6 text-center text-sm text-muted">
+              Udah punya akun? ngapain kesini langsung aja{' '}
+              <Link href={`/login?next=${encodeURIComponent(nextPath)}`} className="font-semibold text-white hover:text-primary">
+                Masuk :)
+              </Link>
+            </p>
+          </>
+        )}
 
         <p className="mt-8 text-center text-xs text-white/60 max-w-xs mx-auto leading-relaxed">
           Dengan mendaftar atau masuk, kamu setuju dengan{' '}

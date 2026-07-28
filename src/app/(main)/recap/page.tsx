@@ -12,6 +12,8 @@ import { usePlayer } from '@/context/PlayerContext';
 import { StatCard, TopTrackCard, TopArtistCard } from '@/components/recap/RecapCards';
 import { CustomSelect } from '@/components/ui/CustomSelect';
 import { ScrollArrows } from '@/components/ui/ScrollArrows';
+import { useFeatureFlags } from '@/context/FeatureFlagsContext';
+import FeatureDisabled from '@/components/ui/FeatureDisabled';
 
 // ── Helpers ─────────────────────────────────────────────────
 
@@ -31,9 +33,14 @@ function generateYears(startYear = 2024) {
 // ── Main Page ───────────────────────────────────────────────
 
 export default function RecapPage() {
+  const { flags } = useFeatureFlags();
   const { user, signInWithGoogle } = useAuth();
   const { playTrack } = usePlayer();
   const heroRef = useRef<HTMLDivElement>(null);
+
+  if (!flags.feature_recap) {
+    return <FeatureDisabled />;
+  }
 
   const {
     year,

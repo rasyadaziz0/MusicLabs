@@ -154,7 +154,11 @@ export class PlaylistRepository {
     
     // Attach the unique playlist_track id and map back to maintain order & duplicates
     return rows.map(row => {
-      const song = songs.find(s => s.id === row.track_id);
+      const song = songs.find(s => 
+        s.id === row.track_id || 
+        s.id === row.track_id.replace(/^itunes-/, '') || 
+        `itunes-${s.id}` === row.track_id
+      );
       if (!song) return null;
       return { ...song, uniqueId: row.id };
     }).filter(Boolean) as Song[];

@@ -4,12 +4,19 @@ import { useAuth } from '@/context/AuthContext';
 import { useIdentifyController } from '@/hooks/useIdentifyController';
 import { AppleMusicIdentifyLayout } from '@/components/identify/AppleMusicIdentifyLayout';
 import { AuthGate } from '@/components/identify/AuthGate';
+import { useFeatureFlags } from '@/context/FeatureFlagsContext';
+import FeatureDisabled from '@/components/ui/FeatureDisabled';
 
 export default function IdentifyPage() {
+  const { flags } = useFeatureFlags();
   const { user, loading: authLoading, signInWithGoogle } = useAuth();
   const isAuthenticated = !!user;
 
   const controller = useIdentifyController();
+
+  if (!flags.feature_identify) {
+    return <FeatureDisabled />;
+  }
 
   return (
     <div className="min-h-[100dvh] flex flex-col relative overflow-hidden text-white font-sans selection:bg-white/30">

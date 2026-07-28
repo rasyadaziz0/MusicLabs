@@ -2,15 +2,17 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, LayoutGrid, Radio, Clock, Mic, SquareStack, Music, UserSquare, Search, ChevronDown, ChevronRight, Pin, Heart, LogOut, PlusSquare, Sparkles, AudioLines } from 'lucide-react';
+import { Home, LayoutGrid, Radio, Clock, Mic, SquareStack, Music, UserSquare, Search, ChevronDown, ChevronRight, Pin, Heart, LogOut, PlusSquare, Sparkles, AudioLines, Coffee, ListMusic } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLibraryPlaylists } from '@/hooks/useMusicLibrary';
 import { useDiscoverWeekly } from '@/hooks/useDiscoverWeekly';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/context/LanguageContext';
+import { useFeatureFlags } from '@/context/FeatureFlagsContext';
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { GlassBar } from '@/components/ui/LiquidGlass';
+import { useImport } from '@/context/ImportContext';
 
 const navItems = [
   { icon: Search, label: 'Search', href: '/search' },
@@ -31,6 +33,8 @@ export default function Sidebar() {
   const router = useRouter();
   const { user, signOut } = useAuth();
   const { t } = useTranslation();
+  const { flags } = useFeatureFlags();
+  const { isImporting, importProgress } = useImport();
   const { data: playlists = [] } = useLibraryPlaylists();
   const [isPinsOpen, setIsPinsOpen] = useState(true);
 
@@ -97,14 +101,33 @@ export default function Sidebar() {
               <Home size={18} className="text-[#FA243C]" />
               <span>{t('sidebar.home')}</span>
             </Link>
-            <Link href="/radio" className={navLinkClass(pathname === '/radio')}>
-              <Radio size={18} className="text-[#FA243C]" />
-              <span>{t('sidebar.radio')}</span>
-            </Link>
-            {/* <Link href="/identify" className={navLinkClass(pathname === '/identify')}>
-              <AudioLines size={18} className="text-[#FA243C]" />
-              <span>Identify Song</span>
-            </Link> */}
+            {flags.feature_radio && (
+              <Link href="/radio" className={navLinkClass(pathname === '/radio')}>
+                <Radio size={18} className="text-[#FA243C]" />
+                <span>{t('sidebar.radio')}</span>
+              </Link>
+            )}
+            {flags.feature_identify && (
+              <Link href="/identify" className={navLinkClass(pathname === '/identify')}>
+                <AudioLines size={18} className="text-[#FA243C]" />
+                <span>Identify Song</span>
+              </Link>
+            )}
+            {flags.feature_import_playlist && (
+              <Link href="/import/playlist" className={cn(navLinkClass(pathname === '/import/playlist'), "relative overflow-hidden")}>
+                <div 
+                  className={cn(
+                    "absolute inset-0 bg-[#FA243C]/20 transition-all duration-500 ease-out z-0 pointer-events-none",
+                    isImporting ? "opacity-100" : "opacity-0"
+                  )}
+                  style={{ width: `${importProgress ?? 0}%` }}
+                />
+                <div className="relative z-10 flex items-center gap-4 w-full">
+                  <ListMusic size={18} className={isImporting ? "text-[#FA243C] animate-pulse" : "text-[#FA243C]"} />
+                  <span>Import Playlist</span>
+                </div>
+              </Link>
+            )}
           </div>
 
           {/* Library — only show for logged-in users */}
@@ -158,7 +181,7 @@ export default function Sidebar() {
                 })}
 
                 {/* Discover Weekly menggantikan Artists JIKA sudah ada. Jika belum, tampilkan Artists. */}
-                {hasPlaylist ? (
+                {flags.feature_ai_discover && hasPlaylist ? (
                   <Link key="discover-weekly" href={discoverWeeklyHref} className={navLinkClass(isDiscoverWeeklyActive)}>
                     <Sparkles size={18} className={isRecentlyUpdated ? "text-white" : "text-[#FA243C]"} />
                     <span className={isRecentlyUpdated ? "text-white font-bold" : ""}>
@@ -232,6 +255,15 @@ export default function Sidebar() {
         </nav>
 
         {/* Footer Profile & Links */}
+        {flags.feature_tip && (
+          <div className="px-4 mb-4">
+            <Link href="/support" className={navLinkClass(pathname === '/support')}>
+              <Coffee size={18} className={pathname === '/support' ? 'text-white' : 'text-[#FA243C]'} />
+              <span className="font-semibold text-[13px]">{t('sidebar.support')}</span>
+            </Link>
+          </div>
+        )}
+        
         {user ? (
           <div className="flex items-center gap-3 md:portrait:gap-1.5 px-4 md:portrait:px-2 group">
             <Link href="/profile" className="flex items-center gap-3 md:portrait:gap-1.5 flex-1 min-w-0">

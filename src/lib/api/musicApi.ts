@@ -78,10 +78,28 @@ export const getAlbum = (albumId: string) => {
 };
 
 export const getSongsByIds = async (trackIds: string[]) => {
-  const results = await Promise.allSettled(trackIds.map((trackId) => getSong(trackId)));
-  return results
-    .filter((result): result is PromiseFulfilledResult<Song> => result.status === 'fulfilled')
-    .map((result) => result.value);
+  const results: PromiseFulfilledResult<Song>[] = [];
+  
+  // Process in batches of 5 to avoid rate limiting (HTTP 429)
+  const BATCH_SIZE = 5;
+  for (let i = 0; i < trackIds.length; i += BATCH_SIZE) {
+    const batch = trackIds.slice(i, i + BATCH_SIZE);
+    const batchPromises = batch.map(id => getSong(id));
+    
+    const batchResults = await Promise.allSettled(batchPromises);
+    
+    const successful = batchResults.filter(
+      (result): result is PromiseFulfilledResult<Song> => result.status === 'fulfilled'
+    );
+    results.push(...successful);
+    
+    // Add a small delay between batches if not the last batch
+    if (i + BATCH_SIZE < trackIds.length) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+  }
+  
+  return results.map(r => r.value);
 };
 
 // ── Lyrics (stub) ─────────────────────────────────────────────────

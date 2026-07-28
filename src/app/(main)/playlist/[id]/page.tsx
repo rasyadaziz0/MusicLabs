@@ -22,8 +22,8 @@ import { useAuth } from '@/context/AuthContext';
 import { escapeHtmlAttr } from '@/lib/utils/escapeHtml';
 import { supabase } from '@/lib/supabase/client';
 import CollaboratorModal from '@/components/playlist/CollaboratorModal';
+import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 import { usePlaylistCollaborators } from '@/hooks/useCollaborators';
-import { uploadImage } from '@/lib/utils/uploadImage';
 import { PlaylistRepository } from '@/lib/supabase/repositories/PlaylistRepository';
 
 export default function PlaylistPage() {
@@ -37,6 +37,7 @@ export default function PlaylistPage() {
   const reorderMutation = useReorderPlaylistTracks();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCollaboratorModalOpen, setIsCollaboratorModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -135,7 +136,7 @@ export default function PlaylistPage() {
         cover={
           <div className="relative w-full h-full group">
             {coverUrl ? (
-              <Image src={coverUrl} alt={playlist?.name || 'Playlist cover'} fill priority className="object-cover" />
+              <Image src={coverUrl} alt={playlist?.name || 'Playlist cover'} fill priority sizes="(max-width: 768px) 100vw, 300px" className="object-cover" />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-void">
                 <Plus size={64} className="text-white/20" />
@@ -223,9 +224,7 @@ export default function PlaylistPage() {
                     <div className="my-1 border-t border-white/10 mx-3" />
 
                     <button onClick={() => {
-                      if (confirm('Are you sure you want to delete this playlist?')) {
-                        deletePlaylistMutation.mutate(playlist.id);
-                      }
+                      setIsDeleteDialogOpen(true);
                       setIsMenuOpen(false);
                     }} className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-red-500 hover:bg-white/10 transition-colors flex items-center justify-between">
                       <span>Delete Playlist</span>
@@ -305,6 +304,20 @@ export default function PlaylistPage() {
         playlistId={playlistId!}
         isOpen={isCollaboratorModalOpen}
         onClose={() => setIsCollaboratorModalOpen(false)}
+      />
+
+      <ConfirmationModal
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={() => {
+          if (playlist) {
+            deletePlaylistMutation.mutate(playlist.id);
+            router.push('/library');
+          }
+        }}
+        title="Delete Playlist"
+        description={playlist ? `Are you sure you want to delete "${playlist.name}"? This action cannot be undone.` : 'Are you sure you want to delete this playlist?'}
+        confirmText="Delete"
       />
     </div>
   );

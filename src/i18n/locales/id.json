@@ -12,7 +12,8 @@
     "made_for_you": "Dibuat Untukmu",
     "playlists": "Playlist",
     "all_playlists": "Semua Playlist",
-    "favourite_songs": "Lagu Favorit"
+    "favourite_songs": "Lagu Favorit",
+    "support": "Dukung Kami"
   },
   "settings": {
     "title": "Pengaturan",
@@ -63,5 +64,12 @@
   },
   "profile": {
     "now_playing": "SEDANG DIPUTAR"
+  },
+  "support": {
+    "title": "Terus Mainkan Musiknya.",
+    "subtitle": "Dukung Developer",
+    "description": "AcadMusic dibuat dengan penuh cinta dan dikelola secara mandiri. Melalui donasi via Kreate, kamu membantu menjaga server tetap hidup, memastikan aplikasi bebas iklan, dan mendanai pengembangan fitur-fitur baru yang keren!",
+    "button": "Dukung via Kreate.gg",
+    "disclaimer": "*Donasimu akan memunculkan notifikasi live ke semua orang yang sedang mendengarkan!"
   }
 }

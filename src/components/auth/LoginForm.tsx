@@ -6,8 +6,10 @@ import { useAuth } from '@/context/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Eye, EyeOff } from 'lucide-react';
 import TurnstileWidget from '@/components/auth/TurnstileWidget';
+import { useFeatureFlags } from '@/context/FeatureFlagsContext';
 
 export default function LoginForm() {
+  const { flags } = useFeatureFlags();
   const { user, loading, signInWithGoogle, signInWithPassword } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -186,27 +188,33 @@ export default function LoginForm() {
           </button>
         </form>
 
-        <div className="my-5 flex items-center gap-3">
-          <div className="h-px flex-1 bg-white/10" />
-          <span className="text-xs uppercase tracking-wider text-white/40">atau</span>
-          <div className="h-px flex-1 bg-white/10" />
-        </div>
+        {flags.feature_google_login && (
+          <>
+            <div className="my-5 flex items-center gap-3">
+              <div className="h-px flex-1 bg-white/10" />
+              <span className="text-xs uppercase tracking-wider text-white/40">atau</span>
+              <div className="h-px flex-1 bg-white/10" />
+            </div>
 
-        <button
-          type="button"
-          onClick={handleGoogleLogin}
-          disabled={isSubmitting || isGoogleLoading}
-          className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isGoogleLoading ? 'Mengarahkan ke Google...' : 'Lanjutkan dengan Google'}
-        </button>
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              disabled={isSubmitting || isGoogleLoading}
+              className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isGoogleLoading ? 'Mengarahkan ke Google...' : 'Lanjutkan dengan Google'}
+            </button>
+          </>
+        )}
 
-        <p className="mt-6 text-center text-sm text-muted">
-          Gak punya akun? langsung {' '}
-          <Link href={`/register?next=${encodeURIComponent(nextPath)}`} className="font-semibold text-white hover:text-primary">
-            Daftar Aja
-          </Link>
-        </p>
+        {flags.feature_manual_register && (
+          <p className="mt-6 text-center text-sm text-muted">
+            Gak punya akun? langsung {' '}
+            <Link href={`/register?next=${encodeURIComponent(nextPath)}`} className="font-semibold text-white hover:text-primary">
+              Daftar Aja
+            </Link>
+          </p>
+        )}
 
         <p className="mt-8 text-center text-xs text-white/60 max-w-xs mx-auto leading-relaxed">
           Dengan mendaftar atau masuk, kamu setuju dengan{' '}

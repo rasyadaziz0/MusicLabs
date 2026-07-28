@@ -11,6 +11,8 @@ import OtherProfilePlaylists from './OtherProfilePlaylists';
 import NowPlayingCard from './NowPlayingCard';
 import { UserProfile } from '@/types/profile';
 import type { PlaylistRecord } from '@/lib/supabase/music';
+import { useFeatureFlags } from '@/context/FeatureFlagsContext';
+import FeatureDisabled from '@/components/ui/FeatureDisabled';
 
 export interface OtherProfileInitialData {
   userId: string;
@@ -39,9 +41,14 @@ export default function OtherProfile({ initialData, isMobile }: OtherProfileProp
 
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
+  const { flags } = useFeatureFlags();
 
   const [followModalOpen, setFollowModalOpen] = useState(false);
   const [followModalTab, setFollowModalTab] = useState<'followers' | 'following'>('followers');
+
+  if (!flags.feature_public_profiles) {
+    return <FeatureDisabled />;
+  }
   
   const hasSocials = !!(profile.social_instagram || profile.social_twitter || profile.social_tiktok);
 

@@ -24,7 +24,7 @@ export default function BaseLayout({
       )}
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-        <main className={`flex-1 overflow-y-auto overflow-x-hidden relative z-0 ${!isMobile ? 'pb-36 md:pb-0' : 'pb-36'}`}>
+        <main className="flex-1 overflow-y-auto overflow-x-hidden relative z-0 pb-36 md:pb-36">
           <div id="main-content-wrapper" className={`p-4 w-full transition-[padding] duration-300 ease-in-out ${!isMobile ? 'md:py-8 md:pr-8 md:pl-[288px] md:portrait:pl-[212px] pb-6 md:pb-8' : 'pb-6'}`}>
             {children}
             <Footer />

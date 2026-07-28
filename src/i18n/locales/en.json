@@ -12,7 +12,8 @@
     "made_for_you": "Made for You",
     "playlists": "Playlists",
     "all_playlists": "All Playlists",
-    "favourite_songs": "Favourite Songs"
+    "favourite_songs": "Favourite Songs",
+    "support": "Support Us"
   },
   "settings": {
     "title": "Settings",
@@ -63,5 +64,12 @@
   },
   "profile": {
     "now_playing": "NOW PLAYING"
+  },
+  "support": {
+    "title": "Keep the Music Playing.",
+    "subtitle": "Support the Developer",
+    "description": "AcadMusic is built with love and maintained independently. By tipping via Kreate, you help keep the servers running, ensure the app remains ad-free, and fuel the development of awesome new features!",
+    "button": "Support on Kreate.gg",
+    "disclaimer": "*Your donation will trigger a live alert for everyone listening right now!"
   }
 }

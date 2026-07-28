@@ -7,9 +7,12 @@ import gsap from 'gsap';
 
 import { useRadioController, CATEGORIES } from './useRadioController';
 import { NowPlayingRadioBanner, RadioStationCard, RadioSkeletonGrid, RadioEmptyState } from '@/components/radio/RadioCards';
+import { useFeatureFlags } from '@/context/FeatureFlagsContext';
+import FeatureDisabled from '@/components/ui/FeatureDisabled';
 
 export default function RadioPage() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const { flags } = useFeatureFlags();
 
   const {
     currentTrack,
@@ -28,6 +31,10 @@ export default function RadioPage() {
     handlePlayStation,
     isStationPlaying,
   } = useRadioController();
+
+  if (!flags.feature_radio) {
+    return <FeatureDisabled />;
+  }
 
   // GSAP entrance animation
   useEffect(() => {
