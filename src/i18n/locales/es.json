@@ -12,7 +12,8 @@
     "made_for_you": "Hecho para ti",
     "playlists": "Listas",
     "all_playlists": "Todas las listas",
-    "favourite_songs": "Canciones favoritas"
+    "favourite_songs": "Canciones favoritas",
+    "support": "Apóyanos"
   },
   "settings": {
     "title": "Ajustes",
@@ -63,5 +64,11 @@
   },
   "profile": {
     "now_playing": "REPRODUCIENDO"
+  },
+  "support": {
+    "title": "Que la música siga sonando.",
+    "subtitle": "Apoya al Desarrollador",
+    "description": "AcadMusic está creado con amor y se mantiene de forma independiente. ¡Al dar una propina a través de Kreate, ayudas a mantener los servidores en funcionamiento, aseguras que la aplicación siga sin anuncios y potencias el desarrollo de nuevas e increíbles funciones!",
+    "button": "Apoyar en Kreate.gg"
   }
 }

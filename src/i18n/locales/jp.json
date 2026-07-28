@@ -12,7 +12,8 @@
     "made_for_you": "メイド・フォー・ユー",
     "playlists": "プレイリスト",
     "all_playlists": "すべてのプレイリスト",
-    "favourite_songs": "お気に入りの曲"
+    "favourite_songs": "お気に入りの曲",
+    "support": "サポート"
   },
   "settings": {
     "title": "設定",
@@ -63,5 +64,11 @@
   },
   "profile": {
     "now_playing": "再生中"
+  },
+  "support": {
+    "title": "音楽を鳴らし続けよう。",
+    "subtitle": "開発者を支援する",
+    "description": "AcadMusicは愛を込めて構築され、独自に維持されています。Kreate経由でチップを渡すことで、サーバーの稼働を維持し、アプリを広告なしに保ち、素晴らしい新機能の開発を促進することができます！",
+    "button": "Kreate.ggで支援する"
   }
 }

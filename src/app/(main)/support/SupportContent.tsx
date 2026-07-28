@@ -43,10 +43,6 @@ export default function SupportContent() {
               <Coffee size={24} />
               {t('support.button')}
             </a>
-
-            <p className="text-sm text-white/40">
-              {t('support.disclaimer')}
-            </p>
           </div>
         </div>
 
