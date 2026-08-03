@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { searchITunesAlbums } from '@/lib/server/itunesApi';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -22,3 +22,4 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Failed to search albums' }, { status: 500 });
   }
 }
+

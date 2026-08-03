@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
-import sharp from 'sharp';
 import { r2Client } from '@/lib/r2';
 import { createClient } from '@/lib/supabase/server';
 import { checkRateLimit, getRequestIp } from '@/lib/server/rateLimit';
 
-// Force Node.js runtime — sharp requires native binaries, incompatible with Edge
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 // Folder → DB column mapping for old-file cleanup
 const FOLDER_TO_DB_COLUMN: Record<string, { table: string; column: string; idColumn: string }> = {
@@ -120,21 +118,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid folder' }, { status: 400 });
     }
 
-    // ── 8. Read buffer ──
+    // ── 8. Read arrayBuffer ──
     const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    const uint8Array = new Uint8Array(arrayBuffer);
 
     // ── 9. Magic Bytes Validation (the real gate — prevents fake images) ──
-    const header = buffer.subarray(0, 4).toString('hex').toUpperCase();
-    let isRealImage = false;
+    const headerBytes = Array.from(uint8Array.slice(0, 4))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('')
+      .toUpperCase();
 
-    if (header.startsWith('FFD8FF')) isRealImage = true; // JPEG
-    else if (header === '89504E47') isRealImage = true;  // PNG
-    else if (header.startsWith('47494638')) isRealImage = true; // GIF (GIF8)
+    let isRealImage = false;
+    if (headerBytes.startsWith('FFD8FF')) isRealImage = true; // JPEG
+    else if (headerBytes === '89504E47') isRealImage = true;  // PNG
+    else if (headerBytes.startsWith('47494638')) isRealImage = true; // GIF (GIF8)
     else if (
-      buffer.subarray(0, 4).toString('utf-8') === 'RIFF' &&
-      buffer.length >= 12 &&
-      buffer.subarray(8, 12).toString('utf-8') === 'WEBP'
+      String.fromCharCode(...Array.from(uint8Array.slice(0, 4))) === 'RIFF' &&
+      uint8Array.length >= 12 &&
+      String.fromCharCode(...Array.from(uint8Array.slice(8, 12))) === 'WEBP'
     ) {
       isRealImage = true; // WEBP
     }
@@ -144,35 +145,22 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Malicious payload detected. Fake image rejected.' }, { status: 400 });
     }
 
-    // ── 10. Re-encode to WebP via Sharp ──
-    // This simultaneously: (a) compresses, (b) strips EXIF/GPS metadata,
-    // (c) neutralizes polyglot payloads (real image with embedded HTML/JS)
-    const resizeCaps: Record<string, number> = {
-      avatars: 512,
-      banners: 1600,
-      playlists: 1000,
-      uploads: 2048,
-    };
-    const maxDim = resizeCaps[folder] || 2048;
-
-    const webpBuffer = await sharp(buffer, { animated: true })
-      .resize(maxDim, maxDim, { fit: 'inside', withoutEnlargement: true })
-      .webp({ quality: 82 })
-      .toBuffer();
+    // ── 10. Upload raw file to R2 (without sharp re-encoding) ──
+    // Rely on Cloudflare Image Resizing to optimize the image on delivery
 
     // ── 11. Generate unique filename ──
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substring(2, 8);
-    const fileName = `${folder}/${user.id}_${timestamp}_${randomString}.webp`;
+    const fileName = `${folder}/${user.id}_${timestamp}_${randomString}.${ext}`;
 
-    // ── 12. Upload re-encoded WebP to R2 (BEFORE deleting old file) ──
+    // ── 12. Upload to R2 (BEFORE deleting old file) ──
     const bucketName = process.env.R2_BUCKET_NAME!;
     await r2Client.send(
       new PutObjectCommand({
         Bucket: bucketName,
         Key: fileName,
-        Body: webpBuffer,
-        ContentType: 'image/webp',
+        Body: uint8Array,
+        ContentType: file.type,
       })
     );
 
@@ -229,3 +217,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+

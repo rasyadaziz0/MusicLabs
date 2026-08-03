@@ -1,4 +1,3 @@
-import crypto from 'crypto';
 import { NextResponse } from 'next/server';
 
 const SPOTIFY_AUTHORIZE_URL = 'https://accounts.spotify.com/authorize';
@@ -15,7 +14,7 @@ export async function GET() {
   }
 
   const scope = 'playlist-read-private playlist-read-collaborative';
-  const state = crypto.randomBytes(16).toString('hex');
+  const state = crypto.randomUUID().replace(/-/g, '');
   const params = new URLSearchParams({
     response_type: 'code',
     client_id: clientId,

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { generateDiscoverWeeklyForUser } from '@/services/discover/discoverService';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 // Allow maximum duration since this might process many users
 export const maxDuration = 300; 
 
@@ -77,3 +77,4 @@ export async function GET(request: Request) {
     );
   }
 }
+

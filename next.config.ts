@@ -5,17 +5,9 @@ const nextConfig: NextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error'] } : false,
   },
-  serverExternalPackages: ['sharp'],
   reactCompiler: true,
   allowedDevOrigins: ['127.0.0.1', 'localhost', '10.110.2.174', 'music.rasyadazizan.site'],
 
-  // ── PAKSA binary sharp + libvips ikut ke serverless function ──
-  outputFileTracingIncludes: {
-    '/api/upload': [
-      'node_modules/@img/sharp-linux-x64/**/*',
-      'node_modules/@img/sharp-libvips-linux-x64/**/*',
-    ],
-  },
   turbopack: {
     root: __dirname,
   },
@@ -114,6 +106,10 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'i.scdn.co', // Spotify Tracks Arts
+      },
+      {
+        protocol: 'https',
+        hostname: 'mosaic.scdn.co', // Spotify Playlist Mosaic Cover Arts
       },
     ],
   },

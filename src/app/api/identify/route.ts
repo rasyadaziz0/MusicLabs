@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { checkRateLimit, getRequestIp } from '@/lib/server/rateLimit';
 import { Song } from '@/types/music';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 import { searchITunesTracks } from '@/lib/server/itunesApi';
 
@@ -120,8 +120,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Convert base64 to a real Blob and send as file upload
-    const audioBuffer = Buffer.from(audioBase64, 'base64');
-    const audioBlob = new Blob([audioBuffer], { type: 'audio/webm' });
+    const binaryStr = atob(audioBase64);
+    const audioBytes = new Uint8Array(binaryStr.length);
+    for (let i = 0; i < binaryStr.length; i++) {
+      audioBytes[i] = binaryStr.charCodeAt(i);
+    }
+    const audioBlob = new Blob([audioBytes], { type: 'audio/webm' });
 
     const formData = new FormData();
     formData.append('api_token', token);
@@ -239,4 +243,5 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
 

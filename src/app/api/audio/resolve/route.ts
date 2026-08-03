@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Innertube } from 'youtubei.js';
 import { createClient } from '@/lib/supabase/server';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 type YoutubeSearchItem = {
   id?: { videoId?: string };
@@ -219,3 +219,4 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+

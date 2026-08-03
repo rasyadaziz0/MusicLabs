@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { gooeyToast as toast } from 'goey-toast';
 import { supabase } from '@/lib/supabase/client';
 import { PlaylistRepository } from '@/lib/supabase/repositories/PlaylistRepository';
@@ -18,6 +19,7 @@ const ImportContext = createContext<ImportContextType | undefined>(undefined);
 export function ImportProvider({ children }: { children: ReactNode }) {
   const [isImporting, setIsImporting] = useState(false);
   const [importProgress, setImportProgress] = useState<number | null>(null);
+  const queryClient = useQueryClient();
 
   const startImport = async (scrapedResult: ScrapedPlaylist, userId: string) => {
     if (isImporting) return;
@@ -65,6 +67,7 @@ export function ImportProvider({ children }: { children: ReactNode }) {
       }
 
       toast.success(`Import selesai! ${successCount}/${totalTracks} lagu berhasil dimasukkan ke "${scrapedResult.name}".`);
+      queryClient.invalidateQueries({ queryKey: ['library-playlists', userId] });
     } catch (err: any) {
       console.error('Save to library error:', err);
       toast.error('Gagal menyimpan playlist ke library: ' + err.message);

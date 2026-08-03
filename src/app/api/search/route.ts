@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { searchITunesTracks, searchITunesArtists } from '@/lib/server/itunesApi';
 import { checkRateLimit, getRequestIp } from '@/lib/server/rateLimit';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 export async function GET(request: NextRequest) {
   const ip = getRequestIp(request);
@@ -61,3 +61,4 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Gagal nyari' }, { status: 500 });
   }
 }
+

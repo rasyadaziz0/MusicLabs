@@ -30,12 +30,62 @@ let ytmusicClientPromise: Promise<YTMusic> | null = null;
 export async function getYtMusicClient() {
   if (!ytmusicClientPromise) {
     ytmusicClientPromise = (async () => {
-      const client = new YTMusic();
-      await client.initialize();
-      return client;
+      try {
+        const client = new YTMusic();
+        
+        // Inject custom fetch adapter for Edge runtime compatibility
+        // Axios's http adapter doesn't work in Edge runtime and standard fetch adapter strips User-Agent
+        const anyClient = client as any;
+        if (anyClient.client && anyClient.client.defaults) {
+          anyClient.client.defaults.adapter = async function customFetchAdapter(config: any) {
+            const url = (config.baseURL || '') + (config.url || '').replace(/^\//, '');
+            const headers = new Headers();
+            if (config.headers) {
+              for (const [k, v] of Object.entries(config.headers)) {
+                if (typeof v === 'string') headers.set(k, v);
+              }
+            }
+            // Enforce modern User-Agent
+            headers.set('User-Agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+            
+            const res = await fetch(url, {
+              method: (config.method || 'get').toUpperCase(),
+              headers,
+              body: config.data ? (typeof config.data === 'string' ? config.data : JSON.stringify(config.data)) : undefined,
+            });
+            
+            const data = config.responseType === 'json' ? await res.json() : await res.text();
+            const response = {
+              data,
+              status: res.status,
+              statusText: res.statusText,
+              headers: Object.fromEntries(res.headers.entries()),
+              config,
+              request: {}
+            };
+            
+            if (res.ok) return response;
+            const error = new Error('Request failed with status code ' + res.status);
+            (error as any).response = response;
+            throw error;
+          };
+        }
+
+        await client.initialize();
+        return client;
+      } catch (error) {
+        ytmusicClientPromise = null;
+        throw error;
+      }
     })();
   }
-  return ytmusicClientPromise;
+  
+  try {
+    return await ytmusicClientPromise;
+  } catch (error) {
+    ytmusicClientPromise = null;
+    throw error;
+  }
 }
 
 function toImageList(

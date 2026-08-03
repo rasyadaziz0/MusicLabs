@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Innertube, UniversalCache, Log } from 'youtubei.js';
 import { createClient } from '@/lib/supabase/server';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 // Disable internal logging spam from youtubei.js
 Log.setLevel(Log.Level.NONE);

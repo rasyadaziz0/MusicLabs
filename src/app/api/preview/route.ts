@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getITunesPreviewUrl } from '@/lib/server/itunesApi';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 /**
  * GET /api/preview?title=...&artist=...
@@ -28,3 +28,4 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ previewUrl: null, source: null }, { status: 500 });
   }
 }
+

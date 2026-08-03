@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { createClient } from '@/lib/supabase/server';
 import { checkRateLimit } from '@/lib/server/rateLimit';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 const GEMINI_API_KEY = process.env.GOOGLE_GEMINI_API_KEY ?? '';
 
@@ -230,4 +230,5 @@ ${numberedLines}`;
     );
   }
 }
+
 

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getYtMusicClient, mapYtSongToAppSong } from '@/lib/server/ytmusic';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 // Disable Next.js data cache for this route to ensure fresh home feed
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -95,11 +95,12 @@ export async function GET() {
         playlists,
       },
     });
-  } catch (error) {
-    console.error('YouTube Music home feed failed:', error);
+  } catch (error: any) {
+    console.error('YouTube Music home feed failed:', error?.message || 'Unknown error');
     return NextResponse.json(
       { data: { trending: { songs: [], albums: [] }, albums: [], charts: [], playlists: [] } },
       { status: 500 }
     );
   }
 }
+

@@ -5,7 +5,7 @@ import { Redis } from '@upstash/redis';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Song } from '@/types/music';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 let yt: Innertube | null = null;
 let lastInit = 0;

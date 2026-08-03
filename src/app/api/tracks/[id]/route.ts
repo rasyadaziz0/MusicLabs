@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getITunesTrack } from '@/lib/server/itunesApi';
 import { getYtMusicClient, mapYtSongToAppSong } from '@/lib/server/ytmusic';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 /** YouTube video IDs are 11-char alphanumeric with - and _ */
 function isYouTubeVideoId(id: string): boolean {

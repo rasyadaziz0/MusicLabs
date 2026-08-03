@@ -6,7 +6,8 @@
     "dev": "cross-env VERCEL= next dev --turbopack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1068.0",
@@ -23,7 +24,6 @@
     "@tanstack/react-query-devtools": "^5.100.3",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.37.0",
-    "@vercel/analytics": "^2.0.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.4.0",
     "framer-motion": "^12.41.0",
@@ -40,7 +40,6 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-easy-crop": "^6.0.2",
-    "sharp": "^0.35.1",
     "tailwind-merge": "^3.5.0",
     "youtube-ext": "^1.1.25",
     "youtubei.js": "^17.0.1",
@@ -55,6 +54,8 @@
     "cross-env": "^10.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
+    "patch-package": "^8.0.1",
+    "postinstall-postinstall": "^2.1.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.9"

@@ -3,7 +3,6 @@ import { Syne, DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import "goey-toast/styles.css";
 import ConditionalProviders from "@/components/ConditionalProviders";
-import { Analytics } from "@vercel/analytics/react";
 import GooeyToasterProvider from "@/components/GooeyToasterProvider";
 
 const syne = Syne({
@@ -24,11 +23,11 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://music.rasyadazizan.site"),
   title: {
-    default: "AcadMusic - Web Player",
-    template: "%s | AcadMusic",
+    default: "AcadMusic - Apple Music Clone Portfolio by Rasyad",
+    template: "%s | AcadMusic Portfolio",
   },
-  description: "Dengarkan jutaan lagu dengan lirik real-time, buat playlist, dan temukan musik baru dengan AI di AcadMusic.",
-  keywords: ["music streaming", "streaming musik", "lirik lagu", "realtime lyrics", "music player", "youtube music alternative", "acadmusic", "rasyad azizan"],
+  description: "A modern Apple Music clone web application built with Next.js, Supabase, and Cloudflare Edge Runtime. A developer portfolio project by Rasyad Azizan featuring YouTube Music API integration and realtime lyrics.",
+  keywords: ["apple music clone", "music streaming app", "next.js portfolio", "rasyad azizan", "acadmusic clone", "developer portfolio", "supabase music app", "realtime lyrics"],
   authors: [{ name: "Rasyad Azizan", url: "https://rasyadazizan.site" }],
   applicationName: "AcadMusic",
   generator: "Next.js",
@@ -40,9 +39,9 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    siteName: "AcadMusic",
-    title: "AcadMusic - Web Player",
-    description: "Dengarkan jutaan lagu dengan lirik real-time dan temukan musik baru dengan AI di AcadMusic.",
+    siteName: "AcadMusic Portfolio",
+    title: "AcadMusic - Apple Music Clone Portfolio by Rasyad",
+    description: "A modern Apple Music clone web application built with Next.js, Supabase, and Cloudflare Edge Runtime. A developer portfolio project by Rasyad Azizan.",
     locale: "id_ID",
     url: "https://music.rasyadazizan.site",
     images: [
@@ -50,16 +49,16 @@ export const metadata: Metadata = {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "AcadMusic - Modern Music Streaming",
+        alt: "AcadMusic - Apple Music Clone Portfolio",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    site: "@acadmusic",
+    site: "@rasyadazizan",
     creator: "@rasyadazizan",
-    title: "AcadMusic - Web Player",
-    description: "Dengarkan jutaan lagu dengan lirik real-time dan temukan musik baru dengan AI di AcadMusic.",
+    title: "AcadMusic - Apple Music Clone Portfolio",
+    description: "A modern Apple Music clone web application built with Next.js, Supabase, and Cloudflare Edge Runtime. A developer portfolio project.",
     images: ["/og-image.jpg"],
   },
   robots: {
@@ -99,7 +98,6 @@ export default function RootLayout({
         <ConditionalProviders>
           {children}
         </ConditionalProviders>
-        <Analytics />
         <GooeyToasterProvider />
       </body>
     </html>

@@ -13,7 +13,7 @@ import {
   generateDiscoverWeeklyForUser,
 } from '@/services/discover/discoverService';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 export const maxDuration = 60; // Allow up to 60s for the full pipeline
 
 export async function POST() {
@@ -108,3 +108,4 @@ export async function GET() {
     );
   }
 }
+

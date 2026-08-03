@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { searchITunesTracks } from '@/lib/server/itunesApi';
 import { checkRateLimit, getRequestIp } from '@/lib/server/rateLimit';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 export async function GET(request: NextRequest) {
   const ip = getRequestIp(request);
@@ -55,3 +55,4 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ data: { results: [] } }, { status: 500 });
   }
 }
+

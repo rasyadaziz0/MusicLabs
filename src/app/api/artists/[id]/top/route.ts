@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getITunesArtistTopTracks } from '@/lib/server/itunesApi';
 
-export const runtime = 'nodejs';
+export const runtime = 'edge';
 
 export async function GET(
   _request: NextRequest,

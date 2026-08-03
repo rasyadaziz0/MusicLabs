@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
     const tokenResponse = await fetch(SPOTIFY_TOKEN_URL, {
       method: 'POST',
       headers: {
-        Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
