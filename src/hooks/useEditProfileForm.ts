@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
 import { uploadImage } from '@/lib/utils/uploadImage';
 import { gooeyToast as toast } from 'goey-toast';
+import { EditProfileFormState, EditProfileFormMeta } from '@/types/hooks/profile';
 
 // ── Constants ──
 
@@ -14,24 +15,9 @@ const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif
 
 // ── Types ──
 
-interface EditProfileFormState {
-  username: string;
-  name: string;
-  bio: string;
-  avatarUrl: string;
-  bannerUrl: string;
-  socialInstagram: string;
-  socialTwitter: string;
-  socialTiktok: string;
-}
 
-interface EditProfileFormMeta {
-  isSubmitting: boolean;
-  isFetching: boolean;
-  isUploadingAvatar: boolean;
-  isUploadingBanner: boolean;
-  error: string | null;
-}
+
+
 
 // ── Hook ──
 

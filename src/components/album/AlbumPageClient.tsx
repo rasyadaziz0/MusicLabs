@@ -13,18 +13,7 @@ import AddToQueueButton from '@/components/ui/AddToQueueButton';
 import AddToPlaylistButton from '@/components/ui/AddToPlaylistButton';
 import { AppleMusicHeader } from '@/components/ui/AppleMusicHeader';
 import { AppleMusicTrackList } from '@/components/ui/AppleMusicTrackList';
-
-interface AlbumPageClientProps {
-  albumId: string;
-  albumTitle: string;
-  albumArtist: string;
-  albumArtistId: string | null;
-  coverUrl: string;
-  releaseYear: string;
-  trackCount: number;
-  tracks: Song[];
-}
-
+import { AlbumPageClientProps } from '@/types/components/album/AlbumPageClientProps';
 export default function AlbumPageClient({
   albumId,
   albumTitle,

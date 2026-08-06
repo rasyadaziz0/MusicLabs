@@ -1,5 +1,6 @@
 import { TextMatcher } from '../../TextMatcher';
-import { BaseLyricsProvider, CleanedQuery, ProviderResult } from './BaseLyricsProvider';
+import { BaseLyricsProvider } from './BaseLyricsProvider';
+import { CleanedQuery, ProviderResult } from '@/types/services/lyrics';
 
 // ── LRCLib-specific types ─────────────────────────────────────────
 

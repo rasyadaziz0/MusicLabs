@@ -1,4 +1,4 @@
-import { PlaylistScraper, ScrapedPlaylist, ScrapedTrack } from './types';
+import { PlaylistScraper, ScrapedPlaylist, ScrapedTrack } from '@/types/services/scrapers';
 
 export class SpotifyScraper implements PlaylistScraper {
   match(url: string): boolean {

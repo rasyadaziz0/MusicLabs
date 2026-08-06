@@ -1,9 +1,9 @@
 'use client';
 
+import { useCreatePlaylist } from '@/hooks/library/useCreatePlaylist';
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { useCreatePlaylist } from '@/hooks/useMusicLibrary';
 import { Music, AlertCircle, Loader2, Upload } from 'lucide-react';
 import Image from 'next/image';
 import { uploadImage } from '@/lib/utils/uploadImage';

@@ -1,20 +1,5 @@
-import { YouTubePlayerInstance, EmbedPlaylistTrack } from '../../_components/types';
-export interface EmbedPlaylistPlayerState {
-  currentIndex: number;
-  isPlaying: boolean;
-  currentTime: number;
-  totalDuration: number;
-  isLoading: boolean;
-  error: string | null;
-  useNativePreview: boolean; // True if using iTunes preview
-  currentTrack: EmbedPlaylistTrack | null;
-}
-
-export interface EmbedPlaylistPlayerControllerOptions {
-  tracks: EmbedPlaylistTrack[];
-  isLoggedIn: boolean;
-  onStateChange: (state: Partial<EmbedPlaylistPlayerState>) => void;
-}
+import { YouTubePlayerInstance, EmbedPlaylistTrack } from '@/types/components/embed';
+import { EmbedPlaylistPlayerState, EmbedPlaylistPlayerControllerOptions } from '@/types/controllers/embed';
 
 export class EmbedPlaylistPlayerController {
   private ytPlayer: YouTubePlayerInstance | null = null;
@@ -120,7 +105,7 @@ export class EmbedPlaylistPlayerController {
   private async playNativePreview(track: EmbedPlaylistTrack) {
     try {
       // 1. Resolve preview URL
-      const res = await fetch(`/api/preview?title=${encodeURIComponent(track.name)}&artist=${encodeURIComponent(track.artistName)}`);
+      const res = await fetch(`${(process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || process.env.NEXT_PUBLIC_EXPRESS_API_URL) || ''}/api/preview?title=${encodeURIComponent(track.name)}&artist=${encodeURIComponent(track.artistName)}`);
       if (!res.ok || this.isDestroyed) throw new Error('Preview failed');
       const data = await res.json();
       

@@ -14,21 +14,8 @@ import type { PlaylistRecord } from '@/lib/supabase/music';
 import { useFeatureFlags } from '@/context/FeatureFlagsContext';
 import FeatureDisabled from '@/components/ui/FeatureDisabled';
 
-export interface OtherProfileInitialData {
-  userId: string;
-  profile: UserProfile;
-  publicPlaylists: PlaylistRecord[];
-  followerCount: number;
-  followingCount: number;
-  isFollowing: boolean;
-  isLoggedIn: boolean;
-}
-
-interface OtherProfileProps {
-  initialData: OtherProfileInitialData;
-  isMobile?: boolean;
-}
-
+import { OtherProfileInitialData } from '@/types/components/profile';
+import { OtherProfileProps } from '@/types/components/profile/OtherProfileProps';
 export default function OtherProfile({ initialData, isMobile }: OtherProfileProps) {
   const {
     userId,

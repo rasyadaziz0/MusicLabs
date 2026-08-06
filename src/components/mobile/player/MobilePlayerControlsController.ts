@@ -1,4 +1,4 @@
-import { IMobilePlayerControlsProps, IMobileDeviceNode } from './MobilePlayerControls.types';
+import { IMobilePlayerControlsProps, IMobileDeviceNode } from '@/types/components/mobile';
 
 export class MobilePlayerControlsController {
   private props: IMobilePlayerControlsProps;

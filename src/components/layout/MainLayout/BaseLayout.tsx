@@ -2,13 +2,7 @@ import React, { ReactNode } from 'react';
 import PlayerBar from '../../player/PlayerBar';
 import ConsoleCleaner from '@/components/ui/ConsoleCleaner';
 import Footer from '@/components/layout/Footer';
-
-export interface IMainLayoutProps {
-  children: ReactNode;
-  renderNavigation: () => ReactNode;
-  isMobile: boolean;
-}
-
+import { IMainLayoutProps } from '@/types/components/layout/MainLayout/IMainLayoutProps';
 export default function BaseLayout({
   children,
   renderNavigation,

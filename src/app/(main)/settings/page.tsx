@@ -58,6 +58,7 @@ export default function SettingsPage() {
           setShowRecentlyPlayed(data.show_recently_played ?? true);
           setLyricsFontSize(data.lyrics_font_size || 'medium');
           setRomanizationEnabled(data.romanization_enabled ?? true);
+          if (data.search_region) setSearchRegion(data.search_region);
         }
         setIsFetching(false);
       };
@@ -93,6 +94,7 @@ export default function SettingsPage() {
       showRecentlyPlayed,
       lyricsFontSize,
       romanizationEnabled,
+      searchRegion,
     });
 
     if (updateError) {
@@ -224,19 +226,10 @@ export default function SettingsPage() {
         setShowRecentlyPlayed={setShowRecentlyPlayed}
       />
 
-      {/* ═══════════════════════════════════════════════════════════
-          SECTION 4.5: SECURITY
-         ═══════════════════════════════════════════════════════════ */}
       <SecuritySettings t={t} />
 
-      {/* ═══════════════════════════════════════════════════════════
-          SECTION 5: ABOUT
-         ═══════════════════════════════════════════════════════════ */}
       <AboutSettings t={t} />
 
-      {/* ═══════════════════════════════════════════════════════════
-          SECTION 6: ACCOUNT
-         ═══════════════════════════════════════════════════════════ */}
       <AccountSettings
         t={t}
         user={user}

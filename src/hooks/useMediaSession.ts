@@ -1,13 +1,9 @@
 import { useEffect } from 'react';
 import { Song } from '@/types/music';
-import { getBestImageUrl } from '@/lib/api/musicApi';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
+import { UseMediaSessionProps } from '@/types/hooks/media';
 
-interface UseMediaSessionProps {
-  currentTrack: Song | null;
-  togglePlay: () => void;
-  nextTrack: () => void;
-  prevTrack: () => void;
-}
+
 
 export function useMediaSession({
   currentTrack,
@@ -21,7 +17,7 @@ export function useMediaSession({
         title: currentTrack.name,
         artist: currentTrack.artists.primary.map((a: any) => a.name).join(', '),
         album: currentTrack.album?.name || '',
-        artwork: [{ src: getBestImageUrl(currentTrack.image) ?? '', sizes: '512x512', type: 'image/jpeg' }]
+        artwork: [{ src: ImageHelper.getBestImageUrl(currentTrack.image) ?? '', sizes: '512x512', type: 'image/jpeg' }]
       });
       navigator.mediaSession.setActionHandler('play', togglePlay);
       navigator.mediaSession.setActionHandler('pause', togglePlay);

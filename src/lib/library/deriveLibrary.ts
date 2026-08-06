@@ -1,23 +1,6 @@
-import { getBestImageUrl } from '@/lib/api/musicApi';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { Song } from '@/types/music';
-
-export interface LibraryArtist {
-  id: string;
-  name: string;
-  imageUrl?: string;
-  songCount: number;
-  primarySong: Song;
-}
-
-export interface LibraryAlbum {
-  id: string;
-  name: string;
-  artistName: string;
-  imageUrl?: string;
-  year?: string;
-  songCount: number;
-  primarySong: Song;
-}
+import { LibraryArtist, LibraryAlbum } from '@/types/models/library';
 
 function dedupeSongs(songs: Song[]) {
   const seen = new Set<string>();
@@ -49,7 +32,7 @@ export function buildLibraryArtists(songs: Song[]): LibraryArtist[] {
       artistMap.set(key, {
         id: artist.id || key,
         name: artist.name,
-        imageUrl: getBestImageUrl(artist.image),
+        imageUrl: ImageHelper.getBestImageUrl(artist.image),
         songCount: 1,
         primarySong: song,
       });
@@ -79,7 +62,7 @@ export function buildLibraryAlbums(songs: Song[]): LibraryAlbum[] {
       id: album.id || key,
       name: album.name,
       artistName,
-      imageUrl: getBestImageUrl(song.image),
+      imageUrl: ImageHelper.getBestImageUrl(song.image),
       year: song.year,
       songCount: 1,
       primarySong: song,

@@ -1,11 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-
-interface AppleMusicBackgroundProps {
-  isRecordingOrProcessing: boolean;
-}
-
+import { AppleMusicBackgroundProps } from '@/types/components/identify/AppleMusicBackgroundProps';
 export function AppleMusicBackground({ isRecordingOrProcessing }: AppleMusicBackgroundProps) {
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">

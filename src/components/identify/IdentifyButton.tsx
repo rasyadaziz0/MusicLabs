@@ -4,14 +4,7 @@ import { useState, useEffect } from 'react';
 import { AudioLines } from 'lucide-react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import IdentifyModal from './IdentifyModal';
-
-interface IdentifyButtonProps {
-  /** Visual variant */
-  variant?: 'sidebar' | 'mobile';
-  /** Custom className override */
-  className?: string;
-}
-
+import { IdentifyButtonProps } from '@/types/components/identify/IdentifyButtonProps';
 export default function IdentifyButton({ variant = 'sidebar', className }: IdentifyButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const searchParams = useSearchParams();

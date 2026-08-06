@@ -1,11 +1,5 @@
 import { Song } from '@/types/music';
-
-export interface PersonalizedSection {
-  key: string;
-  title: string;
-  subtitle: string;
-  tracks: Song[];
-}
+import { PersonalizedSection } from '@/types/services/personalization';
 
 function dedupeSongs(songs: Song[]) {
   const seen = new Set<string>();

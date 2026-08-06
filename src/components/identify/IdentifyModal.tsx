@@ -6,12 +6,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useIdentifyController } from '@/hooks/useIdentifyController';
 import { IdentifyStates } from './ui/IdentifyStates';
 import { IdentifyResults } from './ui/IdentifyResults';
-
-interface IdentifyModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
+import { IdentifyModalProps } from '@/types/components/identify/IdentifyModalProps';
 export default function IdentifyModal({ isOpen, onClose }: IdentifyModalProps) {
   const { user, loading: authLoading, signInWithGoogle } = useAuth();
   const isAuthenticated = !!user;

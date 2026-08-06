@@ -1,16 +1,9 @@
 'use client';
+import { ArtistParser } from '@/lib/utils/ArtistParser';
 
 import Link from 'next/link';
 import { Song } from '@/types/music';
-
-interface LyricsHeaderProps {
-  currentTrack: Song;
-  hasRomanizations: boolean;
-  showRomanization: boolean;
-  onToggleRomanization: () => void;
-  hideHeader?: boolean;
-}
-
+import { LyricsHeaderProps } from '@/types/components/player/lyrics/LyricsHeaderProps';
 export function LyricsHeader({
   currentTrack,
   hasRomanizations,
@@ -85,7 +78,7 @@ export function LyricsHeader({
               {currentTrack.artists.primary.map((a, i) => (
                 <span key={a.id}>
                   <Link
-                    href={`/artist/${a.id}`}
+                    href={ArtistParser.getArtistLink(a)}
                     onClick={(e) => e.stopPropagation()}
                     style={{ color: 'inherit', textDecoration: 'none' }}
                     onMouseOver={(e) => (e.currentTarget.style.textDecoration = 'underline')}

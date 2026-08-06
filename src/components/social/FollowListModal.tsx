@@ -1,22 +1,13 @@
 'use client';
 
+import { useFollowersList } from '@/hooks/social/useFollowersList';
+import { useFollowingList } from '@/hooks/social/useFollowingList';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Users } from 'lucide-react';
-import { useFollowersList, useFollowingList } from '@/hooks/useFollow';
 import UserCard from '@/components/ui/UserCard';
 
-type TabType = 'followers' | 'following';
-
-interface FollowListModalProps {
-  userId: string;
-  initialTab?: TabType;
-  isOpen: boolean;
-  onClose: () => void;
-  followerCount: number;
-  followingCount: number;
-}
-
+import { FollowListModalProps, TabType } from '@/types/components/social/FollowListModalProps';
 export default function FollowListModal({
   userId,
   initialTab = 'followers',

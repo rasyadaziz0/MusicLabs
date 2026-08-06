@@ -1,11 +1,19 @@
 import { Metadata } from 'next';
 import { cache } from 'react';
-import { getITunesAlbum } from '@/lib/server/itunesApi';
 import EmbedPlaylistPlayer from '../../playlist/[id]/EmbedPlaylistPlayer';
 
 const getAlbumData = cache(async (rawId: string) => {
   const itunesId = rawId.replace(/^itunes-album-/, '');
-  return await getITunesAlbum(itunesId);
+  const baseUrl = (process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || process.env.NEXT_PUBLIC_EXPRESS_API_URL) || 'http://localhost:3001';
+  try {
+    const res = await fetch(`${baseUrl}/api/albums/${itunesId}`, { headers: { 'Origin': process.env.NEXT_PUBLIC_APP_URL || 'https://music.rasyadazizan.site' }, next: { revalidate: 3600 } });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.data;
+  } catch (error) {
+    console.error('Error fetching album data:', error);
+    return null;
+  }
 });
 
 interface PageProps {

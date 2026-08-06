@@ -6,14 +6,9 @@ import { getPortalRoot } from '@/lib/utils/portalRoot';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Laptop, Smartphone, Tablet, X, Edit3, Check, Loader2, MonitorSpeaker, Volume2 } from 'lucide-react';
 import { usePlayer } from '@/context/PlayerContext';
-import { cn } from '@/lib/utils';
+import { StyleHelper } from '@/lib/utils/StyleHelper';
 import { GlassBar } from '@/components/ui/LiquidGlass';
-
-export interface DevicePickerModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
+import { DevicePickerModalProps } from '@/types/components/player/DevicePickerModalProps';
 export default function DevicePickerModal({ isOpen, onClose }: DevicePickerModalProps) {
   const {
     myTabId,
@@ -50,7 +45,7 @@ export default function DevicePickerModal({ isOpen, onClose }: DevicePickerModal
   };
 
   const getIcon = (type: string, isActive: boolean) => {
-    const className = cn("w-5 h-5", isActive ? "text-[#1db954]" : "text-white/70");
+    const className = StyleHelper.cn("w-5 h-5", isActive ? "text-[#1db954]" : "text-white/70");
     if (type === 'mobile') return <Smartphone className={className} />;
     if (type === 'tablet') return <Tablet className={className} />;
     return <Laptop className={className} />;
@@ -147,7 +142,7 @@ export default function DevicePickerModal({ isOpen, onClose }: DevicePickerModal
                     <div
                       key={`${device.tabInstanceId}-${idx}`}
                       onClick={() => !isActive && transferPlayback(device.tabInstanceId)}
-                      className={cn(
+                      className={StyleHelper.cn(
                         "group relative flex items-center justify-between p-3.5 rounded-2xl transition-all cursor-pointer border",
                         isActive
                           ? "bg-[#1db954]/15 border-[#1db954]/40 shadow-[0_0_20px_rgba(29,185,84,0.15)]"
@@ -155,7 +150,7 @@ export default function DevicePickerModal({ isOpen, onClose }: DevicePickerModal
                       )}
                     >
                       <div className="flex items-center gap-3.5 min-w-0">
-                        <div className={cn(
+                        <div className={StyleHelper.cn(
                           "flex items-center justify-center w-10 h-10 rounded-xl",
                           isActive ? "bg-[#1db954]/20" : "bg-white/5 group-hover:bg-white/10"
                         )}>
@@ -163,7 +158,7 @@ export default function DevicePickerModal({ isOpen, onClose }: DevicePickerModal
                         </div>
                         <div className="flex flex-col min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className={cn("text-sm font-bold truncate", isActive ? "text-[#1db954]" : "text-white")}>
+                            <span className={StyleHelper.cn("text-sm font-bold truncate", isActive ? "text-[#1db954]" : "text-white")}>
                               {device.label}
                             </span>
                             {isMe && (

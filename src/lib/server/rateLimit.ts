@@ -33,10 +33,25 @@ const limiterStore = getLimiterStore();
 function getStore(): Map<string, Bucket> {
   const globalObj = globalThis as typeof globalThis & {
     [GLOBAL_STORE_KEY]?: Map<string, Bucket>;
+    __ACADMUSIC_RATE_LIMIT_CLEANUP_STARTED?: boolean;
   };
 
   if (!globalObj[GLOBAL_STORE_KEY]) {
     globalObj[GLOBAL_STORE_KEY] = new Map<string, Bucket>();
+  }
+
+  // Jalankan periodic cleanup (setiap 10 menit) untuk mencegah memory leak di VPS
+  if (!globalObj.__ACADMUSIC_RATE_LIMIT_CLEANUP_STARTED) {
+    globalObj.__ACADMUSIC_RATE_LIMIT_CLEANUP_STARTED = true;
+    setInterval(() => {
+      const store = globalObj[GLOBAL_STORE_KEY]!;
+      const now = Date.now();
+      for (const [key, bucket] of store.entries()) {
+        if (now >= bucket.resetAt) {
+          store.delete(key);
+        }
+      }
+    }, 10 * 60 * 1000).unref?.();
   }
 
   return globalObj[GLOBAL_STORE_KEY]!;
@@ -58,22 +73,19 @@ function hasUpstashConfig() {
   return Boolean(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
 }
 
-function shouldUseLocalFallback() {
-  return process.env.NODE_ENV !== 'production';
-}
 
 export function getRequestIp(request: NextRequest): string {
-  const xForwardedFor = request.headers.get('x-forwarded-for');
-  if (xForwardedFor) {
-    return xForwardedFor.split(',')[0]?.trim() || 'unknown';
-  }
+  // Prioritaskan header standar VPS (Cloudflare / Nginx)
+  const cfIp = request.headers.get('cf-connecting-ip');
+  if (cfIp) return cfIp.trim();
 
-  return (
-    request.headers.get('x-real-ip') ||
-    request.headers.get('cf-connecting-ip') ||
-    request.headers.get('x-vercel-forwarded-for') ||
-    'unknown'
-  );
+  const xForwardedFor = request.headers.get('x-forwarded-for');
+  if (xForwardedFor) return xForwardedFor.split(',')[0]?.trim() || 'unknown';
+
+  const xRealIp = request.headers.get('x-real-ip');
+  if (xRealIp) return xRealIp.trim();
+
+  return request.headers.get('x-vercel-forwarded-for')?.trim() || 'unknown';
 }
 
 function checkLocalRateLimit(
@@ -146,19 +158,10 @@ export async function checkRateLimit(
     };
   }
 
-  if (shouldUseLocalFallback()) {
-    return checkLocalRateLimit(identifier, config);
-  }
-
-  // Production without Upstash = all requests blocked (fail-closed)
-  console.error(
-    '[RATE_LIMIT] CRITICAL: UPSTASH_REDIS_REST_URL and/or UPSTASH_REDIS_REST_TOKEN not set in production. All rate-limited requests will be BLOCKED.'
+  // Production without Upstash = Degradasi ke in-memory lokal (jangan fail-closed)
+  console.warn(
+    '[RATE_LIMIT] WARNING: UPSTASH_REDIS_REST_URL and/or UPSTASH_REDIS_REST_TOKEN not set in production. Using local in-memory rate limiting.'
   );
 
-  return {
-    allowed: false,
-    limit,
-    remaining: 0,
-    resetInSeconds: 60,
-  };
+  return checkLocalRateLimit(identifier, config);
 }

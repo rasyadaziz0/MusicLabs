@@ -1,4 +1,8 @@
 import type { NextConfig } from "next";
+import { loadEnvConfig } from "@next/env";
+
+const projectDir = process.cwd();
+loadEnvConfig(projectDir);
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -10,6 +14,16 @@ const nextConfig: NextConfig = {
 
   turbopack: {
     root: __dirname,
+  },
+  output: 'standalone',
+
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${process.env.NEXT_PUBLIC_EXPRESS_API_URL || 'http://localhost:3001'}/api/:path*`,
+      },
+    ];
   },
 
   // ─── Security Headers ───────────────────────────────────────────────────────
@@ -23,7 +37,7 @@ const nextConfig: NextConfig = {
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(self), geolocation=()' },
           { key: 'X-DNS-Prefetch-Control', value: 'on' },
-          { key: 'Content-Security-Policy', value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.youtube.com https://s.ytimg.com https://challenges.cloudflare.com https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https: http:; font-src 'self' data:; connect-src 'self' https: http: wss:; media-src 'self' blob: https: http:; frame-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';" },
+          { key: 'Content-Security-Policy', value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.youtube.com https://s.ytimg.com https://challenges.cloudflare.com https://va.vercel-scripts.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https: http:; font-src 'self' data:; connect-src 'self' https: http: wss:; media-src 'self' blob: https: http:; frame-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';" },
         ],
       },
       {
@@ -31,7 +45,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://s.ytimg.com; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; frame-src https://www.youtube.com; media-src https:; connect-src 'self' https:; object-src 'none'; base-uri 'self'; frame-ancestors *;",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://s.ytimg.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; frame-src https://www.youtube.com; media-src https:; connect-src 'self' https:; object-src 'none'; base-uri 'self'; frame-ancestors *;",
           },
           // Override X-Frame-Options for legacy browsers that don't support CSP frame-ancestors
           { key: 'X-Frame-Options', value: 'ALLOWALL' },
@@ -50,6 +64,7 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',

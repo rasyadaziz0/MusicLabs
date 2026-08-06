@@ -97,6 +97,22 @@ export default function ImportPlaylistPage() {
                   onSave={handleSaveToLibrary}
                 />
               )}
+              
+              {!scrapedResult && importProgress !== null && (
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-5 space-y-4 animate-in fade-in slide-in-from-bottom-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-2 w-2 rounded-full bg-[#FA243C] animate-pulse"></div>
+                    <h3 className="text-sm font-bold text-white">Import sedang berjalan di latar belakang...</h3>
+                  </div>
+                  <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden relative">
+                    <div
+                      className="bg-gradient-to-r from-[#FA243C] to-red-500 h-3 rounded-full transition-all duration-500 ease-out"
+                      style={{ width: `${importProgress}%` }}
+                    ></div>
+                    <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white mix-blend-difference">{importProgress}%</span>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

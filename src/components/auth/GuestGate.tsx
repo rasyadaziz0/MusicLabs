@@ -4,14 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Music } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
-
-interface GuestGateProps {
-  isOpen: boolean;
-  onClose: () => void;
-  /** The action user attempted, shown in the prompt */
-  action?: string;
-}
-
+import { GuestGateProps } from '@/types/components/auth/GuestGateProps';
 export default function GuestGate({ isOpen, onClose, action = 'use this feature' }: GuestGateProps) {
   const { signInWithGoogle } = useAuth();
 

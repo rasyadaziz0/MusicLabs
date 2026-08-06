@@ -7,6 +7,14 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Basic fetch handler
+  const url = new URL(event.request.url);
+  
+  // Bypass Service Worker untuk request lintas origin (seperti API Supabase, YouTube, dll)
+  // Ini menghindari error CORS: "The value of the 'Access-Control-Allow-Origin' header in the response must not be the wildcard '*'"
+  if (url.origin !== self.location.origin) {
+    return;
+  }
+
+  // Basic fetch handler untuk asset lokal
   event.respondWith(fetch(event.request));
 });

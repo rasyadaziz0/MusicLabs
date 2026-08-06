@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useCallback } from 'react';
+import { TimeSubscriber } from '@/types/hooks/time';
 
-type TimeSubscriber = (time: number) => void;
+
 
 let subscribers: Set<TimeSubscriber> = new Set();
 let rafId: number | null = null;

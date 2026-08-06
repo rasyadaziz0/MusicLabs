@@ -3,24 +3,9 @@
 import Image from 'next/image';
 import { Play, Search, AlertCircle, Music2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getBestImageUrl } from '@/lib/api/musicApi';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { Song } from '@/types/music';
-
-interface ResultsBottomSheetProps {
-  hasResults: boolean;
-  state: 'idle' | 'recording' | 'processing' | 'results' | 'no-match' | 'error';
-  mode: 'audd' | 'speech';
-  matchedSong: Song | null;
-  rawMatch: any;
-  speechResults: Song[];
-  errorMessage: string;
-  speech: { transcript: string };
-  resetState: () => void;
-  handlePlay: (song: Song, onPlayStart: () => void) => void;
-  handleSearchForSong: (name: string, artistName: string) => void;
-  routerBack: () => void;
-}
-
+import { ResultsBottomSheetProps } from '@/types/components/identify/ResultsBottomSheetProps';
 export function ResultsBottomSheet({
   hasResults,
   state,
@@ -64,9 +49,9 @@ export function ResultsBottomSheet({
               {state === 'results' && mode === 'audd' && matchedSong && (
                 <div className="flex flex-col items-center text-center">
                   <div className="relative w-48 h-48 rounded-2xl overflow-hidden shadow-2xl mb-6">
-                    {getBestImageUrl(matchedSong.image) ? (
+                    {ImageHelper.getBestImageUrl(matchedSong.image) ? (
                       <Image
-                        src={getBestImageUrl(matchedSong.image)!}
+                        src={ImageHelper.getBestImageUrl(matchedSong.image)!}
                         alt={matchedSong.name}
                         fill
                         sizes="192px"
@@ -123,8 +108,8 @@ export function ResultsBottomSheet({
                         className="flex items-center gap-4 p-3 -mx-3 rounded-xl hover:bg-white/5 active:bg-white/10 transition-colors cursor-pointer"
                       >
                         <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
-                          {getBestImageUrl(song.image) ? (
-                            <Image src={getBestImageUrl(song.image)!} alt={song.name} fill sizes="56px" className="object-cover" />
+                          {ImageHelper.getBestImageUrl(song.image) ? (
+                            <Image src={ImageHelper.getBestImageUrl(song.image)!} alt={song.name} fill sizes="56px" className="object-cover" />
                           ) : (
                             <div className="w-full h-full bg-gradient-to-br from-[#FA243C]/40 to-[#1a1a1e]" />
                           )}

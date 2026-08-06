@@ -1,18 +1,14 @@
 'use client';
 
+import { useLikedSongsIndex } from '@/hooks/library/useLikedSongsIndex';
+import { useLikedSongs } from '@/hooks/library/useLikedSongs';
+import { useToggleLikedSong } from '@/hooks/library/useToggleLikedSong';
 import { Heart, Loader2 } from 'lucide-react';
 import { Song } from '@/types/music';
-import { cn } from '@/lib/utils';
+import { StyleHelper } from '@/lib/utils/StyleHelper';
 import { useAuth } from '@/context/AuthContext';
-import { useLikedSongsIndex, useToggleLikedSong } from '@/hooks/useMusicLibrary';
 import { ContextMenuItem } from './context-menu/ContextMenuItem';
-
-interface TrackLikeButtonProps {
-  track: Song;
-  className?: string;
-  asMenuItem?: boolean;
-}
-
+import { TrackLikeButtonProps } from '@/types/components/ui/TrackLikeButtonProps';
 export default function TrackLikeButton({ track, className, asMenuItem }: TrackLikeButtonProps) {
   const { user, signInWithGoogle } = useAuth();
   const { likedSet } = useLikedSongsIndex();
@@ -48,7 +44,7 @@ export default function TrackLikeButton({ track, className, asMenuItem }: TrackL
       type="button"
       onClick={handleClick}
       disabled={toggleMutation.isPending}
-      className={cn(
+      className={StyleHelper.cn(
         'inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-muted transition-colors hover:text-white disabled:opacity-60',
         isLiked && 'text-primary',
         className

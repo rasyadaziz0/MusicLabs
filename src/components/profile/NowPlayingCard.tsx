@@ -1,25 +1,17 @@
 'use client';
 
+import { MusicApiService } from '@/lib/api/MusicApiService';
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { Music2, Play, Loader2, MoreHorizontal } from 'lucide-react';
 import { supabase } from '@/lib/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePlayer } from '@/context/PlayerContext';
-import { getSong } from '@/lib/api/musicApi';
 import { Song } from '@/types/music';
 import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
 import { gooeyToast as toast } from 'goey-toast';
 import { useTranslation } from '@/context/LanguageContext';
-
-interface PresenceData {
-  track_id: string | null;
-  track_name: string | null;
-  artist_name: string | null;
-  cover_url: string | null;
-  updated_at: string;
-}
-
+import { PresenceData } from '@/types/components/profile/PresenceData';
 // Only show presence if updated within the last 5 minutes
 const STALE_THRESHOLD_MS = 5 * 60 * 1000;
 
@@ -99,7 +91,7 @@ export default function NowPlayingCard({ userId }: { userId: string }) {
     
     setIsLoading(true);
     try {
-      const song = await getSong(presence.track_id);
+      const song = await MusicApiService.getSong(presence.track_id);
       playTrack(song);
     } catch (error) {
       console.error('Failed to fetch song:', error);
@@ -119,7 +111,7 @@ export default function NowPlayingCard({ userId }: { userId: string }) {
     
     setIsLoading(true);
     try {
-      const song = await getSong(presence.track_id);
+      const song = await MusicApiService.getSong(presence.track_id);
       setContextMenuTrack(song);
       setMenuPosition(pos);
     } catch (error) {

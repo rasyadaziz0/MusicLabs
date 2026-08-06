@@ -1,18 +1,11 @@
 'use client';
 
-import { getBestImageUrl } from '@/lib/api/musicApi';
-import { formatTime } from '@/lib/utils';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
+import { TimeHelper } from '@/lib/utils/TimeHelper';
 import Image from 'next/image';
-import { SortableTrack } from './QueuePopupController';
+import { SortableTrack } from '@/types/player/controller';
 import { Plus, X } from 'lucide-react';
-
-interface AutoplayTrackRowProps {
-  track: SortableTrack;
-  onClick: () => void;
-  onPromote: (trackId: string) => void;
-  onRemove: (trackId: string) => void;
-}
-
+import { AutoplayTrackRowProps } from '@/types/components/player/AutoplayTrackRowProps';
 export function AutoplayTrackRow({ track, onClick, onPromote, onRemove }: AutoplayTrackRowProps) {
   return (
     <div
@@ -30,9 +23,9 @@ export function AutoplayTrackRow({ track, onClick, onPromote, onRemove }: Autopl
         background: 'rgba(255,255,255,0.06)',
         position: 'relative',
       }}>
-        {getBestImageUrl(track.image) ? (
+        {ImageHelper.getBestImageUrl(track.image) ? (
           <Image
-            src={getBestImageUrl(track.image)!}
+            src={ImageHelper.getBestImageUrl(track.image)!}
             alt={track.name}
             fill
             sizes="42px"
@@ -99,7 +92,7 @@ export function AutoplayTrackRow({ track, onClick, onPromote, onRemove }: Autopl
             transition: 'color 0.12s ease',
           }}
         >
-          {formatTime(track.duration)}
+          {TimeHelper.formatTime(track.duration)}
         </div>
       </div>
     </div>

@@ -7,11 +7,7 @@ import { useAuth } from '@/context/AuthContext';
 import { gooeyToast as toast } from 'goey-toast';
 import TurnstileWidget from '@/components/auth/TurnstileWidget';
 import Link from 'next/link';
-
-interface SecuritySettingsProps {
-  t: (key: string) => string;
-}
-
+import { SecuritySettingsProps } from '@/types/components/settings/SecuritySettingsProps';
 export function SecuritySettings({ t }: SecuritySettingsProps) {
   const { user, resetPasswordForEmail } = useAuth();
 

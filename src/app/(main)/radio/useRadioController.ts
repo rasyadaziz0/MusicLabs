@@ -1,6 +1,6 @@
+import { RadioApiService } from '@/lib/api/RadioApiService';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { searchRadioStations, searchRadioByName, radioStationToSong } from '@/lib/api/radioApi';
 import { RadioStation } from '@/types/music';
 import { usePlayer } from '@/context/PlayerContext';
 
@@ -15,7 +15,7 @@ export const CATEGORIES = [
   { key: 'classical', label: 'Classical' },
 ] as const;
 
-export type CategoryKey = (typeof CATEGORIES)[number]['key'];
+import { CategoryKey } from '@/types/hooks/radio';
 
 export function useRadioController() {
   const { currentTrack, isPlaying, isResolving, playTrack, togglePlay, isRadio, radioMeta } = usePlayer();
@@ -25,20 +25,20 @@ export function useRadioController() {
   // Fetch Indonesian stations
   const { data: stations = [], isLoading } = useQuery({
     queryKey: ['radioStations', 'ID'],
-    queryFn: () => searchRadioStations('ID', 100),
+    queryFn: () => RadioApiService.searchRadioStations('ID', 100),
     staleTime: 1000 * 60 * 30, // 30 min
   });
 
   // Search query — searches globally
   const { data: searchResults = [], isLoading: isSearching } = useQuery({
     queryKey: ['radioSearch', searchQuery],
-    queryFn: () => searchRadioByName(searchQuery, 30),
+    queryFn: () => RadioApiService.searchRadioByName(searchQuery, 30),
     enabled: searchQuery.length >= 2,
     staleTime: 1000 * 60 * 5,
   });
 
   const handlePlayStation = (station: RadioStation) => {
-    const song = radioStationToSong(station);
+    const song = RadioApiService.radioStationToSong(station);
     // Check if this station is already playing
     if (currentTrack?.id === song.id && isRadio) {
       togglePlay();

@@ -1,12 +1,5 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
-interface ScrollArrowsProps {
-  canScrollLeft: boolean;
-  canScrollRight: boolean;
-  onScrollLeft: () => void;
-  onScrollRight: () => void;
-}
-
+import { ScrollArrowsProps } from '@/types/components/ui/ScrollArrowsProps';
 export function ScrollArrows({ canScrollLeft, canScrollRight, onScrollLeft, onScrollRight }: ScrollArrowsProps) {
   const arrowStyle: React.CSSProperties = {
     background: 'linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0.08) 100%), rgba(30, 30, 34, 0.7)',

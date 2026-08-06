@@ -1,11 +1,11 @@
 'use client';
 
+import { useLibrarySongs } from '@/hooks/library/useLibrarySongs';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { usePlayer } from '@/context/PlayerContext';
-import { useLibrarySongs } from '@/hooks/useMusicLibrary';
 import { LibrarySearchBar } from '@/components/library/LibrarySearchBar';
 import { LibraryEmptyState } from '@/components/library/LibraryEmptyState';
 import { AppleMusicTrackList } from '@/components/ui/AppleMusicTrackList';

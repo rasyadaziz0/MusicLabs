@@ -1,9 +1,9 @@
 'use client';
 
+import { useLibraryPlaylists } from '@/hooks/library/useLibraryPlaylists';
 import Link from 'next/link';
 import { ChevronRight, Music, Mic, SquareStack, Library, Heart, PlusSquare, Sparkles } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { useLibraryPlaylists } from '@/hooks/useMusicLibrary';
 import { useDiscoverWeekly } from '@/hooks/useDiscoverWeekly';
 import Image from 'next/image';
 

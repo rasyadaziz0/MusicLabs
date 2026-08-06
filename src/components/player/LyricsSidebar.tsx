@@ -13,13 +13,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { LyricStyleManager } from './lyrics/LyricStyleManager';
 import { KaraokeLine } from './lyrics/KaraokeLine';
 import { GlassBar } from '@/components/ui/LiquidGlass';
+import { LyricsSidebarProps } from '@/types/components/player/LyricsSidebarProps';
 import './lyrics/sidebar.css';
-
-interface LyricsSidebarProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
 export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
   const { currentTrack, currentTime, seek, duration } = usePlayer();
   const { settings } = useSettings();

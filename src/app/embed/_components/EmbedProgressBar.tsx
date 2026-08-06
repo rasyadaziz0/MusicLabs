@@ -1,4 +1,4 @@
-import { formatTime } from '@/lib/utils';
+import { TimeHelper } from '@/lib/utils/TimeHelper';
 
 interface EmbedProgressBarProps {
   currentTime: number;
@@ -14,7 +14,7 @@ export function EmbedProgressBar({ currentTime, duration, onSeek }: EmbedProgres
   return (
     <div className="flex-1 flex items-center gap-[10px]">
       <span className="text-[11px] font-medium text-[#86868b] w-7 text-right tabular-nums">
-        {formatTime(displayTime)}
+        {TimeHelper.formatTime(displayTime)}
       </span>
 
       <div
@@ -32,7 +32,7 @@ export function EmbedProgressBar({ currentTime, duration, onSeek }: EmbedProgres
       </div>
 
       <span className="text-[11px] font-medium text-[#86868b] w-8 tabular-nums text-right">
-        -{formatTime(duration - displayTime)}
+        -{TimeHelper.formatTime(duration - displayTime)}
       </span>
     </div>
   );

@@ -1,12 +1,7 @@
 'use client';
 
 import { DynamicGradientBackground } from '@/components/player/DynamicGradientBackground';
-
-interface MobileNowPlayingBackgroundProps {
-  coverUrl: string | null;
-  trackId: string | null;
-}
-
+import { MobileNowPlayingBackgroundProps } from '@/types/components/mobile/player/MobileNowPlayingBackgroundProps';
 export function MobileNowPlayingBackground({ coverUrl, trackId }: MobileNowPlayingBackgroundProps) {
   return (
     <DynamicGradientBackground 

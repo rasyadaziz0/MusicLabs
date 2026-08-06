@@ -1,9 +1,9 @@
 'use client';
 
+import { useUpdatePlaylist } from '@/hooks/library/useUpdatePlaylist';
 import { FormEvent, useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { useUpdatePlaylist } from '@/hooks/useMusicLibrary';
 import { getPlaylistById } from '@/lib/supabase/music';
 import { useQuery } from '@tanstack/react-query';
 import { Music, AlertCircle, Loader2, Upload } from 'lucide-react';

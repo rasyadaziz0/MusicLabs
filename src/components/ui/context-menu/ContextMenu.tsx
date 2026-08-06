@@ -5,17 +5,8 @@ import { createPortal } from 'react-dom';
 import { getPortalRoot } from '@/lib/utils/portalRoot';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useIsMobile } from '@/hooks/useIsMobile';
-import { cn } from '@/lib/utils';
-
-export interface ContextMenuProps {
-  isOpen: boolean;
-  onClose: () => void;
-  position?: { x: number; y: number } | null;
-  mobileHeader?: React.ReactNode;
-  children: React.ReactNode;
-  className?: string;
-}
-
+import { StyleHelper } from '@/lib/utils/StyleHelper';
+import { ContextMenuProps } from '@/types/components/ui/context-menu/ContextMenuProps';
 export function ContextMenu({
   isOpen,
   onClose,
@@ -136,7 +127,7 @@ export function ContextMenu({
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.15, ease: "easeOut" }}
-          className={cn("fixed z-[100] w-60 bg-[#1a1a1c] border border-white/10 rounded-xl shadow-2xl backdrop-blur-xl", className)}
+          className={StyleHelper.cn("fixed z-[100] w-60 bg-[#1a1a1c] border border-white/10 rounded-xl shadow-2xl backdrop-blur-xl", className)}
           style={{
             left: position.x,
             top: position.y,

@@ -1,11 +1,13 @@
 'use client';
+import { ArtistParser } from '@/lib/utils/ArtistParser';
 
+import { useLibraryArtists } from '@/hooks/library/useLibraryArtists';
 import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronLeft, Disc3 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { useLibraryArtists } from '@/hooks/useMusicLibrary';
+
 import { LibrarySearchBar } from '@/components/library/LibrarySearchBar';
 import { LibraryEmptyState } from '@/components/library/LibraryEmptyState';
 
@@ -83,7 +85,7 @@ export default function LibraryArtistsPage() {
                 );
 
                 return artist.id && !artist.id.includes('::') ? (
-                  <Link key={artist.id} href={`/artist/${artist.id}`}>
+                  <Link key={artist.id} href={ArtistParser.getArtistLink(artist)}>
                     {content}
                   </Link>
                 ) : (

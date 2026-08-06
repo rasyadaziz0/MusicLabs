@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { cache } from 'react';
 import { PlaylistRepository } from '@/lib/supabase/repositories/PlaylistRepository';
 import EmbedPlaylistPlayer from './EmbedPlaylistPlayer';
-import { getBestImageUrl } from '@/lib/api/musicApi';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { createClient } from '@/lib/supabase/server';
 
 const getPlaylistData = cache(async (playlistId: string) => {
@@ -61,7 +61,7 @@ export default async function EmbedPlaylistPage({ params }: PageProps) {
 
   const { playlist, tracks } = data;
   
-  const coverUrl = playlist.cover_url || getBestImageUrl(tracks[0]?.image ?? []) || '';
+  const coverUrl = playlist.cover_url || ImageHelper.getBestImageUrl(tracks[0]?.image ?? []) || '';
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const isLoggedIn = !!user;
@@ -71,7 +71,7 @@ export default async function EmbedPlaylistPage({ params }: PageProps) {
     id: t.id,
     name: t.name,
     artistName: t.artists?.primary?.[0]?.name || 'Unknown Artist',
-    coverUrl: getBestImageUrl(t.image) || '',
+    coverUrl: ImageHelper.getBestImageUrl(t.image) || '',
     duration: t.duration,
   }));
 

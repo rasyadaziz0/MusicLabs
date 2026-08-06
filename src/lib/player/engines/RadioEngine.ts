@@ -1,22 +1,6 @@
-
 import Hls from 'hls.js';
 import { Song } from '@/types/music';
-
-// ─── Shared types ───
-
-export interface RadioMeta {
-  title: string;
-  station: string;
-}
-
-// ─── Callback contract ───
-
-export interface RadioEngineCallbacks {
-  onPlay: () => void;
-  onPause: () => void;
-  onMetaUpdate: (meta: RadioMeta) => void;
-  onError?: (errorMsg: string) => void;
-}
+import { RadioMeta, RadioEngineCallbacks } from '@/types/player/engine';
 
 // ─── Engine class ───
 
@@ -154,7 +138,7 @@ export class RadioEngine {
 
     const pollMetadata = async () => {
       try {
-        const res = await fetch(`/api/radio/metadata?url=${encodeURIComponent(streamUrl)}`);
+        const res = await fetch(`${(process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || process.env.NEXT_PUBLIC_EXPRESS_API_URL) || ''}/api/radio/metadata?url=${encodeURIComponent(streamUrl)}`);
         if (res.ok) {
           const data = await res.json();
           if (data.title && getCurrentTrackId() === track.id) {

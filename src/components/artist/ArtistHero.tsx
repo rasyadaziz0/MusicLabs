@@ -3,14 +3,7 @@
 import Image from 'next/image';
 import { Play, MoreHorizontal, Share, Link2 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
-
-interface ArtistHeroProps {
-  name: string;
-  heroImage: string | null;
-  hasTracks: boolean;
-  handlePlayAll: () => void;
-}
-
+import { ArtistHeroProps } from '@/types/components/artist/ArtistHeroProps';
 export function ArtistHero({ name, heroImage, hasTracks, handlePlayAll }: ArtistHeroProps) {
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const moreMenuRef = useRef<HTMLDivElement>(null);

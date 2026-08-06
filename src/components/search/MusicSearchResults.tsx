@@ -1,5 +1,8 @@
 'use client';
+import { ArtistParser } from '@/lib/utils/ArtistParser';
 
+import { MusicApiService } from '@/lib/api/MusicApiService';
+import { SlugHelper } from '@/lib/utils/SlugHelper';
 import { useState, useMemo } from 'react';
 import { Search as SearchIcon, Share, Link2, ChevronRight, Play, MoreHorizontal } from 'lucide-react';
 import { gooeyToast as toast } from 'goey-toast';
@@ -11,27 +14,13 @@ import TrackLikeButton from '@/components/ui/TrackLikeButton';
 import AddToPlaylistButton from '@/components/ui/AddToPlaylistButton';
 import AddToQueueButton from '@/components/ui/AddToQueueButton';
 import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
-import { getBestImageUrl, getArtistTopTracks } from '@/lib/api/musicApi';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { Song } from '@/types/music';
-import { buildTrackPath } from '@/lib/utils/slugify';
-import { SearchArtistResult } from '@/hooks/useMusicSearch';
+import { SearchArtistResult } from '@/types/hooks/search';
 import { usePlayer } from '@/context/PlayerContext';
 import { HorizontalScrollSection } from '@/components/ui/HorizontalScrollSection';
 import { TopResultGridItem } from '@/components/search/TopResultGridItem';
-
-interface MusicSearchResultsProps {
-  isLoading: boolean;
-  rankedArtists: SearchArtistResult[];
-  rankedAlbums: any[];
-  displayedSongs: Song[];
-  query: string;
-  isArtistSongsLoading: boolean;
-  isArtistNameSongsLoading: boolean;
-  selectedArtist: SearchArtistResult | null;
-  rankedSongsLength: number;
-  topResult?: { type: 'song'; data: Song } | { type: 'artist'; data: SearchArtistResult } | null;
-}
-
+import { MusicSearchResultsProps } from '@/types/components/search/MusicSearchResultsProps';
 export function MusicSearchResults({
   isLoading,
   rankedArtists,
@@ -88,7 +77,7 @@ export function MusicSearchResults({
 
   const handleGridItemClick = (item: any) => {
     if (item.type === 'artist') {
-      router.push(`/artist/${item.data.id}`);
+      router.push(ArtistParser.getArtistLink(item.data));
     } else if (item.data.album?.id) {
       router.push(`/album/${item.data.album.id}`);
     }
@@ -137,11 +126,11 @@ export function MusicSearchResults({
             <div className="mb-8">
               <HorizontalScrollSection title="Artists" onSeeAll={() => setIsExpandedTopResults(true)}>
                 {filteredArtists.map((artist: SearchArtistResult) => {
-                  const imageUrl = getBestImageUrl(artist.image || []);
+                  const imageUrl = ImageHelper.getBestImageUrl(artist.image || []);
                   return (
                     <Link
                       key={artist.id}
-                      href={`/artist/${artist.id}`}
+                      href={ArtistParser.getArtistLink(artist)}
                       className="flex-shrink-0 w-[120px] md:w-[140px] flex flex-col items-center group cursor-pointer"
                     >
                       <div className="relative w-[120px] h-[120px] md:w-[140px] md:h-[140px] rounded-full overflow-hidden mb-3 shadow-lg group-hover:scale-105 transition-transform duration-500 bg-white/5 border border-white/5">
@@ -240,7 +229,7 @@ export function MusicSearchResults({
                     </button>
                     <button onClick={() => {
                       const artistName = song.artists?.primary?.[0]?.name || 'unknown';
-                      const trackUrl = `${window.location.origin}${buildTrackPath(artistName, song.name, song.id)}`;
+                      const trackUrl = `${window.location.origin}${SlugHelper.buildTrackPath(artistName, song.name, song.id)}`;
                       navigator.clipboard.writeText(trackUrl);
                       toast.success('Song link copied!');
                       closeMenu();

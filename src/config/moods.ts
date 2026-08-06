@@ -5,7 +5,9 @@ export const GLOBAL_EXCLUDED_TERMS = [
   'mrrevant', 'jeezy beatz', 'looperman',
 ];
 
-export const MOOD_PLAYLISTS = [
+import { MoodConfig } from '@/types/config/moods';
+
+export const MOOD_PLAYLISTS: readonly MoodConfig[] = [
   {
     key: 'fokus',
     label: 'Fokus',
@@ -129,6 +131,3 @@ export const MOOD_PLAYLISTS = [
     exclude: ['background music', 'royalty', 'advertising', 'stock', 'uniquesound'],
   },
 ] as const;
-
-export type MoodConfig = (typeof MOOD_PLAYLISTS)[number];
-export type MoodKey = MoodConfig['key'];

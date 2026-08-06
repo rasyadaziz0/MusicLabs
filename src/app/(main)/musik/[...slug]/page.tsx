@@ -1,3 +1,6 @@
+import { ArtistParser } from '@/lib/utils/ArtistParser';
+import { LrcHelper } from '@/lib/utils/LrcHelper';
+import { SlugHelper } from '@/lib/utils/SlugHelper';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
@@ -5,14 +8,12 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Clock, Disc3, Music2, User } from 'lucide-react';
 import { Song } from '@/types/music';
-import { buildTrackPath } from '@/lib/utils/slugify';
 import { trackResolver } from '@/lib/services/TrackPageResolverService';
 import TrackPlayButton from '@/components/track/TrackPlayButton';
 import TrackHeaderActions from '@/components/track/TrackHeaderActions';
 import TrackBackButton from '@/components/track/TrackBackButton';
 import { ShareMoreBySection } from '@/components/share/ShareMoreBySection';
 import { LyricsService } from '@/lib/server/LyricsService';
-import { parseLRC, parseYRC } from '@/lib/utils/lrcParser';
 
 const getResolvedTrack = cache(async (trackId: string) => {
   return await trackResolver.resolveTrack(trackId);
@@ -127,7 +128,7 @@ export default async function MusikPage({ params }: PageProps) {
         .filter(Boolean);
     } else {
       // Synced lyrics — parse with the correct parser based on type
-      const parsed = lyricsRes.type === 'yrc' ? parseYRC(lyricsRes.lyrics) : parseLRC(lyricsRes.lyrics);
+      const parsed = lyricsRes.type === 'yrc' ? LrcHelper.parseYRC(lyricsRes.lyrics) : LrcHelper.parseLRC(lyricsRes.lyrics);
       excerptLines = parsed
         .filter(l => !l.isPlaceholder && l.text.trim().length > 0)
         .map(l => l.text);
@@ -217,7 +218,7 @@ export default async function MusikPage({ params }: PageProps) {
               {allArtists.map((artist) => (
                 <Link
                   key={artist.id}
-                  href={`/artist/${artist.id}`}
+                  href={ArtistParser.getArtistLink(artist)}
                   className="flex items-center gap-3 group"
                 >
                   <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/50 text-sm font-bold group-hover:bg-white/20 transition-colors">

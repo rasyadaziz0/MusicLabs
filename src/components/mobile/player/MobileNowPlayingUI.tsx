@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence, useDragControls } from 'framer-motion';
-import { getBestImageUrl } from '@/lib/api/musicApi';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import GuestGate from '@/components/auth/GuestGate';
 import type { NowPlayingUIProps } from '@/components/player/NowPlayingUI';
 
@@ -30,7 +30,7 @@ export default function MobileNowPlayingUI(props: NowPlayingUIProps) {
   const dragControls = useDragControls();
 
   if (!currentTrack) return null;
-  const coverUrl = getBestImageUrl(currentTrack.image);
+  const coverUrl = ImageHelper.getBestImageUrl(currentTrack.image);
   const artistNames = currentTrack.artists.primary.map((a: any) => a.name).join(', ');
 
   return (

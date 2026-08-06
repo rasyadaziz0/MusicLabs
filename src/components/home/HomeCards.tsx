@@ -1,10 +1,11 @@
 'use client';
+import { ArtistParser } from '@/lib/utils/ArtistParser';
 
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Song } from '@/types/music';
-import { getBestImageUrl } from '@/lib/api/musicApi';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { Play, MoreHorizontal } from 'lucide-react';
 import { TrackContextMenu } from '../ui/TrackContextMenu';
 
@@ -32,10 +33,10 @@ export function TopPicksCard({
       </div>
 
       {/* Optional centered image collage effect for variety */}
-      {index % 2 === 1 && getBestImageUrl(song.image) && (
+      {index % 2 === 1 && ImageHelper.getBestImageUrl(song.image) && (
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-2xl border-4 border-black/10">
           <Image
-            src={getBestImageUrl(song.image)!}
+            src={ImageHelper.getBestImageUrl(song.image)!}
             alt={song.name}
             fill
             sizes="160px"
@@ -56,7 +57,7 @@ export function TopPicksCard({
           {song.artists.primary.map((a: any, i: number) => (
             <React.Fragment key={a.id}>
               <Link
-                href={`/artist/${a.id}`}
+                href={ArtistParser.getArtistLink(a)}
                 className="hover:underline hover:text-white transition-colors"
                 onClick={(e) => e.stopPropagation()}
               >
@@ -91,65 +92,65 @@ export function TrackCard({
 
   return (
     <>
-    <div
-      className="group flex-shrink-0 w-[160px] md:w-[180px] text-left cursor-pointer"
-      onClick={onPlay}
-      onContextMenu={(e) => { e.preventDefault(); handleContextMenu(e); }}
-    >
-      <div className="relative aspect-square rounded-[12px] overflow-hidden mb-3 bg-white/5 border border-white/5 shadow-sm">
-        {getBestImageUrl(song.image) && (
-          <Image
-            src={getBestImageUrl(song.image)!}
-            alt={song.name}
-            fill
-            sizes="180px"
-            className="object-cover"
-            priority={priority}
-          />
-        )}
-        {/* Dark overlay on hover */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300" />
-        
-        {/* Hover Actions */}
-        <div className="absolute inset-x-0 bottom-0 p-2 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <button 
-            aria-label="Play"
-            className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/60 hover:scale-105 transition-all shadow-md"
-            onClick={(e) => { e.stopPropagation(); onPlay(); }}
-          >
-            <Play className="w-4 h-4 ml-0.5" fill="currentColor" />
-          </button>
-          <button 
-            aria-label="More options"
-            className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/60 hover:scale-105 transition-all shadow-md"
-            onClick={handleContextMenu}
-          >
-            <MoreHorizontal className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-      <p className="text-white font-medium text-[14px] line-clamp-1 leading-snug">{song.name}</p>
-      <p className="text-muted text-[13px] line-clamp-1 mt-0.5 pointer-events-auto">
-        {song.artists.primary.map((a: any, i: number) => (
-          <React.Fragment key={a.id}>
-            <Link
-              href={`/artist/${a.id}`}
-              className="hover:underline hover:text-white transition-colors"
-              onClick={(e) => e.stopPropagation()}
+      <div
+        className="group flex-shrink-0 w-[160px] md:w-[180px] text-left cursor-pointer"
+        onClick={onPlay}
+        onContextMenu={(e) => { e.preventDefault(); handleContextMenu(e); }}
+      >
+        <div className="relative aspect-square rounded-[12px] overflow-hidden mb-3 bg-white/5 border border-white/5 shadow-sm">
+          {ImageHelper.getBestImageUrl(song.image) && (
+            <Image
+              src={ImageHelper.getBestImageUrl(song.image)!}
+              alt={song.name}
+              fill
+              sizes="180px"
+              className="object-cover"
+              priority={priority}
+            />
+          )}
+          {/* Dark overlay on hover */}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300" />
+
+          {/* Hover Actions */}
+          <div className="absolute inset-x-0 bottom-0 p-2 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <button
+              aria-label="Play"
+              className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/60 hover:scale-105 transition-all shadow-md"
+              onClick={(e) => { e.stopPropagation(); onPlay(); }}
             >
-              {a.name}
-            </Link>
-            {i < song.artists.primary.length - 1 && ', '}
-          </React.Fragment>
-        ))}
-      </p>
-    </div>
-    <TrackContextMenu
-      track={song}
-      isOpen={contextMenu.isOpen}
-      position={{ x: contextMenu.x, y: contextMenu.y }}
-      onClose={() => setContextMenu(prev => ({ ...prev, isOpen: false }))}
-    />
+              <Play className="w-4 h-4 ml-0.5" fill="currentColor" />
+            </button>
+            <button
+              aria-label="More options"
+              className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/60 hover:scale-105 transition-all shadow-md"
+              onClick={handleContextMenu}
+            >
+              <MoreHorizontal className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+        <p className="text-white font-medium text-[14px] line-clamp-1 leading-snug">{song.name}</p>
+        <p className="text-muted text-[13px] line-clamp-1 mt-0.5 pointer-events-auto">
+          {song.artists.primary.map((a: any, i: number) => (
+            <React.Fragment key={a.id}>
+              <Link
+                href={ArtistParser.getArtistLink(a)}
+                className="hover:underline hover:text-white transition-colors"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {a.name}
+              </Link>
+              {i < song.artists.primary.length - 1 && ', '}
+            </React.Fragment>
+          ))}
+        </p>
+      </div>
+      <TrackContextMenu
+        track={song}
+        isOpen={contextMenu.isOpen}
+        position={{ x: contextMenu.x, y: contextMenu.y }}
+        onClose={() => setContextMenu(prev => ({ ...prev, isOpen: false }))}
+      />
     </>
   );
 }
@@ -162,44 +163,90 @@ export function SocialActivityCard({
   item: any;
   onPlay: () => void;
 }) {
+  const [contextMenu, setContextMenu] = useState<{ isOpen: boolean; x: number; y: number }>({ isOpen: false, x: 0, y: 0 });
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({ isOpen: true, x: e.clientX, y: e.clientY });
+  };
+
+  const song = item.track;
+  const userName = item.user?.display_name || item.user?.username || 'User';
+
   return (
-    <button
-      type="button"
-      className="group flex-shrink-0 w-[240px] md:w-[280px] flex items-center gap-3 p-3 rounded-[12px] bg-white/5 border border-white/5 hover:bg-white/10 transition-colors text-left"
-      onClick={onPlay}
-    >
-      <div className="relative w-12 h-12 rounded-[8px] overflow-hidden flex-shrink-0">
-        {getBestImageUrl(item.track.image) && (
-          <Image
-            src={getBestImageUrl(item.track.image)!}
-            alt={item.track.name}
-            fill
-            sizes="48px"
-            className="object-cover"
-          />
-        )}
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-[12px] text-white/60 mb-0.5 truncate">
-          <span className="font-semibold text-white/90">{item.user?.display_name || item.user?.username || 'User'}</span> baru dengerin
-        </p>
-        <p className="text-[14px] font-medium text-white truncate">{item.track.name}</p>
-        <p className="text-[12px] text-white/50 truncate pointer-events-auto">
-          {item.track.artists?.primary?.map((a: any, i: number) => (
+    <>
+      <div
+        className="group flex-shrink-0 w-[160px] md:w-[180px] text-left cursor-pointer"
+        onClick={onPlay}
+        onContextMenu={(e) => { e.preventDefault(); handleContextMenu(e); }}
+      >
+        <div className="relative aspect-square rounded-[12px] overflow-hidden mb-3 bg-white/5 border border-white/5 shadow-sm">
+          {ImageHelper.getBestImageUrl(song.image) && (
+            <Image
+              src={ImageHelper.getBestImageUrl(song.image)!}
+              alt={song.name}
+              fill
+              sizes="180px"
+              className="object-cover"
+            />
+          )}
+          {/* Dark overlay on hover */}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300" />
+
+          {/* User Badge Overlay */}
+          <div className="absolute top-2 left-2 flex items-center gap-1.5 bg-black/60 backdrop-blur-md px-2 py-1 rounded-full border border-white/10 shadow-sm">
+            {item.user?.avatar_url ? (
+              <img src={item.user.avatar_url} alt="" className="w-4 h-4 rounded-full object-cover" />
+            ) : (
+              <div className="w-4 h-4 rounded-full bg-white/20 flex-shrink-0" />
+            )}
+            <span className="text-[10px] font-medium text-white max-w-[80px] truncate">
+              {userName}
+            </span>
+          </div>
+
+          {/* Hover Actions */}
+          <div className="absolute inset-x-0 bottom-0 p-2 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <button
+              aria-label="Play"
+              className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/60 hover:scale-105 transition-all shadow-md"
+              onClick={(e) => { e.stopPropagation(); onPlay(); }}
+            >
+              <Play className="w-4 h-4 ml-0.5" fill="currentColor" />
+            </button>
+            <button
+              aria-label="More options"
+              className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/60 hover:scale-105 transition-all shadow-md"
+              onClick={handleContextMenu}
+            >
+              <MoreHorizontal className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+        <p className="text-white font-medium text-[14px] line-clamp-1 leading-snug">{song.name}</p>
+        <p className="text-muted text-[13px] line-clamp-1 mt-0.5 pointer-events-auto">
+          {song.artists?.primary?.map((a: any, i: number) => (
             <React.Fragment key={a.id}>
               <Link
-                href={`/artist/${a.id}`}
+                href={ArtistParser.getArtistLink(a)}
                 className="hover:underline hover:text-white transition-colors"
                 onClick={(e) => e.stopPropagation()}
               >
                 {a.name}
               </Link>
-              {i < item.track.artists.primary.length - 1 && ', '}
+              {i < song.artists.primary.length - 1 && ', '}
             </React.Fragment>
           ))}
         </p>
       </div>
-    </button>
+      <TrackContextMenu
+        track={song}
+        isOpen={contextMenu.isOpen}
+        position={{ x: contextMenu.x, y: contextMenu.y }}
+        onClose={() => setContextMenu(prev => ({ ...prev, isOpen: false }))}
+      />
+    </>
   );
 }
 

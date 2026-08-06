@@ -1,7 +1,8 @@
+import { ArtistParser } from '@/lib/utils/ArtistParser';
 import { useState, useEffect, ReactNode, useRef } from 'react';
 import Image from 'next/image';
 import { Song } from '@/types/music';
-import { getBestImageUrl } from '@/lib/api/musicApi';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { Heart, MoreHorizontal, GripVertical } from 'lucide-react';
 import Link from 'next/link';
 import { usePlayer } from '@/context/PlayerContext';
@@ -11,19 +12,7 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable, } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis, restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { CSS } from '@dnd-kit/utilities';
-
-export interface AppleMusicTrackListProps {
-  tracks: Song[];
-  onPlayTrack: (track: Song, allTracks: Song[]) => void;
-  showHeart?: boolean;
-  showAlbum?: boolean;
-  hideHeader?: boolean;
-  renderTrackOptions?: (track: Song, closeMenu: () => void) => ReactNode;
-  className?: string;
-  isReorderable?: boolean;
-  onReorder?: (oldIndex: number, newIndex: number) => void;
-}
-
+import { AppleMusicTrackListProps } from '@/types/components/ui/AppleMusicTrackListProps';
 function SortableTrackItem({
   song,
   index,
@@ -209,9 +198,9 @@ export function AppleMusicTrackList({
 
                       <div className="flex-1 min-w-0 flex items-center gap-3">
                         <div className="relative h-10 w-10 flex-shrink-0 rounded bg-white/10 overflow-hidden shadow-sm">
-                          {getBestImageUrl(song.image) ? (
+                          {ImageHelper.getBestImageUrl(song.image) ? (
                             <Image
-                              src={getBestImageUrl(song.image)!}
+                              src={ImageHelper.getBestImageUrl(song.image)!}
                               alt={song.name}
                               fill
                               sizes="40px"
@@ -239,7 +228,7 @@ export function AppleMusicTrackList({
                             onClick={(e) => e.stopPropagation()}
                           >
                             <Link
-                              href={`/artist/${a.id}`}
+                              href={ArtistParser.getArtistLink(a)}
                               className="hover:underline hover:text-white transition-colors"
                             >
                               {a.name}

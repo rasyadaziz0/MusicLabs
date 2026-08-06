@@ -1,18 +1,17 @@
 'use client';
 
+import { useLibraryPlaylists } from '@/hooks/library/useLibraryPlaylists';
+import { useLikedSongsIndex } from '@/hooks/library/useLikedSongsIndex';
+import { useLikedSongs } from '@/hooks/library/useLikedSongs';
+import { useToggleLikedSong } from '@/hooks/library/useToggleLikedSong';
+import { useAddTrackToPlaylist } from '@/hooks/library/useAddTrackToPlaylist';
+import { SlugHelper } from '@/lib/utils/SlugHelper';
 import { usePlayer } from '@/context/PlayerContext';
 import { useAuth } from '@/context/AuthContext';
 import { useLyrics } from '@/hooks/useLyrics';
 import { useRomanization } from '@/hooks/useRomanization';
-import {
-  useAddTrackToPlaylist,
-  useLibraryPlaylists,
-  useLikedSongsIndex,
-  useToggleLikedSong,
-} from '@/hooks/useMusicLibrary';
 import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react';
 import { getEffectiveTime } from '@/lib/lyrics/lyricsOffsetStore';
-import { buildTrackPath } from '@/lib/utils/slugify';
 
 export function useNowPlaying(isOpen: boolean) {
   const {
@@ -110,7 +109,7 @@ export function useNowPlaying(isOpen: boolean) {
   const getTrackUrl = () => {
     if (!currentTrack) return '';
     const artistName = currentTrack.artists?.primary?.[0]?.name || 'unknown';
-    return `${window.location.origin}${buildTrackPath(artistName, currentTrack.name, currentTrack.id)}`;
+    return `${window.location.origin}${SlugHelper.buildTrackPath(artistName, currentTrack.name, currentTrack.id)}`;
   };
 
   const handleShareAction = async () => {

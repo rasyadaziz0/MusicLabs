@@ -4,8 +4,8 @@ import { EmbedBrandLogo } from '../../_components/EmbedBrandLogo';
 import { EmbedPromoModal } from '../../_components/EmbedPromoModal';
 import { EmbedProgressBar } from '../../_components/EmbedProgressBar';
 import { EmbedPreviewBadge } from '../../_components/EmbedPreviewBadge';
-import { EmbedPlaylistPlayerState } from './EmbedPlaylistPlayerController';
-import { EmbedPlaylistTrack } from '../../_components/types';
+import { EmbedPlaylistPlayerState } from '@/types/controllers/embed';
+import { EmbedPlaylistTrack } from '@/types/components/embed';
 
 export interface EmbedPlaylistPlayerUIProps {
   playlistId: string;

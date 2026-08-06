@@ -2,11 +2,7 @@
 
 import React from 'react';
 import { MonitorSpeaker, X } from 'lucide-react';
-
-export interface DeviceSidebarHeaderProps {
-  onClose: () => void;
-}
-
+import { DeviceSidebarHeaderProps } from '@/types/components/player/devices/DeviceSidebarHeaderProps';
 export function DeviceSidebarHeader({ onClose }: DeviceSidebarHeaderProps) {
   return (
     <div style={{

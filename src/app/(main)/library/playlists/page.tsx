@@ -1,8 +1,8 @@
 'use client';
 
+import { useLibraryPlaylists } from '@/hooks/library/useLibraryPlaylists';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { useLibraryPlaylists } from '@/hooks/useMusicLibrary';
 import { Heart, ChevronLeft } from 'lucide-react';
 
 const gradients = [

@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { Play, Search, Music, Check } from 'lucide-react';
-import { getBestImageUrl } from '@/lib/api/musicApi';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import type { IIdentifySongResultsProps } from './IdentifyLayoutInterface';
 
 export function IdentifySongResultUI({
@@ -15,17 +15,17 @@ export function IdentifySongResultUI({
   return (
     <div className="w-full flex flex-col md:flex-row items-center gap-8 md:gap-12 bg-white/[0.03] border border-white/5 rounded-3xl p-6 md:p-10 backdrop-blur-3xl shadow-[0_30px_70px_rgba(0,0,0,0.6)] relative overflow-hidden">
       <div className="absolute inset-0 opacity-20 pointer-events-none filter blur-[60px] scale-125 z-0">
-        {getBestImageUrl(matchedSong.image) ? (
-          <Image src={getBestImageUrl(matchedSong.image)!} alt="reflection" fill className="object-cover" />
+        {ImageHelper.getBestImageUrl(matchedSong.image) ? (
+          <Image src={ImageHelper.getBestImageUrl(matchedSong.image)!} alt="reflection" fill className="object-cover" />
         ) : (
           <div className="w-full h-full bg-[#fc3c44]" />
         )}
       </div>
 
       <div className="relative w-56 h-56 md:w-64 md:h-64 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex-shrink-0 z-10 group border border-white/10">
-        {getBestImageUrl(matchedSong.image) ? (
+        {ImageHelper.getBestImageUrl(matchedSong.image) ? (
           <Image
-            src={getBestImageUrl(matchedSong.image)!}
+            src={ImageHelper.getBestImageUrl(matchedSong.image)!}
             alt={matchedSong.name}
             fill
             sizes="(max-width: 768px) 224px, 256px"

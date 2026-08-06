@@ -24,12 +24,7 @@ import { QueuePopupController } from './QueuePopupController';
 import { SortableTrackRow } from './SortableTrackRow';
 import { AutoplayTrackRow } from './AutoplayTrackRow';
 import { Infinity } from 'lucide-react';
-
-interface QueuePopupProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
+import { QueuePopupProps } from '@/types/components/player/QueuePopupProps';
 export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
   const player = usePlayer();
   // Instantiate the controller pattern (OOP approach) to handle the complex queue mapping and DnD logic

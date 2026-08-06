@@ -3,18 +3,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle } from 'lucide-react';
-
-interface ConfirmationModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  title: string;
-  description: string;
-  confirmText?: string;
-  cancelText?: string;
-  isDestructive?: boolean;
-}
-
+import { ConfirmationModalProps } from '@/types/components/ui/ConfirmationModalProps';
 export function ConfirmationModal({
   isOpen,
   onClose,

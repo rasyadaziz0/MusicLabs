@@ -4,15 +4,7 @@ import { useState } from 'react';
 import { ChevronRight } from 'lucide-react';
 import { TopSongRow } from '@/components/ui/TopSongRow';
 import { Song } from '@/types/music';
-
-interface ArtistTopSongsProps {
-  topTracks: Song[];
-  isTracksLoading: boolean;
-  currentTrackId?: string;
-  isPlaying: boolean;
-  playTrack: (song: Song, list: Song[]) => void;
-}
-
+import { ArtistTopSongsProps } from '@/types/components/artist/ArtistTopSongsProps';
 export function ArtistTopSongs({
   topTracks,
   isTracksLoading,

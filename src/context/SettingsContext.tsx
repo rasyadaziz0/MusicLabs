@@ -4,13 +4,7 @@ import { createContext, useContext, useEffect, useState, useCallback } from 'rea
 import { useAuth } from './AuthContext';
 import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
 
-export interface UserSettings {
-  lyricsFontSize: 'small' | 'medium' | 'large';
-  romanizationEnabled: boolean;
-  isPublic: boolean;
-  showNowPlaying: boolean;
-  showRecentlyPlayed: boolean;
-}
+import { UserSettings } from '@/types/context/settings';
 
 const DEFAULT_SETTINGS: UserSettings = {
   lyricsFontSize: 'medium',

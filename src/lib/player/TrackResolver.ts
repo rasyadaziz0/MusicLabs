@@ -3,19 +3,7 @@ import { resolveToYoutubeId } from '@/lib/youtube';
 import { supabase } from '@/lib/supabase/client';
 import { PlayerCache } from './PlayerCache';
 
-// ─── Result types ───
-
-export type ResolveResultType =
-  | 'youtube'   // Play via YouTube IFrame
-  | 'html5'     // Play via HTML5 Audio (direct stream URL)
-  | 'preview'   // Play via iTunes 30s preview
-  | 'error';    // Nothing worked
-
-export interface ResolveResult {
-  type: ResolveResultType;
-  videoId?: string;   // For 'youtube'
-  audioUrl?: string;  // For 'html5' or 'preview'
-}
+import { ResolveResult, ResolveResultType } from '@/types/player/resolver';
 
 // ─── Class ───
 export class TrackResolver {
@@ -97,7 +85,7 @@ export class TrackResolver {
   async fetchAudioStreamUrl(videoId: string): Promise<string | null> {
     try {
       const headers = await this.getAuthHeaders();
-      const res = await fetch(`/api/audio/${videoId}`, { headers });
+      const res = await fetch(`${(process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || process.env.NEXT_PUBLIC_EXPRESS_API_URL) || ''}/api/audio/${videoId}`, { headers });
       if (!res.ok) return null;
       const data = await res.json();
       return data.url || null;

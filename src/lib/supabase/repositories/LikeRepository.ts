@@ -1,13 +1,10 @@
+import { MusicApiService } from '@/lib/api/MusicApiService';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Song } from '@/types/music';
-import { getSongsByIds } from '@/lib/api/musicApi';
+import { ILikeRepository } from '@/types/repositories/ILikeRepository';
+import { LikedSongRow } from '@/types/models/Like';
 
-export interface LikedSongRow {
-  track_id: string;
-  liked_at?: string;
-}
-
-export class LikeRepository {
+export class LikeRepository implements ILikeRepository {
   constructor(private supabase: SupabaseClient) {}
 
   async getLikedSongs(userId: string): Promise<LikedSongRow[]> {
@@ -29,7 +26,7 @@ export class LikeRepository {
   async getLikedSongsWithDetails(userId: string): Promise<Song[]> {
     const trackIds = await this.getLikedSongIds(userId);
     if (trackIds.length === 0) return [];
-    return getSongsByIds(trackIds);
+    return MusicApiService.getSongsByIds(trackIds);
   }
 
   async isTrackLiked(userId: string, trackId: string): Promise<boolean> {

@@ -10,21 +10,7 @@ import { gooeyToast as toast } from 'goey-toast';
 import { LogOut, ListMusic, Heart, Users, UserCheck, User, Share2, ArrowLeft, Globe, CheckCircle2, Menu, Bell, Settings, Edit3, X, ChevronRight } from 'lucide-react';
 import { UserProfile } from '@/types/profile';
 import { TikTokIcon, InstagramIcon, XIcon } from '@/components/icons/SocialIcons';
-
-interface ProfileHeroProps {
-  user: any;
-  profile: UserProfile | null;
-  stats: {
-    playlistCount: number;
-    likedCount: number;
-    followerCount: number;
-    followingCount: number;
-  };
-  handleSignOut?: () => void;
-  setFollowModalTab: (tab: 'followers' | 'following') => void;
-  setFollowModalOpen: (open: boolean) => void;
-}
-
+import { ProfileHeroProps } from '@/types/components/mobile/profile/ProfileHeroProps';
 export function MobileProfileHero({
   user,
   profile,

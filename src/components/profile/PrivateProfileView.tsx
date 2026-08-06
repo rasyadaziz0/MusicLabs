@@ -5,12 +5,7 @@ import { ChevronLeft, Lock } from 'lucide-react';
 import Image from 'next/image';
 import { UserProfile } from '@/types/profile';
 import { useTranslation } from '@/context/LanguageContext';
-
-interface PrivateProfileViewProps {
-  profile: UserProfile;
-  isLoggedIn: boolean;
-}
-
+import { PrivateProfileViewProps } from '@/types/components/profile/PrivateProfileViewProps';
 export default function PrivateProfileView({ profile, isLoggedIn }: PrivateProfileViewProps) {
   const router = useRouter();
   const { t } = useTranslation();

@@ -1,10 +1,10 @@
+import { MusicApiService } from '@/lib/api/MusicApiService';
 import { useQuery } from '@tanstack/react-query';
-import { getHomeFeed } from '@/lib/api/musicApi';
 import { getRecentPlays } from '@/lib/supabase/music';
 import { SocialRepository } from '@/lib/supabase/repositories/SocialRepository';
 import { useAuth } from '@/context/AuthContext';
 import { useState } from 'react';
-import { MoodKey } from '@/config/moods';
+import { MoodKey } from '@/types/config/moods';
 import { MoodService } from '@/services/mood/MoodService';
 import { usePlayer } from '@/context/PlayerContext';
 import { Song } from '@/types/music';
@@ -24,7 +24,7 @@ export function useHomeViewModel() {
 
   const { data: homeData, isLoading: isHomeLoading } = useQuery({
     queryKey: ['homeFeed'],
-    queryFn: () => getHomeFeed(),
+    queryFn: () => MusicApiService.getHomeFeed(),
   });
 
   const { data: dbRecentPlays, isLoading: isRecentLoading } = useQuery({

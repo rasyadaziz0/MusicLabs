@@ -1,9 +1,9 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
-import { getITunesArtist, getITunesArtistTopTracks, getITunesArtistAlbums } from '@/lib/server/itunesApi';
-import { getBestImageUrl } from '@/lib/api/musicApi';
-import { AlbumData } from '@/components/ui/AlbumCard';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
+import { ArtistParser } from '@/lib/utils/ArtistParser';
+import { AlbumData } from '@/types/components/ui';
 import ArtistPageClient from '@/components/artist/ArtistPageClient';
 
 interface PageProps {
@@ -13,17 +13,78 @@ interface PageProps {
 // ── Cached data fetcher (dedup across generateMetadata + page render) ──
 
 const getArtistData = cache(async (rawId: string) => {
-  // Strip prefix — same logic as api/artists/[id]/route.ts
-  const itunesId = rawId.replace(/^itunes-artist-/, '');
+  const baseUrl = (process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || process.env.NEXT_PUBLIC_EXPRESS_API_URL) || 'http://localhost:3001';
 
-  const [artist, topTracks, albums] = await Promise.all([
-    getITunesArtist(itunesId),
-    getITunesArtistTopTracks(itunesId, 20),
-    getITunesArtistAlbums(itunesId, 50),
-  ]);
+  // If it's a search-based ID (e.g. itunes-search-Betharia%20Sonatha), 
+  // search by name instead of direct lookup
+  if (ArtistParser.isSearchBasedId(rawId)) {
+    const artistName = decodeURIComponent(
+      rawId.replace(/^itunes-search-/, '').replace(/^search-/, '')
+    );
+    return searchArtistByName(baseUrl, artistName);
+  }
 
-  return { artist, topTracks, albums };
+  const cleanId = ArtistParser.stripArtistIdPrefix(rawId);
+
+  try {
+    const [artistRes, topTracksRes, albumsRes] = await Promise.all([
+      fetch(`${baseUrl}/api/artists/${cleanId}`, { headers: { 'Origin': process.env.NEXT_PUBLIC_APP_URL || 'https://music.rasyadazizan.site' }, next: { revalidate: 3600 } }),
+      fetch(`${baseUrl}/api/artists/${cleanId}/top?limit=20`, { headers: { 'Origin': process.env.NEXT_PUBLIC_APP_URL || 'https://music.rasyadazizan.site' }, next: { revalidate: 3600 } }),
+      fetch(`${baseUrl}/api/artists/${cleanId}/albums?limit=50`, { headers: { 'Origin': process.env.NEXT_PUBLIC_APP_URL || 'https://music.rasyadazizan.site' }, next: { revalidate: 3600 } }),
+    ]);
+
+    const artist = artistRes.ok ? (await artistRes.json()).data : null;
+    const topTracks = topTracksRes.ok ? (await topTracksRes.json()).data?.songs || [] : [];
+    const albums = albumsRes.ok ? (await albumsRes.json()).data : [];
+
+    // Validate: if backend returned a dummy artist, try search by name fallback
+    if (artist && ArtistParser.isDummyArtist(artist, rawId)) {
+      // The name is the raw ID — we can't search with that meaningfully.
+      // Return null so the page shows 404
+      return { artist: null, topTracks: [], albums: [] };
+    }
+
+    return { artist, topTracks, albums };
+  } catch (error) {
+    console.error('Error fetching artist data:', error);
+    return { artist: null, topTracks: [], albums: [] };
+  }
 });
+
+/** Fallback: search for an artist by name and return their data */
+async function searchArtistByName(baseUrl: string, artistName: string) {
+  try {
+    // Step 1: Search for the artist
+    const searchRes = await fetch(
+      `${baseUrl}/api/search/artists?query=${encodeURIComponent(artistName)}&limit=1`,
+      { headers: { 'Origin': process.env.NEXT_PUBLIC_APP_URL || 'https://music.rasyadazizan.site' }, next: { revalidate: 3600 } }
+    );
+    if (!searchRes.ok) return { artist: null, topTracks: [], albums: [] };
+
+    const searchData = await searchRes.json();
+    const results = searchData.data?.results || [];
+    if (results.length === 0) return { artist: null, topTracks: [], albums: [] };
+
+    const foundArtist = results[0];
+    const foundId = ArtistParser.stripArtistIdPrefix(foundArtist.id || '');
+
+    // Step 2: Fetch full artist data using the resolved ID
+    const [artistRes, topTracksRes, albumsRes] = await Promise.all([
+      fetch(`${baseUrl}/api/artists/${foundId}`, { headers: { 'Origin': process.env.NEXT_PUBLIC_APP_URL || 'https://music.rasyadazizan.site' }, next: { revalidate: 3600 } }),
+      fetch(`${baseUrl}/api/artists/${foundId}/top?limit=20`, { headers: { 'Origin': process.env.NEXT_PUBLIC_APP_URL || 'https://music.rasyadazizan.site' }, next: { revalidate: 3600 } }),
+      fetch(`${baseUrl}/api/artists/${foundId}/albums?limit=50`, { headers: { 'Origin': process.env.NEXT_PUBLIC_APP_URL || 'https://music.rasyadazizan.site' }, next: { revalidate: 3600 } }),
+    ]);
+
+    const artist = artistRes.ok ? (await artistRes.json()).data : null;
+    const topTracks = topTracksRes.ok ? (await topTracksRes.json()).data?.songs || [] : [];
+    const albums = albumsRes.ok ? (await albumsRes.json()).data : [];
+
+    return { artist, topTracks, albums };
+  } catch (error) {
+    console.error('Error searching artist by name:', error);
+    return { artist: null, topTracks: [], albums: [] };
+  }
+}
 
 // ── Metadata (SSR) ─────────────────────────────────────────────────
 
@@ -72,7 +133,7 @@ export default async function ArtistPage({ params }: PageProps) {
     artist.picture_xl ||
     artist.picture_big ||
     artist.picture ||
-    (topTracks[0] ? getBestImageUrl(topTracks[0].image) ?? null : null);
+    (topTracks[0] ? ImageHelper.getBestImageUrl(topTracks[0].image) ?? null : null);
 
   // Sort all albums by release_date descending (newest first)
   const sortedAlbums = [...albums].sort((a: AlbumData, b: AlbumData) => {

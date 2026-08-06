@@ -1,6 +1,6 @@
 import { Song } from '@/types/music';
 import { ArtistParser } from '@/lib/utils/ArtistParser';
-import { ITunesResult } from './types';
+import { ITunesResult } from '@/types/services/itunes';
 
 export class ITunesMapper {
   /**

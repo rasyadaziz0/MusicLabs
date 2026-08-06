@@ -1,22 +1,7 @@
 
 import { Song } from '@/types/music';
 import { AutoplayManager } from './queue/AutoplayManager';
-
-// ─── Types ───
-
-export type RepeatMode = 'none' | 'all' | 'one';
-
-export interface QueueState {
-  queue: Song[];
-  queueIndex: number;
-  isShuffled: boolean;
-  repeatMode: RepeatMode;
-  isAutoplayEnabled: boolean;
-}
-
-export interface QueueManagerCallbacks {
-  onStateChange: (state: QueueState) => void;
-}
+import { QueueState, QueueManagerCallbacks, RepeatMode } from '@/types/player/queue';
 
 // ─── Manager class ───
 

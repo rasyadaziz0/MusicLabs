@@ -1,17 +1,10 @@
 import { Song } from '@/types/music';
 import { TrackCard } from '@/components/home/HomeCards';
-import { MOOD_PLAYLISTS, MoodKey } from '@/config/moods';
+import { MOOD_PLAYLISTS } from '@/config/moods';
+import { MoodKey } from '@/types/config/moods';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 import { ScrollArrows } from '@/components/ui/ScrollArrows';
-
-interface MoodsSectionProps {
-  selectedMood: MoodKey;
-  setSelectedMood: (mood: MoodKey) => void;
-  moodSongs: Song[];
-  isMoodSongsLoading: boolean;
-  playTrack: (song: Song, context: Song[]) => void;
-}
-
+import { MoodsSectionProps } from '@/types/components/home/sections/MoodsSectionProps';
 export function MoodsSection({ selectedMood, setSelectedMood, moodSongs, isMoodSongsLoading, playTrack }: MoodsSectionProps) {
   const { scrollRef, canScrollLeft, canScrollRight, scroll } = useHorizontalScroll();
 

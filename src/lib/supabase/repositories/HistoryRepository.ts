@@ -1,14 +1,10 @@
+import { MusicApiService } from '@/lib/api/MusicApiService';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Song } from '@/types/music';
-import { getSongsByIds } from '@/lib/api/musicApi';
+import { IHistoryRepository } from '@/types/repositories/IHistoryRepository';
+import { WeeklyTrackPlay } from '@/types/models/History';
 
-export interface WeeklyTrackPlay {
-  track_id: string;
-  play_count: number;
-  played_at: string;
-}
-
-export class HistoryRepository {
+export class HistoryRepository implements IHistoryRepository {
   constructor(private supabase: SupabaseClient) {}
 
   async recordRecentPlay(userId: string, trackId: string): Promise<void> {
@@ -52,7 +48,7 @@ export class HistoryRepository {
     const uniqueIds = Array.from(new Set(rawIds)).slice(0, 30);
 
     if (uniqueIds.length === 0) return [];
-    return getSongsByIds(uniqueIds);
+    return MusicApiService.getSongsByIds(uniqueIds);
   }
 
   async getListeningStats(userId: string): Promise<{ totalPlays: number }> {
@@ -140,7 +136,7 @@ export class HistoryRepository {
 
     const uniqueIds = Array.from(new Set((data ?? []).map((row) => row.track_id))).slice(0, limit);
     if (uniqueIds.length === 0) return [];
-    return getSongsByIds(uniqueIds);
+    return MusicApiService.getSongsByIds(uniqueIds);
   }
 
   async getOlderTopSongs(
@@ -179,7 +175,7 @@ export class HistoryRepository {
     ).slice(0, limit);
 
     if (olderIds.length === 0) return [];
-    return getSongsByIds(olderIds);
+    return MusicApiService.getSongsByIds(olderIds);
   }
 
   async getSongsPlayedBetweenHours(
@@ -211,7 +207,7 @@ export class HistoryRepository {
     ).slice(0, limit);
 
     if (ids.length === 0) return [];
-    return getSongsByIds(ids);
+    return MusicApiService.getSongsByIds(ids);
   }
 
   async clearHistory(userId: string): Promise<void> {

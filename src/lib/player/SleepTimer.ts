@@ -1,11 +1,4 @@
-export interface SleepTimerState {
-  endTime: number | null;
-}
-
-export interface SleepTimerOptions {
-  onTimeout: () => void;
-  onStateChange?: (state: SleepTimerState) => void;
-}
+import { SleepTimerState, SleepTimerOptions } from '@/types/player/timer';
 
 export class SleepTimer {
   private timeoutId: NodeJS.Timeout | null = null;

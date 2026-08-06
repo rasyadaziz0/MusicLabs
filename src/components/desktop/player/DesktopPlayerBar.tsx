@@ -1,45 +1,12 @@
 'use client';
 
 import React from 'react';
-import { cn } from '@/lib/utils';
+import { StyleHelper } from '@/lib/utils/StyleHelper';
 import DesktopPlaybackControls from './DesktopPlaybackControls';
 import DesktopTrackInfo from './DesktopTrackInfo';
 import DesktopExtraControls from './DesktopExtraControls';
 import { GlassBar } from '@/components/ui/LiquidGlass';
-
-export interface DesktopPlayerBarProps {
-  currentTrack: any;
-  isPlaying: boolean;
-  isResolving: boolean;
-  isGuestPreview: boolean;
-  isRadio: boolean;
-  radioMeta: any;
-  togglePlay: () => void;
-  nextTrack: () => void;
-  prevTrack: () => void;
-  currentTime: number;
-  duration: number;
-  seek: (val: number) => void;
-  volume: number;
-  setVolume: (val: number) => void;
-  isMuted: boolean;
-  isVolumeSliderOpen: boolean;
-  setIsVolumeSliderOpen: (open: boolean) => void;
-  setIsGuestGateOpen: (open: boolean) => void;
-  isNowPlayingOpen: boolean;
-  setIsNowPlayingOpen: (open: boolean) => void;
-  isShuffled: boolean;
-  toggleShuffle: () => void;
-  repeatMode: 'none' | 'all' | 'one';
-  cycleRepeatMode: () => void;
-  isQueueOpen: boolean;
-  setIsQueueOpen: (open: boolean) => void;
-  isLyricsOpen: boolean;
-  setIsLyricsOpen: (open: boolean) => void;
-  isDevicesOpen?: boolean;
-  setIsDevicesOpen?: (open: boolean) => void;
-}
-
+import { DesktopPlayerBarProps } from '@/types/components/desktop/player/DesktopPlayerBarProps';
 export default function DesktopPlayerBar({
   currentTrack, isPlaying, isResolving, isGuestPreview, isRadio, radioMeta,
   togglePlay, nextTrack, prevTrack, currentTime, duration, seek,
@@ -55,7 +22,7 @@ export default function DesktopPlayerBar({
 
   return (
     <div
-      className={cn(
+      className={StyleHelper.cn(
         "hidden md:flex fixed bottom-6 left-[288px] md:portrait:left-[212px] z-50 transition-all duration-[350ms] ease-[cubic-bezier(0.32,0.72,0,1)] pointer-events-none justify-center",
         isRightDrawerOpen ? "right-[340px] md:max-xl:right-[260px] md:portrait:right-[212px]" : "right-0",
         isNowPlayingOpen && "opacity-0 pointer-events-none"

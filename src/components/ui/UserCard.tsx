@@ -1,21 +1,11 @@
 'use client';
 
+import { useFollowStatus } from '@/hooks/social/useFollowStatus';
 import Image from 'next/image';
 import Link from 'next/link';
 import { User } from 'lucide-react';
 import FollowButton from '@/components/ui/FollowButton';
-import { useFollowStatus } from '@/hooks/useFollow';
-
-interface UserCardProps {
-  userId: string;
-  username: string | null;
-  displayNameProfile?: string | null;
-  bio?: string | null;
-  avatarUrl: string | null;
-  showFollowButton?: boolean;
-  onClick?: () => void;
-}
-
+import { UserCardProps } from '@/types/components/ui/UserCardProps';
 export default function UserCard({
   userId,
   username,

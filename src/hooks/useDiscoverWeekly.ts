@@ -1,26 +1,14 @@
 'use client';
 
+import { MusicApiService } from '@/lib/api/MusicApiService';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
+import { DiscoverStatus } from '@/types/hooks/discover';
 
-interface DiscoverStatus {
-  exists: boolean;
-  playlistId?: string;
-  generatedAt?: string;
-  isStale?: boolean;
-  listeningProgress?: {
-    current: number;
-    required: number;
-    ready: boolean;
-  };
-}
+
 
 async function fetchDiscoverStatus(): Promise<DiscoverStatus> {
-  const res = await fetch('/api/ai/discover');
-  if (!res.ok) {
-    throw new Error('Failed to check Discover Weekly status');
-  }
-  return res.json();
+  return MusicApiService.apiFetchInternal<DiscoverStatus>('/api/ai/discover');
 }
 
 export function useDiscoverWeekly() {

@@ -1,21 +1,17 @@
-// @ts-nocheck
 'use client';
-import { cn } from '@/lib/utils';
+// @ts-nocheck
+import { StyleHelper } from '@/lib/utils/StyleHelper';
 import { motion } from 'framer-motion';
 import type React from 'react';
 import { useState, forwardRef } from 'react';
-
-export interface GlassBarProps extends React.HTMLAttributes<HTMLDivElement> {
-  children?: React.ReactNode;
-  refraction?: boolean;
-}
-
+import { GlassBarProps } from '@/types/components/ui/GlassBarProps';
+import { LiquidGlassCardProps } from '@/types/components/ui/LiquidGlassCardProps';
 export const GlassBar = forwardRef<HTMLDivElement, GlassBarProps>(
   ({ children, className, refraction = true, style, ...props }, ref) => {
     return (
       <div
         ref={ref}
-        className={cn('relative overflow-hidden rounded-[22px] border border-white/[0.14]', className)}
+        className={StyleHelper.cn('relative overflow-hidden rounded-[22px] border border-white/[0.14]', className)}
         style={{
           backgroundColor: 'rgba(26,26,30,0.18)',
           backdropFilter: 'blur(22px) saturate(180%) brightness(1.05)',
@@ -59,23 +55,6 @@ export function LiquidGlassFilters() {
     </svg>
   );
 }
-
-interface LiquidGlassCardProps {
-  children: React.ReactNode;
-  className?: string;
-  draggable?: boolean;
-  expandable?: boolean;
-  width?: string;
-  height?: string;
-  expandedWidth?: string;
-  expandedHeight?: string;
-  blurIntensity?: 'sm' | 'md' | 'lg' | 'xl';
-  shadowIntensity?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-  borderRadius?: string;
-  glowIntensity?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-  style?: React.CSSProperties;
-}
-
 export const LiquidGlassCard = ({
   children,
   className = '',
@@ -94,10 +73,10 @@ export const LiquidGlassCard = ({
 }: LiquidGlassCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const handleToggleExpansion = (e: { target: { closest: (arg0: string) => any } }) => {
+  const handleToggleExpansion = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!expandable) return;
     // Don't toggle if clicking on interactive elements
-    if (e.target.closest('a, button, input, select, textarea')) return;
+    if ((e.target as HTMLElement).closest('a, button, input, select, textarea')) return;
     setIsExpanded(!isExpanded);
   };
 
@@ -137,7 +116,7 @@ export const LiquidGlassCard = ({
         height: height || 'auto',
         transition: {
           duration: 0.4,
-          ease: [0.5, 1.5, 0.5, 1],
+          ease: [0.5, 1.5, 0.5, 1] as [number, number, number, number],
         },
       },
       expanded: {
@@ -145,7 +124,7 @@ export const LiquidGlassCard = ({
         height: expandedHeight || 'auto',
         transition: {
           duration: 0.4,
-          ease: [0.5, 1.5, 0.5, 1],
+          ease: [0.5, 1.5, 0.5, 1] as [number, number, number, number],
         },
       },
     }
@@ -205,7 +184,7 @@ export const LiquidGlassCard = ({
         </defs>
       </svg>
       <MotionComponent
-        className={cn(
+        className={StyleHelper.cn(
           `relative ${draggable ? 'cursor-grab active:cursor-grabbing' : ''} ${expandable ? 'cursor-pointer' : ''}`,
           className
         )}

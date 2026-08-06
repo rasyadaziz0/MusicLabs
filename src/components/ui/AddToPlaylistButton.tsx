@@ -1,21 +1,16 @@
 'use client';
 
+import { useLibraryPlaylists } from '@/hooks/library/useLibraryPlaylists';
+import { useAddTrackToPlaylist } from '@/hooks/library/useAddTrackToPlaylist';
 import Link from 'next/link';
 import { Check, ListPlus, Loader2, Plus } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Song } from '@/types/music';
-import { cn } from '@/lib/utils';
+import { StyleHelper } from '@/lib/utils/StyleHelper';
 import { useAuth } from '@/context/AuthContext';
-import { useAddTrackToPlaylist, useLibraryPlaylists } from '@/hooks/useMusicLibrary';
 import { ContextMenuItem } from './context-menu/ContextMenuItem';
 import { gooeyToast as toast } from 'goey-toast';
-
-interface AddToPlaylistButtonProps {
-  track: Song;
-  className?: string;
-  asMenuItem?: boolean;
-}
-
+import { AddToPlaylistButtonProps } from '@/types/components/ui/AddToPlaylistButtonProps';
 export default function AddToPlaylistButton({ track, className, asMenuItem = false }: AddToPlaylistButtonProps) {
   const { user, signInWithGoogle } = useAuth();
   const { data: playlists = [], isLoading } = useLibraryPlaylists();
@@ -79,7 +74,7 @@ export default function AddToPlaylistButton({ track, className, asMenuItem = fal
   };
 
   return (
-    <div ref={containerRef} className={cn("relative", asMenuItem && "w-full")}>
+    <div ref={containerRef} className={StyleHelper.cn("relative", asMenuItem && "w-full")}>
       {asMenuItem ? (
         <ContextMenuItem
           icon={<ListPlus size={15} />}
@@ -91,7 +86,7 @@ export default function AddToPlaylistButton({ track, className, asMenuItem = fal
         <button
           type="button"
           onClick={handleButtonClick}
-          className={cn('inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-muted transition-colors hover:text-white', className)}
+          className={StyleHelper.cn('inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-muted transition-colors hover:text-white', className)}
           title="Add to playlist"
         >
           <ListPlus size={16} />
@@ -100,7 +95,7 @@ export default function AddToPlaylistButton({ track, className, asMenuItem = fal
 
       {isOpen && (
         <div
-          className={cn(
+          className={StyleHelper.cn(
             'absolute z-50 w-56 rounded-xl border border-white/15 bg-[#1c1c1e]/90 p-1.5 shadow-2xl backdrop-blur-xl',
             asMenuItem ? (openUpward ? 'bottom-full left-0 mb-1' : 'top-full left-0 mt-1') : (openUpward ? 'bottom-11 right-0' : 'top-11 right-0')
           )}

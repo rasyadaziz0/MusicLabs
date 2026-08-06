@@ -1,10 +1,10 @@
 'use client';
 
+import { useSearchUsers } from '@/hooks/social/useSearchUsers';
 import { Suspense, useEffect, useState, useRef } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { decodeQuery, encodeQuery } from '@/lib/utils/searchEncode';
-import { useSearchUsers } from '@/hooks/useFollow';
-import { useMusicSearch } from '@/hooks/useMusicSearch';
+import {  useMusicSearch  } from '@/hooks/useMusicSearch';
 import { SearchHeader } from '@/components/search/SearchHeader';
 import { RecentAndTrending } from '@/components/search/RecentAndTrending';
 import { UserSearchResults } from '@/components/search/UserSearchResults';

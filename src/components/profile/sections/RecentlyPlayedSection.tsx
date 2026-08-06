@@ -1,17 +1,12 @@
 'use client';
-
+import { ArtistParser } from '@/lib/utils/ArtistParser';
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { HorizontalScrollSection } from '@/components/ui/HorizontalScrollSection';
-import { getBestImageUrl } from '@/lib/api/musicApi';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { Song } from '@/types/music';
-
-interface RecentlyPlayedSectionProps {
-  recentlyPlayed: Song[];
-  playTrack: (track: Song, queue: Song[]) => void;
-}
-
+import { RecentlyPlayedSectionProps } from '@/types/components/profile/sections/RecentlyPlayedSectionProps';
 export function RecentlyPlayedSection({ recentlyPlayed, playTrack }: RecentlyPlayedSectionProps) {
   if (recentlyPlayed.length === 0) return null;
 
@@ -25,9 +20,9 @@ export function RecentlyPlayedSection({ recentlyPlayed, playTrack }: RecentlyPla
             onClick={() => playTrack(song, recentlyPlayed)}
           >
             <div className="relative aspect-square rounded-xl overflow-hidden mb-2.5 bg-white/5 border border-white/5 shadow-sm">
-              {getBestImageUrl(song.image) && (
+              {ImageHelper.getBestImageUrl(song.image) && (
                 <Image
-                  src={getBestImageUrl(song.image)!}
+                  src={ImageHelper.getBestImageUrl(song.image)!}
                   alt={song.name}
                   fill
                   sizes="170px"
@@ -41,12 +36,12 @@ export function RecentlyPlayedSection({ recentlyPlayed, playTrack }: RecentlyPla
             </p>
             <p className="text-white/40 text-[12px] line-clamp-1 mt-0.5 pointer-events-auto">
               {song.artists.primary.map((a: any, i: number) => (
-                <span 
+                <span
                   key={a.id}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <Link
-                    href={`/artist/${a.id}`}
+                    href={ArtistParser.getArtistLink(a)}
                     className="hover:underline hover:text-white transition-colors"
                   >
                     {a.name}

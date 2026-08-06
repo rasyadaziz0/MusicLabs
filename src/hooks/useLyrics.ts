@@ -1,14 +1,13 @@
 'use client';
 
+import { LrcHelper } from '@/lib/utils/LrcHelper';
 import { useState, useEffect, useRef } from 'react';
-import { parseLRC, LrcLine, addInstrumentalPlaceholders, parseYRC, estimateLineDurations } from '@/lib/utils/lrcParser';
+import { LrcLine } from '@/types/utils/lrc';
 import { Song } from '@/types/music';
+import { CachedLyrics } from '@/types/hooks/lyrics';
 
 // ── In-memory cache & dedup ──────────────────────────────────────
-interface CachedLyrics {
-  lines: LrcLine[];
-  isSynced: boolean;
-}
+
 
 const lyricsCache = new Map<string, CachedLyrics>();
 // Track inflight requests to avoid duplicate fetches from multiple components
@@ -82,7 +81,7 @@ export function useLyrics(currentTrack: Song | null, actualDuration: number = 0)
             let attempt = 0;
             while (attempt < 3) {
               try {
-                res = await fetch(`/api/lyrics?${params.toString()}`);
+                res = await fetch(`${(process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || process.env.NEXT_PUBLIC_EXPRESS_API_URL) || ''}/api/lyrics?${params.toString()}`);
                 if (res.ok || res.status === 404) break;
               } catch (e: unknown) {
                 // Ignore network errors and retry
@@ -100,14 +99,14 @@ export function useLyrics(currentTrack: Song | null, actualDuration: number = 0)
                 let parsedLines: LrcLine[];
                 if (data.type === 'yrc') {
                   // Netease YRC: true word-level karaoke (real per-word timestamps)
-                  parsedLines = parseYRC(data.lyrics);
+                  parsedLines = LrcHelper.parseYRC(data.lyrics);
                 } else {
                   // All LRC sources (Netease, LRClib): line-by-line sync only
                   // No estimated karaoke — estimated word timings are inaccurate
-                  parsedLines = parseLRC(data.lyrics);
+                  parsedLines = LrcHelper.parseLRC(data.lyrics);
                 }
                 const lyricsType = (data.type === 'yrc' ? 'yrc' : 'lrc') as 'yrc' | 'lrc';
-                const withPlaceholders = addInstrumentalPlaceholders(parsedLines, lyricsType);
+                const withPlaceholders = LrcHelper.addInstrumentalPlaceholders(parsedLines, lyricsType);
                 return { lines: withPlaceholders, isSynced: true };
               } else {
                 const splitLines = data.lyrics.split('\n').map((text, i) => ({

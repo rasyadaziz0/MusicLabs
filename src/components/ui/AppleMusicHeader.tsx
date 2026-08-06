@@ -1,23 +1,9 @@
 import { ReactNode } from 'react';
 import { Play, Shuffle, Check, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
-
-export interface AppleMusicHeaderProps {
-  title: ReactNode;
-  subtitle?: ReactNode;
-  description?: ReactNode;
-  cover: ReactNode;
-  onPlay?: () => void;
-  onShuffle?: () => void;
-  isSaved?: boolean;
-  onToggleSave?: () => void;
-  extraActions?: ReactNode;
-  topRightActions?: ReactNode;
-  backHref?: string;
-}
-
 import { useRouter } from 'next/navigation';
 
+import { AppleMusicHeaderProps } from '@/types/components/ui/AppleMusicHeaderProps';
 export function AppleMusicHeader({
   title,
   subtitle,

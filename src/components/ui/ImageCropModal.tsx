@@ -4,16 +4,7 @@ import React, { useState, useCallback } from 'react';
 import Cropper from 'react-easy-crop';
 import { getCroppedImg } from '@/lib/utils/cropImage';
 import { X, Loader2, Check } from 'lucide-react';
-
-export interface ImageCropModalProps {
-  isOpen: boolean;
-  imageSrc: string;
-  onClose: () => void;
-  onCropComplete: (croppedFile: File) => void;
-  aspect?: number;
-  circularCrop?: boolean;
-}
-
+import { ImageCropModalProps } from '@/types/components/ui/ImageCropModalProps';
 export function ImageCropModal({
   isOpen,
   imageSrc,

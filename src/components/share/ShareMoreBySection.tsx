@@ -1,22 +1,16 @@
 'use client';
 
+import { SlugHelper } from '@/lib/utils/SlugHelper';
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Play, MoreHorizontal } from 'lucide-react';
 import { Song } from '@/types/music';
-import { getBestImageUrl } from '@/lib/api/musicApi';
-import { buildTrackPath } from '@/lib/utils/slugify';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { usePlayer } from '@/context/PlayerContext';
 import { HorizontalScrollSection } from '@/components/ui/HorizontalScrollSection';
-
-interface ShareMoreBySectionProps {
-  title: string;
-  tracks: Song[];
-  artistId?: string;
-}
-
+import { ShareMoreBySectionProps } from '@/types/components/share/ShareMoreBySectionProps';
 export function ShareMoreBySection({ title, tracks, artistId }: ShareMoreBySectionProps) {
   const { playTrack } = usePlayer();
   const router = useRouter();
@@ -29,11 +23,11 @@ export function ShareMoreBySection({ title, tracks, artistId }: ShareMoreBySecti
       onSeeAll={artistId ? () => router.push(`/artist/${artistId}`) : undefined}
     >
       {tracks.map((track, idx) => {
-        const coverUrl = getBestImageUrl(track.image);
+        const coverUrl = ImageHelper.getBestImageUrl(track.image);
         const artistNames = track.artists?.primary?.map((a) => a.name).join(', ') || '';
         const isSingle = track.album?.name?.toLowerCase() === 'single' || !track.album?.name || track.album?.name === track.name;
         const subtitle = isSingle ? 'Single' : (track.album?.name || artistNames);
-        const trackUrl = buildTrackPath(track.artists?.primary?.[0]?.name || 'Artist', track.name, track.id);
+        const trackUrl = SlugHelper.buildTrackPath(track.artists?.primary?.[0]?.name || 'Artist', track.name, track.id);
 
         return (
           <Link

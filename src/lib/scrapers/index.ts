@@ -1,4 +1,4 @@
-import { PlaylistScraper, ScrapedPlaylist } from './types';
+import { PlaylistScraper, ScrapedPlaylist } from '@/types/services/scrapers';
 import { SpotifyScraper } from './spotify';
 import { YouTubeScraper } from './youtube';
 import { AppleScraper } from './apple';
@@ -19,4 +19,4 @@ export async function scrapePlaylist(url: string): Promise<ScrapedPlaylist> {
   return scraper.scrape(url);
 }
 
-export * from './types';
+export * from '@/types/services/scrapers';

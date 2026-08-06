@@ -2,15 +2,7 @@ import React from 'react';
 import { Globe } from 'lucide-react';
 import { SectionHeader, SettingsRow } from './SettingsUI';
 import { CustomSelect } from '@/components/ui/CustomSelect';
-
-interface SearchDiscoverySettingsProps {
-  t: (key: string) => string;
-  locale: string;
-  setLocale: (locale: string) => void;
-  searchRegion: string;
-  setSearchRegion: (region: string) => void;
-}
-
+import { SearchDiscoverySettingsProps } from '@/types/components/settings/SearchDiscoverySettingsProps';
 const LANGUAGE_OPTIONS = [
   { value: 'en', label: 'English' },
   { value: 'id', label: 'Bahasa Indonesia' },

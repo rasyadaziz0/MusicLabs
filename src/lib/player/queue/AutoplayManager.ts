@@ -1,8 +1,5 @@
 import { Song } from '@/types/music';
-
-export interface AutoplayManagerCallbacks {
-  onStateChange: (isEnabled: boolean) => void;
-}
+import { AutoplayManagerCallbacks } from '@/types/player/queue';
 
 export class AutoplayManager {
   private _isEnabled: boolean = true;

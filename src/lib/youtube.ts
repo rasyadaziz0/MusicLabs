@@ -17,6 +17,11 @@ export async function resolveToYoutubeId(
   trackId: string,
   options: ResolveOptions = {}
 ): Promise<string | null> {
+  // If trackId is already a YouTube video ID (11 chars), use it directly
+  if (/^[A-Za-z0-9_-]{11}$/.test(trackId)) {
+    return trackId;
+  }
+
   const cacheKey = `${CACHE_KEY_PREFIX}${trackId}`;
 
   // 1. Cek cache localStorage

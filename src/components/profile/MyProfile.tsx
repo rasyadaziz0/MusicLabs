@@ -1,5 +1,9 @@
 'use client';
 
+import { useFollowCounts } from '@/hooks/social/useFollowCounts';
+import { useLibraryPlaylists } from '@/hooks/library/useLibraryPlaylists';
+import { useLikedSongs } from '@/hooks/library/useLikedSongs';
+import { MusicApiService } from '@/lib/api/MusicApiService';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import gsap from 'gsap';
@@ -9,9 +13,6 @@ import { useAuth } from '@/context/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
 import { getRecentPlays } from '@/lib/supabase/music';
-import { getSongsByIds } from '@/lib/api/musicApi';
-import { useLibraryPlaylists, useLikedSongs } from '@/hooks/useMusicLibrary';
-import { useFollowCounts } from '@/hooks/useFollow';
 import { UserProfile } from '@/types/profile';
 import FollowListModal from '@/components/social/FollowListModal';
 import type { PlaylistRecord } from '@/lib/supabase/music';
@@ -25,26 +26,8 @@ import { PlaylistsSection } from './sections/PlaylistsSection';
 import { FavoriteSongsSection } from './sections/FavoriteSongsSection';
 import { AccountSettingsSection } from './sections/AccountSettingsSection';
 
-export interface MyProfileInitialData {
-  userId: string;
-  profile: UserProfile;
-  playlists: PlaylistRecord[];
-  likedSongIds: string[];
-  recentTrackIds: string[];
-  stats: {
-    playlistCount: number;
-    likedCount: number;
-    listenedCount: number;
-    followerCount: number;
-    followingCount: number;
-  };
-}
-
-interface MyProfileProps {
-  initialData: MyProfileInitialData;
-  isMobile?: boolean;
-}
-
+import { MyProfileInitialData } from '@/types/components/profile';
+import { MyProfileProps } from '@/types/components/profile/MyProfileProps';
 export default function MyProfile({ initialData, isMobile }: MyProfileProps) {
   const router = useRouter();
   const { user, signOut, loading: authLoading } = useAuth();
@@ -73,7 +56,7 @@ export default function MyProfile({ initialData, isMobile }: MyProfileProps) {
   // Resolve liked songs to full Song objects on client
   const { data: likedSongsFull = [] } = useQuery<Song[]>({
     queryKey: ['likedSongsFull', initialData.likedSongIds],
-    queryFn: () => getSongsByIds(initialData.likedSongIds),
+    queryFn: () => MusicApiService.getSongsByIds(initialData.likedSongIds),
     enabled: initialData.likedSongIds.length > 0,
   });
 

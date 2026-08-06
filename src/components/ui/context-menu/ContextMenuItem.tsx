@@ -1,15 +1,8 @@
 'use client';
 
 import React from 'react';
-import { cn } from '@/lib/utils';
-
-export interface ContextMenuItemProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  icon?: React.ReactNode;
-  label: React.ReactNode;
-  rightElement?: React.ReactNode;
-  danger?: boolean;
-}
-
+import { StyleHelper } from '@/lib/utils/StyleHelper';
+import { ContextMenuItemProps } from '@/types/components/ui/context-menu/ContextMenuItemProps';
 export function ContextMenuItem({
   icon,
   label,
@@ -21,7 +14,7 @@ export function ContextMenuItem({
   return (
     <button
       type="button"
-      className={cn(
+      className={StyleHelper.cn(
         "w-full text-left px-3 py-2 text-[13px] font-medium transition-colors hover:bg-white/10 flex items-center gap-2.5 disabled:opacity-60",
         danger ? "text-primary" : "text-white",
         className
@@ -29,7 +22,7 @@ export function ContextMenuItem({
       {...props}
     >
       {icon && (
-        <span className={cn("flex-shrink-0", danger ? "" : "text-white/60")}>
+        <span className={StyleHelper.cn("flex-shrink-0", danger ? "" : "text-white/60")}>
           {icon}
         </span>
       )}

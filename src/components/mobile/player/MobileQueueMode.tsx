@@ -4,7 +4,7 @@ import React, { useMemo, useState, useRef } from 'react';
 import Image from 'next/image';
 import { usePlayer } from '@/context/PlayerContext';
 import { QueuePopupController } from '@/components/player/QueuePopupController';
-import { getBestImageUrl } from '@/lib/api/musicApi';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { Heart, MoreHorizontal, Shuffle, Repeat, Infinity as InfinityIcon, Disc, Menu } from 'lucide-react';
 import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
 import {
@@ -23,21 +23,7 @@ import {
 } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis, restrictToWindowEdges } from '@dnd-kit/modifiers';
 import { CSS } from '@dnd-kit/utilities';
-
-interface MobileQueueModeProps {
-  currentTrack: any;
-  coverUrl: string;
-  artistNames: string;
-  isLiked: boolean;
-  handleToggleLike?: (e?: any) => void;
-  onClose: () => void;
-  isShuffled: boolean;
-  repeatMode: string;
-  toggleShuffle: () => void;
-  cycleRepeatMode: () => void;
-  setIsDevicesOpen?: (val: boolean) => void;
-}
-
+import { MobileQueueModeProps } from '@/types/components/mobile/player/MobileQueueModeProps';
 // Exact Apple Music iOS Sortable Track Row
 function AppleMusicQueueRow({ track, onClick }: { track: any; onClick: () => void }) {
   const [isRowMenuOpen, setIsRowMenuOpen] = useState(false);
@@ -60,7 +46,7 @@ function AppleMusicQueueRow({ track, onClick }: { track: any; onClick: () => voi
     position: isDragging ? 'relative' as const : undefined,
   };
 
-  const imgUrl = getBestImageUrl(track.image);
+  const imgUrl = ImageHelper.getBestImageUrl(track.image);
   const trackArtist = track.artists?.primary?.map((a: any) => a.name).join(', ') || '';
 
   return (
@@ -315,8 +301,8 @@ export function MobileQueueMode(props: MobileQueueModeProps) {
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1 pr-3">
                       <div className="w-11 h-11 rounded-lg overflow-hidden relative flex-shrink-0 bg-white/10">
-                        {getBestImageUrl(track.image) && (
-                          <Image src={getBestImageUrl(track.image)!} alt={track.name} fill sizes="44px" className="object-cover" />
+                        {ImageHelper.getBestImageUrl(track.image) && (
+                          <Image src={ImageHelper.getBestImageUrl(track.image)!} alt={track.name} fill sizes="44px" className="object-cover" />
                         )}
                       </div>
                       <div className="min-w-0 flex-1">

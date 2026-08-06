@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+import { StyleHelper } from '@/lib/utils/StyleHelper';
 
 interface EmbedPreviewBadgeProps {
   isVisible: boolean;
@@ -10,7 +10,7 @@ export function EmbedPreviewBadge({ isVisible, className }: EmbedPreviewBadgePro
   if (!isVisible) return null;
   
   return (
-    <div className={cn("absolute left-1/2 -translate-x-1/2 bg-[#1d1d1f]/80 backdrop-blur-md text-white text-[10px] font-medium px-3 py-1.5 rounded-full pointer-events-none shadow-sm z-10 transition-opacity", className)}>
+    <div className={StyleHelper.cn("absolute left-1/2 -translate-x-1/2 bg-[#1d1d1f]/80 backdrop-blur-md text-white text-[10px] font-medium px-3 py-1.5 rounded-full pointer-events-none shadow-sm z-10 transition-opacity", className)}>
       AcadMusic Preview
     </div>
   );

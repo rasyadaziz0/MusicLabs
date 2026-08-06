@@ -1,10 +1,10 @@
 'use client';
 
+import { useLibraryPlaylists } from '@/hooks/library/useLibraryPlaylists';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Home, LayoutGrid, Radio, Clock, Mic, SquareStack, Music, UserSquare, Search, ChevronDown, ChevronRight, Pin, Heart, LogOut, PlusSquare, Sparkles, AudioLines, Coffee, ListMusic } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useLibraryPlaylists } from '@/hooks/useMusicLibrary';
+import { StyleHelper } from '@/lib/utils/StyleHelper';
 import { useDiscoverWeekly } from '@/hooks/useDiscoverWeekly';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/context/LanguageContext';
@@ -67,7 +67,7 @@ export default function Sidebar() {
 
   const isGuest = !user;
 
-  const navLinkClass = (isActive: boolean) => cn(
+  const navLinkClass = (isActive: boolean) => StyleHelper.cn(
     "flex items-center gap-3 md:portrait:gap-2 px-3 md:portrait:px-2 py-1.5 mx-2 md:portrait:mx-1 rounded-md transition-colors text-[13px] md:portrait:text-[12px] font-medium border",
     isActive
       ? "bg-[#FA243C]/20 text-white border-[#FA243C]"
@@ -114,9 +114,9 @@ export default function Sidebar() {
               </Link>
             )}
             {flags.feature_import_playlist && (
-              <Link href="/import/playlist" className={cn(navLinkClass(pathname === '/import/playlist'), "relative overflow-hidden")}>
+              <Link href="/import/playlist" className={StyleHelper.cn(navLinkClass(pathname === '/import/playlist'), "relative overflow-hidden")}>
                 <div 
-                  className={cn(
+                  className={StyleHelper.cn(
                     "absolute inset-0 bg-[#FA243C]/20 transition-all duration-500 ease-out z-0 pointer-events-none",
                     isImporting ? "opacity-100" : "opacity-0"
                   )}

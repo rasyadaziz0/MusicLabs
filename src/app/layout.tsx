@@ -4,6 +4,8 @@ import "./globals.css";
 import "goey-toast/styles.css";
 import ConditionalProviders from "@/components/ConditionalProviders";
 import GooeyToasterProvider from "@/components/GooeyToasterProvider";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/react";
 
 const syne = Syne({
   variable: "--font-display",
@@ -99,6 +101,8 @@ export default function RootLayout({
           {children}
         </ConditionalProviders>
         <GooeyToasterProvider />
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );

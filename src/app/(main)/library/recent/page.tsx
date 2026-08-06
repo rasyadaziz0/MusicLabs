@@ -1,11 +1,12 @@
 'use client';
 
+import { useLibraryPlaylists } from '@/hooks/library/useLibraryPlaylists';
+import { useLibraryAlbums } from '@/hooks/library/useLibraryAlbums';
 import { useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Disc3, Music } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { useLibraryPlaylists, useLibraryAlbums } from '@/hooks/useMusicLibrary';
 import { LibraryEmptyState } from '@/components/library/LibraryEmptyState';
 
 export default function RecentlyAddedPage() {

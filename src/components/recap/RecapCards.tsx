@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Play, Mic2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { getBestImageUrl } from '@/lib/api/musicApi';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { Song } from '@/types/music';
 
 // ── Stat Card ───────────────────────────────────────────
@@ -62,7 +62,7 @@ export function TopTrackCard({
   onPlay: () => void;
   delay: number;
 }) {
-  const coverUrl = getBestImageUrl(song.image);
+  const coverUrl = ImageHelper.getBestImageUrl(song.image);
   const artistNames = song.artists?.primary?.map((a) => a.name).join(', ') || 'Unknown';
 
   return (

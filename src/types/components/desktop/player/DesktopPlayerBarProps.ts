@@ -1,0 +1,32 @@
+export interface DesktopPlayerBarProps {
+  currentTrack: any;
+  isPlaying: boolean;
+  isResolving: boolean;
+  isGuestPreview: boolean;
+  isRadio: boolean;
+  radioMeta: any;
+  togglePlay: () => void;
+  nextTrack: () => void;
+  prevTrack: () => void;
+  currentTime: number;
+  duration: number;
+  seek: (val: number) => void;
+  volume: number;
+  setVolume: (val: number) => void;
+  isMuted: boolean;
+  isVolumeSliderOpen: boolean;
+  setIsVolumeSliderOpen: (open: boolean) => void;
+  setIsGuestGateOpen: (open: boolean) => void;
+  isNowPlayingOpen: boolean;
+  setIsNowPlayingOpen: (open: boolean) => void;
+  isShuffled: boolean;
+  toggleShuffle: () => void;
+  repeatMode: 'none' | 'all' | 'one';
+  cycleRepeatMode: () => void;
+  isQueueOpen: boolean;
+  setIsQueueOpen: (open: boolean) => void;
+  isLyricsOpen: boolean;
+  setIsLyricsOpen: (open: boolean) => void;
+  isDevicesOpen?: boolean;
+  setIsDevicesOpen?: (open: boolean) => void;
+}

@@ -1,6 +1,6 @@
+import { SlugHelper } from '@/lib/utils/SlugHelper';
 import type { MetadataRoute } from 'next';
 import { createClient } from '@/lib/supabase/server';
-import { buildTrackPath } from '@/lib/utils/slugify';
 
 /**
  * Dynamic sitemap fetching indexed tracks from the database.
@@ -26,7 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Track entry
     trackEntries.push({
-      url: `${baseUrl}${buildTrackPath(t.artist_name, t.name, t.track_id)}`,
+      url: `${baseUrl}${SlugHelper.buildTrackPath(t.artist_name, t.name, t.track_id)}`,
       lastModified: updatedAt,
       changeFrequency: 'weekly',
       priority: 0.9,

@@ -2,15 +2,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 import { useRef, useState, useCallback } from 'react';
-
-interface ToggleSwitchProps {
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-  disabled?: boolean;
-  label?: string;
-  description?: string;
-}
-
+import { ToggleSwitchProps } from '@/types/components/ui/ToggleSwitchProps';
 // ── Geometry ────────────────────────────────────────────────────
 const TRACK_W = 51;
 const TRACK_H = 31;

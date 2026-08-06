@@ -4,15 +4,7 @@ import { useNowPlaying } from '@/hooks/useNowPlaying';
 import { NowPlayingUI } from '@/components/player/NowPlayingUI';
 import { GuestNowPlayingUI } from '@/components/player/GuestNowPlayingUI';
 import { useAuth } from '@/context/AuthContext';
-
-interface NowPlayingProps {
-  isOpen: boolean;
-  onClose: () => void;
-  isMobile?: boolean;
-  isDevicesOpen?: boolean;
-  setIsDevicesOpen?: (open: boolean) => void;
-}
-
+import { NowPlayingProps } from '@/types/components/player/NowPlayingProps';
 export default function NowPlaying({ isOpen, onClose, isMobile, isDevicesOpen, setIsDevicesOpen }: NowPlayingProps) {
   const state = useNowPlaying(isOpen);
   const { user } = useAuth();

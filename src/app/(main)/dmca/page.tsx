@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { Shield, Mail, AlertTriangle, ExternalLink } from 'lucide-react';
+import CopyEmailButton from './CopyEmailButton';
 
 export const metadata: Metadata = {
   title: 'DMCA Policy - AcadMusic',
@@ -82,13 +83,16 @@ export default function DMCAPage() {
           <p className="text-white/70">
             Please send all DMCA takedown notices to:
           </p>
-          <a
-            href="mailto:dmca@music.rasyadazizan.site"
-            className="inline-flex items-center gap-2 text-[#FA243C] hover:text-[#ff3a50] transition-colors font-medium"
-          >
-            dmca@music.rasyadazizan.site
-            <ExternalLink size={14} />
-          </a>
+          <div className="flex items-center">
+            <a
+              href="mailto:dmca@music.rasyadazizan.site"
+              className="inline-flex items-center gap-2 text-[#FA243C] hover:text-[#ff3a50] transition-colors font-medium"
+            >
+              dmca@music.rasyadazizan.site
+              <ExternalLink size={14} />
+            </a>
+            <CopyEmailButton email="dmca@music.rasyadazizan.site" />
+          </div>
           <p className="text-white/50 text-sm">
             We will respond to valid takedown requests within 48 hours and remove or disable access
             to the allegedly infringing material promptly.

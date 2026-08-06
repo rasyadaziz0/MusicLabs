@@ -15,13 +15,9 @@ import TapToStartOverlay from '@/components/player/TapToStartOverlay';
 import { AnimatePresence } from 'framer-motion';
 import { MobileAirPlayPopup } from '@/components/mobile/player/MobileAirPlayPopup';
 
+import { PlayerBarProps } from '@/types/components/player/PlayerBarProps';
 const MobilePlayerBar = dynamic(() => import('@/components/mobile/player/MobilePlayerBar'), { ssr: false });
 const DesktopPlayerBar = dynamic(() => import('@/components/desktop/player/DesktopPlayerBar'), { ssr: false });
-
-export interface PlayerBarProps {
-  isMobile?: boolean;
-}
-
 export default function PlayerBar({ isMobile }: PlayerBarProps) {
   const {
     currentTrack,

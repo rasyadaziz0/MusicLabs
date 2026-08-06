@@ -1,5 +1,5 @@
-import { IIdentifyStrategy, IdentifyResult } from './IdentifyStrategy';
-import { searchSongs } from '@/lib/api/musicApi';
+import { MusicApiService } from '@/lib/api/MusicApiService';
+import { IIdentifyStrategy, IdentifyResult } from '@/types/services/identify';
 import { Song } from '@/types/music';
 
 export class SpeechStrategy implements IIdentifyStrategy<string> {
@@ -12,7 +12,7 @@ export class SpeechStrategy implements IIdentifyStrategy<string> {
     }
 
     try {
-      const data: any = await searchSongs(transcript);
+      const data: any = await MusicApiService.searchSongs(transcript);
       const songs: Song[] = data?.results ?? data ?? [];
 
       if (songs.length > 0) {

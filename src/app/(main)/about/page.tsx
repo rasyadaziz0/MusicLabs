@@ -22,15 +22,15 @@ export default function AboutPage() {
       <section className="space-y-6 text-white/70 leading-relaxed">
         <div className="space-y-3">
           <p>
-            AcadMusic is a modern, lightweight music streaming application built as a passion project. 
+            AcadMusic is a modern, lightweight music streaming application built as a passion project.
             It aims to provide an ad-free, immersive, and fast listening experience by leveraging public APIs for music discovery.
           </p>
           <p>
-            Features include real-time synchronized lyrics, a personalized AI-powered Discover Weekly playlist, 
+            Features include real-time synchronized lyrics, a personalized AI-powered Discover Weekly playlist,
             live global radio stations, and seamless background playback on mobile devices.
           </p>
           <p className="pt-4 text-white/50 text-sm">
-            Version 1.0.0 (Beta) <br/>
+            Version 1.1.0  <br />
             Made with ❤️ using Next.js & Supabase.
           </p>
         </div>

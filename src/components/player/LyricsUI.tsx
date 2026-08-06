@@ -1,6 +1,6 @@
 'use client';
 
-import { LrcLine } from '@/lib/utils/lrcParser';
+import { LrcLine } from '@/types/utils/lrc';
 import { Song } from '@/types/music';
 import { motion, animate } from 'framer-motion';
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -9,22 +9,8 @@ import { LyricLine } from './lyrics/LyricLine';
 import { LyricsSkeleton } from './lyrics/LyricsSkeleton';
 import { LyricStyleManager } from './lyrics/LyricStyleManager';
 import { useSettings } from '@/context/SettingsContext';
+import { LyricsUIProps } from '@/types/components/player/LyricsUIProps';
 import './LyricsUI.css';
-
-interface LyricsUIProps {
-  currentTrack: Song;
-  lines: LrcLine[];
-  activeIndex: number;
-  isSynced: boolean;
-  isLoading: boolean;
-  scrollRef: React.RefObject<HTMLDivElement | null>;
-  onLineClick: (time: number, isPlaceholder?: boolean) => void;
-  hideHeader?: boolean;
-  currentTime?: number;
-  romanizations?: Map<number, string>;
-  trackId: string | null;
-}
-
 export default function LyricsUI({
   currentTrack,
   lines,

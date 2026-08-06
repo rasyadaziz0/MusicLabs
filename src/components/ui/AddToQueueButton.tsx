@@ -2,17 +2,11 @@
 
 import { ListPlus } from 'lucide-react';
 import { Song } from '@/types/music';
-import { cn } from '@/lib/utils';
+import { StyleHelper } from '@/lib/utils/StyleHelper';
 import { usePlayer } from '@/context/PlayerContext';
 import { useState } from 'react';
 import { ContextMenuItem } from './context-menu/ContextMenuItem';
-
-interface AddToQueueButtonProps {
-  track: Song;
-  className?: string;
-  showText?: boolean;
-}
-
+import { AddToQueueButtonProps } from '@/types/components/ui/AddToQueueButtonProps';
 export default function AddToQueueButton({ track, className, showText = false }: AddToQueueButtonProps) {
   const { addToQueue } = usePlayer();
   const [added, setAdded] = useState(false);
@@ -39,7 +33,7 @@ export default function AddToQueueButton({ track, className, showText = false }:
     <button
       type="button"
       onClick={handleAdd}
-      className={cn(
+      className={StyleHelper.cn(
         'inline-flex items-center justify-center transition-colors h-9 w-9 rounded-full border border-white/10 bg-white/5 text-muted hover:text-white',
         className
       )}

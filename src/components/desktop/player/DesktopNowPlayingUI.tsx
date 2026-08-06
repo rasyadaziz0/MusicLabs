@@ -1,4 +1,5 @@
 'use client';
+import { ArtistParser } from '@/lib/utils/ArtistParser';
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -6,8 +7,8 @@ import {
   X, Play, Pause, SkipForward, SkipBack, Shuffle, Repeat,
   Volume2, Loader2, Heart, Ellipsis
 } from 'lucide-react';
-import { getBestImageUrl } from '@/lib/api/musicApi';
-import { formatTime } from '@/lib/utils';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
+import { TimeHelper } from '@/lib/utils/TimeHelper';
 import LyricsUI from '@/components/player/LyricsUI';
 import GuestGate from '@/components/auth/GuestGate';
 import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
@@ -48,7 +49,7 @@ export default function DesktopNowPlayingUI(props: NowPlayingUIProps) {
 
   if (!currentTrack) return null;
   const progress = duration ? (currentTime / duration) * 100 : 0;
-  const coverUrl = getBestImageUrl(currentTrack.image);
+  const coverUrl = ImageHelper.getBestImageUrl(currentTrack.image);
 
   return (
     <AnimatePresence>
@@ -116,7 +117,7 @@ export default function DesktopNowPlayingUI(props: NowPlayingUIProps) {
                     <div style={{ marginTop: 3, fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.55)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {currentTrack.artists.primary.map((a, i) => (
                         <span key={a.id}>
-                          <Link href={`/artist/${a.id}`} onClick={(e) => { e.stopPropagation(); onClose(); }} style={{ color: 'inherit', textDecoration: 'none' }} onMouseOver={e => (e.currentTarget.style.textDecoration = 'underline')} onMouseOut={e => (e.currentTarget.style.textDecoration = 'none')}>{a.name}</Link>
+                          <Link href={ArtistParser.getArtistLink(a)} onClick={(e) => { e.stopPropagation(); onClose(); }} style={{ color: 'inherit', textDecoration: 'none' }} onMouseOver={e => (e.currentTarget.style.textDecoration = 'underline')} onMouseOut={e => (e.currentTarget.style.textDecoration = 'none')}>{a.name}</Link>
                           {i < currentTrack.artists.primary.length - 1 && ' — '}
                         </span>
                       ))}
@@ -166,8 +167,8 @@ export default function DesktopNowPlayingUI(props: NowPlayingUIProps) {
                     </div>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.5)', fontVariantNumeric: 'tabular-nums' }}>
-                    <span>{formatTime(currentTime)}</span>
-                    <span>-{formatTime(Math.max((duration || 0) - currentTime, 0))}</span>
+                    <span>{TimeHelper.formatTime(currentTime)}</span>
+                    <span>-{TimeHelper.formatTime(Math.max((duration || 0) - currentTime, 0))}</span>
                   </div>
                 </div>
 

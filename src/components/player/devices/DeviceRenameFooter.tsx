@@ -2,12 +2,7 @@
 
 import React, { useState } from 'react';
 import { Edit3, Check, X } from 'lucide-react';
-
-export interface DeviceRenameFooterProps {
-  currentLabel?: string;
-  onRename: (newName: string) => void;
-}
-
+import { DeviceRenameFooterProps } from '@/types/components/player/devices/DeviceRenameFooterProps';
 export function DeviceRenameFooter({ currentLabel, onRename }: DeviceRenameFooterProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState('');

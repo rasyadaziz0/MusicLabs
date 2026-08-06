@@ -1,11 +1,11 @@
 'use client';
 
+import { useLikedSongs } from '@/hooks/library/useLikedSongs';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Heart, MoreHorizontal, Play, Shuffle, Share, Link2 } from 'lucide-react';
 import { usePlayer } from '@/context/PlayerContext';
 import { useAuth } from '@/context/AuthContext';
-import { useLikedSongs } from '@/hooks/useMusicLibrary';
 import { AppleMusicHeader } from '@/components/ui/AppleMusicHeader';
 import { AppleMusicTrackList } from '@/components/ui/AppleMusicTrackList';
 import TrackLikeButton from '@/components/ui/TrackLikeButton';

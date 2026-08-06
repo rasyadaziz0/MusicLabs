@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { Play, RefreshCw, Music } from 'lucide-react';
-import { getBestImageUrl } from '@/lib/api/musicApi';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import type { ISingSayResultsProps } from './IdentifyLayoutInterface';
 
 export function SingSayResultUI({
@@ -36,8 +36,8 @@ export function SingSayResultUI({
             className="flex items-center gap-4 p-3 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.06] hover:border-white/15 cursor-pointer transition-all group relative overflow-hidden select-none"
           >
             <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 shadow-lg border border-white/5">
-              {getBestImageUrl(song.image) ? (
-                <Image src={getBestImageUrl(song.image)!} alt={song.name} fill sizes="56px" className="object-cover" />
+              {ImageHelper.getBestImageUrl(song.image) ? (
+                <Image src={ImageHelper.getBestImageUrl(song.image)!} alt={song.name} fill sizes="56px" className="object-cover" />
               ) : (
                 <div className="w-full h-full bg-[#fc3c44]/30 flex items-center justify-center">
                   <Music size={20} className="text-white/40" />

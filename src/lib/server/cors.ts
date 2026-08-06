@@ -88,7 +88,6 @@ export function enforceCors(
   const origin = getRequestOrigin(request);
 
   if (!origin) {
-    // Allow direct browser navigation in development
     if (process.env.NODE_ENV !== 'production') {
       return { corsHeaders: {} };
     }
@@ -98,7 +97,15 @@ export function enforceCors(
     };
   }
 
-  if (!allowedOrigins.has(origin)) {
+  const host = request.headers.get('host');
+  let isSameOrigin = false;
+  try {
+    isSameOrigin = !!host && new URL(origin).host === host;
+  } catch {
+    isSameOrigin = false;
+  }
+
+  if (!allowedOrigins.has(origin) && !isSameOrigin) {
     return {
       corsHeaders: {},
       response: NextResponse.json({ error: 'Forbidden origin' }, { status: 403 }),

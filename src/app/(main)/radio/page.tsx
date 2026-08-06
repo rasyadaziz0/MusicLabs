@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { Search, Radio } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { StyleHelper } from '@/lib/utils/StyleHelper';
 import gsap from 'gsap';
 
 import { useRadioController, CATEGORIES } from './useRadioController';
@@ -101,7 +101,7 @@ export default function RadioPage() {
             <button
               key={cat.key}
               onClick={() => setActiveCategory(cat.key)}
-              className={cn(
+              className={StyleHelper.cn(
                 'px-4 py-1.5 rounded-full text-[13px] font-semibold transition-colors border',
                 activeCategory === cat.key
                   ? 'bg-white text-black border-white'

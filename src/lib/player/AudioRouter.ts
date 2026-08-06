@@ -3,9 +3,7 @@ import { YouTubeEngine } from './engines/YouTubeEngine';
 import { Html5Engine } from './engines/Html5Engine';
 import { RadioEngine } from './engines/RadioEngine';
 
-// ─── Types ───
-
-export type ActiveEngine = 'youtube' | 'html5' | 'radio' | 'none';
+import { ActiveEngine } from '@/types/player/engine';
 
 // ─── Router class ───
 

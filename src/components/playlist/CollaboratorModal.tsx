@@ -5,13 +5,7 @@ import { UserProfile } from '@/types/profile';
 import { usePlaylistCollaborators, useAddCollaborator, useRemoveCollaborator } from '@/hooks/useCollaborators';
 import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
 import { useAuth } from '@/context/AuthContext';
-
-interface CollaboratorModalProps {
-  playlistId: string;
-  isOpen: boolean;
-  onClose: () => void;
-}
-
+import { CollaboratorModalProps } from '@/types/components/playlist/CollaboratorModalProps';
 export default function CollaboratorModal({ playlistId, isOpen, onClose }: CollaboratorModalProps) {
   const { user } = useAuth();
   const [query, setQuery] = useState('');

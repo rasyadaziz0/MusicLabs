@@ -1,11 +1,5 @@
 
-// ─── Callback contract ───
-
-export interface Html5EngineCallbacks {
-  onPlay: () => void;
-  onPause: () => void;
-  onEnded: () => void;
-}
+import { Html5EngineCallbacks } from '@/types/player/engine';
 
 // ─── Engine class ───
 

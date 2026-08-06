@@ -1,5 +1,10 @@
 'use client';
+import { ArtistParser } from '@/lib/utils/ArtistParser';
 
+import { useLikedSongsIndex } from '@/hooks/library/useLikedSongsIndex';
+import { useLikedSongs } from '@/hooks/library/useLikedSongs';
+import { useToggleLikedSong } from '@/hooks/library/useToggleLikedSong';
+import { SlugHelper } from '@/lib/utils/SlugHelper';
 import { useState, useEffect } from 'react';
 import { Song } from '@/types/music';
 import { PlaySquare, Heart, ListPlus, Disc3, Mic2, Share, Radio, Link2, Timer, ChevronRight, Code } from 'lucide-react';
@@ -7,25 +12,15 @@ import { useRouter } from 'next/navigation';
 import { escapeHtmlAttr } from '@/lib/utils/escapeHtml';
 import { usePlayer } from '@/context/PlayerContext';
 import Image from 'next/image';
-import { getBestImageUrl } from '@/lib/api/musicApi';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { useAuth } from '@/context/AuthContext';
-import { useLikedSongsIndex, useToggleLikedSong } from '@/hooks/useMusicLibrary';
 import { gooeyToast as toast } from 'goey-toast';
 import { resolveToYoutubeId } from '@/lib/youtube';
-import { buildTrackPath } from '@/lib/utils/slugify';
 import { PlaylistSubMenu } from './context-menu/PlaylistSubMenu';
 import { ContextMenu } from './context-menu/ContextMenu';
 import { ContextMenuItem, ContextMenuDivider } from './context-menu/ContextMenuItem';
 import { useIsMobile } from '@/hooks/useIsMobile';
-
-interface TrackContextMenuProps {
-  track: Song | null;
-  isOpen: boolean;
-  position: { x: number; y: number } | null;
-  onClose: () => void;
-  showPlayerControls?: boolean;
-}
-
+import { TrackContextMenuProps } from '@/types/components/ui/TrackContextMenuProps';
 export function TrackContextMenu({ track, isOpen, position, onClose, showPlayerControls }: TrackContextMenuProps) {
   const router = useRouter();
   const { playNext, addToQueue, playTrack, isAutoplayEnabled, toggleAutoplay, setSleepTimer, clearSleepTimer, sleepTimerEndTime } = usePlayer();
@@ -61,7 +56,7 @@ export function TrackContextMenu({ track, isOpen, position, onClose, showPlayerC
 
   const getTrackUrl = () => {
     const artistName = track.artists?.primary?.[0]?.name || 'unknown';
-    return `${window.location.origin}${buildTrackPath(artistName, track.name, track.id)}`;
+    return `${window.location.origin}${SlugHelper.buildTrackPath(artistName, track.name, track.id)}`;
   };
 
   const handleShare = async () => {
@@ -102,7 +97,7 @@ export function TrackContextMenu({ track, isOpen, position, onClose, showPlayerC
           userId: user?.id || 'anonymous'
         });
 
-        const res = await fetch(`/api/audio/related/${videoId}?${titleParams.toString()}`);
+        const res = await fetch(`${(process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || process.env.NEXT_PUBLIC_EXPRESS_API_URL) || ''}/api/audio/related/${videoId}?${titleParams.toString()}`);
         if (!res.ok) throw new Error('Failed to fetch station tracks');
 
         const data = await res.json();
@@ -216,7 +211,7 @@ export function TrackContextMenu({ track, isOpen, position, onClose, showPlayerC
           <ContextMenuItem
             icon={<Mic2 size={15} />}
             label="Go to Artist"
-            onClick={() => handleAction(() => router.push(`/artist/${track.artists.primary[0].id}`))}
+            onClick={() => handleAction(() => router.push(ArtistParser.getArtistLink(track.artists.primary[0])))}
           />
         )}
 
@@ -299,8 +294,8 @@ export function TrackContextMenu({ track, isOpen, position, onClose, showPlayerC
   const mobileHeader = (
     <div className="px-5 pb-4 pt-2 flex items-center gap-4 border-b border-white/10">
       <div className="relative w-14 h-14 rounded-md overflow-hidden flex-shrink-0 bg-white/10">
-        {getBestImageUrl(track.image) && (
-          <Image src={getBestImageUrl(track.image)!} alt={track.name} fill sizes="56px" className="object-cover" />
+        {ImageHelper.getBestImageUrl(track.image) && (
+          <Image src={ImageHelper.getBestImageUrl(track.image)!} alt={track.name} fill sizes="56px" className="object-cover" />
         )}
       </div>
       <div className="flex-1 min-w-0">

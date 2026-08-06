@@ -1,6 +1,7 @@
-import { searchSongs } from '@/lib/api/musicApi';
+import { MusicApiService } from '@/lib/api/MusicApiService';
 import { Song } from '@/types/music';
-import { GLOBAL_EXCLUDED_TERMS, MOOD_PLAYLISTS, MoodConfig, MoodKey } from '@/config/moods';
+import { GLOBAL_EXCLUDED_TERMS, MOOD_PLAYLISTS } from '@/config/moods';
+import { MoodConfig, MoodKey } from '@/types/config/moods';
 
 export class MoodService {
   private static normalizeText(value: string) {
@@ -68,7 +69,7 @@ export class MoodService {
     const moodConfig = this.getMoodConfig(moodKey);
     const responses = await Promise.all(
       moodConfig.queries.map((query) => 
-        searchSongs(query).catch((error) => {
+        MusicApiService.searchSongs(query).catch((error) => {
           console.warn(`Failed to search songs for mood query "${query}":`, error);
           return { results: [] };
         })

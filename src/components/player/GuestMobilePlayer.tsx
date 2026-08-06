@@ -1,8 +1,9 @@
 'use client';
+import { ArtistParser } from '@/lib/utils/ArtistParser';
 
 import { motion } from 'framer-motion';
 import { Play, Pause, SkipForward, SkipBack, Volume2, Volume, Loader2, Heart, MessageSquare, ListMusic, Ellipsis } from 'lucide-react';
-import { formatTime } from '@/lib/utils';
+import { TimeHelper } from '@/lib/utils/TimeHelper';
 import Image from 'next/image';
 import Link from 'next/link';
 import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
@@ -70,7 +71,7 @@ export function GuestMobilePlayer({
               <>
                 {currentTrack.artists.primary.map((a: any, i: number) => (
                   <span key={a.id}>
-                    <Link href={`/artist/${a.id}`} onClick={(e) => { e.stopPropagation(); onClose(); }} style={{ color: 'inherit', textDecoration: 'none' }}>{a.name}</Link>
+                    <Link href={ArtistParser.getArtistLink(a)} onClick={(e) => { e.stopPropagation(); onClose(); }} style={{ color: 'inherit', textDecoration: 'none' }}>{a.name}</Link>
                     {i < currentTrack.artists.primary.length - 1 && ', '}
                   </span>
                 ))}
@@ -115,8 +116,8 @@ export function GuestMobilePlayer({
               </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 8, fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.45)', fontVariantNumeric: 'tabular-nums', letterSpacing: '0.2px' }}>
-              <span>{formatTime(currentTime)}</span>
-              <span>-{formatTime(Math.max((duration || 0) - currentTime, 0))}</span>
+              <span>{TimeHelper.formatTime(currentTime)}</span>
+              <span>-{TimeHelper.formatTime(Math.max((duration || 0) - currentTime, 0))}</span>
             </div>
           </div>
         ) : (

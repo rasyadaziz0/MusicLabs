@@ -1,22 +1,5 @@
 
-// ─── YouTube IFrame types ───
-
-export type YouTubePlayerEvent = {
-  data: number;
-};
-
-export type YouTubePlayer = {
-  getDuration: () => number;
-  getPlayerState: () => number;
-  getCurrentTime: () => number;
-  loadVideoById: (videoId: string) => void;
-  stopVideo: () => void;
-  destroy: () => void;
-  pauseVideo: () => void;
-  playVideo: () => void;
-  seekTo: (seconds: number, allowSeekAhead: boolean) => void;
-  setVolume: (volume: number) => void;
-};
+import { YouTubePlayerEvent, YouTubePlayer } from '@/types/player/youtube';
 
 declare global {
   interface Window {
@@ -40,15 +23,7 @@ declare global {
   }
 }
 
-// ─── Callback contract ───
-
-export interface YouTubeEngineCallbacks {
-  onPlay: () => void;
-  onPause: () => void;
-  onEnded: () => void;
-  onDuration: (duration: number) => void;
-  onError: (errorCode: number) => void;
-}
+import { YouTubeEngineCallbacks } from '@/types/player/engine';
 
 // ─── Engine class ───
 

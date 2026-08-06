@@ -2,7 +2,7 @@ import { Song } from '@/types/music';
 import { gooeyToast as toast } from 'goey-toast';
 import { YouTubeEngine } from './engines/YouTubeEngine';
 import { Html5Engine } from './engines/Html5Engine';
-import { RadioEngine, RadioMeta } from './engines/RadioEngine';
+import { RadioEngine } from './engines/RadioEngine';
 import { AudioRouter } from './AudioRouter';
 import { QueueManager } from './QueueManager';
 import { SleepTimer } from './SleepTimer';
@@ -10,28 +10,7 @@ import { TrackResolver } from './TrackResolver';
 import { PlayerCache } from './PlayerCache';
 import { registerTimeGetter } from '@/hooks/useHighPrecisionTime';
 import { recordRecentPlay } from '@/lib/supabase/music';
-
-// ─── State shape (shared with context) ───
-
-export type PlayerState = {
-  currentTrack: Song | null;
-  isPlaying: boolean;
-  isResolving: boolean;
-  isPreview: boolean;
-  isGuestPreview: boolean;
-  currentTime: number;
-  duration: number;
-  volume: number;
-  queue: Song[];
-  queueIndex: number;
-  isRadio: boolean;
-  radioMeta: RadioMeta | null;
-  isError: boolean;
-  isShuffled: boolean;
-  repeatMode: 'none' | 'all' | 'one';
-  sleepTimerEndTime: number | null;
-  isAutoplayEnabled: boolean;
-};
+import { PlayerState, PlayerControllerOptions } from '@/types/player/controller';
 
 export const INITIAL_STATE: PlayerState = {
   currentTrack: null,
@@ -52,13 +31,6 @@ export const INITIAL_STATE: PlayerState = {
   sleepTimerEndTime: null,
   isAutoplayEnabled: false,
 };
-
-// ─── Options ───
-
-export interface PlayerControllerOptions {
-  /** Called when state changes. Receives a partial state to merge. */
-  onStateChange: (patch: Partial<PlayerState>) => void;
-}
 
 // ─── Controller ───
 

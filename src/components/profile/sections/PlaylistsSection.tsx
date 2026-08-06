@@ -4,11 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronRight, Music } from 'lucide-react';
 import { HorizontalScrollSection } from '@/components/ui/HorizontalScrollSection';
-
-interface PlaylistsSectionProps {
-  playlists: any[];
-}
-
+import { PlaylistsSectionProps } from '@/types/components/profile/sections/PlaylistsSectionProps';
 export function PlaylistsSection({ playlists }: PlaylistsSectionProps) {
   if (playlists.length === 0) {
     return (

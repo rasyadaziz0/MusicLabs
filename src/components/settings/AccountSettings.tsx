@@ -2,16 +2,7 @@ import React from 'react';
 import { History, LogOut, Trash2, Loader2 } from 'lucide-react';
 import { SectionHeader } from './SettingsUI';
 import { User } from '@supabase/supabase-js';
-
-interface AccountSettingsProps {
-  t: (key: string) => string;
-  user: User;
-  handleClearHistory: () => void;
-  isClearingHistory: boolean;
-  handleSignOut: () => void;
-  setShowDeleteModal: (show: boolean) => void;
-}
-
+import { AccountSettingsProps } from '@/types/components/settings/AccountSettingsProps';
 export function AccountSettings({
   t,
   user,

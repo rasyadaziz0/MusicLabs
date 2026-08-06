@@ -1,25 +1,13 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { LrcLine } from '@/lib/utils/lrcParser';
+import { LrcLine } from '@/types/utils/lrc';
 import { LyricStyleManager } from './LyricStyleManager';
 import { KaraokeLine } from './KaraokeLine';
 
-
-interface LyricLineProps {
-  line: LrcLine;
-  index: number;
-  activeIndex: number;
-  isSynced: boolean;
-  romanText?: string;
-  currentTime: number;
-  isUserScrolling?: boolean;
-  trackId: string | null;
-  onLineClick: (time: number, isPlaceholder?: boolean) => void;
-}
-
 import React from 'react';
 
+import { LyricLineProps } from '@/types/components/player/lyrics/LyricLineProps';
 export const LyricLine = React.memo(function LyricLine({
   line,
   index,

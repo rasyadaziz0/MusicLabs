@@ -1,5 +1,4 @@
-export type LyricsFontSizeSetting = 'small' | 'medium' | 'large';
-
+import { LyricsFontSizeSetting } from '@/types/components/lyrics';
 export class LyricStyleManager {
   /* ── Apple Music style: uniform font size, no zoom/scale on active line ── */
   private static readonly FONT_SIZES: Record<LyricsFontSizeSetting, string> = {

@@ -1,4 +1,4 @@
-import { IIdentifyStrategy, IdentifyResult } from './IdentifyStrategy';
+import { IIdentifyStrategy, IdentifyResult } from '@/types/services/identify';
 
 export class AuddStrategy implements IIdentifyStrategy<string> {
   async execute(audioBase64: string, authContext: { accessToken?: string }): Promise<IdentifyResult> {
@@ -10,7 +10,7 @@ export class AuddStrategy implements IIdentifyStrategy<string> {
     }
 
     try {
-      const res = await fetch('/api/identify', {
+      const res = await fetch(`${(process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || process.env.NEXT_PUBLIC_EXPRESS_API_URL) || ''}/api/identify`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

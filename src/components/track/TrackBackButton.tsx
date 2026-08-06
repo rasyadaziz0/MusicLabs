@@ -3,11 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
-
-interface TrackBackButtonProps {
-  mode: 'desktop' | 'mobile';
-}
-
+import { TrackBackButtonProps } from '@/types/components/track/TrackBackButtonProps';
 export default function TrackBackButton({ mode }: TrackBackButtonProps) {
   const router = useRouter();
 

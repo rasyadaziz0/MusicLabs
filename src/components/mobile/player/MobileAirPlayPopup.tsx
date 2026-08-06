@@ -5,11 +5,7 @@ import Image from 'next/image';
 import { usePlayer } from '@/context/PlayerContext';
 import { Headphones, Smartphone, Laptop, Tablet, Check, AudioLines } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-interface MobileAirPlayPopupProps {
-  onClose: () => void;
-}
-
+import { MobileAirPlayPopupProps } from '@/types/components/mobile/player/MobileAirPlayPopupProps';
 export function MobileAirPlayPopup({ onClose }: MobileAirPlayPopupProps) {
   const {
     currentTrack,

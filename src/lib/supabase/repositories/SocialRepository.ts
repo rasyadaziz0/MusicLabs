@@ -1,18 +1,13 @@
+import { MusicApiService } from '@/lib/api/MusicApiService';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '../client';
-import { getSongsByIds } from '@/lib/api/musicApi';
 import { Song } from '@/types/music';
 import { UserProfile, FollowCounts } from '@/types/profile';
 import { PROFILE_COLUMNS } from './ProfileRepository';
+import { ISocialRepository } from '@/types/repositories/ISocialRepository';
+import { SocialFeedItem } from '@/types/models/Social';
 
-export interface SocialFeedItem {
-  id: string;
-  user: UserProfile;
-  track: Song;
-  played_at: string;
-}
-
-export class SocialRepository {
+export class SocialRepository implements ISocialRepository {
   private static instance: SocialRepository;
   private supabase: SupabaseClient;
 
@@ -154,7 +149,7 @@ export class SocialRepository {
     if (!data || data.length === 0) return [];
 
     const trackIds = Array.from(new Set(data.map(item => item.track_id)));
-    const songs = await getSongsByIds(trackIds);
+    const songs = await MusicApiService.getSongsByIds(trackIds);
     const songMap = new Map(songs.map(s => [s.id, s]));
 
     return data
@@ -167,25 +162,26 @@ export class SocialRepository {
   }
 
   async getSocialFeed(userId: string): Promise<SocialFeedItem[]> {
-    // 1. Get following IDs
-    const following = await this.getFollowing(userId);
-    const followingIds = following.map(u => u.id);
-
-    if (followingIds.length === 0) return [];
-
-    // 2. Get recent listens from these users
-    const { data: historyData } = await this.supabase
-      .from('listening_history')
-      .select('id, user_id, track_id, played_at, profiles(id, username, display_name, bio, avatar_url, created_at)')
-      .in('user_id', followingIds)
-      .order('played_at', { ascending: false })
-      .limit(30);
+    // Call the API route which bypasses RLS to get followers' listening history
+    let historyData = [];
+    try {
+      // In SSR or CSR, we can fetch from the relative URL if on client, or absolute if SSR.
+      // Since this is typically called via react-query on the client, relative URL works.
+      const baseUrl = typeof window !== 'undefined' ? '' : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      const res = await fetch(`${baseUrl}/api/social?userId=${userId}`);
+      if (res.ok) {
+        const json = await res.json();
+        historyData = json.data || [];
+      }
+    } catch (e) {
+      console.error('Error fetching social feed:', e);
+    }
 
     if (!historyData || historyData.length === 0) return [];
 
     // 3. Fetch song details
     const trackIds = Array.from(new Set(historyData.map((h: any) => h.track_id)));
-    const songs = await getSongsByIds(trackIds);
+    const songs = await MusicApiService.getSongsByIds(trackIds);
     const songMap = new Map(songs.map((s: Song) => [s.id, s]));
 
     // 4. Map back

@@ -2,14 +2,7 @@ import { SocialActivityCard } from '@/components/home/HomeCards';
 import { User } from '@supabase/supabase-js';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 import { ScrollArrows } from '@/components/ui/ScrollArrows';
-
-interface SocialFeedSectionProps {
-  user: User | null;
-  socialFeed: any[];
-  isSocialFeedLoading: boolean;
-  playTrack: (song: any, context: any[]) => void;
-}
-
+import { SocialFeedSectionProps } from '@/types/components/home/sections/SocialFeedSectionProps';
 export function SocialFeedSection({ user, socialFeed, isSocialFeedLoading, playTrack }: SocialFeedSectionProps) {
   const { scrollRef, canScrollLeft, canScrollRight, scroll } = useHorizontalScroll();
 

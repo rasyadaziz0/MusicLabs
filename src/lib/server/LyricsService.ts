@@ -1,7 +1,8 @@
-import { BaseLyricsProvider, LyricsQuery, LyricsResult, CleanedQuery } from './lyrics/providers/BaseLyricsProvider';
+import { BaseLyricsProvider } from './lyrics/providers/BaseLyricsProvider';
 import { NeteaseProvider } from './lyrics/providers/NeteaseProvider';
 import { LrcLibProvider } from './lyrics/providers/LrcLibProvider';
 import { OvhProvider } from './lyrics/providers/OvhProvider';
+import { LyricsResult, LyricsQuery } from '@/types/services/lyrics';
 
 // Re-export types so existing consumers don't break
 export type { LyricsResult, LyricsQuery };

@@ -3,18 +3,7 @@ import Image from 'next/image';
 import { gooeyToast as toast } from 'goey-toast';
 import FollowButton from '@/components/ui/FollowButton';
 import { TikTokIcon, InstagramIcon, XIcon } from '@/components/icons/SocialIcons';
-
-interface OtherProfileHeroProps {
-  userId: string;
-  profile: any;
-  followerCount: number;
-  followingCount: number;
-  playlistCount?: number;
-  isFollowing: boolean;
-  isFollowStatusLoading: boolean;
-  openFollowModal: (tab: 'followers' | 'following') => void;
-}
-
+import { OtherProfileHeroProps } from '@/types/components/profile/OtherProfileHeroProps';
 export default function OtherProfileHero({
   userId,
   profile,

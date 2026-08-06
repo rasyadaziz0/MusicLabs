@@ -1,5 +1,6 @@
 import { TextMatcher } from '../../TextMatcher';
-import { BaseLyricsProvider, CleanedQuery, ProviderResult } from './BaseLyricsProvider';
+import { BaseLyricsProvider } from './BaseLyricsProvider';
+import { CleanedQuery, ProviderResult } from '@/types/services/lyrics';
 
 /**
  * NeteaseProvider — fetches lyrics from Netease Music (music.163.com).

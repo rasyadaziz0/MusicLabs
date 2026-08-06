@@ -1,17 +1,7 @@
 import React from 'react';
 import { Eye, Music2, History } from 'lucide-react';
 import { SectionHeader, ToggleRow } from './SettingsUI';
-
-interface PrivacySocialSettingsProps {
-  t: (key: string) => string;
-  isPublic: boolean;
-  setIsPublic: (enabled: boolean) => void;
-  showNowPlaying: boolean;
-  setShowNowPlaying: (enabled: boolean) => void;
-  showRecentlyPlayed: boolean;
-  setShowRecentlyPlayed: (enabled: boolean) => void;
-}
-
+import { PrivacySocialSettingsProps } from '@/types/components/settings/PrivacySocialSettingsProps';
 export function PrivacySocialSettings({
   t,
   isPublic,

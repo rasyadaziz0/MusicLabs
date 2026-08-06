@@ -2,13 +2,7 @@
 
 import { ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-
-interface TopNavigationProps {
-  mode: 'audd' | 'speech';
-  setMode: (mode: 'audd' | 'speech') => void;
-  isSpeechSupported: boolean;
-}
-
+import { TopNavigationProps } from '@/types/components/identify/TopNavigationProps';
 export function TopNavigation({ mode, setMode, isSpeechSupported }: TopNavigationProps) {
   const router = useRouter();
 

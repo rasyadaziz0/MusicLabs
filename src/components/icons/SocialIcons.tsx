@@ -1,8 +1,4 @@
-
-interface SocialIconProps {
-  size?: number;
-  className?: string;
-}
+import { SocialIconProps } from '@/types/components/icons/SocialIconProps';
 
 export function InstagramIcon({ size = 14, className = '' }: SocialIconProps) {
   return (

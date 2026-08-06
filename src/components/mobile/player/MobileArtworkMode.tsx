@@ -1,4 +1,5 @@
 'use client';
+import { ArtistParser } from '@/lib/utils/ArtistParser';
 
 import { useState, useRef } from 'react';
 import Image from 'next/image';
@@ -6,18 +7,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Loader2, Heart, Ellipsis } from 'lucide-react';
 import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
-
-interface MobileArtworkModeProps {
-  currentTrack: any;
-  coverUrl: string | null;
-  isPlaying: boolean;
-  isPreview: boolean;
-  isLiked: boolean;
-  toggleLikeMutation: any;
-  handleToggleLike: (e?: any) => void;
-  onClose: () => void;
-}
-
+import { MobileArtworkModeProps } from '@/types/components/mobile/player/MobileArtworkModeProps';
 export function MobileArtworkMode({
   currentTrack, coverUrl, isPlaying, isPreview, isLiked, toggleLikeMutation, handleToggleLike, onClose
 }: MobileArtworkModeProps) {
@@ -105,7 +95,7 @@ export function MobileArtworkMode({
             {currentTrack.artists.primary.map((a: any, i: number) => (
               <span key={a.id}>
                 <Link
-                  href={`/artist/${a.id}`}
+                  href={ArtistParser.getArtistLink(a)}
                   onClick={(e) => { e.stopPropagation(); onClose(); }}
                   style={{ color: 'inherit', textDecoration: 'none' }}
                 >

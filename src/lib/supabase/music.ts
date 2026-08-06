@@ -1,9 +1,13 @@
 import { createClient } from './client';
 import { SupabaseClient } from '@supabase/supabase-js';
 
-import { PlaylistRepository, PlaylistRecord } from './repositories/PlaylistRepository';
-import { LikeRepository, LikedSongRow } from './repositories/LikeRepository';
-import { HistoryRepository, WeeklyTrackPlay } from './repositories/HistoryRepository';
+import { PlaylistRepository } from './repositories/PlaylistRepository';
+import { LikeRepository } from './repositories/LikeRepository';
+import { HistoryRepository } from './repositories/HistoryRepository';
+
+import { PlaylistRecord } from '@/types/models/Playlist';
+import { LikedSongRow } from '@/types/models/Like';
+import { WeeklyTrackPlay } from '@/types/models/History';
 
 export const supabase = createClient();
 

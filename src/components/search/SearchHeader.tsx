@@ -2,15 +2,7 @@
 
 import { Search as SearchIcon } from 'lucide-react';
 import { useTranslation } from '@/context/LanguageContext';
-
-interface SearchHeaderProps {
-  inputValue: string;
-  setInputValue: (val: string) => void;
-  searchMode: 'music' | 'users';
-  setSearchMode: (mode: 'music' | 'users') => void;
-  onCommit?: (val: string) => void;
-}
-
+import { SearchHeaderProps } from '@/types/components/search/SearchHeaderProps';
 export function SearchHeader({ inputValue, setInputValue, searchMode, setSearchMode, onCommit }: SearchHeaderProps) {
   const { t } = useTranslation();
   return (

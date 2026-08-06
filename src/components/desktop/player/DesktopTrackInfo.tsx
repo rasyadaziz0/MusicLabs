@@ -1,35 +1,23 @@
+import { ArtistParser } from '@/lib/utils/ArtistParser';
+import { SlugHelper } from '@/lib/utils/SlugHelper';
 import React from 'react';
-import { cn } from '@/lib/utils';
+import { StyleHelper } from '@/lib/utils/StyleHelper';
 import { Radio as RadioIcon, Loader2, Maximize2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { getBestImageUrl } from '@/lib/api/musicApi';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { gooeyToast as toast } from 'goey-toast';
-import { buildTrackPath } from '@/lib/utils/slugify';
 import { MoreHorizontal, Share, Link2, Timer } from 'lucide-react';
 import TrackLikeButton from '@/components/ui/TrackLikeButton';
-import { formatTime } from '@/lib/utils';
+import { TimeHelper } from '@/lib/utils/TimeHelper';
 import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
 import AddToPlaylistButton from '@/components/ui/AddToPlaylistButton';
 import AddToQueueButton from '@/components/ui/AddToQueueButton';
 import { usePlayer } from '@/context/PlayerContext';
 import { SleepTimerCountdown } from '@/components/player/SleepTimerCountdown';
 
-
-export interface DesktopTrackInfoProps {
-  currentTrack: any;
-  hasTrack: boolean;
-  isRadio: boolean;
-  radioMeta: any;
-  isResolving: boolean;
-  currentTime: number;
-  duration: number;
-  seek: (val: number) => void;
-  setIsNowPlayingOpen: (open: boolean) => void;
-  isVolumeSliderOpen?: boolean;
-}
-
+import { DesktopTrackInfoProps } from '@/types/components/desktop/player/DesktopTrackInfoProps';
 export default function DesktopTrackInfo({
   currentTrack, hasTrack, isRadio, radioMeta, isResolving,
   currentTime, duration, seek, setIsNowPlayingOpen, isVolumeSliderOpen
@@ -53,7 +41,7 @@ export default function DesktopTrackInfo({
   const handleCopyLink = () => {
     if (!currentTrack) return;
     const artistName = currentTrack.artists?.primary?.[0]?.name || 'unknown';
-    const trackUrl = `${window.location.origin}${buildTrackPath(artistName, currentTrack.name, currentTrack.id)}`;
+    const trackUrl = `${window.location.origin}${SlugHelper.buildTrackPath(artistName, currentTrack.name, currentTrack.id)}`;
     navigator.clipboard.writeText(trackUrl);
     toast.success('Song link copied!', {
       description: 'You can now share this track anywhere.'
@@ -77,8 +65,8 @@ export default function DesktopTrackInfo({
                 <div className="w-full h-full bg-gradient-to-br from-[#FA243C]/30 to-[#FA243C]/10 flex items-center justify-center">
                   <RadioIcon size={16} className="text-[#FA243C]" />
                 </div>
-              ) : getBestImageUrl(currentTrack.image) ? (
-                <Image src={getBestImageUrl(currentTrack.image)!} alt={currentTrack.name} fill sizes="34px" className="object-cover" />
+              ) : ImageHelper.getBestImageUrl(currentTrack.image) ? (
+                <Image src={ImageHelper.getBestImageUrl(currentTrack.image)!} alt={currentTrack.name} fill sizes="34px" className="object-cover" />
               ) : (
                 <div className="w-full h-full bg-white/10" />
               )}
@@ -120,7 +108,7 @@ export default function DesktopTrackInfo({
                           onClick={(e) => e.stopPropagation()}
                         >
                           <Link 
-                            href={`/artist/${a.id}`} 
+                            href={ArtistParser.getArtistLink(a)} 
                             className="hover:underline hover:text-white transition-colors"
                           >
                             {a.name}
@@ -152,7 +140,7 @@ export default function DesktopTrackInfo({
             {/* Three Dots Menu */}
             {!isRadio && (
               <div 
-                className={cn(
+                className={StyleHelper.cn(
                   "relative flex items-center justify-center pl-2 transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]",
                   isVolumeSliderOpen ? "opacity-0 pointer-events-none scale-95" : "opacity-100 scale-100"
                 )} 
@@ -171,7 +159,7 @@ export default function DesktopTrackInfo({
                       React_setIsMenuOpen(true);
                     }
                   }}
-                  className={cn("transition-colors flex-shrink-0", hasTrack ? (isMenuOpen ? "text-white" : "text-white/50 hover:text-white/90") : "text-white/15 pointer-events-none")}
+                  className={StyleHelper.cn("transition-colors flex-shrink-0", hasTrack ? (isMenuOpen ? "text-white" : "text-white/50 hover:text-white/90") : "text-white/15 pointer-events-none")}
                 >
                   <MoreHorizontal size={18} strokeWidth={2.5} />
                 </button>

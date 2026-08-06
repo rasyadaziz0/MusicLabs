@@ -3,13 +3,8 @@
 import React from 'react';
 import { Song } from '@/types/music';
 import { HorizontalScrollSection } from '@/components/ui/HorizontalScrollSection';
+import { FavoriteSongsSectionProps } from '@/types/components/profile/sections/FavoriteSongsSectionProps';
 import { TrackCard } from '@/components/home/HomeCards'; // Or import from the correct place
-
-interface FavoriteSongsSectionProps {
-  likedSongs: Song[];
-  playTrack: (track: Song, queue: Song[]) => void;
-}
-
 export function FavoriteSongsSection({ likedSongs, playTrack }: FavoriteSongsSectionProps) {
   if (likedSongs.length === 0) return null;
 

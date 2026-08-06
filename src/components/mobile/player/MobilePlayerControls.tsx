@@ -3,10 +3,10 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Loader2, Play, Pause, SkipForward, SkipBack, Volume2, Volume1, MessageSquareQuote, ListMusic, Headphones } from 'lucide-react';
-import { formatTime } from '@/lib/utils';
+import { TimeHelper } from '@/lib/utils/TimeHelper';
 import { MobileAirPlayPopup } from '@/components/mobile/player/MobileAirPlayPopup';
 import { usePlayer } from '@/context/PlayerContext';
-import { IMobilePlayerControlsProps } from './MobilePlayerControls.types';
+import { IMobilePlayerControlsProps } from '@/types/components/mobile';
 import { MobilePlayerControlsController } from './MobilePlayerControlsController';
 
 export function MobilePlayerControls(props: IMobilePlayerControlsProps) {
@@ -81,7 +81,7 @@ export function MobilePlayerControls(props: IMobilePlayerControlsProps) {
         </div>
 
         <div className="flex items-center justify-between mt-[-4px] text-[12px] font-semibold tracking-tight text-white/55 relative">
-          <span className="w-12 text-left font-mono">{formatTime(displayTime)}</span>
+          <span className="w-12 text-left font-mono">{TimeHelper.formatTime(displayTime)}</span>
 
           {/* Lossless Badge (Centered) */}
           <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/15 backdrop-blur-md border border-white/10 shadow-sm text-white/90">
@@ -89,7 +89,7 @@ export function MobilePlayerControls(props: IMobilePlayerControlsProps) {
           </div>
 
           <span className="w-12 text-right font-mono">
-            {remainingTime < 0 ? '-' : ''}{formatTime(Math.abs(remainingTime))}
+            {remainingTime < 0 ? '-' : ''}{TimeHelper.formatTime(Math.abs(remainingTime))}
           </span>
         </div>
       </div>

@@ -2,17 +2,10 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '../client';
 import { UserProfile } from '@/types/profile';
 import { PROFILE_COLUMNS } from './ProfileRepository';
+import { ICollaboratorRepository } from '@/types/repositories/ICollaboratorRepository';
+import { PlaylistCollaborator } from '@/types/models/Collaborator';
 
-export interface PlaylistCollaborator {
-  id: string;
-  playlist_id: string;
-  user_id: string;
-  added_at: string;
-  added_by: string;
-  profile: UserProfile;
-}
-
-export class CollaboratorRepository {
+export class CollaboratorRepository implements ICollaboratorRepository {
   private static instance: CollaboratorRepository;
   private supabase: SupabaseClient;
 

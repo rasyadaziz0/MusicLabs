@@ -2,15 +2,7 @@
 
 import Link from 'next/link';
 import { Music2 } from 'lucide-react';
-
-interface LibraryEmptyStateProps {
-  title: string;
-  description: string;
-  ctaHref?: string;
-  ctaLabel?: string;
-  onCtaClick?: () => void;
-}
-
+import { LibraryEmptyStateProps } from '@/types/components/library/LibraryEmptyStateProps';
 export function LibraryEmptyState({
   title,
   description,

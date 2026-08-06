@@ -1,16 +1,10 @@
 'use client';
 
 import React, { useMemo, useEffect, useRef } from 'react';
-import { useDominantColors, type DominantColors } from '@/hooks/useDominantColors';
+import { useDominantColors } from '@/hooks/useDominantColors';
+import { type DominantColors } from '@/types/hooks/colors';
 import { WebGLFluidRenderer } from '@/lib/webgl/FluidRenderer';
-
-interface DynamicGradientBackgroundProps {
-  coverUrl: string | null | undefined;
-  trackId: string | null | undefined;
-  className?: string;
-  style?: React.CSSProperties;
-}
-
+import { DynamicGradientBackgroundProps } from '@/types/components/player/DynamicGradientBackgroundProps';
 export function DynamicGradientBackground({
   coverUrl,
   trackId,

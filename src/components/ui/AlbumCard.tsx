@@ -1,19 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-export interface AlbumData {
-  id: string;
-  title: string;
-  cover: string;
-  cover_small: string;
-  cover_medium: string;
-  cover_big: string;
-  cover_xl: string;
-  nb_tracks: number;
-  artist: string;
-  release_date: string;
-  album_type: string;
-}
+import { AlbumData } from '@/types/components/ui';
 
 export function AlbumCard({ album }: { album: AlbumData }) {
   const cover = album.cover_xl || album.cover_big || album.cover;

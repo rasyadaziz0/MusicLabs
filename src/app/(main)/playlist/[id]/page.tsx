@@ -1,9 +1,13 @@
 'use client';
 
+import { usePlaylistTracks } from '@/hooks/library/usePlaylistTracks';
+import { useRemoveTrackFromPlaylist } from '@/hooks/library/useRemoveTrackFromPlaylist';
+import { useReorderPlaylistTracks } from '@/hooks/library/useReorderPlaylistTracks';
+import { useTogglePinPlaylist } from '@/hooks/library/useTogglePinPlaylist';
+import { useDeletePlaylist } from '@/hooks/library/useDeletePlaylist';
 import { usePlayer } from '@/context/PlayerContext';
-import { getBestImageUrl } from '@/lib/api/musicApi';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { getPlaylistById } from '@/lib/supabase/music';
-import { usePlaylistTracks, useRemoveTrackFromPlaylist, useTogglePinPlaylist, useDeletePlaylist, useReorderPlaylistTracks } from '@/hooks/useMusicLibrary';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
 import { UserProfile } from '@/types/profile';
@@ -124,7 +128,7 @@ export default function PlaylistPage() {
     );
   }
 
-  const coverUrl = playlist?.cover_url || getBestImageUrl(playlistTracks[0]?.image ?? []);
+  const coverUrl = playlist?.cover_url || ImageHelper.getBestImageUrl(playlistTracks[0]?.image ?? []);
 
   return (
     <div className="flex flex-col w-full min-h-screen bg-transparent pt-8 px-6 md:px-10 pb-32">

@@ -1,6 +1,6 @@
 import { RadioStation } from '@/types/music';
 import { Signal, Wifi, Play, Pause, Loader2, Globe, Radio } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { StyleHelper } from '@/lib/utils/StyleHelper';
 
 export function NowPlayingRadioBanner({
   currentTrack,
@@ -82,7 +82,7 @@ export function RadioStationCard({
   return (
     <button
       onClick={onPlay}
-      className={cn(
+      className={StyleHelper.cn(
         'radio-card group relative flex items-center gap-3 p-3 rounded-xl border transition-all text-left',
         isPlaying
           ? 'bg-[#FA243C]/10 border-[#FA243C]/30 ring-1 ring-[#FA243C]/20'
@@ -103,7 +103,7 @@ export function RadioStationCard({
         <div className="absolute inset-0 flex items-center justify-center">
           <Radio size={20} className="text-white/20" />
         </div>
-        <div className={cn(
+        <div className={StyleHelper.cn(
           "absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity",
           isPlaying ? "opacity-100" : "opacity-0 group-hover:opacity-100"
         )}>
@@ -117,7 +117,7 @@ export function RadioStationCard({
         </div>
       </div>
       <div className="flex-1 min-w-0">
-        <p className={cn(
+        <p className={StyleHelper.cn(
           "text-[14px] font-semibold truncate leading-snug",
           isPlaying ? "text-[#FA243C]" : "text-white"
         )}>

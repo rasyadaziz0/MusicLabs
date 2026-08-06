@@ -2,18 +2,7 @@
 
 import { AudioLines, Mic } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-
-interface MainIdentifyButtonProps {
-  mode: 'audd' | 'speech';
-  state: 'idle' | 'recording' | 'processing' | 'results' | 'no-match' | 'error';
-  quota: { isExhausted: boolean; remaining: number };
-  recorder: { secondsLeft: number };
-  speech: { transcript: string };
-  handleAuddIdentify: () => void;
-  handleSpeechStart: () => void;
-  handleCancel: () => void;
-}
-
+import { MainIdentifyButtonProps } from '@/types/components/identify/MainIdentifyButtonProps';
 export function MainIdentifyButton({
   mode,
   state,

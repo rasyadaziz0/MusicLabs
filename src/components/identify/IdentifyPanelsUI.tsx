@@ -4,7 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { AudioLines, Mic, Play, Search, AlertCircle, Music, RefreshCw, Check } from 'lucide-react';
-import { getBestImageUrl } from '@/lib/api/musicApi';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { IdentifySongResultUI } from './IdentifySongResultUI';
 import { SingSayResultUI } from './SingSayResultUI';
 import type {

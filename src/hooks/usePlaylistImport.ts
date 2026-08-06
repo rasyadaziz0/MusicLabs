@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase/client';
 import { useFeatureFlags } from '@/context/FeatureFlagsContext';
 import { useImport } from '@/context/ImportContext';
-import { ScrapedPlaylist } from '@/lib/scrapers/types';
+import { ScrapedPlaylist } from '@/types/services/scrapers';
 
 export function usePlaylistImport() {
   const { flags } = useFeatureFlags();
@@ -65,7 +65,7 @@ export function usePlaylistImport() {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/import/scrape', {
+      const res = await fetch(`${(process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || process.env.NEXT_PUBLIC_EXPRESS_API_URL) || ''}/api/import/scrape`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: spotifyUrl })

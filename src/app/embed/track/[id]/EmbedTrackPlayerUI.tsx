@@ -4,7 +4,7 @@ import { EmbedBrandLogo } from '../../_components/EmbedBrandLogo';
 import { EmbedPromoModal } from '../../_components/EmbedPromoModal';
 import { EmbedProgressBar } from '../../_components/EmbedProgressBar';
 import { EmbedPreviewBadge } from '../../_components/EmbedPreviewBadge';
-import { EmbedPlayerState } from './EmbedPlayerController';
+import { EmbedPlayerState } from '@/types/controllers/embed';
 
 export interface EmbedTrackPlayerUIProps {
   trackId: string;

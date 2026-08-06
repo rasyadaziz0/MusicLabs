@@ -3,13 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, X, Loader2 } from 'lucide-react';
-
-interface DeleteAccountModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: () => Promise<void>;
-}
-
+import { DeleteAccountModalProps } from '@/types/components/profile/DeleteAccountModalProps';
 export function DeleteAccountModal({ isOpen, onClose, onConfirm }: DeleteAccountModalProps) {
   const [confirmText, setConfirmText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);

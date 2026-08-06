@@ -4,25 +4,11 @@ import React from 'react';
 import { Loader2, Pause, Play, Radio as RadioIcon, SkipForward, MonitorSpeaker } from 'lucide-react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { getBestImageUrl } from '@/lib/api/musicApi';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { GlassBar } from '@/components/ui/LiquidGlass';
 import { usePlayer } from '@/context/PlayerContext';
-import { cn } from '@/lib/utils';
-
-export interface MobilePlayerBarProps {
-  currentTrack: any;
-  isPlaying: boolean;
-  isResolving: boolean;
-  isGuestPreview: boolean;
-  isRadio: boolean;
-  radioMeta: any;
-  togglePlay: () => void;
-  nextTrack: () => void;
-  setIsNowPlayingOpen: (open: boolean) => void;
-  isDevicesOpen?: boolean;
-  setIsDevicesOpen?: (open: boolean) => void;
-}
-
+import { StyleHelper } from '@/lib/utils/StyleHelper';
+import { MobilePlayerBarProps } from '@/types/components/mobile/player/MobilePlayerBarProps';
 export default function MobilePlayerBar({
   currentTrack,
   isPlaying,
@@ -56,9 +42,9 @@ export default function MobilePlayerBar({
             <div className="w-full h-full bg-gradient-to-br from-[#FA243C]/30 to-[#FA243C]/10 flex items-center justify-center">
               <RadioIcon size={20} className="text-[#FA243C]" />
             </div>
-          ) : getBestImageUrl(currentTrack.image) ? (
+          ) : ImageHelper.getBestImageUrl(currentTrack.image) ? (
             <Image
-              src={getBestImageUrl(currentTrack.image)!}
+              src={ImageHelper.getBestImageUrl(currentTrack.image)!}
               alt={currentTrack.name}
               fill
               sizes="44px"
@@ -103,7 +89,7 @@ export default function MobilePlayerBar({
           <div className="relative flex items-center justify-center">
             <button
               onClick={(e) => { e.stopPropagation(); setIsDevicesOpen?.(!isDevicesOpen); }}
-              className={cn(
+              className={StyleHelper.cn(
                 "relative transition-colors hover:scale-105 p-1.5",
                 isDevicesOpen ? "text-[#ff3b30]" : !isActivePlayer ? "text-[#1db954]" : "text-white/70 hover:text-white"
               )}

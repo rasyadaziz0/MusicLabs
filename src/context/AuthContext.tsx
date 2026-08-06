@@ -25,6 +25,7 @@ interface AuthContextType {
     socialInstagram?: string; socialTwitter?: string; socialTiktok?: string;
     isPublic?: boolean; showNowPlaying?: boolean; showRecentlyPlayed?: boolean;
     lyricsFontSize?: string; romanizationEnabled?: boolean;
+    searchRegion?: string;
   }) => Promise<AuthActionResult>;
 }
 
@@ -185,6 +186,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     socialInstagram?: string; socialTwitter?: string; socialTiktok?: string;
     isPublic?: boolean; showNowPlaying?: boolean; showRecentlyPlayed?: boolean;
     lyricsFontSize?: string; romanizationEnabled?: boolean;
+    searchRegion?: string;
   }) => {
     const authUpdateData: any = {};
     if (data.name !== undefined) authUpdateData.name = data.name;
@@ -231,6 +233,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (data.showRecentlyPlayed !== undefined) profileUpdates.show_recently_played = data.showRecentlyPlayed;
       if (data.lyricsFontSize !== undefined) profileUpdates.lyrics_font_size = data.lyricsFontSize;
       if (data.romanizationEnabled !== undefined) profileUpdates.romanization_enabled = data.romanizationEnabled;
+      if (data.searchRegion !== undefined) profileUpdates.search_region = data.searchRegion;
 
       try {
         await ProfileRepository.getInstance().updateProfile(userData.user.id, profileUpdates);

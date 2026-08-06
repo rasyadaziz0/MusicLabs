@@ -11,8 +11,7 @@ import { encodeQuery } from '@/lib/utils/searchEncode';
 import { AuddStrategy } from '@/services/identify/AuddStrategy';
 import { SpeechStrategy } from '@/services/identify/SpeechStrategy';
 
-export type IdentifyMode = 'audd' | 'speech';
-export type IdentifyState = 'idle' | 'recording' | 'processing' | 'results' | 'error' | 'no-match';
+import { IdentifyMode, IdentifyState } from '@/types/hooks/identify';
 
 export function useIdentifyController() {
   const { playTrack } = usePlayer();

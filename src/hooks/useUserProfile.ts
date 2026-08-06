@@ -3,7 +3,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { UserProfile } from '@/types/profile';
 import { PlaylistRecord } from '@/lib/supabase/music';
-import { useFollowCounts, useFollowStatus } from './useFollow';
+import { useFollowCounts } from '@/hooks/social/useFollowCounts';
+import { useFollowStatus } from '@/hooks/social/useFollowStatus';
 import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
 import { PlaylistRepository } from '@/lib/supabase/repositories/PlaylistRepository';
 import { supabase } from '@/lib/supabase/client';

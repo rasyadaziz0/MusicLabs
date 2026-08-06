@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { Play, MoreHorizontal, Share } from 'lucide-react';
 import { Song } from '@/types/music';
-import { getBestImageUrl } from '@/lib/api/musicApi';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
 import { EqualizerIcon } from '@/components/ui/EqualizerIcon';
 
@@ -29,7 +29,7 @@ export function TopSongRow({
     return () => document.removeEventListener('mousedown', close);
   }, [menuOpen]);
 
-  const artwork = getBestImageUrl(song.image);
+  const artwork = ImageHelper.getBestImageUrl(song.image);
   const albumInfo = song.album?.name || '';
   const songType = song.type === 'song' ? 'Single' : song.type || '';
   const year = song.year || (song.releaseDate ? new Date(song.releaseDate).getFullYear().toString() : '');

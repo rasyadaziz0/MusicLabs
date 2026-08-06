@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrapedPlaylist } from '@/lib/scrapers/types';
+import { ScrapedPlaylist } from '@/types/services/scrapers';
 
 interface ScrapedResultPreviewProps {
   scrapedResult: ScrapedPlaylist;

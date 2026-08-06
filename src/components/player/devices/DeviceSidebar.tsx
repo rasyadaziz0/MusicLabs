@@ -11,12 +11,7 @@ import { DeviceRow } from './DeviceRow';
 import { DeviceRenameFooter } from './DeviceRenameFooter';
 import { DeviceInfo } from '@/types/connect';
 import { getPortalRoot } from '@/lib/utils/portalRoot';
-
-export interface DeviceSidebarProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
+import { DeviceSidebarProps } from '@/types/components/player/devices/DeviceSidebarProps';
 export default function DeviceSidebar({ isOpen, onClose }: DeviceSidebarProps) {
   const {
     myTabId,

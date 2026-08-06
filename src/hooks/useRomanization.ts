@@ -1,7 +1,8 @@
 'use client';
 
+import { MusicApiService } from '@/lib/api/MusicApiService';
 import { useState, useEffect, useRef } from 'react';
-import { LrcLine } from '@/lib/utils/lrcParser';
+import { LrcLine } from '@/types/utils/lrc';
 import { useSettings } from '@/context/SettingsContext';
 
 // In-memory cache per track
@@ -51,10 +52,7 @@ export function useRomanization(
     const realLines = lines.filter(l => !l.isPlaceholder && l.text.trim().length > 0);
     const nonLatinLines = realLines.filter(l => hasNonLatinChars(l.text) && !isLikelyLatinScript(l.text));
 
-    // Trigger romanization if at least 2 lines have non-Latin text and >=10% of total
-    // Low threshold because even a few Korean/Japanese lines deserve romanization
-    const nonLatinRatio = realLines.length > 0 ? nonLatinLines.length / realLines.length : 0;
-    const needsRomanization = nonLatinLines.length >= 2 && nonLatinRatio >= 0.1;
+    const needsRomanization = nonLatinLines.length >= 1;
 
     if (!needsRomanization) {
       const empty = new Map<number, string>();
@@ -75,17 +73,17 @@ export function useRomanization(
       try {
         const lineTexts = lines.map((l) => l.text);
 
-        let res: Response | null = null;
+        let data: { romanizations?: Record<string, string> } | null = null;
         let attempt = 0;
         while (attempt < 3) {
           try {
-            res = await fetch('/api/romanize', {
+            data = await MusicApiService.apiFetchInternal<{ romanizations?: Record<string, string> }>('/api/romanize', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ lines: lineTexts, trackId }),
               signal: controller.signal,
             });
-            if (res.ok) break;
+            break;
           } catch (e: unknown) {
             if (e instanceof DOMException && e.name === 'AbortError') throw e;
           }
@@ -93,12 +91,11 @@ export function useRomanization(
           if (attempt < 3) await new Promise(r => setTimeout(r, 1000 * attempt));
         }
 
-        if (!res || !res.ok) {
-          console.warn('Romanization API returned', res?.status || 'Network Error');
+        if (!data) {
+          console.warn('Romanization API returned Network Error or failed after 3 attempts');
           return;
         }
 
-        const data = await res.json();
         const map = new Map<number, string>();
 
         if (data.romanizations) {

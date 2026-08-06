@@ -1,19 +1,9 @@
 import Image from 'next/image';
 import { Music2, Play, Search } from 'lucide-react';
 import { Song } from '@/types/music';
-import { getBestImageUrl } from '@/lib/api/musicApi';
-import { IdentifyMode } from '@/hooks/useIdentifyController';
-
-interface IdentifyResultsProps {
-  mode: IdentifyMode;
-  matchedSong: Song | null;
-  speechResults: Song[];
-  speechTranscript: string;
-  onPlay: (song: Song) => void;
-  onSearch: (title: string, artist: string) => void;
-  onReset: () => void;
-}
-
+import { ImageHelper } from '@/lib/utils/ImageHelper';
+import { IdentifyMode } from '@/types/hooks/identify';
+import { IdentifyResultsProps } from '@/types/components/identify/ui/IdentifyResultsProps';
 export function IdentifyResults({
   mode,
   matchedSong,
@@ -40,9 +30,9 @@ export function IdentifyResults({
         >
           <div className="flex items-center gap-4">
             <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden flex-shrink-0 shadow-lg">
-              {getBestImageUrl(matchedSong.image) ? (
+              {ImageHelper.getBestImageUrl(matchedSong.image) ? (
                 <Image
-                  src={getBestImageUrl(matchedSong.image)!}
+                  src={ImageHelper.getBestImageUrl(matchedSong.image)!}
                   alt={matchedSong.name}
                   fill
                   sizes="80px"
@@ -110,9 +100,9 @@ export function IdentifyResults({
               className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.04] cursor-pointer transition-all group"
             >
               <div className="relative w-12 h-12 sm:w-11 sm:h-11 rounded-lg overflow-hidden flex-shrink-0">
-                {getBestImageUrl(song.image) ? (
+                {ImageHelper.getBestImageUrl(song.image) ? (
                   <Image
-                    src={getBestImageUrl(song.image)!}
+                    src={ImageHelper.getBestImageUrl(song.image)!}
                     alt={song.name}
                     fill
                     sizes="48px"

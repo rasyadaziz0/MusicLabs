@@ -1,29 +1,10 @@
+import { MusicApiService } from '@/lib/api/MusicApiService';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { Song } from '@/types/music';
-import { getSongsByIds } from '@/lib/api/musicApi';
+import { IPlaylistRepository } from '@/types/repositories/IPlaylistRepository';
+import { PlaylistRecord, PlaylistTrackRow } from '@/types/models/Playlist';
 
-export interface PlaylistRecord {
-  id: string;
-  user_id: string;
-  name: string;
-  description: string | null;
-  cover_url: string | null;
-  is_pinned?: boolean;
-  is_public?: boolean;
-  is_discover_weekly?: boolean;
-  discover_generated_at?: string | null;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export interface PlaylistTrackRow {
-  id?: string;
-  playlist_id: string;
-  track_id: string;
-  position: number;
-}
-
-export class PlaylistRepository {
+export class PlaylistRepository implements IPlaylistRepository {
   constructor(private supabase: SupabaseClient) {}
 
   async getUserPlaylists(userId: string): Promise<PlaylistRecord[]> {
@@ -150,7 +131,7 @@ export class PlaylistRepository {
     if (rows.length === 0) return [];
     
     const trackIds = rows.map((row) => row.track_id);
-    const songs = await getSongsByIds(trackIds);
+    const songs = await MusicApiService.getSongsByIds(trackIds);
     
     // Attach the unique playlist_track id and map back to maintain order & duplicates
     return rows.map(row => {
@@ -167,12 +148,32 @@ export class PlaylistRepository {
   async getAllPlaylistTracksForUser(userId: string): Promise<Song[]> {
     const playlists = await this.getUserPlaylists(userId);
     if (playlists.length === 0) return [];
+    
+    const playlistIds = playlists.map(p => p.id);
 
-    const trackLists = await Promise.all(
-      playlists.map((playlist) => this.getPlaylistTracks(playlist.id))
-    );
+    const { data, error } = await this.supabase
+      .from('playlist_tracks')
+      .select('id, playlist_id, track_id, position')
+      .in('playlist_id', playlistIds)
+      .order('position', { ascending: true });
 
-    return trackLists.flat();
+    if (error) throw error;
+    
+    const rows = (data ?? []) as PlaylistTrackRow[];
+    if (rows.length === 0) return [];
+
+    const uniqueTrackIds = [...new Set(rows.map((row) => row.track_id))];
+    const songs = await MusicApiService.getSongsByIds(uniqueTrackIds);
+
+    return rows.map(row => {
+      const song = songs.find(s => 
+        s.id === row.track_id || 
+        s.id === row.track_id.replace(/^itunes-/, '') || 
+        `itunes-${s.id}` === row.track_id
+      );
+      if (!song) return null;
+      return { ...song, uniqueId: row.id };
+    }).filter(Boolean) as Song[];
   }
 
   async addTrackToPlaylist(playlistId: string, trackId: string): Promise<'SUCCESS' | 'ALREADY_EXISTS'> {

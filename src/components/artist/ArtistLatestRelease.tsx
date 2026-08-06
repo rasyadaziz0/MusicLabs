@@ -3,12 +3,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Plus } from 'lucide-react';
-import { AlbumData } from '@/components/ui/AlbumCard';
-
-interface ArtistLatestReleaseProps {
-  latestRelease: AlbumData | null;
-}
-
+import { AlbumData } from '@/types/components/ui';
+import { ArtistLatestReleaseProps } from '@/types/components/artist/ArtistLatestReleaseProps';
 export function ArtistLatestRelease({ latestRelease }: ArtistLatestReleaseProps) {
   return (
     <div>

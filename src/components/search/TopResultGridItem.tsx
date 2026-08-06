@@ -1,11 +1,12 @@
 'use client';
 
+import { MusicApiService } from '@/lib/api/MusicApiService';
 import { useState } from 'react';
 import Image from 'next/image';
 import { Search as SearchIcon, Play, MoreHorizontal } from 'lucide-react';
 import { gooeyToast as toast } from 'goey-toast';
 import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
-import { getBestImageUrl, getArtistTopTracks } from '@/lib/api/musicApi';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { Song } from '@/types/music';
 import { usePlayer } from '@/context/PlayerContext';
 
@@ -18,7 +19,7 @@ export function TopResultGridItem({ item, onPlay, onClick }: { item: any, onPlay
   const subtitle = isSong
     ? [...(item.data.artists?.primary || []), ...(item.data.artists?.featured || [])].map((a: any) => a.name).join(', ')
     : item.data.description || 'Artist';
-  const imageUrl = getBestImageUrl(item.data.image || []);
+  const imageUrl = ImageHelper.getBestImageUrl(item.data.image || []);
 
   const handlePlay = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -27,7 +28,7 @@ export function TopResultGridItem({ item, onPlay, onClick }: { item: any, onPlay
     } else {
       try {
         setIsLoading(true);
-        const topTracks = await getArtistTopTracks(item.data.id);
+        const topTracks = await MusicApiService.getArtistTopTracks(item.data.id);
         if (topTracks.length > 0) {
           shufflePlay(topTracks);
         } else {

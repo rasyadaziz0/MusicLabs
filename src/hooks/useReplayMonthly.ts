@@ -1,30 +1,13 @@
 'use client';
 
+import { MusicApiService } from '@/lib/api/MusicApiService';
 import { useQuery } from '@tanstack/react-query';
 import { useState, useMemo, useCallback } from 'react';
 import { getMonthlyTopTracks } from '@/lib/supabase/music';
-import { getSongsByIds } from '@/lib/api/musicApi';
 import { Song } from '@/types/music';
 import { useAuth } from '@/context/AuthContext';
 
-export interface ReplayArtist {
-  id: string;
-  name: string;
-  imageUrl: string | undefined;
-  trackCount: number;
-}
-
-export interface ReplayStats {
-  totalTracks: number;
-  estimatedMinutes: number;
-  uniqueArtists: number;
-}
-
-export interface ReplayData {
-  topTracks: Song[];
-  topArtists: ReplayArtist[];
-  stats: ReplayStats;
-}
+import { ReplayArtist, ReplayStats, ReplayData } from '@/types/hooks/replay';
 
 async function fetchReplayData(
   userId: string,
@@ -44,7 +27,7 @@ async function fetchReplayData(
 
   // 2. Fetch Song metadata from Music API
   const trackIds = rows.map((r) => r.track_id);
-  const songs = await getSongsByIds(trackIds);
+  const songs = await MusicApiService.getSongsByIds(trackIds);
   const songMap = new Map(songs.map((s) => [s.id, s]));
 
   // 3. Top tracks — keep in RPC order (play count desc)

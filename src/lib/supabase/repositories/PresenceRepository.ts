@@ -1,7 +1,8 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '../client';
+import { IPresenceRepository } from '@/types/repositories/IPresenceRepository';
 
-export class PresenceRepository {
+export class PresenceRepository implements IPresenceRepository {
   private static instance: PresenceRepository;
   private supabase: SupabaseClient;
 

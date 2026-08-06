@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { EmbedPlaylistPlayerController, EmbedPlaylistPlayerState } from './EmbedPlaylistPlayerController';
-import { EmbedPlaylistTrack } from '../../_components/types';
+import { EmbedPlaylistPlayerController } from './EmbedPlaylistPlayerController';
+import { EmbedPlaylistPlayerState } from '@/types/controllers/embed';
+import { EmbedPlaylistTrack } from '@/types/components/embed';
 import { EmbedPlaylistPlayerUI } from './EmbedPlaylistPlayerUI';
 
 interface EmbedPlaylistPlayerProps {

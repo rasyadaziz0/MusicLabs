@@ -1,20 +1,5 @@
-import { YouTubePlayerInstance } from '../../_components/types';
-export interface EmbedPlayerState {
-  isPlaying: boolean;
-  currentTime: number;
-  totalDuration: number;
-  isLoading: boolean;
-  error: string | null;
-}
-
-export interface EmbedPlayerControllerOptions {
-  trackName: string;
-  artistName: string;
-  duration: number;
-  isLoggedIn: boolean;
-  previewUrl?: string;
-  onStateChange: (state: Partial<EmbedPlayerState>) => void;
-}
+import { YouTubePlayerInstance } from '@/types/components/embed';
+import { EmbedPlayerState, EmbedPlayerControllerOptions } from '@/types/controllers/embed';
 
 export class EmbedPlayerController {
   private ytPlayer: YouTubePlayerInstance | null = null;

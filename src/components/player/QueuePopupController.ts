@@ -1,19 +1,7 @@
 import { DragEndEvent } from '@dnd-kit/core';
 import { Song } from '@/types/music';
 
-export interface QueueContextAdapter {
-  queue: Song[];
-  queueIndex: number;
-  repeatMode: 'none' | 'one' | 'all';
-  playTrack: (track: Song, queue?: Song[]) => void;
-  clearQueue: () => void;
-  cycleRepeatMode: () => void;
-  reorderQueue: (startIndex: number, endIndex: number) => void;
-  removeFromQueue: (trackId: string) => void;
-  promoteToManual: (trackId: string) => void;
-}
-
-export type SortableTrack = Song & { uniqueId: string };
+import { QueueContextAdapter, SortableTrack } from '@/types/player/controller';
 
 export class QueuePopupController {
   private player: QueueContextAdapter;

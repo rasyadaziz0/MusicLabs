@@ -2,16 +2,11 @@
 
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { getBestImageUrl } from '@/lib/api/musicApi';
-import { formatTime } from '@/lib/utils';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
+import { TimeHelper } from '@/lib/utils/TimeHelper';
 import Image from 'next/image';
-import { SortableTrack } from './QueuePopupController';
-
-interface SortableTrackRowProps {
-  track: SortableTrack;
-  onClick: () => void;
-}
-
+import { SortableTrack } from '@/types/player/controller';
+import { SortableTrackRowProps } from '@/types/components/player/SortableTrackRowProps';
 export function SortableTrackRow({ track, onClick }: SortableTrackRowProps) {
   const {
     attributes,
@@ -48,9 +43,9 @@ export function SortableTrackRow({ track, onClick }: SortableTrackRowProps) {
         background: 'rgba(255,255,255,0.06)',
         position: 'relative',
       }}>
-        {getBestImageUrl(track.image) ? (
+        {ImageHelper.getBestImageUrl(track.image) ? (
           <Image
-            src={getBestImageUrl(track.image)!}
+            src={ImageHelper.getBestImageUrl(track.image)!}
             alt={track.name}
             fill
             sizes="42px"
@@ -101,7 +96,7 @@ export function SortableTrackRow({ track, onClick }: SortableTrackRowProps) {
           transition: 'color 0.12s ease',
         }}
       >
-        {formatTime(track.duration)}
+        {TimeHelper.formatTime(track.duration)}
       </div>
 
       {/* Drag handle icon */}

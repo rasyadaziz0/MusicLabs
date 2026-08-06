@@ -2,8 +2,9 @@
 
 import React, { createContext, useContext, useEffect } from 'react';
 import { usePlayer } from '@/context/PlayerContext';
-import { getBestImageUrl } from '@/lib/api/musicApi';
-import { useDominantColors, type DominantColors } from '@/hooks/useDominantColors';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
+import { useDominantColors } from '@/hooks/useDominantColors';
+import { type DominantColors } from '@/types/hooks/colors';
 
 // ── Context ────────────────────────────────────────────────────────────────
 
@@ -24,7 +25,7 @@ const ArtworkColorsContext = createContext<ArtworkColorsContextType>({
 export function ArtworkColorsProvider({ children }: { children: React.ReactNode }) {
   const { currentTrack } = usePlayer();
 
-  const coverUrl = currentTrack ? getBestImageUrl(currentTrack.image) : null;
+  const coverUrl = currentTrack ? ImageHelper.getBestImageUrl(currentTrack.image) : null;
   const trackId = currentTrack?.id ?? null;
 
   const { current, previous, isLoading } = useDominantColors(coverUrl, trackId);

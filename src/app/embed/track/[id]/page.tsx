@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { cache } from 'react';
 import { trackResolver } from '@/lib/services/TrackPageResolverService';
-import { getBestImageUrl } from '@/lib/api/musicApi';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { createClient } from '@/lib/supabase/server';
 import EmbedPlayer from './EmbedPlayer';
 
@@ -47,7 +47,7 @@ export default async function EmbedTrackPage({ params }: PageProps) {
   }
 
   const artistName = track.artists?.primary?.[0]?.name || 'Unknown Artist';
-  const coverUrl = getBestImageUrl(track.image) || '';
+  const coverUrl = ImageHelper.getBestImageUrl(track.image) || '';
   const duration = track.duration || 0;
 
   const supabase = await createClient();

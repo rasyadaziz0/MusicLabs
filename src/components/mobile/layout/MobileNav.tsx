@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Search, Library, Radio, AudioLines } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { StyleHelper } from '@/lib/utils/StyleHelper';
 import { GlassBar } from '@/components/ui/LiquidGlass';
 
 const navItems = [
@@ -29,7 +29,7 @@ export default function MobileNav() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={cn(
+                className={StyleHelper.cn(
                   "flex flex-col items-center justify-center flex-1 h-full gap-1 transition-all",
                   isIdentify && !isActive
                     ? "text-[#FA243C]/70 hover:text-[#FA243C]"
@@ -50,7 +50,7 @@ export default function MobileNav() {
       <GlassBar className="w-[68px] h-[68px] rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
         <Link 
           href="/search" 
-          className={cn(
+          className={StyleHelper.cn(
             "w-full h-full flex items-center justify-center transition-all",
             pathname === '/search' ? "text-[#fc3c44]" : "text-white/60 hover:text-white"
           )}

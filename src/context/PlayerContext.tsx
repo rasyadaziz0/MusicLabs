@@ -2,8 +2,9 @@
 
 import { createContext, useContext, useEffect, useRef, useReducer, useCallback, useState } from 'react';
 import { Song } from '@/types/music';
-import { RadioMeta } from '@/lib/player/engines/RadioEngine';
-import { PlayerController, PlayerState, INITIAL_STATE } from '@/lib/player/PlayerController';
+import { RadioMeta } from '@/types/player/engine';
+import { PlayerController, INITIAL_STATE } from '@/lib/player/PlayerController';
+import { PlayerState } from '@/types/player/controller';
 import { useAuth } from './AuthContext';
 import { useMediaSession } from '@/hooks/useMediaSession';
 import { usePresenceBroadcast } from '@/hooks/usePresenceBroadcast';

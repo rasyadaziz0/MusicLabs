@@ -2,11 +2,7 @@
 
 import { LogIn } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-interface AuthGateProps {
-  signInWithGoogle: (redirectTo?: string) => Promise<any>;
-}
-
+import { AuthGateProps } from '@/types/components/identify/AuthGateProps';
 export function AuthGate({ signInWithGoogle }: AuthGateProps) {
   return (
     <motion.div 

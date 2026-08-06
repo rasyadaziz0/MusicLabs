@@ -2,16 +2,11 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
+import { UseIdentifyQuotaReturn } from '@/types/hooks/identify';
 
 const MAX_MONTHLY_REQUESTS = 300;
 
-interface UseIdentifyQuotaReturn {
-  remaining: number;
-  used: number;
-  isExhausted: boolean;
-  consume: () => void;
-  isLoading: boolean;
-}
+
 
 /**
  * Tracks AudD free tier usage (300 requests/month) globally across all users in Supabase.

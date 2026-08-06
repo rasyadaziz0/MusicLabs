@@ -5,25 +5,7 @@ import { Loader2, Heart, Ellipsis, Languages, MessageSquareQuote } from 'lucide-
 import LyricsUI from '@/components/player/LyricsUI';
 import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
 import { useState, useRef } from 'react';
-
-interface MobileLyricsModeProps {
-  currentTrack: any;
-  coverUrl: string | null;
-  artistNames: string;
-  isLiked: boolean;
-  toggleLikeMutation: any;
-  handleToggleLike: (e?: any) => void;
-  lines: any[];
-  activeIndex: number;
-  isSynced: boolean;
-  isLyricsLoading: boolean;
-  mobileLyricsScrollRef: any;
-  seek: (time: number) => void;
-  currentTime: number;
-  romanizations?: Map<number, string>;
-  trackId: string | null;
-}
-
+import { MobileLyricsModeProps } from '@/types/components/mobile/player/MobileLyricsModeProps';
 export function MobileLyricsMode({
   currentTrack, coverUrl, artistNames, isLiked, toggleLikeMutation, handleToggleLike,
   lines, activeIndex, isSynced, isLyricsLoading, mobileLyricsScrollRef, seek, currentTime, romanizations, trackId

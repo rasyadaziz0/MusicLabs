@@ -13,7 +13,7 @@ export async function uploadImage(
     formData.append('playlistId', playlistId);
   }
 
-  const response = await fetch('/api/upload', {
+  const response = await fetch(`${(process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || process.env.NEXT_PUBLIC_EXPRESS_API_URL) || ''}/api/upload`, {
     method: 'POST',
     body: formData,
   });

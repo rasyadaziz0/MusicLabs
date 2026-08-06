@@ -1,25 +1,9 @@
 import React from 'react';
-import { cn } from '@/lib/utils';
+import { StyleHelper } from '@/lib/utils/StyleHelper';
 import { Volume2, VolumeX, MessageSquare, ListMusic, MonitorSpeaker } from 'lucide-react';
 import QueuePopup from '@/components/player/QueuePopup';
 import { usePlayer } from '@/context/PlayerContext';
-
-export interface DesktopExtraControlsProps {
-  currentTrack: any;
-  hasTrack: boolean;
-  volume: number;
-  setVolume: (val: number) => void;
-  isMuted: boolean;
-  isVolumeSliderOpen: boolean;
-  setIsVolumeSliderOpen: (open: boolean) => void;
-  isQueueOpen: boolean;
-  setIsQueueOpen: (open: boolean) => void;
-  isLyricsOpen: boolean;
-  setIsLyricsOpen: (open: boolean) => void;
-  isDevicesOpen?: boolean;
-  setIsDevicesOpen?: (open: boolean) => void;
-}
-
+import { DesktopExtraControlsProps } from '@/types/components/desktop/player/DesktopExtraControlsProps';
 export default function DesktopExtraControls({
   currentTrack, hasTrack, volume, setVolume, isMuted,
   isVolumeSliderOpen, setIsVolumeSliderOpen,
@@ -31,7 +15,7 @@ export default function DesktopExtraControls({
   return (
     <div className="flex items-center gap-[18px] md:max-xl:gap-[10px] flex-shrink-0">
       {/* Icons container that fades out when volume slider opens */}
-      <div className={cn(
+      <div className={StyleHelper.cn(
         "flex items-center gap-[18px] md:max-xl:gap-[10px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:portrait:hidden",
         isVolumeSliderOpen ? "opacity-0 pointer-events-none scale-95" : "opacity-100 scale-100"
       )}>
@@ -44,7 +28,7 @@ export default function DesktopExtraControls({
               setIsDevicesOpen?.(false);
             }
           }}
-          className={cn(
+          className={StyleHelper.cn(
             "transition-colors cursor-pointer",
             hasTrack ? (isLyricsOpen ? "text-[#ff3b30]" : "text-white/70 hover:text-white") : "text-white/20 pointer-events-none"
           )}
@@ -62,7 +46,7 @@ export default function DesktopExtraControls({
                 setIsDevicesOpen?.(false);
               }
             }}
-            className={cn(
+            className={StyleHelper.cn(
               "transition-colors cursor-pointer",
               hasTrack ? (isQueueOpen ? "text-[#ff3b30]" : "text-white/70 hover:text-white") : "text-white/20 pointer-events-none"
             )}
@@ -83,7 +67,7 @@ export default function DesktopExtraControls({
                 setIsQueueOpen(false);
               }
             }}
-            className={cn(
+            className={StyleHelper.cn(
               "relative transition-colors cursor-pointer",
               isDevicesOpen ? "text-[#ff3b30]" : !isActivePlayer ? "text-[#1db954]" : "text-white/70 hover:text-white"
             )}
@@ -103,7 +87,7 @@ export default function DesktopExtraControls({
         onMouseLeave={() => setIsVolumeSliderOpen(false)}
       >
         <div 
-          className={cn(
+          className={StyleHelper.cn(
             "absolute right-0 flex items-center h-[32px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] z-20",
             isVolumeSliderOpen ? "w-[120px]" : "w-[18px]"
           )}
@@ -114,7 +98,7 @@ export default function DesktopExtraControls({
             style={{ width: isVolumeSliderOpen ? '102px' : '0px' }}
           >
             <div 
-              className={cn(
+              className={StyleHelper.cn(
                 "w-[102px] pr-3 transition-opacity duration-200",
                 isVolumeSliderOpen ? "opacity-100 delay-100" : "opacity-0 pointer-events-none"
               )}
@@ -129,7 +113,7 @@ export default function DesktopExtraControls({
           {/* Icon */}
           <button 
             onClick={() => setIsVolumeSliderOpen(true)}
-            className={cn(
+            className={StyleHelper.cn(
               "transition-colors flex-shrink-0 flex items-center justify-center w-[18px] h-full cursor-pointer",
               isVolumeSliderOpen ? "text-white" : "text-white/70 hover:text-white"
             )}

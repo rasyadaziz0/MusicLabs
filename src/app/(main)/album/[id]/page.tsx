@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
-import { getITunesAlbum } from '@/lib/server/itunesApi';
 import AlbumPageClient from '@/components/album/AlbumPageClient';
 
 interface PageProps {
@@ -11,9 +10,17 @@ interface PageProps {
 // ── Cached data fetcher (dedup across generateMetadata + page render) ──
 
 const getAlbumData = cache(async (rawId: string) => {
-  // Strip prefix — same logic as api/albums/[id]/route.ts
   const itunesId = rawId.replace(/^itunes-album-/, '');
-  return await getITunesAlbum(itunesId);
+  const baseUrl = (process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || process.env.NEXT_PUBLIC_EXPRESS_API_URL) || 'http://localhost:3001';
+  try {
+    const res = await fetch(`${baseUrl}/api/albums/${itunesId}`, { headers: { 'Origin': process.env.NEXT_PUBLIC_APP_URL || 'https://music.rasyadazizan.site' }, next: { revalidate: 3600 } });
+    if (!res.ok) return null;
+    const json = await res.json();
+    return json.data;
+  } catch (error) {
+    console.error('Error fetching album data:', error);
+    return null;
+  }
 });
 
 // ── Metadata (SSR) ─────────────────────────────────────────────────

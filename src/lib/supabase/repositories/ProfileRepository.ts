@@ -1,10 +1,11 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '../client';
 import { UserProfile } from '@/types/profile';
+import { IProfileRepository } from '@/types/repositories/IProfileRepository';
 
-export const PROFILE_COLUMNS = 'id, username, display_name, bio, avatar_url, banner_url, social_instagram, social_twitter, social_tiktok, is_public, show_now_playing, show_recently_played, lyrics_font_size, romanization_enabled, created_at';
+export const PROFILE_COLUMNS = 'id, username, display_name, bio, avatar_url, banner_url, social_instagram, social_twitter, social_tiktok, is_public, show_now_playing, show_recently_played, lyrics_font_size, romanization_enabled, search_region, created_at';
 
-export class ProfileRepository {
+export class ProfileRepository implements IProfileRepository {
   private static instance: ProfileRepository;
   private supabase: SupabaseClient;
 

@@ -1,11 +1,11 @@
 'use client';
 
+import { useLibraryAlbums } from '@/hooks/library/useLibraryAlbums';
 import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronLeft, Disc3 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { useLibraryAlbums } from '@/hooks/useMusicLibrary';
 import { LibrarySearchBar } from '@/components/library/LibrarySearchBar';
 import { LibraryEmptyState } from '@/components/library/LibraryEmptyState';
 import { CustomSelect } from '@/components/ui/CustomSelect';

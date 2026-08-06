@@ -1,16 +1,10 @@
+import { useLibraryPlaylists } from '@/hooks/library/useLibraryPlaylists';
+import { useAddTrackToPlaylist } from '@/hooks/library/useAddTrackToPlaylist';
 import { Plus, X } from 'lucide-react';
 import Link from 'next/link';
 import { Song } from '@/types/music';
-import { useLibraryPlaylists, useAddTrackToPlaylist } from '@/hooks/useMusicLibrary';
 import { gooeyToast as toast } from 'goey-toast';
-
-interface PlaylistSubMenuProps {
-  track: Song;
-  onClose: () => void;
-  onBack: () => void;
-  hideHeader?: boolean;
-}
-
+import { PlaylistSubMenuProps } from '@/types/components/ui/context-menu/PlaylistSubMenuProps';
 export function PlaylistSubMenu({ track, onClose, onBack, hideHeader }: PlaylistSubMenuProps) {
   const { data: playlists = [] } = useLibraryPlaylists();
   const addPlaylistMutation = useAddTrackToPlaylist();

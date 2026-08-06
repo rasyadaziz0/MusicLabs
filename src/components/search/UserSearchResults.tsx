@@ -2,13 +2,7 @@
 
 import UserCard from '@/components/ui/UserCard';
 import { UserProfile } from '@/types/profile';
-
-interface UserSearchResultsProps {
-  isUsersLoading: boolean;
-  usersData: UserProfile[] | undefined;
-  query: string;
-}
-
+import { UserSearchResultsProps } from '@/types/components/search/UserSearchResultsProps';
 export function UserSearchResults({ isUsersLoading, usersData, query }: UserSearchResultsProps) {
   if (isUsersLoading) {
     return (

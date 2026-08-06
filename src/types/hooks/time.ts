@@ -1,0 +1,1 @@
+export type TimeSubscriber = (time: number) => void;
