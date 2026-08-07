@@ -125,12 +125,12 @@ export function AppleMusicTrackList({
     }
   };
 
-  const handleTrackClick = (song: Song, allTracks: Song[]) => {
+  const handleTrackClick = (song: Song, allTracks: Song[], index: number) => {
     if (suppressClickRef.current) {
       suppressClickRef.current = false;
       return;
     }
-    onPlayTrack(song, allTracks);
+    onPlayTrack(song, allTracks, index);
   };
 
   return (
@@ -176,7 +176,7 @@ export function AppleMusicTrackList({
                 <SortableTrackItem key={uniqueKey} song={song} index={index} isReorderable={isReorderable}>
                   {({ attributes, listeners }) => (
                     <div
-                      onClick={() => handleTrackClick(song, tracks)}
+                      onClick={() => handleTrackClick(song, tracks, index)}
                       onContextMenu={(e) => handleContextMenu(e, song)}
                       onTouchStart={(e) => handleTouchStart(e, song)}
                       onTouchMove={handleTouchMove}

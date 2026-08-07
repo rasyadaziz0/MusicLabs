@@ -3,12 +3,9 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 
-type FeatureFlags = Record<string, boolean>;
+import { FeatureFlagsContextType } from '@/types/context/featureflags';
 
-interface FeatureFlagsContextType {
-  flags: FeatureFlags;
-  loading: boolean;
-}
+type FeatureFlags = Record<string, boolean>;
 
 const defaultFlags: FeatureFlags = {
   feature_import_playlist: true,

@@ -61,7 +61,7 @@ export function ShareMoreBySection({ title, tracks, artistId }: ShareMoreBySecti
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    playTrack(track, tracks);
+                    playTrack(track, tracks, idx);
                   }}
                 >
                   <Play className="w-4 h-4 ml-0.5 fill-current" />

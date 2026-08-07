@@ -75,13 +75,13 @@ export class ProfileRepository implements IProfileRepository {
   }
 
   async searchUsers(query: string, limit = 20): Promise<UserProfile[]> {
-    const trimmed = query.trim();
-    if (!trimmed) return [];
+    const safe = query.replace(/[,()%*\\]/g, ' ').trim();
+    if (safe.length < 2) return [];
 
     const { data, error } = await this.supabase
       .from('profiles')
       .select(PROFILE_COLUMNS)
-      .or(`username.ilike.%${trimmed}%,display_name.ilike.%${trimmed}%`)
+      .or(`username.ilike.%${safe}%,display_name.ilike.%${safe}%`)
       .limit(limit);
 
     if (error) throw error;

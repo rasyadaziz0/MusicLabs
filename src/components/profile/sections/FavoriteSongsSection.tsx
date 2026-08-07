@@ -11,11 +11,11 @@ export function FavoriteSongsSection({ likedSongs, playTrack }: FavoriteSongsSec
   return (
     <div data-animate className="mt-10">
       <HorizontalScrollSection title="Favourite Songs" onSeeAll={() => { window.location.href = '/library/liked' }}>
-        {likedSongs.slice(0, 10).map((song) => (
+        {likedSongs.slice(0, 10).map((song, index) => (
           <TrackCard
             key={song.id}
             song={song}
-            onPlay={() => playTrack(song, likedSongs)}
+            onPlay={() => playTrack(song, likedSongs, index)}
           />
         ))}
       </HorizontalScrollSection>

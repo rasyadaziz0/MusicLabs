@@ -3,6 +3,7 @@ import { SlugHelper } from '@/lib/utils/SlugHelper';
 import { ArtistParser } from '@/lib/utils/ArtistParser';
 import { Song } from '@/types/music';
 import { ImageHelper } from '@/lib/utils/ImageHelper';
+import { API_BASE } from '@/lib/config';
 
 import { ParsedTrackSlug, TrackSEOData } from '@/types/services/track';
 
@@ -76,7 +77,7 @@ export class TrackPageResolverService {
   public async resolveTrack(trackId: string): Promise<Song | null> {
     console.debug(`${this.loggerPrefix} Starting resolution for trackId: "${trackId}"`);
     try {
-      const baseUrl = (process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || process.env.NEXT_PUBLIC_EXPRESS_API_URL) || 'http://localhost:3001';
+      const baseUrl = API_BASE || 'http://localhost:3001';
       const cleanId = trackId.replace(/^itunes-/, '');
       const res = await fetch(`${baseUrl}/api/tracks/${cleanId}`, { next: { revalidate: 3600 } });
       if (!res.ok) {
@@ -93,7 +94,7 @@ export class TrackPageResolverService {
 
   public async getMoreByArtist(track: Song, artistName: string): Promise<Song[]> {
     const artistId = track.artists?.primary?.[0]?.id || '';
-    const baseUrl = (process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || process.env.NEXT_PUBLIC_EXPRESS_API_URL) || 'http://localhost:3001';
+    const baseUrl = API_BASE || 'http://localhost:3001';
     console.debug(`${this.loggerPrefix} Discovering more tracks for artist: "${artistName}" (artistId: "${artistId}")`);
 
     try {

@@ -51,7 +51,7 @@ export function MoodsSection({ selectedMood, setSelectedMood, moodSongs, isMoodS
             <TrackCard
               key={`${song.id}-mood-${selectedMood}-${index}`}
               song={song}
-              onPlay={() => playTrack(song, moodSongs)}
+              onPlay={() => playTrack(song, moodSongs, index)}
             />
           ))}
           {!isMoodSongsLoading && moodSongs.length === 0 && (

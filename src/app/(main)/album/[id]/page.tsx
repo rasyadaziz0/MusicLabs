@@ -7,11 +7,11 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-// ── Cached data fetcher (dedup across generateMetadata + page render) ──
+import { API_BASE } from '@/lib/config';
 
 const getAlbumData = cache(async (rawId: string) => {
   const itunesId = rawId.replace(/^itunes-album-/, '');
-  const baseUrl = (process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || process.env.NEXT_PUBLIC_EXPRESS_API_URL) || 'http://localhost:3001';
+  const baseUrl = API_BASE || 'http://localhost:3001';
   try {
     const res = await fetch(`${baseUrl}/api/albums/${itunesId}`, { headers: { 'Origin': process.env.NEXT_PUBLIC_APP_URL || 'https://music.rasyadazizan.site' }, next: { revalidate: 3600 } });
     if (!res.ok) return null;

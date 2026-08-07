@@ -3,48 +3,11 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
-import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
+import { AuthService } from '@/lib/services/AuthService';
 
-interface AuthActionResult {
-  error: string | null;
-}
-
-interface AuthContextType {
-  user: User | null;
-  session: Session | null;
-  loading: boolean;
-  signInWithGoogle: (redirectPath?: string) => Promise<AuthActionResult>;
-  signInWithPassword: (email: string, password: string, captchaToken?: string) => Promise<AuthActionResult>;
-  signUpWithPassword: (email: string, password: string, fullName: string, captchaToken?: string) => Promise<AuthActionResult>;
-  signOut: () => Promise<AuthActionResult>;
-  resetPasswordForEmail: (email: string, captchaToken?: string) => Promise<AuthActionResult>;
-  updatePassword: (password: string) => Promise<AuthActionResult>;
-  updateProfile: (data: {
-    username?: string; name?: string; bio?: string; avatarUrl?: string;
-    bannerUrl?: string;
-    socialInstagram?: string; socialTwitter?: string; socialTiktok?: string;
-    isPublic?: boolean; showNowPlaying?: boolean; showRecentlyPlayed?: boolean;
-    lyricsFontSize?: string; romanizationEnabled?: boolean;
-    searchRegion?: string;
-  }) => Promise<AuthActionResult>;
-}
+import { AuthContextType } from '@/types/context/auth';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-function mapAuthErrorMessage(action: 'login' | 'register' | 'google' | 'logout') {
-  switch (action) {
-    case 'login':
-      return 'Email atau Password salah, coba lagi';
-    case 'register':
-      return 'Daftar akun gagal. Coba lagi beberapa saat lagi.';
-    case 'google':
-      return 'Login Google belum berhasil. Coba ulang lagi.';
-    case 'logout':
-      return 'Logout gagal. Coba ulang lagi.';
-    default:
-      return 'Terjadi gangguan autentikasi. Coba lagi.';
-  }
-}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -90,162 +53,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const signInWithGoogle = async (redirectPath = '/') => {
-    const redirectTarget = redirectPath.startsWith('/') ? redirectPath : '/';
-    const callbackUrl = new URL('/auth/callback', window.location.origin);
-    callbackUrl.searchParams.set('next', redirectTarget);
+  const authService = AuthService.getInstance();
 
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: callbackUrl.toString(),
-      },
-    });
-    if (error) {
-      console.error('Auth signInWithGoogle gagal:', error);
-      return { error: mapAuthErrorMessage('google') };
-    }
-    return { error: null };
-  };
-
-  const signInWithPassword = async (email: string, password: string, captchaToken?: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ 
-      email, 
-      password,
-      options: captchaToken ? { captchaToken } : undefined
-    });
-    if (error) {
-      console.error('Auth signInWithPassword gagal:', error);
-      // Jika error karena email belum dikonfirmasi, beri pesan spesifik
-      if (error.message.toLowerCase().includes('email not confirmed')) {
-        return { error: 'Email belum diverifikasi. Silakan cek kotak masuk email kamu.' };
-      }
-      return { error: mapAuthErrorMessage('login') };
-    }
-    return { error: null };
-  };
-
-  const signUpWithPassword = async (email: string, password: string, fullName: string, captchaToken?: string) => {
-    const callbackUrl = new URL('/auth/callback', window.location.origin);
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: fullName },
-        emailRedirectTo: callbackUrl.toString(),
-        ...(captchaToken ? { captchaToken } : {})
-      },
-    });
-
-    if (error) {
-      console.error('Auth signUpWithPassword gagal:', error);
-      return { error: mapAuthErrorMessage('register') };
-    }
-
-    if (data?.user && data.user.identities && data.user.identities.length === 0) {
-      return { error: 'Email udah ada, langsung login aja ;)' };
-    }
-
-    return { error: null };
-  };
-
-  const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error('Auth signOut gagal:', error);
-      return { error: mapAuthErrorMessage('logout') };
-    }
-    return { error: null };
-  };
-
-  const resetPasswordForEmail = async (email: string, captchaToken?: string) => {
-    const callbackUrl = new URL('/update-password', window.location.origin);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: callbackUrl.toString(),
-      ...(captchaToken ? { captchaToken } : {})
-    });
-    if (error) {
-      console.error('Auth resetPasswordForEmail gagal:', error);
-      return { error: 'Gagal mengirim link reset password. Pastikan email terdaftar dan coba lagi.' };
-    }
-    return { error: null };
-  };
-
-  const updatePassword = async (password: string) => {
-    const { error } = await supabase.auth.updateUser({ password });
-    if (error) {
-      console.error('Auth updatePassword gagal:', error);
-      return { error: 'Gagal memperbarui password. Silakan coba lagi.' };
-    }
-    return { error: null };
-  };
-
-  const updateProfile = async (data: { 
-    username?: string; name?: string; bio?: string; avatarUrl?: string;
-    bannerUrl?: string;
-    socialInstagram?: string; socialTwitter?: string; socialTiktok?: string;
-    isPublic?: boolean; showNowPlaying?: boolean; showRecentlyPlayed?: boolean;
-    lyricsFontSize?: string; romanizationEnabled?: boolean;
-    searchRegion?: string;
-  }) => {
-    const authUpdateData: any = {};
-    if (data.name !== undefined) authUpdateData.name = data.name;
-    if (data.avatarUrl !== undefined) authUpdateData.avatar_url = data.avatarUrl;
-
-    const { data: userData, error: authError } = await supabase.auth.updateUser({
-      data: authUpdateData
-    });
-
-    if (authError) {
-      console.error('Auth updateProfile gagal (auth):', authError);
-      return { error: 'Gagal memperbarui profil auth. Silakan coba lagi.' };
-    }
-
-    if (userData.user) {
-      // Check for unique username
-      if (data.username !== undefined) {
-        const { data: existingUser, error: checkError } = await supabase
-          .from('profiles')
-          .select('id')
-          .eq('username', data.username)
-          .neq('id', userData.user.id)
-          .maybeSingle();
-          
-        if (checkError) {
-          console.error('Error checking username:', checkError);
-        } else if (existingUser) {
-          return { error: 'Nama pengguna sudah terpakai oleh user lain. Silakan pilih yang lain.' };
-        }
-      }
-
-      // Update public.profiles table
-      const profileUpdates: any = {};
-      if (data.username !== undefined) profileUpdates.username = data.username;
-      if (data.name !== undefined) profileUpdates.display_name = data.name;
-      if (data.bio !== undefined) profileUpdates.bio = data.bio;
-      if (data.avatarUrl !== undefined) profileUpdates.avatar_url = data.avatarUrl;
-      if (data.bannerUrl !== undefined) profileUpdates.banner_url = data.bannerUrl;
-      if (data.socialInstagram !== undefined) profileUpdates.social_instagram = data.socialInstagram;
-      if (data.socialTwitter !== undefined) profileUpdates.social_twitter = data.socialTwitter;
-      if (data.socialTiktok !== undefined) profileUpdates.social_tiktok = data.socialTiktok;
-      if (data.isPublic !== undefined) profileUpdates.is_public = data.isPublic;
-      if (data.showNowPlaying !== undefined) profileUpdates.show_now_playing = data.showNowPlaying;
-      if (data.showRecentlyPlayed !== undefined) profileUpdates.show_recently_played = data.showRecentlyPlayed;
-      if (data.lyricsFontSize !== undefined) profileUpdates.lyrics_font_size = data.lyricsFontSize;
-      if (data.romanizationEnabled !== undefined) profileUpdates.romanization_enabled = data.romanizationEnabled;
-      if (data.searchRegion !== undefined) profileUpdates.search_region = data.searchRegion;
-
-      try {
-        await ProfileRepository.getInstance().updateProfile(userData.user.id, profileUpdates);
-      } catch (profileError) {
-        console.error('Auth updateProfile gagal (profiles):', profileError);
-        // We still updated auth, so maybe we don't throw, or we return error
-      }
-
-      setUser(userData.user);
-    }
+  const signInWithGoogle = (redirectPath = '/') => authService.signInWithGoogle(redirectPath);
+  
+  const signInWithPassword = (email: string, password: string, captchaToken?: string) => 
+    authService.signInWithPassword(email, password, captchaToken);
     
-    return { error: null };
+  const signUpWithPassword = (email: string, password: string, fullName: string, captchaToken?: string) => 
+    authService.signUpWithPassword(email, password, fullName, captchaToken);
+    
+  const signOut = () => authService.signOut();
+  
+  const resetPasswordForEmail = (email: string, captchaToken?: string) => 
+    authService.resetPasswordForEmail(email, captchaToken);
+    
+  const updatePassword = (password: string) => authService.updatePassword(password);
+  
+  const updateProfile = async (data: any) => {
+    const result = await authService.updateProfile(data);
+    if (result.user) {
+      setUser(result.user); // Update local state directly if profile changes
+    }
+    return { error: result.error };
   };
 
   return (

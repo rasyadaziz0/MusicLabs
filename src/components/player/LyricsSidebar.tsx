@@ -9,7 +9,7 @@ import { Music2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { getPortalRoot } from '@/lib/utils/portalRoot';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, animate } from 'framer-motion';
 import { LyricStyleManager } from './lyrics/LyricStyleManager';
 import { KaraokeLine } from './lyrics/KaraokeLine';
 import { GlassBar } from '@/components/ui/LiquidGlass';
@@ -28,7 +28,38 @@ export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
   // Sync font size setting
   LyricStyleManager.setFontSize(settings.lyricsFontSize);
 
+  const scrollAnimRef = useRef<any>(null);
+
   useEffect(() => { setMounted(true); }, []);
+
+  useEffect(() => {
+    if (activeIndex < 0 || !scrollRef.current) return;
+    const el = scrollRef.current.querySelector(
+      `[data-lyric-index="${activeIndex}"]`
+    ) as HTMLElement | null;
+    
+    if (el && scrollRef.current) {
+      const container = scrollRef.current;
+      const offsetRatio = 0.4;
+      const offset = el.offsetTop - (container.clientHeight * offsetRatio) + (el.clientHeight / 2);
+      
+      if (scrollAnimRef.current) scrollAnimRef.current.stop();
+      
+      scrollAnimRef.current = animate(container.scrollTop, offset, {
+        type: 'spring',
+        stiffness: 200,
+        damping: 28,
+        mass: 1,
+        onUpdate: (latest) => {
+          container.scrollTop = latest;
+        }
+      });
+    }
+
+    return () => {
+      if (scrollAnimRef.current) scrollAnimRef.current.stop();
+    };
+  }, [activeIndex, lines, scrollRef]);
 
   if (!mounted) return null;
 

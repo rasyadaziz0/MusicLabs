@@ -47,6 +47,18 @@ export class SleepTimer {
     this.stop();
   }
 
+  public tick(): void {
+    if (this.endTime !== null && Date.now() >= this.endTime) {
+      this.endTime = null;
+      if (this.timeoutId) {
+        clearTimeout(this.timeoutId);
+        this.timeoutId = null;
+      }
+      this.notifyStateChange();
+      this.onTimeout();
+    }
+  }
+
   private notifyStateChange(): void {
     if (this.onStateChange) {
       this.onStateChange({ endTime: this.endTime });

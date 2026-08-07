@@ -68,7 +68,7 @@ export default function AlbumPageClient({
             </div>
           )
         }
-        onPlay={() => tracks.length > 0 && playTrack(tracks[0], tracks)}
+        onPlay={() => tracks.length > 0 && playTrack(tracks[0], tracks, 0)}
         onShuffle={() => tracks.length > 0 && shufflePlay(tracks)}
         backHref="/search"
         topRightActions={

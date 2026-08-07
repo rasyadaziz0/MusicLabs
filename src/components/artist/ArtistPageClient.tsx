@@ -22,7 +22,7 @@ export default function ArtistPageClient({
 
   const handlePlayAll = () => {
     if (topTracks.length > 0) {
-      playTrack(topTracks[0], topTracks);
+      playTrack(topTracks[0], topTracks, 0);
     }
   };
 

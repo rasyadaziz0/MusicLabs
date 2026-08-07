@@ -40,10 +40,16 @@ export class ConnectEngine {
   /** Retrieve or initialize tab session ID (SSR safe) */
   public static getOrCreateTabId(): string {
     if (typeof window === 'undefined') return '';
-    let id = sessionStorage.getItem('connect_tab_id');
-    if (!id) {
+    let id = '';
+    try {
+      id = sessionStorage.getItem('connect_tab_id') || '';
+      if (!id) {
+        id = this.generateUUID();
+        sessionStorage.setItem('connect_tab_id', id);
+      }
+    } catch (e) {
+      // Fallback for private mode / storage disabled
       id = this.generateUUID();
-      sessionStorage.setItem('connect_tab_id', id);
     }
     return id;
   }
@@ -51,10 +57,15 @@ export class ConnectEngine {
   /** Retrieve or initialize cosmetic device label (SSR safe) */
   public static getOrCreateDeviceLabel(): string {
     if (typeof window === 'undefined') return 'Desktop';
-    let label = localStorage.getItem('connect_device_label');
-    if (!label) {
+    let label = 'Desktop';
+    try {
+      label = localStorage.getItem('connect_device_label') || '';
+      if (!label) {
+        label = this.detectBrowserLabel();
+        localStorage.setItem('connect_device_label', label);
+      }
+    } catch (e) {
       label = this.detectBrowserLabel();
-      localStorage.setItem('connect_device_label', label);
     }
     return label;
   }
@@ -65,7 +76,9 @@ export class ConnectEngine {
    */
   public static electActivePlayer(devices: DeviceInfo[]): string | null {
     if (!devices || devices.length === 0) return null;
-    const sorted = [...devices].sort((a, b) => a.tabInstanceId.localeCompare(b.tabInstanceId));
+    const sorted = [...devices].sort((a, b) => 
+      a.tabInstanceId < b.tabInstanceId ? -1 : a.tabInstanceId > b.tabInstanceId ? 1 : 0
+    );
     return sorted[0].tabInstanceId;
   }
 

@@ -1,15 +1,15 @@
 'use client';
 
-import { useMemo, useRef, useEffect } from 'react';
+import { useMemo, useRef } from 'react';
 import { getEffectiveTime } from '@/lib/lyrics/lyricsOffsetStore';
 import { UseLyricsScrollOptions, UseLyricsScrollReturn } from '@/types/hooks/lyrics';
-import { LyricsScroller } from '@/lib/utils/LyricsScroller';
 
 export function useLyricsScroll({
   lines,
   isSynced,
   currentTime,
   trackId,
+  disableScroll,
 }: UseLyricsScrollOptions): UseLyricsScrollReturn {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -31,20 +31,7 @@ export function useLyricsScroll({
     return lo;
   }, [currentTime, lines, isSynced, trackId]);
 
-  useEffect(() => {
-    if (activeIndex < 0 || !scrollRef.current) return;
-    if (lines[activeIndex]?.isPlaceholder) return;
 
-    const container = scrollRef.current;
-    const activeLine = container.querySelector(`[data-lyric-index="${activeIndex}"]`) as HTMLElement;
-    if (!activeLine) return;
-
-    LyricsScroller.scrollToCenter(container, activeLine, 550);
-
-    return () => {
-      LyricsScroller.cleanup();
-    };
-  }, [activeIndex, lines]);
 
   return { activeIndex, scrollRef };
 }

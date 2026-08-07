@@ -22,9 +22,10 @@ export function useHomeViewModel() {
     router.push('/');
   };
 
-  const { data: homeData, isLoading: isHomeLoading } = useQuery({
+  const { data: homeData, isLoading: isHomeLoading, isError: isHomeError, error: homeError } = useQuery({
     queryKey: ['homeFeed'],
     queryFn: () => MusicApiService.getHomeFeed(),
+    retry: 1, // don't retry too many times if backend is dead
   });
 
   const { data: dbRecentPlays, isLoading: isRecentLoading } = useQuery({
@@ -35,7 +36,7 @@ export function useHomeViewModel() {
 
   const { data: socialFeed, isLoading: isSocialFeedLoading } = useQuery({
     queryKey: ['socialFeed', user?.id],
-    queryFn: () => SocialRepository.getInstance().getSocialFeed(user!.id),
+    queryFn: () => SocialRepository.getInstance().getSocialFeed(),
     enabled: !!user?.id,
   });
 
@@ -71,6 +72,8 @@ export function useHomeViewModel() {
     selectedMood,
     setSelectedMood,
     isHomeLoading,
+    isHomeError,
+    homeError,
     isRecentLoading,
     isMoodSongsLoading,
     isSocialFeedLoading,

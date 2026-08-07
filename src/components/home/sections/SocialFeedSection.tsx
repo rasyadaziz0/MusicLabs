@@ -33,7 +33,7 @@ export function SocialFeedSection({ user, socialFeed, isSocialFeedLoading, playT
               <SocialActivityCard
                 key={`${item.id}-social-${index}`}
                 item={item}
-                onPlay={() => playTrack(item.track, socialFeed.map((f: any) => f.track))}
+                onPlay={() => playTrack(item.track, socialFeed.map((f: any) => f.track), index)}
               />
             ))
           ) : (

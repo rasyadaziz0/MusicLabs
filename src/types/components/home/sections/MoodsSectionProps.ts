@@ -6,5 +6,5 @@ export interface MoodsSectionProps {
   setSelectedMood: (mood: MoodKey) => void;
   moodSongs: Song[];
   isMoodSongsLoading: boolean;
-  playTrack: (song: Song, context: Song[]) => void;
+  playTrack: (song: Song, context: Song[], index?: number | string) => void;
 }

@@ -1,4 +1,3 @@
-import { DragEndEvent } from '@dnd-kit/core';
 import { Song } from '@/types/music';
 
 import { QueueContextAdapter, SortableTrack } from '@/types/player/controller';
@@ -35,13 +34,12 @@ export class QueuePopupController {
     return this.sortableItems.length > 0;
   }
 
-  handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (active && over && active.id !== over.id) {
+  reorder = (activeId: string, overId: string) => {
+    if (activeId && overId && activeId !== overId) {
       // Find within the combined sortable items list to map back to queue index
       const combined = [...this.manualItems, ...this.autoplayItems];
-      const oldIndex = combined.findIndex((t) => t.uniqueId === active.id);
-      const newIndex = combined.findIndex((t) => t.uniqueId === over.id);
+      const oldIndex = combined.findIndex((t) => t.uniqueId === activeId);
+      const newIndex = combined.findIndex((t) => t.uniqueId === overId);
 
       if (oldIndex !== -1 && newIndex !== -1) {
         this.player.reorderQueue(
@@ -52,8 +50,8 @@ export class QueuePopupController {
     }
   };
 
-  playTrack = (track: Song) => {
-    this.player.playTrack(track, this.player.queue);
+  playTrack = (track: Song, target?: number | string) => {
+    this.player.playTrack(track, this.player.queue, target);
   };
 
   clearQueue = () => {

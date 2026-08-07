@@ -17,7 +17,7 @@ export function RecentlyPlayedSection({ recentlyPlayed, playTrack }: RecentlyPla
           <div
             key={`${song.id}-recent-${index}`}
             className="group flex-shrink-0 w-[150px] md:w-[170px] text-left cursor-pointer"
-            onClick={() => playTrack(song, recentlyPlayed)}
+            onClick={() => playTrack(song, recentlyPlayed, index)}
           >
             <div className="relative aspect-square rounded-xl overflow-hidden mb-2.5 bg-white/5 border border-white/5 shadow-sm">
               {ImageHelper.getBestImageUrl(song.image) && (

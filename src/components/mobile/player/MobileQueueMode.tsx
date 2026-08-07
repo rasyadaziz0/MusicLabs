@@ -4,6 +4,7 @@ import React, { useMemo, useState, useRef } from 'react';
 import Image from 'next/image';
 import { usePlayer } from '@/context/PlayerContext';
 import { QueuePopupController } from '@/components/player/QueuePopupController';
+import { SortableTrackRow } from '@/components/player/SortableTrackRow';
 import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { Heart, MoreHorizontal, Shuffle, Repeat, Infinity as InfinityIcon, Disc, Menu } from 'lucide-react';
 import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
@@ -267,7 +268,12 @@ export function MobileQueueMode(props: MobileQueueModeProps) {
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
-              onDragEnd={controller.handleDragEnd}
+              onDragEnd={(e) => {
+                const { active, over } = e;
+                if (active && over) {
+                  controller.reorder(active.id.toString(), over.id.toString());
+                }
+              }}
               modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
             >
               <SortableContext
@@ -275,10 +281,10 @@ export function MobileQueueMode(props: MobileQueueModeProps) {
                 strategy={verticalListSortingStrategy}
               >
                 {controller.manualItems.map((track) => (
-                  <AppleMusicQueueRow
+                  <SortableTrackRow
                     key={track.uniqueId}
                     track={track}
-                    onClick={() => controller.playTrack(track)}
+                    onClick={() => controller.playTrack(track, track.queueItemId)}
                   />
                 ))}
               </SortableContext>
@@ -296,7 +302,7 @@ export function MobileQueueMode(props: MobileQueueModeProps) {
                 {controller.autoplayItems.map((track) => (
                   <div
                     key={track.uniqueId}
-                    onClick={() => controller.playTrack(track)}
+                    onClick={() => controller.playTrack(track, track.queueItemId)}
                     className="flex items-center justify-between py-2 px-1 group active:bg-white/10 rounded-xl transition-all cursor-pointer select-none opacity-80 hover:opacity-100"
                   >
                     <div className="flex items-center gap-3 min-w-0 flex-1 pr-3">

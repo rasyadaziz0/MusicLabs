@@ -141,7 +141,7 @@ export class SocialRepository implements ISocialRepository {
       .from('listening_history')
       .select('track_id, played_at, profiles!inner(id, username, display_name, avatar_url, show_recently_played)')
       .in('user_id', followingIds)
-      .eq('profiles.show_recently_played', true)
+      .not('profiles.show_recently_played', 'is', false)
       .order('played_at', { ascending: false })
       .limit(20);
 
@@ -161,18 +161,13 @@ export class SocialRepository implements ISocialRepository {
       .filter(item => item.track);
   }
 
-  async getSocialFeed(userId: string): Promise<SocialFeedItem[]> {
-    // Call the API route which bypasses RLS to get followers' listening history
+  async getSocialFeed(): Promise<SocialFeedItem[]> {
     let historyData = [];
     try {
-      // In SSR or CSR, we can fetch from the relative URL if on client, or absolute if SSR.
-      // Since this is typically called via react-query on the client, relative URL works.
-      const baseUrl = typeof window !== 'undefined' ? '' : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-      const res = await fetch(`${baseUrl}/api/social?userId=${userId}`);
-      if (res.ok) {
-        const json = await res.json();
-        historyData = json.data || [];
-      }
+      const { data: { session } } = await this.supabase.auth.getSession();
+      if (!session?.user) return [];
+      
+      historyData = await MusicApiService.apiFetchInternal<any[]>('/api/social');
     } catch (e) {
       console.error('Error fetching social feed:', e);
     }

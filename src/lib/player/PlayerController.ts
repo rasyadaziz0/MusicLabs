@@ -54,6 +54,9 @@ export class PlayerController {
   constructor(options: PlayerControllerOptions) {
     this.emit = options.onStateChange;
     this.resolver = new TrackResolver();
+    
+    // Cleanup old player caches
+    PlayerCache.cleanupOldVersions();
 
     // ── YouTube Engine ──
     const ytEngine = new YouTubeEngine({
@@ -106,6 +109,7 @@ export class PlayerController {
 
     // ── Progress polling (50ms) ──
     this._progressTimer = setInterval(() => {
+      this.sleepTimer?.tick();
       const progress = this.router.pollProgress();
       const patch: Partial<PlayerState> = {};
       if (progress.currentTime !== undefined) patch.currentTime = progress.currentTime;
@@ -157,11 +161,11 @@ export class PlayerController {
   //  Playback
   // ────────────────────────────────────────
 
-  async playTrack(track: Song, newQueue?: Song[]): Promise<void> {
+  async playTrack(track: Song, newQueue?: Song[], target?: number | string): Promise<void> {
     this.resolver.abort();
 
     if (newQueue) {
-      this.queueMgr.setQueue(newQueue, track.id);
+      this.queueMgr.setQueue(newQueue, target);
     }
 
     this.emit({
@@ -329,6 +333,9 @@ export class PlayerController {
       await this.applyPreviewFallback(activeTrack!);
       return;
     }
+
+    // Invalidate the problematic videoId cache to force a fresh resolve next time
+    PlayerCache.invalidate(activeTrack.id);
 
     // Embed-blocked codes → try re-resolve
     if (errorCode === 101 || errorCode === 150) {

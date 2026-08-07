@@ -39,7 +39,7 @@ export function TopPicksSection({ trendingSongs, playTrack }: TopPicksSectionPro
               song={song}
               index={index}
               gradient={bgGradient}
-              onPlay={() => playTrack(song, trendingSongs)}
+              onPlay={() => playTrack(song, trendingSongs, index)}
             />
           );
         })}

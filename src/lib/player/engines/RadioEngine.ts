@@ -2,6 +2,8 @@ import Hls from 'hls.js';
 import { Song } from '@/types/music';
 import { RadioMeta, RadioEngineCallbacks } from '@/types/player/engine';
 
+const API_BASE = process.env.NEXT_PUBLIC_EXPRESS_API_URL || process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || '';
+
 // ─── Engine class ───
 
 export class RadioEngine {
@@ -44,7 +46,7 @@ export class RadioEngine {
     let hasFallenBack = false;
 
     const setupStream = (url: string, useProxy: boolean = false) => {
-      const targetUrl = useProxy ? `/api/radio/proxy?url=${encodeURIComponent(url)}` : url;
+      const targetUrl = useProxy ? `${API_BASE}/api/radio/proxy?url=${encodeURIComponent(url)}` : url;
 
       if (url.includes('.m3u8') && Hls.isSupported()) {
         const hlsInstance = new Hls({

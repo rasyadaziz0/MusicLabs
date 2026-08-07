@@ -31,6 +31,45 @@ export const LyricLine = React.memo(function LyricLine({
     isUserScrolling
   );
 
+  const romanLine = React.useMemo(() => {
+    if (!romanText || !((isActive || isPlaceholder) && line.words && line.words.length > 0)) {
+      return null;
+    }
+    const romanWordsMatch = romanText.match(/\S+\s*/g);
+    if (!romanWordsMatch || romanWordsMatch.length === 0) return null;
+
+    let mappedWords = [];
+    if (romanWordsMatch.length === line.words.length) {
+      mappedWords = romanWordsMatch.map((rw, i) => ({
+        text: rw,
+        startTime: line.words![i].startTime,
+        endTime: line.words![i].endTime,
+      }));
+    } else {
+      const totalChars = romanText.length;
+      const totalDuration = (line.words[line.words.length - 1].endTime ?? 0) - line.words[0].startTime;
+      let currentStartTime = line.words[0].startTime;
+      mappedWords = romanWordsMatch.map((rw) => {
+        const durationRatio = rw.length / totalChars;
+        const duration = totalDuration * durationRatio;
+        const wordObj = {
+          text: rw,
+          startTime: currentStartTime,
+          endTime: currentStartTime + duration,
+        };
+        currentStartTime += duration;
+        return wordObj;
+      });
+    }
+
+    return {
+      time: line.time,
+      text: romanText,
+      isPlaceholder: false,
+      words: mappedWords
+    } as LrcLine;
+  }, [romanText, isActive, isPlaceholder, line.words, line.time]);
+
   const renderContent = () => {
     const mainContent = ((isActive || isPlaceholder) && line.words) ? (
       <KaraokeLine line={line} currentTime={currentTime} isActive={isActive} />
@@ -83,51 +122,11 @@ export const LyricLine = React.memo(function LyricLine({
           transition={LyricStyleManager.getRomanizationTransition()}
           style={{ width: '100%' }}
         >
-          {(() => {
-            if ((isActive || isPlaceholder) && line.words && line.words.length > 0) {
-              const romanWordsMatch = romanText.match(/\S+\s*/g);
-              
-              if (romanWordsMatch && romanWordsMatch.length > 0) {
-                let mappedWords = [];
-
-                if (romanWordsMatch.length === line.words.length) {
-                  // 1-to-1 match
-                  mappedWords = romanWordsMatch.map((rw, i) => ({
-                    text: rw,
-                    startTime: line.words![i].startTime,
-                    endTime: line.words![i].endTime,
-                  }));
-                } else {
-                  // Fallback: character-length proportional mapping
-                  const totalChars = romanText.length;
-                  const totalDuration = (line.words[line.words.length - 1].endTime ?? 0) - line.words[0].startTime;
-                  
-                  let currentStartTime = line.words[0].startTime;
-                  mappedWords = romanWordsMatch.map((rw, i) => {
-                    const durationRatio = rw.length / totalChars;
-                    const duration = totalDuration * durationRatio;
-                    const wordObj = {
-                      text: rw,
-                      startTime: currentStartTime,
-                      endTime: currentStartTime + duration,
-                    };
-                    currentStartTime += duration;
-                    return wordObj;
-                  });
-                }
-
-                const romanLine: LrcLine = {
-                  time: line.time,
-                  text: romanText,
-                  isPlaceholder: false,
-                  words: mappedWords
-                };
-
-                return <KaraokeLine line={romanLine} currentTime={currentTime} isActive={isActive} />;
-              }
-            }
-            return <span>{romanText}</span>;
-          })()}
+          {romanLine ? (
+            <KaraokeLine line={romanLine} currentTime={currentTime} isActive={isActive} />
+          ) : (
+            <span>{romanText}</span>
+          )}
         </motion.div>
       )}
     </motion.div>

@@ -5,15 +5,14 @@ import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { ArtistParser } from '@/lib/utils/ArtistParser';
 import { AlbumData } from '@/types/components/ui';
 import ArtistPageClient from '@/components/artist/ArtistPageClient';
+import { API_BASE } from '@/lib/config';
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-// ── Cached data fetcher (dedup across generateMetadata + page render) ──
-
 const getArtistData = cache(async (rawId: string) => {
-  const baseUrl = (process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || process.env.NEXT_PUBLIC_EXPRESS_API_URL) || 'http://localhost:3001';
+  const baseUrl = API_BASE;
 
   // If it's a search-based ID (e.g. itunes-search-Betharia%20Sonatha), 
   // search by name instead of direct lookup

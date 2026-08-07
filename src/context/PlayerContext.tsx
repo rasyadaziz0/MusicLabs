@@ -12,56 +12,9 @@ import { useSpotifyConnect } from '@/hooks/useSpotifyConnect';
 import { DeviceInfo, RemoteCommandType, HandoffPayload } from '@/types/connect';
 import '@/lib/utils/portalRoot';
 
+import { PlayerContextType } from '@/types/context/player';
+
 // ─── Context type ───
-
-interface PlayerContextType {
-  currentTrack: Song | null;
-  isPlaying: boolean;
-  isResolving: boolean;
-  isPreview: boolean;
-  isGuestPreview: boolean;
-  isRadio: boolean;
-  radioMeta: RadioMeta | null;
-  isError: boolean;
-  currentTime: number;
-  duration: number;
-  volume: number;
-  queue: Song[];
-  queueIndex: number;
-  isShuffled: boolean;
-  repeatMode: 'none' | 'all' | 'one';
-  isAutoplayEnabled: boolean;
-  toggleShuffle: () => void;
-  cycleRepeatMode: () => void;
-  playTrack: (track: Song, queue?: Song[]) => void;
-  togglePlay: () => void;
-  nextTrack: () => void;
-  prevTrack: () => void;
-  seek: (time: number) => void;
-  setVolume: (volume: number) => void;
-  addToQueue: (track: Song) => void;
-  playNext: (track: Song) => void;
-  removeFromQueue: (trackId: string) => void;
-  promoteToManual: (trackId: string) => void;
-  clearQueue: () => void;
-  reorderQueue: (startIndex: number, endIndex: number) => void;
-  shufflePlay: (tracks: Song[]) => void;
-  sleepTimerEndTime: number | null;
-  setSleepTimer: (minutes: number) => void;
-  clearSleepTimer: () => void;
-  toggleAutoplay: () => void;
-
-  // ── Spotify Connect fields ──
-  myTabId: string;
-  activeTabId: string | null;
-  isActivePlayer: boolean;
-  connectedDevices: DeviceInfo[];
-  autoplayBlocked: boolean;
-  isElecting: boolean;
-  transferPlayback: (targetTabInstanceId: string) => void;
-  renameDevice: (newName: string) => void;
-  dismissAutoplayBlock: () => void;
-}
 
 const PlayerContext = createContext<PlayerContextType | undefined>(undefined);
 
@@ -108,7 +61,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const handleReceiveHandoff = useCallback(async (payload: HandoffPayload) => {
     const ctrl = controllerRef.current;
     if (!ctrl) return;
-    await ctrl.playTrack(payload.track, payload.queue);
+    await ctrl.playTrack(payload.track, payload.queue, payload.target);
     ctrl.seek(payload.position);
     if (!payload.isPlaying && state.isPlaying) {
       ctrl.togglePlay();
@@ -193,11 +146,11 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
 
   // ── Stable callbacks (branched execution) ──
 
-  const playTrack = useCallback((track: Song, queue?: Song[]) => {
+  const playTrack = useCallback((track: Song, queue?: Song[], target?: number | string) => {
     if (isRemote && connect.activeTabId) {
       connect.transferPlayback(connect.myTabId); // claim back or play locally
     }
-    controllerRef.current?.playTrack(track, queue);
+    controllerRef.current?.playTrack(track, queue, target);
   }, [isRemote, connect]);
 
   const togglePlay = useCallback(() => {

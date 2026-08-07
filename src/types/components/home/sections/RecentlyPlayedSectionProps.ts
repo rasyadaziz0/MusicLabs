@@ -5,5 +5,5 @@ export interface RecentlyPlayedSectionProps {
   recentlyPlayedSongs: Song[];
   isRecentLoading: boolean;
   user: User | null;
-  playTrack: (song: Song, context: Song[]) => void;
+  playTrack: (song: Song, context: Song[], index?: number | string) => void;
 }

@@ -3,7 +3,7 @@ import { Song } from '@/types/music';
 
 export interface AppleMusicTrackListProps {
   tracks: Song[];
-  onPlayTrack: (track: Song, allTracks: Song[]) => void;
+  onPlayTrack: (track: Song, allTracks: Song[], index?: number) => void;
   showHeart?: boolean;
   showAlbum?: boolean;
   hideHeader?: boolean;

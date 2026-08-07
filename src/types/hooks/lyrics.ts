@@ -9,6 +9,7 @@ export interface UseLyricsScrollOptions {
   isSynced: boolean;
   currentTime: number;
   trackId: string | null;
+  disableScroll?: boolean;
 }
 
 export interface UseLyricsScrollReturn {

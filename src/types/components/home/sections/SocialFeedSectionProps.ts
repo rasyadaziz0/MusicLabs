@@ -4,5 +4,5 @@ export interface SocialFeedSectionProps {
   user: User | null;
   socialFeed: any[];
   isSocialFeedLoading: boolean;
-  playTrack: (song: any, context: any[]) => void;
+  playTrack: (song: any, context: any[], index?: number | string) => void;
 }

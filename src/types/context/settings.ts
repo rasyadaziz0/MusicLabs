@@ -5,3 +5,10 @@ export interface UserSettings {
   showNowPlaying: boolean;
   showRecentlyPlayed: boolean;
 }
+
+
+export interface SettingsContextType {
+  settings: UserSettings;
+  updateSettings: (partial: Partial<UserSettings>) => void;
+  isLoaded: boolean;
+}

@@ -80,6 +80,7 @@ export interface HandoffPayload {
   track: Song;
   queue: Song[];
   queueIndex: number;
+  target?: number | string;
   /** Position in seconds — read directly from controllerRef, NOT React state */
   position: number;
   isPlaying: boolean;

@@ -13,7 +13,7 @@ export function KaraokeLine({ line, currentTime, isActive }: KaraokeLineProps) {
     return () => {
       animatorRef.current?.stop();
     };
-  }, [line]); // re-init if line changes
+  }, [line.text, line.time]); // re-init if text or time changes
 
   useEffect(() => {
     if (isActive) {

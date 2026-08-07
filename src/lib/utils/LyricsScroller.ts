@@ -1,12 +1,12 @@
 export class LyricsScroller {
-  private static animFrameId: number | null = null;
+  private animFrameId: number | null = null;
 
   /* Cubic-bezier easing — easeOutQuart for a gentle deceleration */
-  private static easeOutQuart(t: number): number {
+  private easeOutQuart(t: number): number {
     return 1 - Math.pow(1 - t, 4);
   }
 
-  public static scrollToCenter(
+  public scrollToCenter(
     container: HTMLElement, 
     activeElement: HTMLElement, 
     duration: number = 550
@@ -21,7 +21,7 @@ export class LyricsScroller {
     this.smoothScrollTo(container, targetScroll, duration);
   }
 
-  public static smoothScrollTo(container: HTMLElement, targetY: number, duration: number): void {
+  public smoothScrollTo(container: HTMLElement, targetY: number, duration: number): void {
     if (this.animFrameId) cancelAnimationFrame(this.animFrameId);
 
     const startY = container.scrollTop;
@@ -50,7 +50,7 @@ export class LyricsScroller {
     this.animFrameId = requestAnimationFrame(step);
   }
 
-  public static cleanup(): void {
+  public cleanup(): void {
     if (this.animFrameId) {
       cancelAnimationFrame(this.animFrameId);
       this.animFrameId = null;

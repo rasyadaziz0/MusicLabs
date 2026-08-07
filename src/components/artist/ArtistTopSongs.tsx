@@ -56,7 +56,7 @@ export function ArtistTopSongs({
                 key={song.id}
                 song={song}
                 index={idx + 1}
-                onPlay={() => playTrack(song, topTracks)}
+                onPlay={() => playTrack(song, topTracks, idx)}
                 isCurrentlyPlaying={currentTrackId === song.id && isPlaying}
               />
             ))}

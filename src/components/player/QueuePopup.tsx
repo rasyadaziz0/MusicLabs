@@ -25,6 +25,8 @@ import { SortableTrackRow } from './SortableTrackRow';
 import { AutoplayTrackRow } from './AutoplayTrackRow';
 import { Infinity } from 'lucide-react';
 import { QueuePopupProps } from '@/types/components/player/QueuePopupProps';
+import './QueuePopup.css';
+
 export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
   const player = usePlayer();
   // Instantiate the controller pattern (OOP approach) to handle the complex queue mapping and DnD logic
@@ -59,110 +61,39 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
           animate={{ x: 0 }}
           exit={{ x: '100%' }}
           transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-          className="w-full md:w-[340px] md:max-xl:w-[260px] md:portrait:w-[212px]"
-          style={{
-            position: 'fixed',
-            top: 0,
-            right: 0,
-            height: '100vh',
-            display: 'flex',
-            flexDirection: 'column',
-            zIndex: 100,
-            fontFamily: "-apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif",
-          }}
+          className="w-full md:w-[340px] md:max-xl:w-[260px] md:portrait:w-[212px] queue-popup-overlay"
         >
           <GlassBar
-            className="absolute inset-0 w-full h-full border-none"
-            style={{ backgroundColor: 'rgba(32, 32, 33, 0.5)', borderRadius: '0px', boxShadow: 'none' }}
+            className="absolute inset-0 w-full h-full queue-glass-bar border-none"
           >
             <div className="flex flex-col h-full w-full relative">
             <div className="relative z-30 flex flex-col h-full w-full">
-              <style>{`
-        .queue-track-row {
-          display: flex;
-          align-items: center;
-          gap: 11px;
-          padding: 7px 10px;
-          border-radius: 10px;
-          cursor: pointer;
-          transition: background 0.12s ease;
-        }
-        .queue-track-row:hover {
-          background: rgba(255,255,255,0.08);
-        }
-        .queue-track-row:hover .queue-duration {
-          color: rgba(255,255,255,0.6);
-        }
-        .queue-track-row:hover .queue-drag-handle {
-          color: rgba(255,255,255,0.6);
-        }
-        .queue-list::-webkit-scrollbar { width: 4px; }
-        .queue-list::-webkit-scrollbar-track { background: transparent; }
-        .queue-list::-webkit-scrollbar-thumb {
-          background: rgba(255,255,255,0.15);
-          border-radius: 2px;
-        }
-      `}</style>
 
               {/* Header */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '16px 18px 14px',
-                borderBottom: '0.5px solid rgba(255,255,255,0.06)',
-                flexShrink: 0,
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div className="queue-header">
+                <div className="queue-header-left">
                   <button
-                    className="md:hidden"
+                    className="md:hidden queue-btn-close-mobile"
                     onClick={onClose}
-                    style={{
-                      background: 'none', border: 'none', padding: 0, color: '#fff',
-                      cursor: 'pointer', display: 'flex', alignItems: 'center'
-                    }}
                   >
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M18 6L6 18M6 6l12 12" />
                     </svg>
                   </button>
-                  <span style={{
-                    fontSize: '17px',
-                    fontWeight: 700,
-                    color: '#fff',
-                    letterSpacing: '-0.3px',
-                  }}>
+                  <span className="queue-header-title">
                     Up next
                   </span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div className="queue-header-right">
                   <button
                     onClick={controller.clearQueue}
-                    style={{
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      color: '#ff3b30',
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      padding: 0,
-                      lineHeight: 1,
-                    }}
+                    className="queue-btn-clear"
                   >
                     Clear
                   </button>
                   <button
                     onClick={controller.cycleRepeatMode}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      color: controller.repeatMode !== 'none' ? '#fff' : 'rgba(255,255,255,0.5)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      padding: 0,
-                      position: 'relative',
-                    }}
+                    className={`queue-btn-action ${controller.repeatMode !== 'none' ? 'active' : 'inactive'}`}
                     aria-label="Loop"
                   >
                     {/* Repeat / Infinity icon */}
@@ -175,15 +106,7 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
                       <path d="M21 13v2a4 4 0 0 1-4 4H3" />
                     </svg>
                     {controller.repeatMode === 'one' && (
-                      <span style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        fontSize: '10px',
-                        fontWeight: 'bold',
-                        color: '#fff',
-                      }}>
+                      <span className="queue-badge-repeat-one">
                         1
                       </span>
                     )}
@@ -191,15 +114,7 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
 
                   <button
                     onClick={player.toggleAutoplay}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      color: player.isAutoplayEnabled ? '#fff' : 'rgba(255,255,255,0.5)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      padding: 0,
-                    }}
+                    className={`queue-btn-action ${player.isAutoplayEnabled ? 'active' : 'inactive'}`}
                     aria-label="Autoplay"
                   >
                     <Infinity size={20} strokeWidth={2.5} />
@@ -208,24 +123,10 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
               </div>
 
               {/* Track list */}
-              <div
-                className="queue-list"
-                style={{
-                  flex: 1,
-                  overflowY: 'auto',
-                  padding: '6px 8px',
-                  scrollbarWidth: 'thin',
-                  scrollbarColor: 'rgba(255,255,255,0.15) transparent',
-                }}
-              >
+              <div className="queue-list">
                 {!controller.hasUpcomingTracks ? (
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    height: '160px',
-                  }}>
-                    <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.4)' }}>
+                  <div className="queue-empty-state">
+                    <p className="queue-empty-text">
                       No upcoming tracks
                     </p>
                   </div>
@@ -234,7 +135,12 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
                     <DndContext
                       sensors={sensors}
                       collisionDetection={closestCenter}
-                      onDragEnd={controller.handleDragEnd}
+                      onDragEnd={(e) => {
+                        const { active, over } = e;
+                        if (active && over) {
+                          controller.reorder(active.id.toString(), over.id.toString());
+                        }
+                      }}
                       modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
                     >
                       <SortableContext
@@ -242,7 +148,7 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
                         strategy={verticalListSortingStrategy}
                       >
                         {controller.manualItems.length > 0 && (
-                          <div style={{ padding: '8px', fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.5)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                          <div className="queue-section-title">
                             Playing Next
                           </div>
                         )}
@@ -250,7 +156,7 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
                           <SortableTrackRow
                             key={track.uniqueId}
                             track={track}
-                            onClick={() => controller.playTrack(track)}
+                            onClick={() => controller.playTrack(track, track.queueItemId)}
                           />
                         ))}
                       </SortableContext>
@@ -258,17 +164,7 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
 
                     {controller.autoplayItems.length > 0 && (
                       <>
-                        <div style={{
-                          padding: '16px 8px 8px',
-                          fontSize: '13px',
-                          fontWeight: 600,
-                          color: 'rgba(255,255,255,0.5)',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.5px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px'
-                        }}>
+                        <div className="queue-section-title-autoplay queue-section-title">
                           <span>Autoplay</span>
                           <Infinity size={14} strokeWidth={2.5} />
                         </div>
@@ -276,7 +172,7 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
                           <AutoplayTrackRow
                             key={track.uniqueId}
                             track={track}
-                            onClick={() => controller.playTrack(track)}
+                            onClick={() => controller.playTrack(track, track.queueItemId)}
                             onPromote={controller.promoteToManual}
                             onRemove={controller.removeFromQueue}
                           />

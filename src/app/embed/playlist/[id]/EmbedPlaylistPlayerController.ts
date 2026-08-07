@@ -1,6 +1,8 @@
 import { YouTubePlayerInstance, EmbedPlaylistTrack } from '@/types/components/embed';
 import { EmbedPlaylistPlayerState, EmbedPlaylistPlayerControllerOptions } from '@/types/controllers/embed';
 
+const API_BASE = process.env.NEXT_PUBLIC_EXPRESS_API_URL || process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || '';
+
 export class EmbedPlaylistPlayerController {
   private ytPlayer: YouTubePlayerInstance | null = null;
   private nativeAudio: HTMLAudioElement | null = null;
@@ -105,7 +107,7 @@ export class EmbedPlaylistPlayerController {
   private async playNativePreview(track: EmbedPlaylistTrack) {
     try {
       // 1. Resolve preview URL
-      const res = await fetch(`${(process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || process.env.NEXT_PUBLIC_EXPRESS_API_URL) || ''}/api/preview?title=${encodeURIComponent(track.name)}&artist=${encodeURIComponent(track.artistName)}`);
+      const res = await fetch(`${API_BASE}/api/preview?title=${encodeURIComponent(track.name)}&artist=${encodeURIComponent(track.artistName)}`);
       if (!res.ok || this.isDestroyed) throw new Error('Preview failed');
       const data = await res.json();
       
@@ -154,13 +156,13 @@ export class EmbedPlaylistPlayerController {
 
     try {
       const res = await fetch(
-        `/api/audio/resolve?title=${encodeURIComponent(track.name)}&artist=${encodeURIComponent(track.artistName)}${track.duration ? `&duration=${track.duration}` : ''}`
+        `${API_BASE}/api/audio/resolve?title=${encodeURIComponent(track.name)}&artist=${encodeURIComponent(track.artistName)}${track.duration ? `&duration=${track.duration}` : ''}`
       );
 
       let videoId: string | null = null;
       if (!res.ok) {
         const fallbackRes = await fetch(
-          `/api/audio/resolve?title=${encodeURIComponent(track.name)}&artist=${encodeURIComponent(track.artistName)}&fallback=1`
+          `${API_BASE}/api/audio/resolve?title=${encodeURIComponent(track.name)}&artist=${encodeURIComponent(track.artistName)}&fallback=1`
         );
         if (!fallbackRes.ok) throw new Error('Could not resolve');
         const fallbackData = await fallbackRes.json();

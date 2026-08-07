@@ -5,6 +5,8 @@ import { PlayerCache } from './PlayerCache';
 
 import { ResolveResult, ResolveResultType } from '@/types/player/resolver';
 
+const API_BASE = process.env.NEXT_PUBLIC_EXPRESS_API_URL || process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || '';
+
 // ─── Class ───
 export class TrackResolver {
   private controller: AbortController | null = null;
@@ -175,7 +177,7 @@ export class TrackResolver {
       const headers = await this.getAuthHeaders();
 
       const response = await fetch(
-        `/api/audio/resolve?title=${encodeURIComponent(track.name)}&artist=${encodeURIComponent(artistName)}&trackId=${encodeURIComponent(track.id)}&duration=${track.duration}&fallback=1`,
+        `${API_BASE}/api/audio/resolve?title=${encodeURIComponent(track.name)}&artist=${encodeURIComponent(artistName)}&trackId=${encodeURIComponent(track.id)}&duration=${track.duration}&fallback=1`,
         { signal, headers }
       );
 
@@ -210,7 +212,7 @@ export class TrackResolver {
       try {
         const artistName = track.artists.primary[0]?.name || '';
         const res = await fetch(
-          `/api/preview?title=${encodeURIComponent(track.name)}&artist=${encodeURIComponent(artistName)}`
+          `${API_BASE}/api/preview?title=${encodeURIComponent(track.name)}&artist=${encodeURIComponent(artistName)}`
         );
         if (res.ok) {
           const data = await res.json();

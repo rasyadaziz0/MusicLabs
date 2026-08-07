@@ -51,6 +51,7 @@ export default function LyricsUI({
 
     const handleScroll = () => {
       setIsUserScrolling(true);
+      if (scrollAnimRef.current) scrollAnimRef.current.stop();
       clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(() => {
         setIsUserScrolling(false);
@@ -80,24 +81,28 @@ export default function LyricsUI({
 
       // On mobile, position active lyric slightly higher (at 20%). On desktop, we also move it higher (at 25% instead of 50%).
       const isMobile = window.innerWidth < 768;
-      const offsetRatio = isMobile ? 0.20 : 0.20;
+      const offsetRatio = isMobile ? 0.35 : 0.35;
 
       const offset = el.offsetTop - (container.clientHeight * offsetRatio) + (el.clientHeight / 2);
-      
+
       // Stop previous animation if any
       if (scrollAnimRef.current) scrollAnimRef.current.stop();
-      
+
       // Custom "santai" spring animation instead of native smooth scroll
       scrollAnimRef.current = animate(container.scrollTop, offset, {
         type: 'spring',
-        stiffness: 70, // Semakin kecil, semakin santai
-        damping: 20,   // Mengurangi mantul-mantul
-        mass: 1.5,
+        stiffness: 200,
+        damping: 28,
+        mass: 1,
         onUpdate: (latest) => {
           container.scrollTop = latest;
         }
       });
     }
+
+    return () => {
+      if (scrollAnimRef.current) scrollAnimRef.current.stop();
+    };
   }, [activeIndex, lines, scrollRef, isUserScrolling]);
 
   return (

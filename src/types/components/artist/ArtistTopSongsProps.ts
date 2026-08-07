@@ -5,5 +5,5 @@ export interface ArtistTopSongsProps {
   isTracksLoading: boolean;
   currentTrackId?: string;
   isPlaying: boolean;
-  playTrack: (song: Song, list: Song[]) => void;
+  playTrack: (song: Song, list: Song[], index?: number | string) => void;
 }

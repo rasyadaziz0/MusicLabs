@@ -6,13 +6,9 @@ import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { useDominantColors } from '@/hooks/useDominantColors';
 import { type DominantColors } from '@/types/hooks/colors';
 
-// ── Context ────────────────────────────────────────────────────────────────
+import { ArtworkColorsContextType } from '@/types/context/artworkcolors';
 
-interface ArtworkColorsContextType {
-  colors: DominantColors | null;
-  prevColors: DominantColors | null;
-  isLoading: boolean;
-}
+// ── Context ────────────────────────────────────────────────────────────────
 
 const ArtworkColorsContext = createContext<ArtworkColorsContextType>({
   colors: null,

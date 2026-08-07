@@ -51,34 +51,48 @@ export class QueueManager {
     }
     return shuffled;
   }
-  private shuffleQueueKeepingCurrent(tracks: Song[], currentTrackId?: string): Song[] {
+  private shuffleQueueKeepingCurrent(tracks: Song[], currentQueueItemId?: string): Song[] {
     if (tracks.length <= 1) return [...tracks];
 
-    if (!currentTrackId) {
+    if (!currentQueueItemId) {
       return QueueManager.fisherYatesShuffle(tracks);
     }
 
-    const currentTrack = tracks.find(t => t.id === currentTrackId);
-    const rest = tracks.filter(t => t.id !== currentTrackId);
+    const currentTrack = tracks.find(t => t.queueItemId === currentQueueItemId);
+    const rest = tracks.filter(t => t.queueItemId !== currentQueueItemId);
     const shuffledRest = QueueManager.fisherYatesShuffle(rest);
 
     return currentTrack ? [currentTrack, ...shuffledRest] : shuffledRest;
   }
 
+  private assignQueueItemId(track: Song): Song {
+    return track.queueItemId ? track : { ...track, queueItemId: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) };
+  }
+
   // ── Mutations ──
 
-  setQueue(tracks: Song[], trackId?: string): void {
-    this._originalQueue = [...tracks];
+  setQueue(tracks: Song[], target?: number | string): void {
+    const identifiedTracks = tracks.map(t => this.assignQueueItemId(t));
+    this._originalQueue = [...identifiedTracks];
 
-    if (this._isShuffled) {
-      this._queue = this.shuffleQueueKeepingCurrent(tracks, trackId);
-    } else {
-      this._queue = [...tracks];
+    let targetQueueItemId: string | undefined;
+    if (typeof target === 'string') {
+      targetQueueItemId = target;
+    } else if (typeof target === 'number' && identifiedTracks[target]) {
+      targetQueueItemId = identifiedTracks[target].queueItemId;
     }
 
-    if (trackId !== undefined) {
-      const index = this._queue.findIndex((s) => s.id === trackId);
-      this._queueIndex = index !== -1 ? index : 0;
+    if (this._isShuffled) {
+      this._queue = this.shuffleQueueKeepingCurrent(identifiedTracks, targetQueueItemId);
+    } else {
+      this._queue = [...identifiedTracks];
+    }
+
+    if (targetQueueItemId !== undefined) {
+      const idx = this._queue.findIndex((s) => s.queueItemId === targetQueueItemId);
+      this._queueIndex = idx !== -1 ? idx : 0;
+    } else {
+      this._queueIndex = this._queue.length > 0 ? 0 : -1;
     }
     this.emit();
   }
@@ -98,13 +112,13 @@ export class QueueManager {
 
     if (this._isShuffled) {
       // Shuffle: keep current track at current position (front of remaining)
-      this._queue = this.shuffleQueueKeepingCurrent(this._originalQueue, currentTrack?.id);
+      this._queue = this.shuffleQueueKeepingCurrent(this._originalQueue, currentTrack?.queueItemId);
       this._queueIndex = 0; // current track is at position 0
     } else {
       // Unshuffle: restore original order
       this._queue = [...this._originalQueue];
       if (currentTrack) {
-        const restoredIndex = this._queue.findIndex(s => s.id === currentTrack.id);
+        const restoredIndex = this._queue.findIndex(s => s.queueItemId === currentTrack.queueItemId);
         this._queueIndex = restoredIndex !== -1 ? restoredIndex : 0;
       }
     }
@@ -115,9 +129,10 @@ export class QueueManager {
   shuffleAndPlay(tracks: Song[]): Song | null {
     if (tracks.length === 0) return null;
 
-    this._originalQueue = [...tracks];
+    const identifiedTracks = tracks.map(t => this.assignQueueItemId(t));
+    this._originalQueue = [...identifiedTracks];
     this._isShuffled = true;
-    this._queue = QueueManager.fisherYatesShuffle(tracks);
+    this._queue = QueueManager.fisherYatesShuffle(identifiedTracks);
     this._queueIndex = 0;
     this.emit();
 
@@ -142,7 +157,7 @@ export class QueueManager {
       this._queue = this._queue.slice(0, this._queueIndex + 1);
 
       if (currentTrack) {
-        const origIdx = this._originalQueue.findIndex(t => t.id === currentTrack.id);
+        const origIdx = this._originalQueue.findIndex(t => t.queueItemId === currentTrack.queueItemId);
         if (origIdx !== -1) {
           this._originalQueue = this._originalQueue.slice(0, origIdx + 1);
         }
@@ -159,14 +174,15 @@ export class QueueManager {
     
     // Find the first autoplay track to insert before it (so manual tracks stay together)
     const firstAutoplayIdx = this._queue.findIndex(t => t.isAutoplay);
+    const trackToAdd = this.assignQueueItemId({ ...track, isAutoplay: false });
     if (firstAutoplayIdx !== -1) {
       this._queue = [
         ...this._queue.slice(0, firstAutoplayIdx),
-        { ...track, isAutoplay: false },
+        trackToAdd,
         ...this._queue.slice(firstAutoplayIdx)
       ];
     } else {
-      this._queue = [...this._queue, { ...track, isAutoplay: false }];
+      this._queue = [...this._queue, trackToAdd];
     }
     
     // Also update original queue
@@ -174,22 +190,27 @@ export class QueueManager {
     if (origFirstAutoplayIdx !== -1) {
       this._originalQueue = [
         ...this._originalQueue.slice(0, origFirstAutoplayIdx),
-        { ...track, isAutoplay: false },
+        trackToAdd,
         ...this._originalQueue.slice(origFirstAutoplayIdx)
       ];
     } else {
-      this._originalQueue = [...this._originalQueue, { ...track, isAutoplay: false }];
+      this._originalQueue = [...this._originalQueue, trackToAdd];
     }
 
     this.emit();
   }
 
-  removeFromQueue(trackId: string): void {
-    const idx = this._queue.findIndex((t, i) => t.id === trackId && i > this._queueIndex);
-    if (idx !== -1) {
-      this._queue.splice(idx, 1);
+  removeFromQueue(trackId: string, queueItemId?: string): void {
+    // If queueItemId is provided, use it for exact targeting. Otherwise fallback to first instance of trackId.
+    const predicate = queueItemId 
+      ? (t: Song) => t.queueItemId === queueItemId 
+      : (t: Song) => t.id === trackId;
       
-      const origIdx = this._originalQueue.findIndex(t => t.id === trackId);
+    const idx = this._queue.findIndex((t, i) => predicate(t) && i > this._queueIndex);
+    if (idx !== -1) {
+      const removed = this._queue.splice(idx, 1)[0];
+      
+      const origIdx = this._originalQueue.findIndex(t => t.queueItemId === removed.queueItemId);
       if (origIdx !== -1) {
         this._originalQueue.splice(origIdx, 1);
       }
@@ -197,8 +218,12 @@ export class QueueManager {
     }
   }
 
-  promoteToManual(trackId: string): void {
-    const idx = this._queue.findIndex((t, i) => t.id === trackId && i > this._queueIndex);
+  promoteToManual(trackId: string, queueItemId?: string): void {
+    const predicate = queueItemId 
+      ? (t: Song) => t.queueItemId === queueItemId 
+      : (t: Song) => t.id === trackId;
+
+    const idx = this._queue.findIndex((t, i) => predicate(t) && i > this._queueIndex);
     if (idx !== -1) {
       this._queue[idx] = { ...this._queue[idx], isAutoplay: false };
       
@@ -211,7 +236,7 @@ export class QueueManager {
         this._queue.push(track);
       }
 
-      const origIdx = this._originalQueue.findIndex(t => t.id === trackId);
+      const origIdx = this._originalQueue.findIndex(t => t.queueItemId === track.queueItemId);
       if (origIdx !== -1) {
         this._originalQueue[origIdx] = { ...this._originalQueue[origIdx], isAutoplay: false };
       }
@@ -223,7 +248,7 @@ export class QueueManager {
     if (!tracks || tracks.length === 0) return;
     
     const existingIds = new Set(this._queue.map(t => t.id));
-    const taggedNewTracks = this.autoplayManager.getTracksToAppend(tracks, existingIds);
+    const taggedNewTracks = this.autoplayManager.getTracksToAppend(tracks, existingIds).map(t => this.assignQueueItemId(t));
 
     if (taggedNewTracks.length === 0) return;
 
@@ -241,7 +266,7 @@ export class QueueManager {
     
     if (newTracks.length === 0) return;
 
-    const taggedNewTracks = newTracks.map(t => ({ ...t, isAutoplay: t.isAutoplay ?? true }));
+    const taggedNewTracks = newTracks.map(t => this.assignQueueItemId({ ...t, isAutoplay: t.isAutoplay ?? true }));
 
     this._queue = [...this._queue, ...taggedNewTracks];
     this._originalQueue = [...this._originalQueue, ...taggedNewTracks];
@@ -254,7 +279,7 @@ export class QueueManager {
       return;
     }
 
-    const trackToAdd = { ...track, isAutoplay: false };
+    const trackToAdd = this.assignQueueItemId({ ...track, isAutoplay: false });
 
     // Insert after current track in active queue
     const insertIdx = this._queueIndex >= 0 ? this._queueIndex + 1 : this._queue.length;
@@ -269,7 +294,7 @@ export class QueueManager {
     let origInsertIdx = this._originalQueue.length;
     
     if (currentTrack) {
-      const foundIdx = this._originalQueue.findIndex((t) => t.id === currentTrack.id);
+      const foundIdx = this._originalQueue.findIndex((t) => t.queueItemId === currentTrack.queueItemId);
       if (foundIdx !== -1) {
         origInsertIdx = foundIdx + 1;
       }
@@ -322,7 +347,7 @@ export class QueueManager {
           this._queue = QueueManager.fisherYatesShuffle(this._originalQueue);
 
           // Avoid starting with the same track that just ended
-          if (this._queue.length > 1 && this._queue[0].id === currentTrack?.id) {
+          if (this._queue.length > 1 && this._queue[0].queueItemId === currentTrack?.queueItemId) {
             const swapIdx = 1 + Math.floor(Math.random() * (this._queue.length - 1));
             [this._queue[0], this._queue[swapIdx]] = [this._queue[swapIdx], this._queue[0]];
           }

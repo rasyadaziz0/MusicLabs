@@ -2,6 +2,8 @@
 
 import { Loader2, Save, Camera, Upload, Crop } from 'lucide-react';
 import { ChevronLeft } from 'lucide-react';
+
+import { API_BASE } from '@/lib/config';
 import Image from 'next/image';
 import { InstagramIcon, TikTokIcon, XIcon } from '@/components/icons/SocialIcons';
 import { useEditProfileForm } from '@/hooks/useEditProfileForm';
@@ -96,7 +98,7 @@ export default function EditProfilePage() {
               <button
                 type="button"
                 onClick={() => {
-                  const srcToAdjust = originalImages.banner || (form.bannerUrl ? `/api/proxy?url=${encodeURIComponent(form.bannerUrl)}` : null);
+                  const srcToAdjust = originalImages.banner || (form.bannerUrl ? `${API_BASE}/api/proxy?url=${encodeURIComponent(form.bannerUrl)}` : null);
                   if (srcToAdjust) {
                     setCropModal({ isOpen: true, src: srcToAdjust, type: 'banner' });
                   }
@@ -129,7 +131,7 @@ export default function EditProfilePage() {
                 <button
                   type="button"
                   onClick={() => {
-                    const srcToAdjust = originalImages.avatar || (form.avatarUrl ? `/api/proxy?url=${encodeURIComponent(form.avatarUrl)}` : null);
+                    const srcToAdjust = originalImages.avatar || (form.avatarUrl ? `${API_BASE}/api/proxy?url=${encodeURIComponent(form.avatarUrl)}` : null);
                     if (srcToAdjust) {
                       setCropModal({ isOpen: true, src: srcToAdjust, type: 'avatar' });
                     } else {

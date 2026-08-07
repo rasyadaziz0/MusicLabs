@@ -6,6 +6,8 @@ import { supabase } from './supabase/client';
 
 const CACHE_KEY_PREFIX = 'yt_resolve_v7_';
 
+import { API_BASE } from './config';
+
 type ResolveOptions = {
   signal?: AbortSignal;
   duration?: number;
@@ -39,14 +41,14 @@ export async function resolveToYoutubeId(
 
     // 2. Fetch dari internal NodeJS API endpoint yang menggunakan youtube.music.search
     let res = await fetch(
-      `/api/audio/resolve?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}${durationParam}`,
+      `${API_BASE}/api/audio/resolve?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}${durationParam}`,
       { signal: options.signal, headers }
     );
 
     if (!res.ok) {
       console.warn(`YouTube resolve primary failed for: ${title} - ${artist}, trying fallback...`);
       res = await fetch(
-        `/api/audio/resolve?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}&fallback=1${durationParam}`,
+        `${API_BASE}/api/audio/resolve?title=${encodeURIComponent(title)}&artist=${encodeURIComponent(artist)}&fallback=1${durationParam}`,
         { signal: options.signal, headers }
       );
     }

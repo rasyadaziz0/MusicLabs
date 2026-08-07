@@ -5,13 +5,14 @@ import { supabase } from '@/lib/supabase/client';
 import { useFeatureFlags } from '@/context/FeatureFlagsContext';
 import { useImport } from '@/context/ImportContext';
 import { ScrapedPlaylist } from '@/types/services/scrapers';
+import { MusicApiService } from '@/lib/api/MusicApiService';
 
 export function usePlaylistImport() {
   const { flags } = useFeatureFlags();
   const { user, signInWithGoogle } = useAuth();
   const { startImport, isImporting, importProgress } = useImport();
   const searchParams = useSearchParams();
-  
+
   const [loading, setLoading] = useState(false);
   const [importMode, setImportMode] = useState<'auth' | 'url'>('url');
   const [spotifyUrl, setSpotifyUrl] = useState('');
@@ -65,18 +66,12 @@ export function usePlaylistImport() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${(process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || process.env.NEXT_PUBLIC_EXPRESS_API_URL) || ''}/api/import/scrape`, {
+      const data = await MusicApiService.apiFetchInternal<any>('/api/import/scrape', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: spotifyUrl })
       });
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Gagal mengambil data dari URL.');
-      }
-
-      setScrapedResult(data.data);
+      setScrapedResult(data);
     } catch (err: any) {
       setErrorMessage(err.message || 'Gagal scraping URL playlist. Pastikan playlist bersifat publik.');
     } finally {

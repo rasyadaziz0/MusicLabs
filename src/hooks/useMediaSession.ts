@@ -3,8 +3,6 @@ import { Song } from '@/types/music';
 import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { UseMediaSessionProps } from '@/types/hooks/media';
 
-
-
 export function useMediaSession({
   currentTrack,
   togglePlay,

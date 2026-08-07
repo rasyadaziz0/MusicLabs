@@ -2,9 +2,11 @@
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { useAuth } from './AuthContext';
-import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
+import { SettingsService } from '@/lib/services/SettingsService';
 
 import { UserSettings } from '@/types/context/settings';
+
+import { SettingsContextType } from '@/types/context/settings';
 
 const DEFAULT_SETTINGS: UserSettings = {
   lyricsFontSize: 'medium',
@@ -15,12 +17,6 @@ const DEFAULT_SETTINGS: UserSettings = {
 };
 
 const STORAGE_KEY = 'userSettings';
-
-interface SettingsContextType {
-  settings: UserSettings;
-  updateSettings: (partial: Partial<UserSettings>) => void;
-  isLoaded: boolean;
-}
 
 const SettingsContext = createContext<SettingsContextType>({
   settings: DEFAULT_SETTINGS,
@@ -35,14 +31,11 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
   // Load settings: localStorage first (instant), then Supabase (authoritative)
   useEffect(() => {
+    const settingsService = SettingsService.getInstance();
+    
     // 1. Instant load from localStorage
-    try {
-      const cached = localStorage.getItem(STORAGE_KEY);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        setSettings(prev => ({ ...prev, ...parsed }));
-      }
-    } catch { /* ignore */ }
+    const localSettings = settingsService.getLocalSettings(DEFAULT_SETTINGS);
+    setSettings(localSettings);
 
     // 2. If user is logged in, fetch from Supabase (source of truth)
     if (authLoading) return;
@@ -52,17 +45,11 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    ProfileRepository.getInstance().getProfile(user.id).then(data => {
-      if (data) {
-        const loaded: UserSettings = {
-          lyricsFontSize: (data.lyrics_font_size as UserSettings['lyricsFontSize']) || 'medium',
-          romanizationEnabled: data.romanization_enabled ?? true,
-          isPublic: data.is_public ?? true,
-          showNowPlaying: data.show_now_playing ?? true,
-          showRecentlyPlayed: data.show_recently_played ?? true,
-        };
+    settingsService.fetchRemoteSettings(user.id).then(remoteData => {
+      if (remoteData) {
+        const loaded: UserSettings = { ...localSettings, ...remoteData };
         setSettings(loaded);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(loaded));
+        settingsService.saveLocalSettings(loaded);
       }
       setIsLoaded(true);
     }).catch(() => {
@@ -73,9 +60,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const updateSettings = useCallback((partial: Partial<UserSettings>) => {
     setSettings(prev => {
       const next = { ...prev, ...partial };
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      } catch { /* ignore */ }
+      SettingsService.getInstance().saveLocalSettings(next);
       return next;
     });
   }, []);

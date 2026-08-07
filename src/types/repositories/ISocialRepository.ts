@@ -12,5 +12,5 @@ export interface ISocialRepository {
   getFollowers(userId: string): Promise<UserProfile[]>;
   getFollowing(userId: string): Promise<UserProfile[]>;
   getRecentlyPlayedByFollows(userId: string): Promise<{ track: Song; played_at: string; user: UserProfile }[]>;
-  getSocialFeed(userId: string): Promise<SocialFeedItem[]>;
+  getSocialFeed(): Promise<SocialFeedItem[]>;
 }

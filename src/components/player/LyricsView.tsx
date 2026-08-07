@@ -10,7 +10,7 @@ export default function LyricsView({ onClose }: { onClose?: () => void }) {
   const { currentTrack, currentTime, seek, duration } = usePlayer();
   const trackId = currentTrack?.id ?? null;
   const { lines, isSynced, isLoading } = useLyrics(currentTrack, duration);
-  const { activeIndex, scrollRef } = useLyricsScroll({ lines, isSynced, currentTime, trackId });
+  const { activeIndex, scrollRef } = useLyricsScroll({ lines, isSynced, currentTime, trackId, disableScroll: true });
   const romanizations = useRomanization(lines, trackId);
 
   if (!currentTrack) return null;

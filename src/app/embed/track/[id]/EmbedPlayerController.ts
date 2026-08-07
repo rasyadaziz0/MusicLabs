@@ -1,6 +1,8 @@
 import { YouTubePlayerInstance } from '@/types/components/embed';
 import { EmbedPlayerState, EmbedPlayerControllerOptions } from '@/types/controllers/embed';
 
+const API_BASE = process.env.NEXT_PUBLIC_EXPRESS_API_URL || process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || '';
+
 export class EmbedPlayerController {
   private ytPlayer: YouTubePlayerInstance | null = null;
   private nativeAudio: HTMLAudioElement | null = null;
@@ -65,13 +67,13 @@ export class EmbedPlayerController {
     try {
       const { trackName, artistName, duration } = this.options;
       const res = await fetch(
-        `/api/audio/resolve?title=${encodeURIComponent(trackName)}&artist=${encodeURIComponent(artistName)}${duration ? `&duration=${duration}` : ''}`
+        `${API_BASE}/api/audio/resolve?title=${encodeURIComponent(trackName)}&artist=${encodeURIComponent(artistName)}${duration ? `&duration=${duration}` : ''}`
       );
 
       let videoId: string | null = null;
       if (!res.ok) {
         const fallbackRes = await fetch(
-          `/api/audio/resolve?title=${encodeURIComponent(trackName)}&artist=${encodeURIComponent(artistName)}&fallback=1`
+          `${API_BASE}/api/audio/resolve?title=${encodeURIComponent(trackName)}&artist=${encodeURIComponent(artistName)}&fallback=1`
         );
         if (!fallbackRes.ok) throw new Error('Could not resolve track');
         const fallbackData = await fallbackRes.json();

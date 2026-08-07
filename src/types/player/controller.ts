@@ -30,7 +30,7 @@ export interface QueueContextAdapter {
   queue: Song[];
   queueIndex: number;
   repeatMode: 'none' | 'one' | 'all';
-  playTrack: (track: Song, queue?: Song[]) => void;
+  playTrack: (track: Song, queue?: Song[], target?: number | string) => void;
   clearQueue: () => void;
   cycleRepeatMode: () => void;
   reorderQueue: (startIndex: number, endIndex: number) => void;

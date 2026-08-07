@@ -58,6 +58,7 @@ export interface Song {
   spotifyId?: string;       // Spotify track ID for reference
   preview?: string;         // 30s preview URL (Spotify or iTunes)
   youtubeId?: string;       // Resolved YouTube video ID
+  queueItemId?: string;     // Unique identifier for duplicate songs in queue
   isRadio?: boolean;        // True if this is a radio stream
   radioStreamUrl?: string;  // Direct stream URL for radio
   radioMeta?: {             // Live metadata from icecast stream

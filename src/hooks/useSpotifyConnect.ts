@@ -114,7 +114,7 @@ export function useSpotifyConnect(options: UseSpotifyConnectOptions) {
             track: msg.track,
             isPlaying: msg.isPlaying,
             position: msg.position,
-            timestamp: msg.timestamp,
+            timestamp: Date.now(), // Use local time to avoid clock skew
             volume: msg.volume,
             duration: msg.duration,
             queue: msg.queue,
@@ -129,7 +129,7 @@ export function useSpotifyConnect(options: UseSpotifyConnectOptions) {
               ...prev,
               isPlaying: msg.isPlaying,
               position: msg.position,
-              timestamp: msg.timestamp,
+              timestamp: Date.now(), // Use local time to avoid clock skew
               volume: msg.volume,
             };
           });

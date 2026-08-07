@@ -46,6 +46,7 @@ export class LyricStyleManager {
     if (isUserScrolling) {
       return {
         fontSize: this.UNIFORM_FONT,
+        fontWeight: 700,
         color: '#fff',
         opacity: isActive ? 1 : 0.5,
         scale: isActive ? 1 : 0.955,
@@ -59,6 +60,7 @@ export class LyricStyleManager {
     if (isActive) {
       return {
         fontSize: this.UNIFORM_FONT,
+        fontWeight: 700,
         color: '#fff',
         opacity: 1,
         scale: 1,
@@ -71,6 +73,7 @@ export class LyricStyleManager {
     if (isPast) {
       return {
         fontSize: this.UNIFORM_FONT,
+        fontWeight: 700,
         color: '#fff',
         opacity: 0,
         scale: 0.955,
@@ -85,17 +88,18 @@ export class LyricStyleManager {
     
     if (dist === 1) {
       futureOpacity = 0.4;
-      futureBlur = 'blur(1.5px)';
+      futureBlur = 'blur(1.2px)';
     } else if (dist === 2) {
       futureOpacity = 0.2;
-      futureBlur = 'blur(3px)';
+      futureBlur = 'blur(2.5px)';
     } else if (dist >= 3) {
-      futureOpacity = 0.08;
-      futureBlur = 'blur(5px)';
+      futureOpacity = 0.1;
+      futureBlur = 'blur(4px)';
     }
 
     return {
       fontSize: this.UNIFORM_FONT,
+      fontWeight: 700,
       color: '#fff',
       opacity: futureOpacity,
       scale: 0.955,
@@ -131,6 +135,7 @@ export class LyricStyleManager {
       opacity: { type: 'tween', duration: 0.45, ease: [0.4, 0, 0.2, 1] },
       scale: { type: 'tween', duration: 0.55, ease: [0.34, 1.4, 0.5, 1] },
       color: { type: 'tween', duration: 0.4, ease: [0.4, 0, 0.2, 1] },
+      filter: { type: 'tween', duration: 0.45, ease: [0.4, 0, 0.2, 1] },
     };
   }
 

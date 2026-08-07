@@ -32,7 +32,7 @@ export function RecentlyPlayedSection({ recentlyPlayedSongs, isRecentLoading, us
               <TrackCard
                 key={`${song.id}-recent-${index}`}
                 song={song}
-                onPlay={() => playTrack(song, recentlyPlayedSongs)}
+                onPlay={() => playTrack(song, recentlyPlayedSongs, index)}
                 priority={index < 4}
               />
             ))

@@ -142,9 +142,20 @@ export class MusicApiService {
 
 // ── Lyrics (stub) ─────────────────────────────────────────────────
 
-  static getSongLyrics = async (_trackId: string): Promise<{ lyrics: string } | null> => {
-  return null;
-};
+  static getSongLyrics = async (track: Song): Promise<{ lyrics: string, type?: 'plain' | 'lrc' | 'yrc', synced?: boolean } | null> => {
+    try {
+      const params = new URLSearchParams({
+        title: track.name,
+        artist: track.artists.primary[0]?.name || '',
+        album: track.album?.name || '',
+        duration: Math.round(track.duration).toString()
+      });
+      const res = await MusicApiService.apiFetchInternal<any>(`/api/lyrics?${params.toString()}`);
+      return res ? res : null;
+    } catch {
+      return null;
+    }
+  };
 
 // ── Audio resolve ──────────────────────────────────────────────────
 
