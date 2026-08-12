@@ -1,8 +1,8 @@
 import { MusicApiService } from '@/lib/api/MusicApiService';
-import { SupabaseClient } from '@supabase/supabase-js';
+import { PlaylistRecord, PlaylistTrackRow } from '@/types/models/Playlist';
 import { Song } from '@/types/music';
 import { IPlaylistRepository } from '@/types/repositories/IPlaylistRepository';
-import { PlaylistRecord, PlaylistTrackRow } from '@/types/models/Playlist';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 export class PlaylistRepository implements IPlaylistRepository {
   constructor(private supabase: SupabaseClient) {}

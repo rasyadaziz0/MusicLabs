@@ -1,3 +1,4 @@
+
 export interface NowPlayingProps {
   isOpen: boolean;
   onClose: () => void;

@@ -1,14 +1,14 @@
 'use client';
 
+import { LibraryEmptyState } from '@/components/library/LibraryEmptyState';
+import { LibrarySearchBar } from '@/components/library/LibrarySearchBar';
+import { CustomSelect } from '@/components/ui/CustomSelect';
+import { useAuth } from '@/context/AuthContext';
 import { useLibraryAlbums } from '@/hooks/library/useLibraryAlbums';
-import { useMemo, useState } from 'react';
+import { ChevronLeft, Disc3 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronLeft, Disc3 } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
-import { LibrarySearchBar } from '@/components/library/LibrarySearchBar';
-import { LibraryEmptyState } from '@/components/library/LibraryEmptyState';
-import { CustomSelect } from '@/components/ui/CustomSelect';
+import { useMemo, useState } from 'react';
 
 type SortMode = 'title' | 'artist' | 'year';
 

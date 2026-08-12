@@ -1,10 +1,10 @@
 'use client';
 
-import { LrcHelper } from '@/lib/utils/LrcHelper';
-import { useState, useEffect, useRef } from 'react';
-import { LrcLine } from '@/types/utils/lrc';
-import { Song } from '@/types/music';
 import { CachedLyrics } from '@/types/hooks/lyrics';
+import { Song } from '@/types/music';
+import { LrcLine } from '@/types/utils/lrc';
+import { useEffect, useRef, useState } from 'react';
+import * as LrcHelper from '../lib/lyrics/lrc';
 
 // ── In-memory cache & dedup ──────────────────────────────────────
 

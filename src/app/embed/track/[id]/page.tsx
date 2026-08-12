@@ -1,8 +1,8 @@
+import { trackResolver } from '@/lib/services/TrackPageResolverService';
+import { createClient } from '@/lib/supabase/server';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { Metadata } from 'next';
 import { cache } from 'react';
-import { trackResolver } from '@/lib/services/TrackPageResolverService';
-import { ImageHelper } from '@/lib/utils/ImageHelper';
-import { createClient } from '@/lib/supabase/server';
 import EmbedPlayer from './EmbedPlayer';
 
 const getTrack = cache(async (trackId: string) => {

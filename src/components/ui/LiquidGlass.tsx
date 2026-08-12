@@ -1,11 +1,32 @@
 'use client';
+import React from 'react';
 // @ts-nocheck
 import { StyleHelper } from '@/lib/utils/StyleHelper';
 import { motion } from 'framer-motion';
-import type React from 'react';
-import { useState, forwardRef } from 'react';
-import { GlassBarProps } from '@/types/components/ui/GlassBarProps';
-import { LiquidGlassCardProps } from '@/types/components/ui/LiquidGlassCardProps';
+import { forwardRef, useState } from 'react';
+
+export interface LiquidGlassCardProps {
+  children: React.ReactNode;
+  className?: string;
+  draggable?: boolean;
+  expandable?: boolean;
+  width?: string;
+  height?: string;
+  expandedWidth?: string;
+  expandedHeight?: string;
+  blurIntensity?: 'sm' | 'md' | 'lg' | 'xl';
+  shadowIntensity?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  borderRadius?: string;
+  glowIntensity?: 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  style?: React.CSSProperties;
+}
+
+
+export interface GlassBarProps extends React.HTMLAttributes<HTMLDivElement> {
+  children?: React.ReactNode;
+  refraction?: boolean;
+}
+
 export const GlassBar = forwardRef<HTMLDivElement, GlassBarProps>(
   ({ children, className, refraction = true, style, ...props }, ref) => {
     return (

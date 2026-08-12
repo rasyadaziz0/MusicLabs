@@ -1,6 +1,6 @@
+import { DeviceInfo } from '@/types/connect';
 import { Song } from '@/types/music';
 import { RadioMeta } from '@/types/player/engine';
-import { DeviceInfo } from '@/types/connect';
 
 export interface PlayerContextType {
   currentTrack: Song | null;

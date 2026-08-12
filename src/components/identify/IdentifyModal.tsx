@@ -1,12 +1,18 @@
 'use client';
 
-import { useEffect } from 'react';
-import { X, AudioLines, Mic, LogIn } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useIdentifyController } from '@/hooks/useIdentifyController';
-import { IdentifyStates } from './ui/IdentifyStates';
+import { AudioLines, LogIn, Mic, X } from 'lucide-react';
+import { useEffect } from 'react';
 import { IdentifyResults } from './ui/IdentifyResults';
-import { IdentifyModalProps } from '@/types/components/identify/IdentifyModalProps';
+import { IdentifyStates } from './ui/IdentifyStates';
+
+export interface IdentifyModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+
 export default function IdentifyModal({ isOpen, onClose }: IdentifyModalProps) {
   const { user, loading: authLoading, signInWithGoogle } = useAuth();
   const isAuthenticated = !!user;

@@ -1,16 +1,15 @@
 'use client';
 
-import { createContext, useContext, useEffect, useRef, useReducer, useCallback, useState } from 'react';
-import { Song } from '@/types/music';
-import { RadioMeta } from '@/types/player/engine';
-import { PlayerController, INITIAL_STATE } from '@/lib/player/PlayerController';
-import { PlayerState } from '@/types/player/controller';
-import { useAuth } from './AuthContext';
 import { useMediaSession } from '@/hooks/useMediaSession';
 import { usePresenceBroadcast } from '@/hooks/usePresenceBroadcast';
 import { useSpotifyConnect } from '@/hooks/useSpotifyConnect';
-import { DeviceInfo, RemoteCommandType, HandoffPayload } from '@/types/connect';
+import { INITIAL_STATE, PlayerController } from '@/lib/player/PlayerController';
 import '@/lib/utils/portalRoot';
+import { HandoffPayload, RemoteCommandType } from '@/types/connect';
+import { Song } from '@/types/music';
+import { PlayerState } from '@/types/player/controller';
+import { createContext, useCallback, useContext, useEffect, useReducer, useRef, useState } from 'react';
+import { useAuth } from './AuthContext';
 
 import { PlayerContextType } from '@/types/context/player';
 

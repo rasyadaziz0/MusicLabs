@@ -1,26 +1,24 @@
 'use client';
 import { ArtistParser } from '@/lib/utils/ArtistParser';
-
-import { MusicApiService } from '@/lib/api/MusicApiService';
+import { SearchArtistResult } from '@/types/hooks/search';
+import { Song } from '@/types/music';
+import { TopResultGridItem } from '@/components/search/TopResultGridItem';
+import AddToPlaylistButton from '@/components/ui/AddToPlaylistButton';
+import AddToQueueButton from '@/components/ui/AddToQueueButton';
+import { AppleMusicTrackList } from '@/components/ui/AppleMusicTrackList';
+import { HorizontalScrollSection } from '@/components/ui/HorizontalScrollSection';
+import TrackLikeButton from '@/components/ui/TrackLikeButton';
+import { usePlayer } from '@/context/PlayerContext';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { SlugHelper } from '@/lib/utils/SlugHelper';
-import { useState, useMemo } from 'react';
-import { Search as SearchIcon, Share, Link2, ChevronRight, Play, MoreHorizontal } from 'lucide-react';
 import { gooeyToast as toast } from 'goey-toast';
+import { ChevronRight, Link2, Search as SearchIcon, Share } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { AppleMusicTrackList } from '@/components/ui/AppleMusicTrackList';
-import TrackLikeButton from '@/components/ui/TrackLikeButton';
-import AddToPlaylistButton from '@/components/ui/AddToPlaylistButton';
-import AddToQueueButton from '@/components/ui/AddToQueueButton';
-import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
-import { ImageHelper } from '@/lib/utils/ImageHelper';
-import { Song } from '@/types/music';
-import { SearchArtistResult } from '@/types/hooks/search';
-import { usePlayer } from '@/context/PlayerContext';
-import { HorizontalScrollSection } from '@/components/ui/HorizontalScrollSection';
-import { TopResultGridItem } from '@/components/search/TopResultGridItem';
-import { MusicSearchResultsProps } from '@/types/components/search/MusicSearchResultsProps';
+import { useMemo, useState } from 'react';
+import { MusicSearchResultsProps } from "@/types/components/search/MusicSearchResultsProps";
+
 export function MusicSearchResults({
   isLoading,
   rankedArtists,

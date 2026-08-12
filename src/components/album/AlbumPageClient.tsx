@@ -1,19 +1,31 @@
 'use client';
-
-import { usePlayer } from '@/context/PlayerContext';
-import { gooeyToast as toast } from 'goey-toast';
-import { MoreHorizontal, Share, Code, Link2 } from 'lucide-react';
-import { escapeHtmlAttr } from '@/lib/utils/escapeHtml';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useState, useEffect, useRef } from 'react';
 import { Song } from '@/types/music';
-import TrackLikeButton from '@/components/ui/TrackLikeButton';
-import AddToQueueButton from '@/components/ui/AddToQueueButton';
+
 import AddToPlaylistButton from '@/components/ui/AddToPlaylistButton';
+import AddToQueueButton from '@/components/ui/AddToQueueButton';
 import { AppleMusicHeader } from '@/components/ui/AppleMusicHeader';
 import { AppleMusicTrackList } from '@/components/ui/AppleMusicTrackList';
-import { AlbumPageClientProps } from '@/types/components/album/AlbumPageClientProps';
+import TrackLikeButton from '@/components/ui/TrackLikeButton';
+import { usePlayer } from '@/context/PlayerContext';
+import { escapeHtmlAttr } from '@/lib/utils/escapeHtml';
+import { gooeyToast as toast } from 'goey-toast';
+import { Code, Link2, MoreHorizontal, Share } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
+
+export interface AlbumPageClientProps {
+  albumId: string;
+  albumTitle: string;
+  albumArtist: string;
+  albumArtistId: string | null;
+  coverUrl: string;
+  releaseYear: string;
+  trackCount: number;
+  tracks: Song[];
+}
+
+
 export default function AlbumPageClient({
   albumId,
   albumTitle,

@@ -1,10 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { AudioLines } from 'lucide-react';
-import { useSearchParams, useRouter, usePathname } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import IdentifyModal from './IdentifyModal';
-import { IdentifyButtonProps } from '@/types/components/identify/IdentifyButtonProps';
+
+export interface IdentifyButtonProps {
+  /** Visual variant */
+  variant?: 'sidebar' | 'mobile';
+  /** Custom className override */
+  className?: string;
+}
+
+
 export default function IdentifyButton({ variant = 'sidebar', className }: IdentifyButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const searchParams = useSearchParams();

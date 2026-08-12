@@ -1,24 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { useSettings } from '@/context/SettingsContext';
 import { useTranslation } from '@/context/LanguageContext';
+import { useSettings } from '@/context/SettingsContext';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
-import { ChevronLeft, Loader2, Save } from 'lucide-react';
-import { gooeyToast as toast } from 'goey-toast';
-import { supabase } from '@/lib/supabase/client';
 import { DeleteAccountModal } from '@/components/profile/DeleteAccountModal';
-import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
+import { supabase } from '@/lib/supabase/client';
 import { HistoryRepository } from '@/lib/supabase/repositories/HistoryRepository';
+import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
+import { gooeyToast as toast } from 'goey-toast';
+import { ChevronLeft, Loader2, Save } from 'lucide-react';
 
 // Import newly extracted section components
-import { SearchDiscoverySettings } from '@/components/settings/SearchDiscoverySettings';
+import { AboutSettings } from '@/components/settings/AboutSettings';
+import { AccountSettings } from '@/components/settings/AccountSettings';
 import { LyricsSettings } from '@/components/settings/LyricsSettings';
 import { PrivacySocialSettings } from '@/components/settings/PrivacySocialSettings';
-import { AccountSettings } from '@/components/settings/AccountSettings';
-import { AboutSettings } from '@/components/settings/AboutSettings';
+import { SearchDiscoverySettings } from '@/components/settings/SearchDiscoverySettings';
 import { SecuritySettings } from '@/components/settings/SecuritySettings';
 
 export default function SettingsPage() {

@@ -1,10 +1,11 @@
 'use client';
 
-import { useNowPlaying } from '@/hooks/useNowPlaying';
-import { NowPlayingUI } from '@/components/player/NowPlayingUI';
 import { GuestNowPlayingUI } from '@/components/player/GuestNowPlayingUI';
+import { NowPlayingUI } from '@/components/player/NowPlayingUI';
 import { useAuth } from '@/context/AuthContext';
-import { NowPlayingProps } from '@/types/components/player/NowPlayingProps';
+import { useNowPlaying } from '@/hooks/useNowPlaying';
+import { NowPlayingProps } from "@/types/components/player/NowPlayingProps";
+
 export default function NowPlaying({ isOpen, onClose, isMobile, isDevicesOpen, setIsDevicesOpen }: NowPlayingProps) {
   const state = useNowPlaying(isOpen);
   const { user } = useAuth();

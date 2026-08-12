@@ -1,8 +1,16 @@
+import { User } from '@supabase/supabase-js';
+import { LogOut } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { LogOut } from 'lucide-react';
-import { User } from '@supabase/supabase-js';
-import { HomeHeaderProps } from '@/types/components/home/sections/HomeHeaderProps';
+
+export interface HomeHeaderProps {
+  user: User | null;
+  isProfileOpen: boolean;
+  setIsProfileOpen: (isOpen: boolean) => void;
+  handleSignOut: () => void;
+}
+
+
 export function HomeHeader({ user, isProfileOpen, setIsProfileOpen, handleSignOut }: HomeHeaderProps) {
   return (
     <div className="px-2">

@@ -1,8 +1,13 @@
-import { Song } from '@/types/music';
 import { TopPicksCard } from '@/components/home/HomeCards';
-import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 import { ScrollArrows } from '@/components/ui/ScrollArrows';
-import { TopPicksSectionProps } from '@/types/components/home/sections/TopPicksSectionProps';
+import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
+import { Song } from '@/types/music';
+
+export interface TopPicksSectionProps {
+  trendingSongs: Song[];
+  playTrack: (song: Song, context: Song[], index?: number | string) => void;
+}
+
 const topPicksGradients = [
   'linear-gradient(135deg, #FA243C, #FF6275)',
   'linear-gradient(135deg, #E6D02A, #C8B625)',

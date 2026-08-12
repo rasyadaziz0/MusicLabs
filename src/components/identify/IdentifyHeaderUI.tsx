@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { ChevronLeft } from 'lucide-react';
 import type { IIdentifyHeaderProps } from './IdentifyLayoutInterface';
 

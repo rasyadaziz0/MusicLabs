@@ -1,6 +1,6 @@
+import { API_BASE } from '@/lib/config';
 import { Metadata } from 'next';
 import { cache } from 'react';
-import { API_BASE } from '@/lib/config';
 import EmbedPlaylistPlayer from '../../playlist/[id]/EmbedPlaylistPlayer';
 
 const getAlbumData = cache(async (rawId: string) => {

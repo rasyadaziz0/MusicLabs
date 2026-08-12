@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useTranslation } from '@/context/LanguageContext';
 import { useAuth } from '@/context/AuthContext';
-import { Lock, Eye, EyeOff, Loader2, ArrowLeft, KeyRound } from 'lucide-react';
+import { useTranslation } from '@/context/LanguageContext';
 import { gooeyToast as toast } from 'goey-toast';
+import { ArrowLeft, Eye, EyeOff, KeyRound, Loader2, Lock } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
 
 export default function SetPasswordPage() {
   const { t } = useTranslation();

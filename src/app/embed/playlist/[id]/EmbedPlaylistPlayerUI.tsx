@@ -1,11 +1,11 @@
-import Image from 'next/image';
-import { Play, Pause, SkipBack, SkipForward, Music } from 'lucide-react';
-import { EmbedBrandLogo } from '../../_components/EmbedBrandLogo';
-import { EmbedPromoModal } from '../../_components/EmbedPromoModal';
-import { EmbedProgressBar } from '../../_components/EmbedProgressBar';
-import { EmbedPreviewBadge } from '../../_components/EmbedPreviewBadge';
-import { EmbedPlaylistPlayerState } from '@/types/controllers/embed';
 import { EmbedPlaylistTrack } from '@/types/components/embed';
+import { EmbedPlaylistPlayerState } from '@/types/controllers/embed';
+import { Music, Pause, Play, SkipBack, SkipForward } from 'lucide-react';
+import Image from 'next/image';
+import { EmbedBrandLogo } from '../../_components/EmbedBrandLogo';
+import { EmbedPreviewBadge } from '../../_components/EmbedPreviewBadge';
+import { EmbedProgressBar } from '../../_components/EmbedProgressBar';
+import { EmbedPromoModal } from '../../_components/EmbedPromoModal';
 
 export interface EmbedPlaylistPlayerUIProps {
   playlistId: string;

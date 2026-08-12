@@ -1,10 +1,12 @@
 'use client';
+import React from 'react';
 
-import React, { useMemo, useEffect, useRef } from 'react';
 import { useDominantColors } from '@/hooks/useDominantColors';
-import { type DominantColors } from '@/types/hooks/colors';
 import { WebGLFluidRenderer } from '@/lib/webgl/FluidRenderer';
-import { DynamicGradientBackgroundProps } from '@/types/components/player/DynamicGradientBackgroundProps';
+import { type DominantColors } from '@/types/hooks/colors';
+import { useEffect, useMemo, useRef } from 'react';
+import { DynamicGradientBackgroundProps } from "@/types/components/player/DynamicGradientBackgroundProps";
+
 export function DynamicGradientBackground({
   coverUrl,
   trackId,

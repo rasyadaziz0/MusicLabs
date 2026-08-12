@@ -1,10 +1,9 @@
 'use client';
 
-import React, { createContext, useContext, useEffect } from 'react';
 import { usePlayer } from '@/context/PlayerContext';
-import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { useDominantColors } from '@/hooks/useDominantColors';
-import { type DominantColors } from '@/types/hooks/colors';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
+import React, { createContext, useContext, useEffect } from 'react';
 
 import { ArtworkColorsContextType } from '@/types/context/artworkcolors';
 

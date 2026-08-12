@@ -1,11 +1,11 @@
 import { MusicApiService } from '@/lib/api/MusicApiService';
+import { SocialFeedItem } from '@/types/models/Social';
+import { Song } from '@/types/music';
+import { FollowCounts, UserProfile } from '@/types/profile';
+import { ISocialRepository } from '@/types/repositories/ISocialRepository';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '../client';
-import { Song } from '@/types/music';
-import { UserProfile, FollowCounts } from '@/types/profile';
 import { PROFILE_COLUMNS } from './ProfileRepository';
-import { ISocialRepository } from '@/types/repositories/ISocialRepository';
-import { SocialFeedItem } from '@/types/models/Social';
 
 export class SocialRepository implements ISocialRepository {
   private static instance: SocialRepository;

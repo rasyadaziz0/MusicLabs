@@ -1,11 +1,27 @@
 'use client';
-
-import Image from 'next/image';
-import { Play, Search, AlertCircle, Music2, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { Song } from '@/types/music';
-import { ResultsBottomSheetProps } from '@/types/components/identify/ResultsBottomSheetProps';
+
+import { ImageHelper } from '@/lib/utils/ImageHelper';
+import { AnimatePresence, motion } from 'framer-motion';
+import { AlertCircle, Music2, Play, Search, X } from 'lucide-react';
+import Image from 'next/image';
+
+export interface ResultsBottomSheetProps {
+  hasResults: boolean;
+  state: 'idle' | 'recording' | 'processing' | 'results' | 'no-match' | 'error';
+  mode: 'audd' | 'speech';
+  matchedSong: Song | null;
+  rawMatch: any;
+  speechResults: Song[];
+  errorMessage: string;
+  speech: { transcript: string };
+  resetState: () => void;
+  handlePlay: (song: Song, onPlayStart: () => void) => void;
+  handleSearchForSong: (name: string, artistName: string) => void;
+  routerBack: () => void;
+}
+
+
 export function ResultsBottomSheet({
   hasResults,
   state,

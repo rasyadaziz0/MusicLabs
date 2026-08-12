@@ -1,17 +1,17 @@
 'use client';
 
-import { MusicApiService } from '@/lib/api/MusicApiService';
-import { useEffect, useState, useRef } from 'react';
-import Image from 'next/image';
-import { Music2, Play, Loader2, MoreHorizontal } from 'lucide-react';
-import { supabase } from '@/lib/supabase/client';
-import { motion, AnimatePresence } from 'framer-motion';
-import { usePlayer } from '@/context/PlayerContext';
-import { Song } from '@/types/music';
 import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
-import { gooeyToast as toast } from 'goey-toast';
 import { useTranslation } from '@/context/LanguageContext';
+import { usePlayer } from '@/context/PlayerContext';
+import { MusicApiService } from '@/lib/api/MusicApiService';
+import { supabase } from '@/lib/supabase/client';
 import { PresenceData } from '@/types/components/profile/PresenceData';
+import { Song } from '@/types/music';
+import { AnimatePresence, motion } from 'framer-motion';
+import { gooeyToast as toast } from 'goey-toast';
+import { Loader2, MoreHorizontal, Music2, Play } from 'lucide-react';
+import Image from 'next/image';
+import { useEffect, useRef, useState } from 'react';
 // Only show presence if updated within the last 5 minutes
 const STALE_THRESHOLD_MS = 5 * 60 * 1000;
 

@@ -1,8 +1,16 @@
 'use client';
-
 import React from 'react';
+
 import { StyleHelper } from '@/lib/utils/StyleHelper';
-import { ContextMenuItemProps } from '@/types/components/ui/context-menu/ContextMenuItemProps';
+
+export interface ContextMenuItemProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  icon?: React.ReactNode;
+  label: React.ReactNode;
+  rightElement?: React.ReactNode;
+  danger?: boolean;
+}
+
+
 export function ContextMenuItem({
   icon,
   label,

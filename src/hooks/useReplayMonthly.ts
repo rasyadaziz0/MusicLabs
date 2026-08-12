@@ -1,13 +1,13 @@
 'use client';
 
+import { useAuth } from '@/context/AuthContext';
 import { MusicApiService } from '@/lib/api/MusicApiService';
-import { useQuery } from '@tanstack/react-query';
-import { useState, useMemo, useCallback } from 'react';
 import { getMonthlyTopTracks } from '@/lib/supabase/music';
 import { Song } from '@/types/music';
-import { useAuth } from '@/context/AuthContext';
+import { useQuery } from '@tanstack/react-query';
+import { useCallback, useMemo, useState } from 'react';
 
-import { ReplayArtist, ReplayStats, ReplayData } from '@/types/hooks/replay';
+import { ReplayArtist, ReplayData } from '@/types/hooks/replay';
 
 async function fetchReplayData(
   userId: string,

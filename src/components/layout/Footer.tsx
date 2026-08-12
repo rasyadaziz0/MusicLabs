@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { useTranslation } from '@/context/LanguageContext';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();

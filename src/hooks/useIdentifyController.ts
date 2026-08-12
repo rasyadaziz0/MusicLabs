@@ -1,15 +1,15 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase/client';
-import { usePlayer } from '@/context/PlayerContext';
+﻿import { usePlayer } from '@/context/PlayerContext';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
-import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 import { useIdentifyQuota } from '@/hooks/useIdentifyQuota';
-import { Song } from '@/types/music';
+import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
+import { supabase } from '@/lib/supabase/client';
 import { encodeQuery } from '@/lib/utils/searchEncode';
+import { Song } from '@/types/music';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { AuddStrategy } from '@/services/identify/AuddStrategy';
-import { SpeechStrategy } from '@/services/identify/SpeechStrategy';
+import { AuddStrategy } from '@/lib/services/identify/AuddStrategy';
+import { SpeechStrategy } from '@/lib/services/identify/SpeechStrategy';
 
 import { IdentifyMode, IdentifyState } from '@/types/hooks/identify';
 

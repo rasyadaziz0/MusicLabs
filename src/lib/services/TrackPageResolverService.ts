@@ -1,21 +1,15 @@
-import { MusicApiService } from '@/lib/api/MusicApiService';
-import { SlugHelper } from '@/lib/utils/SlugHelper';
-import { ArtistParser } from '@/lib/utils/ArtistParser';
-import { Song } from '@/types/music';
-import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { API_BASE } from '@/lib/config';
-
+import { ArtistParser } from '@/lib/utils/ArtistParser';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
+import { SlugHelper } from '@/lib/utils/SlugHelper';
+import { Song } from '@/types/music';
 import { ParsedTrackSlug, TrackSEOData } from '@/types/services/track';
 
-/**
- * OOP Service for resolving track metadata, multi-provider fallbacks, and related songs
- * for the Music share/detail pages. Provides structured logging for seamless debugging.
- */
 export class TrackPageResolverService {
   private static instance: TrackPageResolverService;
   private readonly loggerPrefix = '[TrackPageResolverService]';
 
-  private constructor() {}
+  private constructor() { }
 
   /** Singleton instance accessor */
   public static getInstance(): TrackPageResolverService {
@@ -25,9 +19,6 @@ export class TrackPageResolverService {
     return TrackPageResolverService.instance;
   }
 
-  /**
-   * Helper to inspect if an ID matches YouTube Music's 11-character video ID pattern.
-   */
   public isYouTubeVideoId(id: string): boolean {
     return /^[A-Za-z0-9_-]{11}$/.test(id);
   }
@@ -120,7 +111,7 @@ export class TrackPageResolverService {
     } catch (err: any) {
       console.warn(`${this.loggerPrefix} Failed to fetch more by artist:`, err?.message || err);
     }
-    
+
     return [];
   }
 

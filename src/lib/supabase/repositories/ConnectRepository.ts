@@ -1,7 +1,7 @@
+import { ConnectBroadcastMessage, DeviceInfo } from '@/types/connect';
+import { IConnectRepository } from '@/types/repositories/IConnectRepository';
 import { RealtimeChannel } from '@supabase/supabase-js';
 import { supabase } from '../client';
-import { DeviceInfo, ConnectBroadcastMessage } from '@/types/connect';
-import { IConnectRepository } from '@/types/repositories/IConnectRepository';
 
 export class ConnectRepository implements IConnectRepository {
   private static instance: ConnectRepository;

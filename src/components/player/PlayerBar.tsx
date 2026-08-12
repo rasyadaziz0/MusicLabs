@@ -1,21 +1,19 @@
 'use client';
 
-import { usePlayer } from '@/context/PlayerContext';
-import { useAuth } from '@/context/AuthContext';
-import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { LayoutGroup } from 'framer-motion';
-import { Timer } from 'lucide-react';
-import dynamic from 'next/dynamic';
-import NowPlaying from './NowPlaying';
-import LyricsSidebar from './LyricsSidebar';
-import DeviceSidebar from './devices/DeviceSidebar';
 import GuestGate from '@/components/auth/GuestGate';
-import TapToStartOverlay from '@/components/player/TapToStartOverlay';
-import { AnimatePresence } from 'framer-motion';
 import { MobileAirPlayPopup } from '@/components/mobile/player/MobileAirPlayPopup';
+import TapToStartOverlay from '@/components/player/TapToStartOverlay';
+import { useAuth } from '@/context/AuthContext';
+import { usePlayer } from '@/context/PlayerContext';
+import { AnimatePresence, LayoutGroup } from 'framer-motion';
+import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
+import LyricsSidebar from './LyricsSidebar';
+import NowPlaying from './NowPlaying';
+import DeviceSidebar from './devices/DeviceSidebar';
+import { PlayerBarProps } from "@/types/components/player/PlayerBarProps";
 
-import { PlayerBarProps } from '@/types/components/player/PlayerBarProps';
 const MobilePlayerBar = dynamic(() => import('@/components/mobile/player/MobilePlayerBar'), { ssr: false });
 const DesktopPlayerBar = dynamic(() => import('@/components/desktop/player/DesktopPlayerBar'), { ssr: false });
 export default function PlayerBar({ isMobile }: PlayerBarProps) {

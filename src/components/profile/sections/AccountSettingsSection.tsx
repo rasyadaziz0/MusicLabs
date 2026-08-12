@@ -1,8 +1,13 @@
 'use client';
 
+import { ChevronRight, LogOut, Settings, User } from 'lucide-react';
 import Link from 'next/link';
-import { User, Settings, LogOut, ChevronRight } from 'lucide-react';
-import { AccountSettingsSectionProps } from '@/types/components/profile/sections/AccountSettingsSectionProps';
+
+export interface AccountSettingsSectionProps {
+  handleSignOut: () => void;
+}
+
+
 export function AccountSettingsSection({ handleSignOut }: AccountSettingsSectionProps) {
   return (
     <div data-animate className="px-5 md:px-8 mt-10 mb-8">

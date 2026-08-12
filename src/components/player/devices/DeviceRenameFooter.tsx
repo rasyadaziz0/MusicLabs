@@ -1,8 +1,9 @@
 'use client';
 
+import { Check, Edit3, X } from 'lucide-react';
 import React, { useState } from 'react';
-import { Edit3, Check, X } from 'lucide-react';
-import { DeviceRenameFooterProps } from '@/types/components/player/devices/DeviceRenameFooterProps';
+import { DeviceRenameFooterProps } from "@/types/components/player/devices/DeviceRenameFooterProps";
+
 export function DeviceRenameFooter({ currentLabel, onRename }: DeviceRenameFooterProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState('');

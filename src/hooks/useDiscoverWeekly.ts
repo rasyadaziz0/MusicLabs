@@ -1,9 +1,9 @@
 'use client';
 
-import { MusicApiService } from '@/lib/api/MusicApiService';
-import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
+import { MusicApiService } from '@/lib/api/MusicApiService';
 import { DiscoverStatus } from '@/types/hooks/discover';
+import { useQuery } from '@tanstack/react-query';
 
 
 

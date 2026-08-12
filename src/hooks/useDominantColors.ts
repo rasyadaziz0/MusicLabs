@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { extract, getDefaultColors } from '@/lib/utils/color';
 import { DominantColors, UseDominantColorsResult } from '@/types/hooks/colors';
-import { ColorExtractor } from '@/lib/utils/ColorExtractor';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export function useDominantColors(
   imageUrl: string | null | undefined,
@@ -20,7 +20,7 @@ export function useDominantColors(
     trackIdRef.current = currentTrackId;
 
     try {
-      const result = await ColorExtractor.extract(url);
+      const result = await extract(url);
       
       // If the request is stale, ignore it
       if (loadingUrlRef.current !== url || trackIdRef.current !== currentTrackId) return;
@@ -33,7 +33,7 @@ export function useDominantColors(
       });
     } catch (err) {
       if (loadingUrlRef.current === url && trackIdRef.current === currentTrackId) {
-        const fallback = ColorExtractor.getDefaultColors();
+        const fallback = getDefaultColors();
         setCurrent((prev) => {
           if (prev !== null) {
             setPrevious(prev);

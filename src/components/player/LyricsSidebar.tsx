@@ -1,20 +1,21 @@
 'use client';
 
+import { GlassBar } from '@/components/ui/LiquidGlass';
 import { usePlayer } from '@/context/PlayerContext';
+import { useSettings } from '@/context/SettingsContext';
 import { useLyrics } from '@/hooks/useLyrics';
 import { useLyricsScroll } from '@/hooks/useLyricsScroll';
 import { useRomanization } from '@/hooks/useRomanization';
-import { useSettings } from '@/context/SettingsContext';
+import { getPortalRoot } from '@/lib/utils/portalRoot';
+import { animate, AnimatePresence, motion } from 'framer-motion';
 import { Music2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { getPortalRoot } from '@/lib/utils/portalRoot';
-import { AnimatePresence, motion, animate } from 'framer-motion';
-import { LyricStyleManager } from './lyrics/LyricStyleManager';
 import { KaraokeLine } from './lyrics/KaraokeLine';
-import { GlassBar } from '@/components/ui/LiquidGlass';
-import { LyricsSidebarProps } from '@/types/components/player/LyricsSidebarProps';
+import { LyricStyleManager } from './lyrics/LyricStyleManager';
 import './lyrics/sidebar.css';
+import { LyricsSidebarProps } from "@/types/components/player/LyricsSidebarProps";
+
 export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
   const { currentTrack, currentTime, seek, duration } = usePlayer();
   const { settings } = useSettings();

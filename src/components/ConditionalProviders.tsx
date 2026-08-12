@@ -1,17 +1,17 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
-import { AuthProvider } from '@/context/AuthContext';
-import { SettingsProvider } from '@/context/SettingsContext';
-import { PlayerProvider } from '@/context/PlayerContext';
-import { ArtworkColorsProvider } from '@/context/ArtworkColorsContext';
-import { LanguageProvider } from '@/context/LanguageContext';
-import { FeatureFlagsProvider } from '@/context/FeatureFlagsContext';
-import QueryProvider from '@/context/QueryProvider';
 import PWARegistration from '@/components/PWARegistration';
 import YouTubePlayerMount from '@/components/YouTubePlayerMount';
 import { LiquidGlassFilters } from '@/components/ui/LiquidGlass';
+import { ArtworkColorsProvider } from '@/context/ArtworkColorsContext';
+import { AuthProvider } from '@/context/AuthContext';
+import { FeatureFlagsProvider } from '@/context/FeatureFlagsContext';
 import { ImportProvider } from '@/context/ImportContext';
+import { LanguageProvider } from '@/context/LanguageContext';
+import { PlayerProvider } from '@/context/PlayerContext';
+import QueryProvider from '@/context/QueryProvider';
+import { SettingsProvider } from '@/context/SettingsContext';
+import { usePathname } from 'next/navigation';
 
 /**
  * ConditionalProviders — Wraps children with the full app provider stack,

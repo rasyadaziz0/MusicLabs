@@ -1,9 +1,9 @@
+import { PlaylistCollaborator } from '@/types/models/Collaborator';
+import { UserProfile } from '@/types/profile';
+import { ICollaboratorRepository } from '@/types/repositories/ICollaboratorRepository';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '../client';
-import { UserProfile } from '@/types/profile';
 import { PROFILE_COLUMNS } from './ProfileRepository';
-import { ICollaboratorRepository } from '@/types/repositories/ICollaboratorRepository';
-import { PlaylistCollaborator } from '@/types/models/Collaborator';
 
 export class CollaboratorRepository implements ICollaboratorRepository {
   private static instance: CollaboratorRepository;

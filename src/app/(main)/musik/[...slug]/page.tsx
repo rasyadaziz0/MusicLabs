@@ -1,19 +1,17 @@
+import { ShareMoreBySection } from '@/components/share/ShareMoreBySection';
+import TrackBackButton from '@/components/track/TrackBackButton';
+import TrackHeaderActions from '@/components/track/TrackHeaderActions';
+import TrackPlayButton from '@/components/track/TrackPlayButton';
+import { LyricsService } from '@/lib/server/LyricsService';
+import { trackResolver } from '@/lib/services/TrackPageResolverService';
 import { ArtistParser } from '@/lib/utils/ArtistParser';
-import { LrcHelper } from '@/lib/utils/LrcHelper';
-import { SlugHelper } from '@/lib/utils/SlugHelper';
+import { Clock, Disc3, Music2 } from 'lucide-react';
 import { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { cache } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Clock, Disc3, Music2, User } from 'lucide-react';
-import { Song } from '@/types/music';
-import { trackResolver } from '@/lib/services/TrackPageResolverService';
-import TrackPlayButton from '@/components/track/TrackPlayButton';
-import TrackHeaderActions from '@/components/track/TrackHeaderActions';
-import TrackBackButton from '@/components/track/TrackBackButton';
-import { ShareMoreBySection } from '@/components/share/ShareMoreBySection';
-import { LyricsService } from '@/lib/server/LyricsService';
+import { notFound } from 'next/navigation';
+import { cache } from 'react';
+import * as LrcHelper from '../../../../lib/lyrics/lrc';
 
 const getResolvedTrack = cache(async (trackId: string) => {
   return await trackResolver.resolveTrack(trackId);

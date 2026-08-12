@@ -1,7 +1,16 @@
-import React from 'react';
-import { Music2, Globe } from 'lucide-react';
+import { Globe, Music2 } from 'lucide-react';
 import { SectionHeader, SettingsRow, ToggleRow } from './SettingsUI';
-import { LyricsSettingsProps } from '@/types/components/settings/LyricsSettingsProps';
+
+export interface LyricsSettingsProps {
+  t: (key: string) => string;
+  lyricsFontSize: string;
+  setLyricsFontSize: (size: string) => void;
+  romanizationEnabled: boolean;
+  setRomanizationEnabled: (enabled: boolean) => void;
+  fontSizeOptions: { value: string; label: string }[];
+}
+
+
 export function LyricsSettings({
   t,
   lyricsFontSize,

@@ -1,8 +1,13 @@
-import Link from 'next/link';
-import Image from 'next/image';
-import { Music } from 'lucide-react';
 import { HorizontalScrollSection } from '@/components/ui/HorizontalScrollSection';
-import { OtherProfilePlaylistsProps } from '@/types/components/profile/OtherProfilePlaylistsProps';
+import { Music } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+
+export interface OtherProfilePlaylistsProps {
+  publicPlaylists: any[];
+}
+
+
 export default function OtherProfilePlaylists({ publicPlaylists }: OtherProfilePlaylistsProps) {
   if (publicPlaylists.length === 0) {
     return (

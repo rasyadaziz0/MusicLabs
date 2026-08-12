@@ -1,11 +1,11 @@
+import ArtistPageClient from '@/components/artist/ArtistPageClient';
+import { API_BASE } from '@/lib/config';
+import { ArtistParser } from '@/lib/utils/ArtistParser';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
+import { AlbumData } from '@/types/components/ui';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
-import { ImageHelper } from '@/lib/utils/ImageHelper';
-import { ArtistParser } from '@/lib/utils/ArtistParser';
-import { AlbumData } from '@/types/components/ui';
-import ArtistPageClient from '@/components/artist/ArtistPageClient';
-import { API_BASE } from '@/lib/config';
 
 interface PageProps {
   params: Promise<{ id: string }>;

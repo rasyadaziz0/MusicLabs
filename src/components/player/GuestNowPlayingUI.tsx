@@ -1,11 +1,10 @@
 'use client';
 
-import { motion, AnimatePresence, useDragControls } from 'framer-motion';
-import { ImageHelper } from '@/lib/utils/ImageHelper';
 import GuestGate from '@/components/auth/GuestGate';
-import Image from 'next/image';
-import type { NowPlayingUIProps } from '@/components/player/NowPlayingUI';
 import { DynamicGradientBackground } from '@/components/player/DynamicGradientBackground';
+import type { NowPlayingUIProps } from '@/components/player/NowPlayingUI';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
+import { AnimatePresence, motion, useDragControls } from 'framer-motion';
 
 import { GuestDesktopPlayer } from './GuestDesktopPlayer';
 import { GuestMobilePlayer } from './GuestMobilePlayer';

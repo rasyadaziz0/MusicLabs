@@ -1,16 +1,31 @@
 'use client';
+import { UserProfile } from '@/types/profile';
 
-import { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
+import { InstagramIcon, TikTokIcon } from '@/components/icons/SocialIcons';
 import { getPortalRoot } from '@/lib/utils/portalRoot';
+import { gooeyToast as toast } from 'goey-toast';
+import { ArrowLeft, Bell, CheckCircle2, ChevronRight, Edit3, LogOut, Menu, Settings, Share2, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { gooeyToast as toast } from 'goey-toast';
-import { LogOut, ListMusic, Heart, Users, UserCheck, User, Share2, ArrowLeft, Globe, CheckCircle2, Menu, Bell, Settings, Edit3, X, ChevronRight } from 'lucide-react';
-import { UserProfile } from '@/types/profile';
-import { TikTokIcon, InstagramIcon, XIcon } from '@/components/icons/SocialIcons';
-import { ProfileHeroProps } from '@/types/components/mobile/profile/ProfileHeroProps';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+
+export interface ProfileHeroProps {
+  user: any;
+  profile: UserProfile | null;
+  stats: {
+    playlistCount: number;
+    likedCount: number;
+    followerCount: number;
+    followingCount: number;
+  };
+  handleSignOut?: () => void;
+  setFollowModalTab: (tab: 'followers' | 'following') => void;
+  setFollowModalOpen: (open: boolean) => void;
+}
+
+
 export function MobileProfileHero({
   user,
   profile,

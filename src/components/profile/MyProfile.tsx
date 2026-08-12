@@ -1,33 +1,37 @@
 'use client';
+import { MyProfileInitialData } from '@/types/components/profile';
 
-import { useFollowCounts } from '@/hooks/social/useFollowCounts';
 import { useLibraryPlaylists } from '@/hooks/library/useLibraryPlaylists';
 import { useLikedSongs } from '@/hooks/library/useLikedSongs';
+import { useFollowCounts } from '@/hooks/social/useFollowCounts';
 import { MusicApiService } from '@/lib/api/MusicApiService';
-import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import gsap from 'gsap';
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 
-import { usePlayer } from '@/context/PlayerContext';
-import { useAuth } from '@/context/AuthContext';
-import { useQuery } from '@tanstack/react-query';
-import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
-import { getRecentPlays } from '@/lib/supabase/music';
-import { UserProfile } from '@/types/profile';
 import FollowListModal from '@/components/social/FollowListModal';
-import type { PlaylistRecord } from '@/lib/supabase/music';
+import { useAuth } from '@/context/AuthContext';
+import { usePlayer } from '@/context/PlayerContext';
+import { getRecentPlays } from '@/lib/supabase/music';
+import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
 import type { Song } from '@/types/music';
+import { useQuery } from '@tanstack/react-query';
 
 // Imported Sections
-import { ProfileHero } from './sections/ProfileHero';
 import { MobileProfileHero } from '@/components/mobile/profile/MobileProfileHero';
-import { RecentlyPlayedSection } from './sections/RecentlyPlayedSection';
-import { PlaylistsSection } from './sections/PlaylistsSection';
-import { FavoriteSongsSection } from './sections/FavoriteSongsSection';
 import { AccountSettingsSection } from './sections/AccountSettingsSection';
+import { FavoriteSongsSection } from './sections/FavoriteSongsSection';
+import { PlaylistsSection } from './sections/PlaylistsSection';
+import { ProfileHero } from './sections/ProfileHero';
+import { RecentlyPlayedSection } from './sections/RecentlyPlayedSection';
 
-import { MyProfileInitialData } from '@/types/components/profile';
-import { MyProfileProps } from '@/types/components/profile/MyProfileProps';
+
+export interface MyProfileProps {
+  initialData: MyProfileInitialData;
+  isMobile?: boolean;
+}
+
+
 export default function MyProfile({ initialData, isMobile }: MyProfileProps) {
   const router = useRouter();
   const { user, signOut, loading: authLoading } = useAuth();

@@ -1,6 +1,6 @@
-import { UserProfile, FollowCounts } from '@/types/profile';
-import { Song } from '@/types/music';
 import { SocialFeedItem } from '@/types/models/Social';
+import { Song } from '@/types/music';
+import { FollowCounts, UserProfile } from '@/types/profile';
 
 export interface ISocialRepository {
   followUser(followingId: string): Promise<boolean>;

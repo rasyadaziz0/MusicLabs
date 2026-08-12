@@ -1,9 +1,15 @@
-import Link from 'next/link';
-import { Sparkles } from 'lucide-react';
 import { ScrollArrows } from '@/components/ui/ScrollArrows';
-import { User } from '@supabase/supabase-js';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
-import { MobileStationsSectionProps } from '@/types/components/home/sections/MobileStationsSectionProps';
+import { User } from '@supabase/supabase-js';
+import { Sparkles } from 'lucide-react';
+import Link from 'next/link';
+
+export interface MobileStationsSectionProps {
+  user: User | null;
+  discoverPlaylistId?: string;
+}
+
+
 export function MobileStationsSection({ user, discoverPlaylistId }: MobileStationsSectionProps) {
   const { scrollRef, canScrollLeft, canScrollRight, scroll } = useHorizontalScroll();
 

@@ -1,6 +1,6 @@
-import { TextMatcher } from '../../TextMatcher';
+import * as TextMatcher from '../../text';
 
-import { LyricsQuery, LyricsResult, ProviderResult, CleanedQuery } from '@/types/services/lyrics';
+import { CleanedQuery, LyricsQuery, LyricsResult, ProviderResult } from '@/types/services/lyrics';
 
 // ── Abstract Base Class ───────────────────────────────────────────
 

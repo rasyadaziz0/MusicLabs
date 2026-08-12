@@ -1,14 +1,25 @@
 'use client';
-
-import { usePlayer } from '@/context/PlayerContext';
-import { Song } from '@/types/music';
 import { AlbumData } from '@/types/components/ui';
-import {  AlbumCard  } from '@/components/ui/AlbumCard';
-import { HorizontalScrollSection } from '@/components/ui/HorizontalScrollSection';
+import { Song } from '@/types/music';
+
 import { ArtistHero } from '@/components/artist/ArtistHero';
 import { ArtistLatestRelease } from '@/components/artist/ArtistLatestRelease';
 import { ArtistTopSongs } from '@/components/artist/ArtistTopSongs';
-import { ArtistPageClientProps } from '@/types/components/artist/ArtistPageClientProps';
+import { AlbumCard } from '@/components/ui/AlbumCard';
+import { HorizontalScrollSection } from '@/components/ui/HorizontalScrollSection';
+import { usePlayer } from '@/context/PlayerContext';
+
+export interface ArtistPageClientProps {
+  artistName: string;
+  heroImage: string | null;
+  topTracks: Song[];
+  latestRelease: AlbumData | null;
+  fullAlbums: AlbumData[];
+  singlesEps: AlbumData[];
+  allAlbums: AlbumData[];
+}
+
+
 export default function ArtistPageClient({
   artistName,
   heroImage,

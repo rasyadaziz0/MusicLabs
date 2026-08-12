@@ -1,9 +1,10 @@
 'use client';
 import { ArtistParser } from '@/lib/utils/ArtistParser';
+import { Song } from '@/types/music';
 
 import Link from 'next/link';
-import { Song } from '@/types/music';
-import { LyricsHeaderProps } from '@/types/components/player/lyrics/LyricsHeaderProps';
+import { LyricsHeaderProps } from "@/types/components/player/lyrics/LyricsHeaderProps";
+
 export function LyricsHeader({
   currentTrack,
   hasRomanizations,

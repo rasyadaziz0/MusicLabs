@@ -1,12 +1,45 @@
 'use client';
 
-import React from 'react';
+import { GlassBar } from '@/components/ui/LiquidGlass';
 import { StyleHelper } from '@/lib/utils/StyleHelper';
+import DesktopExtraControls from './DesktopExtraControls';
 import DesktopPlaybackControls from './DesktopPlaybackControls';
 import DesktopTrackInfo from './DesktopTrackInfo';
-import DesktopExtraControls from './DesktopExtraControls';
-import { GlassBar } from '@/components/ui/LiquidGlass';
-import { DesktopPlayerBarProps } from '@/types/components/desktop/player/DesktopPlayerBarProps';
+
+export interface DesktopPlayerBarProps {
+  currentTrack: any;
+  isPlaying: boolean;
+  isResolving: boolean;
+  isGuestPreview: boolean;
+  isRadio: boolean;
+  radioMeta: any;
+  togglePlay: () => void;
+  nextTrack: () => void;
+  prevTrack: () => void;
+  currentTime: number;
+  duration: number;
+  seek: (val: number) => void;
+  volume: number;
+  setVolume: (val: number) => void;
+  isMuted: boolean;
+  isVolumeSliderOpen: boolean;
+  setIsVolumeSliderOpen: (open: boolean) => void;
+  setIsGuestGateOpen: (open: boolean) => void;
+  isNowPlayingOpen: boolean;
+  setIsNowPlayingOpen: (open: boolean) => void;
+  isShuffled: boolean;
+  toggleShuffle: () => void;
+  repeatMode: 'none' | 'all' | 'one';
+  cycleRepeatMode: () => void;
+  isQueueOpen: boolean;
+  setIsQueueOpen: (open: boolean) => void;
+  isLyricsOpen: boolean;
+  setIsLyricsOpen: (open: boolean) => void;
+  isDevicesOpen?: boolean;
+  setIsDevicesOpen?: (open: boolean) => void;
+}
+
+
 export default function DesktopPlayerBar({
   currentTrack, isPlaying, isResolving, isGuestPreview, isRadio, radioMeta,
   togglePlay, nextTrack, prevTrack, currentTime, duration, seek,

@@ -1,9 +1,20 @@
-import Image from 'next/image';
-import { Music2, Play, Search } from 'lucide-react';
-import { Song } from '@/types/music';
 import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { IdentifyMode } from '@/types/hooks/identify';
-import { IdentifyResultsProps } from '@/types/components/identify/ui/IdentifyResultsProps';
+import { Song } from '@/types/music';
+import { Music2, Play, Search } from 'lucide-react';
+import Image from 'next/image';
+
+export interface IdentifyResultsProps {
+  mode: IdentifyMode;
+  matchedSong: Song | null;
+  speechResults: Song[];
+  speechTranscript: string;
+  onPlay: (song: Song) => void;
+  onSearch: (title: string, artist: string) => void;
+  onReset: () => void;
+}
+
+
 export function IdentifyResults({
   mode,
   matchedSong,

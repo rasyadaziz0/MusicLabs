@@ -1,11 +1,15 @@
 'use client';
 
-import React from 'react';
-import Image from 'next/image';
 import { usePlayer } from '@/context/PlayerContext';
-import { Headphones, Smartphone, Laptop, Tablet, Check, AudioLines } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { MobileAirPlayPopupProps } from '@/types/components/mobile/player/MobileAirPlayPopupProps';
+import { AudioLines, Check, Headphones, Laptop, Smartphone, Tablet } from 'lucide-react';
+import Image from 'next/image';
+
+export interface MobileAirPlayPopupProps {
+  onClose: () => void;
+}
+
+
 export function MobileAirPlayPopup({ onClose }: MobileAirPlayPopupProps) {
   const {
     currentTrack,

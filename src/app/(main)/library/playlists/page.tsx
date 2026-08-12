@@ -1,9 +1,9 @@
 'use client';
 
-import { useLibraryPlaylists } from '@/hooks/library/useLibraryPlaylists';
-import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { Heart, ChevronLeft } from 'lucide-react';
+import { useLibraryPlaylists } from '@/hooks/library/useLibraryPlaylists';
+import { ChevronLeft, Heart } from 'lucide-react';
+import Link from 'next/link';
 
 const gradients = [
   'from-[#87B4E5] to-[#121921]', // Blue

@@ -1,21 +1,25 @@
 'use client';
+import { OtherProfileInitialData } from '@/types/components/profile';
 
-import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import MobileOtherProfileHero from '@/components/mobile/profile/MobileOtherProfileHero';
+import FollowListModal from '@/components/social/FollowListModal';
+import FeatureDisabled from '@/components/ui/FeatureDisabled';
+import { useFeatureFlags } from '@/context/FeatureFlagsContext';
 import gsap from 'gsap';
 import { ChevronLeft } from 'lucide-react';
-import FollowListModal from '@/components/social/FollowListModal';
-import OtherProfileHero from './OtherProfileHero';
-import MobileOtherProfileHero from '@/components/mobile/profile/MobileOtherProfileHero';
-import OtherProfilePlaylists from './OtherProfilePlaylists';
+import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 import NowPlayingCard from './NowPlayingCard';
-import { UserProfile } from '@/types/profile';
-import type { PlaylistRecord } from '@/lib/supabase/music';
-import { useFeatureFlags } from '@/context/FeatureFlagsContext';
-import FeatureDisabled from '@/components/ui/FeatureDisabled';
+import OtherProfileHero from './OtherProfileHero';
+import OtherProfilePlaylists from './OtherProfilePlaylists';
 
-import { OtherProfileInitialData } from '@/types/components/profile';
-import { OtherProfileProps } from '@/types/components/profile/OtherProfileProps';
+
+export interface OtherProfileProps {
+  initialData: OtherProfileInitialData;
+  isMobile?: boolean;
+}
+
+
 export default function OtherProfile({ initialData, isMobile }: OtherProfileProps) {
   const {
     userId,

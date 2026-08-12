@@ -1,16 +1,23 @@
 'use client';
-
-import { useLibraryPlaylists } from '@/hooks/library/useLibraryPlaylists';
-import { useAddTrackToPlaylist } from '@/hooks/library/useAddTrackToPlaylist';
-import Link from 'next/link';
-import { Check, ListPlus, Loader2, Plus } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
 import { Song } from '@/types/music';
-import { StyleHelper } from '@/lib/utils/StyleHelper';
+
 import { useAuth } from '@/context/AuthContext';
-import { ContextMenuItem } from './context-menu/ContextMenuItem';
+import { useAddTrackToPlaylist } from '@/hooks/library/useAddTrackToPlaylist';
+import { useLibraryPlaylists } from '@/hooks/library/useLibraryPlaylists';
+import { StyleHelper } from '@/lib/utils/StyleHelper';
 import { gooeyToast as toast } from 'goey-toast';
-import { AddToPlaylistButtonProps } from '@/types/components/ui/AddToPlaylistButtonProps';
+import { Check, ListPlus, Loader2, Plus } from 'lucide-react';
+import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
+import { ContextMenuItem } from './context-menu/ContextMenuItem';
+
+export interface AddToPlaylistButtonProps {
+  track: Song;
+  className?: string;
+  asMenuItem?: boolean;
+}
+
+
 export default function AddToPlaylistButton({ track, className, asMenuItem = false }: AddToPlaylistButtonProps) {
   const { user, signInWithGoogle } = useAuth();
   const { data: playlists = [], isLoading } = useLibraryPlaylists();

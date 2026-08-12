@@ -1,5 +1,5 @@
-import YTMusic from 'ytmusic-api';
 import { PlaylistScraper, ScrapedPlaylist, ScrapedTrack } from '@/types/services/scrapers';
+import YTMusic from 'ytmusic-api';
 
 export class YouTubeScraper implements PlaylistScraper {
   private ytmusic: YTMusic | null = null;

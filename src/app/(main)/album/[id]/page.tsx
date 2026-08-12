@@ -1,7 +1,7 @@
+import AlbumPageClient from '@/components/album/AlbumPageClient';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
-import AlbumPageClient from '@/components/album/AlbumPageClient';
 
 interface PageProps {
   params: Promise<{ id: string }>;

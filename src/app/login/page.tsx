@@ -1,5 +1,5 @@
-import { Suspense } from 'react';
 import LoginForm from '@/components/auth/LoginForm';
+import { Suspense } from 'react';
 
 // Export default pakai Suspense untuk wrap useSearchParams()
 // Ini WAJIB di Next.js App Router — tanpa ini terjadi hydration mismatch

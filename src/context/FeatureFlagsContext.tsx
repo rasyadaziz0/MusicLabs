@@ -1,7 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
 import { FeatureFlagsContextType } from '@/types/context/featureflags';
 

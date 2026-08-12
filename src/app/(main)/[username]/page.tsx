@@ -1,19 +1,19 @@
-import { notFound } from 'next/navigation';
-import { headers } from 'next/headers';
-import {
-  getServerProfileByUsername,
-  getServerCurrentUser,
-  getServerPublicPlaylists,
-  getServerFollowCounts,
-  getServerIsFollowing,
-  getServerUserPlaylists,
-  getServerListeningStats,
-  getServerLikedSongIds,
-  getServerRecentTrackIds,
-} from '@/lib/supabase/server-fetches';
-import OtherProfile from '@/components/profile/OtherProfile';
 import MyProfile from '@/components/profile/MyProfile';
+import OtherProfile from '@/components/profile/OtherProfile';
 import PrivateProfileView from '@/components/profile/PrivateProfileView';
+import {
+    getServerCurrentUser,
+    getServerFollowCounts,
+    getServerIsFollowing,
+    getServerLikedSongIds,
+    getServerListeningStats,
+    getServerProfileByUsername,
+    getServerPublicPlaylists,
+    getServerRecentTrackIds,
+    getServerUserPlaylists,
+} from '@/lib/supabase/server-fetches';
+import { headers } from 'next/headers';
+import { notFound } from 'next/navigation';
 
 interface PageProps {
   params: Promise<{ username: string }>;

@@ -1,10 +1,10 @@
 'use client';
 
+import { GlassBar } from '@/components/ui/LiquidGlass';
+import { StyleHelper } from '@/lib/utils/StyleHelper';
+import { Home, Library, Radio, Search } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Search, Library, Radio, AudioLines } from 'lucide-react';
-import { StyleHelper } from '@/lib/utils/StyleHelper';
-import { GlassBar } from '@/components/ui/LiquidGlass';
 
 const navItems = [
   { icon: Home, label: 'Home', href: '/' },

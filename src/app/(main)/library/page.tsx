@@ -1,11 +1,11 @@
 'use client';
 
-import { useLibraryPlaylists } from '@/hooks/library/useLibraryPlaylists';
-import Link from 'next/link';
-import { ChevronRight, Music, Mic, SquareStack, Library, Heart, PlusSquare, Sparkles } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useLibraryPlaylists } from '@/hooks/library/useLibraryPlaylists';
 import { useDiscoverWeekly } from '@/hooks/useDiscoverWeekly';
+import { ChevronRight, Heart, Library, Mic, Music, PlusSquare, Sparkles, SquareStack } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 const libraryMenu = [
   { label: 'Playlists', icon: Library, href: '/library/playlists' },

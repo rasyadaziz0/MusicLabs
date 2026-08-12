@@ -1,18 +1,31 @@
-import { ArtistParser } from '@/lib/utils/ArtistParser';
-import { useState, useEffect, ReactNode, useRef } from 'react';
-import Image from 'next/image';
-import { Song } from '@/types/music';
-import { ImageHelper } from '@/lib/utils/ImageHelper';
-import { Heart, MoreHorizontal, GripVertical } from 'lucide-react';
-import Link from 'next/link';
-import { usePlayer } from '@/context/PlayerContext';
-import { TrackContextMenu } from './TrackContextMenu';
 import { EqualizerIcon } from '@/components/ui/EqualizerIcon';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent, } from '@dnd-kit/core';
-import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable, } from '@dnd-kit/sortable';
+import { usePlayer } from '@/context/PlayerContext';
+import { ArtistParser } from '@/lib/utils/ArtistParser';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
+import { Song } from '@/types/music';
+import { closestCenter, DndContext, DragEndEvent, KeyboardSensor, PointerSensor, useSensor, useSensors, } from '@dnd-kit/core';
 import { restrictToVerticalAxis, restrictToWindowEdges } from '@dnd-kit/modifiers';
+import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy, } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { AppleMusicTrackListProps } from '@/types/components/ui/AppleMusicTrackListProps';
+import { Heart, MoreHorizontal } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { ReactNode, useEffect, useRef, useState } from 'react';
+import { TrackContextMenu } from './TrackContextMenu';
+
+export interface AppleMusicTrackListProps {
+  tracks: Song[];
+  onPlayTrack: (track: Song, allTracks: Song[], index?: number) => void;
+  showHeart?: boolean;
+  showAlbum?: boolean;
+  hideHeader?: boolean;
+  renderTrackOptions?: (track: Song, closeMenu: () => void) => ReactNode;
+  className?: string;
+  isReorderable?: boolean;
+  onReorder?: (oldIndex: number, newIndex: number) => void;
+}
+
+
 function SortableTrackItem({
   song,
   index,

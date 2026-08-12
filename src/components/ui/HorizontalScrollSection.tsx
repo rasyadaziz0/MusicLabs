@@ -1,8 +1,15 @@
+import { ScrollArrows } from '@/components/ui/ScrollArrows';
+import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 import { ChevronRight } from 'lucide-react';
 import React from 'react';
-import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
-import { ScrollArrows } from '@/components/ui/ScrollArrows';
-import { HorizontalScrollSectionProps } from '@/types/components/ui/HorizontalScrollSectionProps';
+
+export interface HorizontalScrollSectionProps {
+  title: string;
+  children: React.ReactNode;
+  onSeeAll?: () => void;
+}
+
+
 export function HorizontalScrollSection({
   title,
   children,

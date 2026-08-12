@@ -1,9 +1,8 @@
 'use client';
 
-import React from 'react';
-import Image from 'next/image';
-import { Play, Search, Music, Check } from 'lucide-react';
 import { ImageHelper } from '@/lib/utils/ImageHelper';
+import { Check, Music, Play, Search } from 'lucide-react';
+import Image from 'next/image';
 import type { IIdentifySongResultsProps } from './IdentifyLayoutInterface';
 
 export function IdentifySongResultUI({

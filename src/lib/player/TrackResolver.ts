@@ -1,9 +1,9 @@
-import { Song } from '@/types/music';
-import { resolveToYoutubeId } from '@/lib/youtube';
 import { supabase } from '@/lib/supabase/client';
-import { PlayerCache } from './PlayerCache';
+import { resolveToYoutubeId } from '@/lib/youtube';
+import { Song } from '@/types/music';
+import * as PlayerCache from './cache';
 
-import { ResolveResult, ResolveResultType } from '@/types/player/resolver';
+import { ResolveResult } from '@/types/player/resolver';
 
 const API_BASE = process.env.NEXT_PUBLIC_EXPRESS_API_URL || process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || '';
 

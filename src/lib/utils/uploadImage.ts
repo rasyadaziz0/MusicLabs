@@ -1,3 +1,6 @@
+import { API_BASE } from '@/lib/config';
+import { createClient } from '@/lib/supabase/client';
+
 export async function uploadImage(
   file: File,
   folder: 'avatars' | 'banners' | 'playlists' | 'uploads' = 'uploads',
@@ -13,8 +16,13 @@ export async function uploadImage(
     formData.append('playlistId', playlistId);
   }
 
-  const response = await fetch(`${(process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || process.env.NEXT_PUBLIC_EXPRESS_API_URL) || ''}/api/upload`, {
+  const { data: { session } } = await createClient().auth.getSession();
+
+  const response = await fetch(`${API_BASE}/api/upload`, {
     method: 'POST',
+    headers: session?.access_token
+      ? { Authorization: `Bearer ${session.access_token}` }
+      : {},
     body: formData,
   });
 

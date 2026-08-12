@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo, useRef } from 'react';
 import { getEffectiveTime } from '@/lib/lyrics/lyricsOffsetStore';
 import { UseLyricsScrollOptions, UseLyricsScrollReturn } from '@/types/hooks/lyrics';
+import { useMemo, useRef } from 'react';
 
 export function useLyricsScroll({
   lines,

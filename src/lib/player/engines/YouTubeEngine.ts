@@ -1,5 +1,5 @@
 
-import { YouTubePlayerEvent, YouTubePlayer } from '@/types/player/youtube';
+import { YouTubePlayer, YouTubePlayerEvent } from '@/types/player/youtube';
 
 declare global {
   interface Window {

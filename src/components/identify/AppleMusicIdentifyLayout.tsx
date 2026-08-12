@@ -1,17 +1,17 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { IdentifyHeaderUI } from './IdentifyHeaderUI';
-import {
-  IdentifyIdlePanel,
-  IdentifyRecordingPanel,
-  IdentifyProcessingPanel,
-  IdentifyResultsPanel,
-  IdentifyFeedbackPanel,
-} from './IdentifyPanelsUI';
 import type { IIdentifyLayoutProps } from './IdentifyLayoutInterface';
+import {
+    IdentifyFeedbackPanel,
+    IdentifyIdlePanel,
+    IdentifyProcessingPanel,
+    IdentifyRecordingPanel,
+    IdentifyResultsPanel,
+} from './IdentifyPanelsUI';
 
 export function AppleMusicIdentifyLayout({
   mode,

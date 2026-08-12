@@ -1,6 +1,6 @@
 import { ImageHelper } from '@/lib/utils/ImageHelper';
+import { LibraryAlbum, LibraryArtist } from '@/types/models/library';
 import { Song } from '@/types/music';
-import { LibraryArtist, LibraryAlbum } from '@/types/models/library';
 
 function dedupeSongs(songs: Song[]) {
   const seen = new Set<string>();

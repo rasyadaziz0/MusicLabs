@@ -1,8 +1,8 @@
 'use client';
 
-import { useCallback, useRef, useState, useEffect } from 'react';
-import { UseAudioRecorderReturn } from '@/types/hooks/audio';
 import { AudioRecorderService } from '@/lib/services/AudioRecorderService';
+import { UseAudioRecorderReturn } from '@/types/hooks/audio';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
  * Records audio from the microphone and returns it as a base64-encoded string.

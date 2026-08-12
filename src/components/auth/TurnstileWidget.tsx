@@ -1,7 +1,12 @@
 "use client";
 
 import { Turnstile } from "@marsidev/react-turnstile";
-import { Props } from '@/types/components/auth/Props';
+
+export interface Props {
+  onSuccess: (token: string) => void;
+}
+
+
 export default function TurnstileWidget({ onSuccess }: Props) {
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 

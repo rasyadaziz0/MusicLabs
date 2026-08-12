@@ -1,10 +1,15 @@
 'use client';
 
+import { HorizontalScrollSection } from '@/components/ui/HorizontalScrollSection';
+import { Music } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronRight, Music } from 'lucide-react';
-import { HorizontalScrollSection } from '@/components/ui/HorizontalScrollSection';
-import { PlaylistsSectionProps } from '@/types/components/profile/sections/PlaylistsSectionProps';
+
+export interface PlaylistsSectionProps {
+  playlists: any[];
+}
+
+
 export function PlaylistsSection({ playlists }: PlaylistsSectionProps) {
   if (playlists.length === 0) {
     return (

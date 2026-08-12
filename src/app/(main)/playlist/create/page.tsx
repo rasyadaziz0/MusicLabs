@@ -1,14 +1,14 @@
 'use client';
 
-import { useCreatePlaylist } from '@/hooks/library/useCreatePlaylist';
-import { FormEvent, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
 import { useAuth } from '@/context/AuthContext';
-import { Music, AlertCircle, Loader2, Upload } from 'lucide-react';
-import Image from 'next/image';
+import { useCreatePlaylist } from '@/hooks/library/useCreatePlaylist';
 import { uploadImage } from '@/lib/utils/uploadImage';
 import { gooeyToast as toast } from 'goey-toast';
-import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
+import { AlertCircle, Loader2, Music, Upload } from 'lucide-react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { FormEvent, useState } from 'react';
 
 export default function CreatePlaylistPage() {
   const router = useRouter();

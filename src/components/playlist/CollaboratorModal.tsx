@@ -1,11 +1,18 @@
-import { useState, useEffect } from 'react';
-import { X, Search, UserPlus, Check } from 'lucide-react';
-import Image from 'next/image';
-import { UserProfile } from '@/types/profile';
-import { usePlaylistCollaborators, useAddCollaborator, useRemoveCollaborator } from '@/hooks/useCollaborators';
-import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
 import { useAuth } from '@/context/AuthContext';
-import { CollaboratorModalProps } from '@/types/components/playlist/CollaboratorModalProps';
+import { useAddCollaborator, usePlaylistCollaborators, useRemoveCollaborator } from '@/hooks/useCollaborators';
+import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
+import { UserProfile } from '@/types/profile';
+import { Check, Search, UserPlus, X } from 'lucide-react';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
+
+export interface CollaboratorModalProps {
+  playlistId: string;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+
 export default function CollaboratorModal({ playlistId, isOpen, onClose }: CollaboratorModalProps) {
   const { user } = useAuth();
   const [query, setQuery] = useState('');

@@ -1,13 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Lock, Mail, Loader2, CheckCircle, KeyRound } from 'lucide-react';
-import { SectionHeader } from './SettingsUI';
+import TurnstileWidget from '@/components/auth/TurnstileWidget';
 import { useAuth } from '@/context/AuthContext';
 import { gooeyToast as toast } from 'goey-toast';
-import TurnstileWidget from '@/components/auth/TurnstileWidget';
+import { CheckCircle, KeyRound, Loader2, Lock, Mail } from 'lucide-react';
 import Link from 'next/link';
-import { SecuritySettingsProps } from '@/types/components/settings/SecuritySettingsProps';
+import { useState } from 'react';
+import { SectionHeader } from './SettingsUI';
+
+export interface SecuritySettingsProps {
+  t: (key: string) => string;
+}
+
+
 export function SecuritySettings({ t }: SecuritySettingsProps) {
   const { user, resetPasswordForEmail } = useAuth();
 

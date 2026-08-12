@@ -1,6 +1,6 @@
-import { RadioStation } from '@/types/music';
-import { Signal, Wifi, Play, Pause, Loader2, Globe, Radio } from 'lucide-react';
 import { StyleHelper } from '@/lib/utils/StyleHelper';
+import { RadioStation } from '@/types/music';
+import { Globe, Loader2, Pause, Play, Radio, Signal } from 'lucide-react';
 
 export function NowPlayingRadioBanner({
   currentTrack,

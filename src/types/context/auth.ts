@@ -1,5 +1,4 @@
-import { User, Session } from '@supabase/supabase-js';
-import { UserProfile } from '@/types/profile';
+import { Session, User } from '@supabase/supabase-js';
 
 export interface AuthActionResult {
   error: string | null;

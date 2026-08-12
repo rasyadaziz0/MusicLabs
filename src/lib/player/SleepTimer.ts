@@ -1,4 +1,4 @@
-import { SleepTimerState, SleepTimerOptions } from '@/types/player/timer';
+import { SleepTimerOptions, SleepTimerState } from '@/types/player/timer';
 
 export class SleepTimer {
   private timeoutId: NodeJS.Timeout | null = null;

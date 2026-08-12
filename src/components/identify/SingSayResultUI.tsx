@@ -1,9 +1,8 @@
 'use client';
 
-import React from 'react';
-import Image from 'next/image';
-import { Play, RefreshCw, Music } from 'lucide-react';
 import { ImageHelper } from '@/lib/utils/ImageHelper';
+import { Music, Play, RefreshCw } from 'lucide-react';
+import Image from 'next/image';
 import type { ISingSayResultsProps } from './IdentifyLayoutInterface';
 
 export function SingSayResultUI({

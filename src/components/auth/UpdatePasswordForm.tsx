@@ -1,11 +1,11 @@
 'use client';
 
-import { FormEvent, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/lib/supabase/client';
 import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
+import { FormEvent, useEffect, useState } from 'react';
 
 export default function UpdatePasswordForm() {
   const { updatePassword } = useAuth();

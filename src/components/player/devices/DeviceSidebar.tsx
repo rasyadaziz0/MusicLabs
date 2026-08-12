@@ -1,17 +1,18 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2 } from 'lucide-react';
-import { usePlayer } from '@/context/PlayerContext';
 import { GlassBar } from '@/components/ui/LiquidGlass';
-import { DeviceSidebarHeader } from './DeviceSidebarHeader';
-import { DeviceRow } from './DeviceRow';
-import { DeviceRenameFooter } from './DeviceRenameFooter';
-import { DeviceInfo } from '@/types/connect';
+import { usePlayer } from '@/context/PlayerContext';
 import { getPortalRoot } from '@/lib/utils/portalRoot';
-import { DeviceSidebarProps } from '@/types/components/player/devices/DeviceSidebarProps';
+import { DeviceInfo } from '@/types/connect';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { DeviceRenameFooter } from './DeviceRenameFooter';
+import { DeviceRow } from './DeviceRow';
+import { DeviceSidebarHeader } from './DeviceSidebarHeader';
+import { DeviceSidebarProps } from "@/types/components/player/devices/DeviceSidebarProps";
+
 export default function DeviceSidebar({ isOpen, onClose }: DeviceSidebarProps) {
   const {
     myTabId,

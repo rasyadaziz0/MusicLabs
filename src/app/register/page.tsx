@@ -1,5 +1,5 @@
-import { Suspense } from 'react';
 import RegisterForm from '@/components/auth/RegisterForm';
+import { Suspense } from 'react';
 
 // Export default pakai Suspense untuk wrap useSearchParams()
 export default function RegisterPage() {

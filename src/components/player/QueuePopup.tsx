@@ -1,31 +1,31 @@
 'use client';
 
-import { usePlayer } from '@/context/PlayerContext';
-import { useEffect, useRef, useState, useMemo } from 'react';
-import { createPortal } from 'react-dom';
-import { getPortalRoot } from '@/lib/utils/portalRoot';
-import { AnimatePresence, motion } from 'framer-motion';
 import { GlassBar } from '@/components/ui/LiquidGlass';
+import { usePlayer } from '@/context/PlayerContext';
+import { getPortalRoot } from '@/lib/utils/portalRoot';
 import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
+    closestCenter,
+    DndContext,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
 } from '@dnd-kit/core';
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
 import { restrictToVerticalAxis, restrictToWindowEdges } from '@dnd-kit/modifiers';
+import {
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Infinity } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { AutoplayTrackRow } from './AutoplayTrackRow';
+import './QueuePopup.css';
 import { QueuePopupController } from './QueuePopupController';
 import { SortableTrackRow } from './SortableTrackRow';
-import { AutoplayTrackRow } from './AutoplayTrackRow';
-import { Infinity } from 'lucide-react';
-import { QueuePopupProps } from '@/types/components/player/QueuePopupProps';
-import './QueuePopup.css';
+import { QueuePopupProps } from "@/types/components/player/QueuePopupProps";
 
 export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
   const player = usePlayer();

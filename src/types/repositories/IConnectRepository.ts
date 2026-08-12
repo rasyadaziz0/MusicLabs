@@ -1,5 +1,5 @@
+import { ConnectBroadcastMessage, DeviceInfo } from '@/types/connect';
 import { RealtimeChannel } from '@supabase/supabase-js';
-import { DeviceInfo, ConnectBroadcastMessage } from '@/types/connect';
 
 export interface IConnectRepository {
   joinChannel(

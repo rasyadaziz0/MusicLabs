@@ -1,12 +1,12 @@
 'use client';
 import { ArtistParser } from '@/lib/utils/ArtistParser';
 
-import React, { useState } from 'react';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
+import { Song } from '@/types/music';
+import { MoreHorizontal, Play } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Song } from '@/types/music';
-import { ImageHelper } from '@/lib/utils/ImageHelper';
-import { Play, MoreHorizontal } from 'lucide-react';
+import React, { useState } from 'react';
 import { TrackContextMenu } from '../ui/TrackContextMenu';
 
 // ── Top Picks Card ──────────────────────────────────────────

@@ -1,21 +1,30 @@
 'use client';
 import { ArtistParser } from '@/lib/utils/ArtistParser';
 
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  X, Play, Pause, SkipForward, SkipBack, Shuffle, Repeat,
-  Volume2, Loader2, Heart, Ellipsis
-} from 'lucide-react';
+import GuestGate from '@/components/auth/GuestGate';
+import { DynamicGradientBackground } from '@/components/player/DynamicGradientBackground';
+import LyricsUI from '@/components/player/LyricsUI';
+import type { NowPlayingUIProps } from '@/components/player/NowPlayingUI';
+import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
 import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { TimeHelper } from '@/lib/utils/TimeHelper';
-import LyricsUI from '@/components/player/LyricsUI';
-import GuestGate from '@/components/auth/GuestGate';
-import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+    Ellipsis,
+    Heart,
+    Loader2,
+    Pause,
+    Play,
+    Repeat,
+    Shuffle,
+    SkipBack,
+    SkipForward,
+    Volume2,
+    X
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import type { NowPlayingUIProps } from '@/components/player/NowPlayingUI';
-import { DynamicGradientBackground } from '@/components/player/DynamicGradientBackground';
+import { useState } from 'react';
 
 const css = `
   .np-range { position:absolute; inset:-6px 0; width:100%; height:calc(100% + 12px); opacity:0; cursor:pointer; z-index:10; }

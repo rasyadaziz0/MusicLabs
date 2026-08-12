@@ -1,10 +1,11 @@
 'use client';
 
-import { Clock, X, TrendingUp } from 'lucide-react';
 import { useRecentSearches } from '@/hooks/useRecentSearches';
+import { Clock, TrendingUp, X } from 'lucide-react';
 import { SearchCategories } from './SearchCategories';
+import { RecentAndTrendingProps } from '@/types/components/search/RecentAndTrendingProps';
 
-export function RecentAndTrending({ onSearch }: { onSearch: (query: string) => void }) {
+export function RecentAndTrending({ onSearch }: RecentAndTrendingProps) {
   const { recentSearches, removeSearch, clearAll } = useRecentSearches();
 
   const curatedTrending = ['Taylor Swift', 'New Releases', 'Top 50', 'Pop Hits', 'Viral 50'];

@@ -1,26 +1,34 @@
 'use client';
 import { ArtistParser } from '@/lib/utils/ArtistParser';
-
-import { useLikedSongsIndex } from '@/hooks/library/useLikedSongsIndex';
-import { useLikedSongs } from '@/hooks/library/useLikedSongs';
-import { useToggleLikedSong } from '@/hooks/library/useToggleLikedSong';
-import { SlugHelper } from '@/lib/utils/SlugHelper';
-import { useState, useEffect } from 'react';
 import { Song } from '@/types/music';
-import { PlaySquare, Heart, ListPlus, Disc3, Mic2, Share, Radio, Link2, Timer, ChevronRight, Code } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { escapeHtmlAttr } from '@/lib/utils/escapeHtml';
-import { usePlayer } from '@/context/PlayerContext';
-import Image from 'next/image';
-import { ImageHelper } from '@/lib/utils/ImageHelper';
+
 import { useAuth } from '@/context/AuthContext';
-import { gooeyToast as toast } from 'goey-toast';
-import { resolveToYoutubeId } from '@/lib/youtube';
-import { PlaylistSubMenu } from './context-menu/PlaylistSubMenu';
-import { ContextMenu } from './context-menu/ContextMenu';
-import { ContextMenuItem, ContextMenuDivider } from './context-menu/ContextMenuItem';
+import { usePlayer } from '@/context/PlayerContext';
+import { useLikedSongsIndex } from '@/hooks/library/useLikedSongsIndex';
+import { useToggleLikedSong } from '@/hooks/library/useToggleLikedSong';
 import { useIsMobile } from '@/hooks/useIsMobile';
-import { TrackContextMenuProps } from '@/types/components/ui/TrackContextMenuProps';
+import { escapeHtmlAttr } from '@/lib/utils/escapeHtml';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
+import { SlugHelper } from '@/lib/utils/SlugHelper';
+import { resolveToYoutubeId } from '@/lib/youtube';
+import { gooeyToast as toast } from 'goey-toast';
+import { ChevronRight, Code, Disc3, Heart, Link2, ListPlus, Mic2, PlaySquare, Radio, Share, Timer } from 'lucide-react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { ContextMenu } from './context-menu/ContextMenu';
+import { ContextMenuDivider, ContextMenuItem } from './context-menu/ContextMenuItem';
+import { PlaylistSubMenu } from './context-menu/PlaylistSubMenu';
+
+export interface TrackContextMenuProps {
+  track: Song | null;
+  isOpen: boolean;
+  position: { x: number; y: number } | null;
+  onClose: () => void;
+  showPlayerControls?: boolean;
+}
+
+
 export function TrackContextMenu({ track, isOpen, position, onClose, showPlayerControls }: TrackContextMenuProps) {
   const router = useRouter();
   const { playNext, addToQueue, playTrack, isAutoplayEnabled, toggleAutoplay, setSleepTimer, clearSleepTimer, sleepTimerEndTime } = usePlayer();

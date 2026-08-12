@@ -1,17 +1,16 @@
 'use client';
 
+import { useAuth } from '@/context/AuthContext';
+import { usePlayer } from '@/context/PlayerContext';
+import { useAddTrackToPlaylist } from '@/hooks/library/useAddTrackToPlaylist';
 import { useLibraryPlaylists } from '@/hooks/library/useLibraryPlaylists';
 import { useLikedSongsIndex } from '@/hooks/library/useLikedSongsIndex';
-import { useLikedSongs } from '@/hooks/library/useLikedSongs';
 import { useToggleLikedSong } from '@/hooks/library/useToggleLikedSong';
-import { useAddTrackToPlaylist } from '@/hooks/library/useAddTrackToPlaylist';
-import { SlugHelper } from '@/lib/utils/SlugHelper';
-import { usePlayer } from '@/context/PlayerContext';
-import { useAuth } from '@/context/AuthContext';
 import { useLyrics } from '@/hooks/useLyrics';
 import { useRomanization } from '@/hooks/useRomanization';
-import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react';
 import { getEffectiveTime } from '@/lib/lyrics/lyricsOffsetStore';
+import { SlugHelper } from '@/lib/utils/SlugHelper';
+import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react';
 
 export function useNowPlaying(isOpen: boolean) {
   const {

@@ -1,11 +1,11 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
-import { Bell, User as UserIcon, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
+import { decodeQuery, encodeQuery } from '@/lib/utils/searchEncode';
+import { Bell, ChevronLeft, ChevronRight, LogOut, User as UserIcon } from 'lucide-react';
 import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, useRef } from 'react';
-import { decodeQuery, encodeQuery } from '@/lib/utils/searchEncode';
 
 export default function Header() {
   const { user, signOut } = useAuth();

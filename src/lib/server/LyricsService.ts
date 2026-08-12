@@ -1,11 +1,11 @@
+import { LyricsQuery, LyricsResult } from '@/types/services/lyrics';
 import { BaseLyricsProvider } from './lyrics/providers/BaseLyricsProvider';
-import { NeteaseProvider } from './lyrics/providers/NeteaseProvider';
 import { LrcLibProvider } from './lyrics/providers/LrcLibProvider';
+import { NeteaseProvider } from './lyrics/providers/NeteaseProvider';
 import { OvhProvider } from './lyrics/providers/OvhProvider';
-import { LyricsResult, LyricsQuery } from '@/types/services/lyrics';
 
 // Re-export types so existing consumers don't break
-export type { LyricsResult, LyricsQuery };
+export type { LyricsQuery, LyricsResult };
 
 export class LyricsService {
   private static instance: LyricsService;

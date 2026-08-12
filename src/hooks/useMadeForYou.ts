@@ -1,17 +1,17 @@
-'use client';
+﻿'use client';
 
-import { useLikedSongs } from '@/hooks/library/useLikedSongs';
-import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
+import { useLikedSongs } from '@/hooks/library/useLikedSongs';
 import { useDiscoverWeekly } from '@/hooks/useDiscoverWeekly';
-import {
-  getMostPlayedSongs,
-  getOlderTopSongs,
-  getRecentPlays,
-  getSongsPlayedBetweenHours,
-} from '@/lib/supabase/music';
-import { MoodService } from '@/services/mood/MoodService';
 import { buildPersonalizedSections } from '@/lib/personalization/buildMixes';
+import * as MoodService from '@/lib/services/mood';
+import {
+    getMostPlayedSongs,
+    getOlderTopSongs,
+    getRecentPlays,
+    getSongsPlayedBetweenHours,
+} from '@/lib/supabase/music';
+import { useQuery } from '@tanstack/react-query';
 
 export function useMadeForYou() {
   const { user } = useAuth();
@@ -73,3 +73,4 @@ export function useMadeForYou() {
       ((likedSongsQuery.data?.length ?? 0) > 0 || (recentSongsQuery.data?.length ?? 0) > 0),
   };
 }
+

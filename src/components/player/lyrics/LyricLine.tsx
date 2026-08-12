@@ -1,13 +1,13 @@
 'use client';
+import { LrcLine } from '@/types/utils/lrc';
 
 import { motion } from 'framer-motion';
-import { LrcLine } from '@/types/utils/lrc';
-import { LyricStyleManager } from './LyricStyleManager';
 import { KaraokeLine } from './KaraokeLine';
+import { LyricStyleManager } from './LyricStyleManager';
 
 import React from 'react';
+import { LyricLineProps } from "@/types/components/player/lyrics/LyricLineProps";
 
-import { LyricLineProps } from '@/types/components/player/lyrics/LyricLineProps';
 export const LyricLine = React.memo(function LyricLine({
   line,
   index,

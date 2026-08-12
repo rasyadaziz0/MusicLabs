@@ -1,6 +1,6 @@
-import { createClient } from './server';
-import type { UserProfile, FollowCounts } from '@/types/profile';
+import type { FollowCounts, UserProfile } from '@/types/profile';
 import type { PlaylistRecord } from './music';
+import { createClient } from './server';
 
 const PROFILE_COLUMNS = 'id, username, display_name, bio, avatar_url, banner_url, social_instagram, social_twitter, social_tiktok, is_public, show_now_playing, show_recently_played, lyrics_font_size, romanization_enabled, created_at';
 

@@ -1,9 +1,8 @@
 'use client';
 
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Volume2, Play } from 'lucide-react';
 import { usePlayer } from '@/context/PlayerContext';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Play } from 'lucide-react';
 
 export default function TapToStartOverlay() {
   const { autoplayBlocked, dismissAutoplayBlock } = (usePlayer() as any);

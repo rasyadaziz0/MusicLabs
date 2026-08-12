@@ -1,4 +1,4 @@
-import { RemoteCommandType, HandoffPayload } from '@/types/connect';
+import { HandoffPayload, RemoteCommandType } from '@/types/connect';
 import { Song } from '@/types/music';
 
 export interface UseSpotifyConnectOptions {

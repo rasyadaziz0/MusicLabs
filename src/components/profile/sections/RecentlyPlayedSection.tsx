@@ -1,12 +1,17 @@
 'use client';
-import { ArtistParser } from '@/lib/utils/ArtistParser';
-import React from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
 import { HorizontalScrollSection } from '@/components/ui/HorizontalScrollSection';
+import { ArtistParser } from '@/lib/utils/ArtistParser';
 import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { Song } from '@/types/music';
-import { RecentlyPlayedSectionProps } from '@/types/components/profile/sections/RecentlyPlayedSectionProps';
+import Image from 'next/image';
+import Link from 'next/link';
+
+export interface RecentlyPlayedSectionProps {
+  recentlyPlayed: Song[];
+  playTrack: (track: Song, queue: Song[], index?: number | string) => void;
+}
+
+
 export function RecentlyPlayedSection({ recentlyPlayed, playTrack }: RecentlyPlayedSectionProps) {
   if (recentlyPlayed.length === 0) return null;
 

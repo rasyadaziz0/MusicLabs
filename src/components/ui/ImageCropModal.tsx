@@ -1,10 +1,20 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
-import Cropper from 'react-easy-crop';
 import { getCroppedImg } from '@/lib/utils/cropImage';
-import { X, Loader2, Check } from 'lucide-react';
-import { ImageCropModalProps } from '@/types/components/ui/ImageCropModalProps';
+import { Check, Loader2, X } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import Cropper from 'react-easy-crop';
+
+export interface ImageCropModalProps {
+  isOpen: boolean;
+  imageSrc: string;
+  onClose: () => void;
+  onCropComplete: (croppedFile: File) => void;
+  aspect?: number;
+  circularCrop?: boolean;
+}
+
+
 export function ImageCropModal({
   isOpen,
   imageSrc,
@@ -27,7 +37,8 @@ export function ImageCropModal({
     setIsProcessing(true);
     try {
       const croppedBlob = await getCroppedImg(imageSrc, croppedAreaPixels);
-      const file = new File([croppedBlob], 'cropped-profile.jpg', { type: 'image/jpeg' });
+      const ext = croppedBlob.type === 'image/webp' ? 'webp' : 'jpg';
+      const file = new File([croppedBlob], `cropped-profile.${ext}`, { type: croppedBlob.type });
       onCropComplete(file);
     } catch (e) {
       console.error(e);

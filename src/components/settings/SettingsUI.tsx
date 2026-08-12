@@ -1,6 +1,6 @@
-import React from 'react';
-import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
 import { LiquidGlassCard } from '@/components/ui/LiquidGlass';
+import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
+import React from 'react';
 
 export function SettingsCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (

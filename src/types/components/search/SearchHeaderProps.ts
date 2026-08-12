@@ -1,3 +1,5 @@
+import { Search as SearchIcon } from 'lucide-react';
+
 export interface SearchHeaderProps {
   inputValue: string;
   setInputValue: (val: string) => void;

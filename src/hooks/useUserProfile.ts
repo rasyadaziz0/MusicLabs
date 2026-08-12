@@ -1,13 +1,13 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { UserProfile } from '@/types/profile';
-import { PlaylistRecord } from '@/lib/supabase/music';
 import { useFollowCounts } from '@/hooks/social/useFollowCounts';
 import { useFollowStatus } from '@/hooks/social/useFollowStatus';
-import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
-import { PlaylistRepository } from '@/lib/supabase/repositories/PlaylistRepository';
 import { supabase } from '@/lib/supabase/client';
+import { PlaylistRecord } from '@/lib/supabase/music';
+import { PlaylistRepository } from '@/lib/supabase/repositories/PlaylistRepository';
+import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
+import { UserProfile } from '@/types/profile';
+import { useQuery } from '@tanstack/react-query';
 
 export function useUserProfile(userId: string | null) {
   const profileQuery = useQuery<UserProfile | null>({

@@ -1,7 +1,7 @@
 import { PlaylistScraper, ScrapedPlaylist } from '@/types/services/scrapers';
+import { AppleScraper } from './apple';
 import { SpotifyScraper } from './spotify';
 import { YouTubeScraper } from './youtube';
-import { AppleScraper } from './apple';
 
 const scrapers: PlaylistScraper[] = [
   new SpotifyScraper(),

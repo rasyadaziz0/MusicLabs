@@ -1,12 +1,13 @@
 'use client';
+import { SortableTrack } from '@/types/player/controller';
 
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { TimeHelper } from '@/lib/utils/TimeHelper';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import Image from 'next/image';
-import { SortableTrack } from '@/types/player/controller';
-import { SortableTrackRowProps } from '@/types/components/player/SortableTrackRowProps';
+import { SortableTrackRowProps } from "@/types/components/player/SortableTrackRowProps";
+
 export function SortableTrackRow({ track, onClick }: SortableTrackRowProps) {
   const {
     attributes,

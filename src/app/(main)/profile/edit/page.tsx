@@ -1,14 +1,13 @@
 'use client';
 
-import { Loader2, Save, Camera, Upload, Crop } from 'lucide-react';
-import { ChevronLeft } from 'lucide-react';
+import { Camera, ChevronLeft, Crop, Loader2, Save } from 'lucide-react';
 
+import { InstagramIcon, TikTokIcon, XIcon } from '@/components/icons/SocialIcons';
+import { ImageCropModal } from '@/components/ui/ImageCropModal';
+import { useEditProfileForm } from '@/hooks/useEditProfileForm';
 import { API_BASE } from '@/lib/config';
 import Image from 'next/image';
-import { InstagramIcon, TikTokIcon, XIcon } from '@/components/icons/SocialIcons';
-import { useEditProfileForm } from '@/hooks/useEditProfileForm';
 import { useState } from 'react';
-import { ImageCropModal } from '@/components/ui/ImageCropModal';
 
 export default function EditProfilePage() {
   const {

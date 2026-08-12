@@ -1,11 +1,20 @@
 'use client';
 
-import { useToggleFollow } from '@/hooks/social/useToggleFollow';
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { UserPlus, UserCheck, UserMinus, Loader2 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { FollowButtonProps } from '@/types/components/ui/FollowButtonProps';
+import { useToggleFollow } from '@/hooks/social/useToggleFollow';
+import { motion } from 'framer-motion';
+import { Loader2, UserCheck, UserMinus, UserPlus } from 'lucide-react';
+import { useState } from 'react';
+
+export interface FollowButtonProps {
+  targetUserId: string;
+  isFollowing: boolean;
+  isLoading?: boolean;
+  size?: 'sm' | 'md';
+  className?: string;
+}
+
+
 export default function FollowButton({
   targetUserId,
   isFollowing,

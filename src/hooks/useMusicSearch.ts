@@ -1,11 +1,11 @@
 'use client';
 
-import { SearchHelper } from '@/lib/utils/SearchHelper';
 import { MusicApiService } from '@/lib/api/MusicApiService';
+import { RawSearchArtistResult, SearchArtistResult } from '@/types/hooks/search';
+import { Song } from '@/types/music';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
-import { Song } from '@/types/music';
-import { SearchArtistResult, RawSearchArtistResult } from '@/types/hooks/search';
+import * as SearchHelper from '../lib/utils/search';
 
 
 

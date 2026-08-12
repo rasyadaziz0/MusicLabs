@@ -1,7 +1,7 @@
 
 import { Song } from '@/types/music';
+import { QueueManagerCallbacks, RepeatMode } from '@/types/player/queue';
 import { AutoplayManager } from './queue/AutoplayManager';
-import { QueueState, QueueManagerCallbacks, RepeatMode } from '@/types/player/queue';
 
 // ─── Manager class ───
 

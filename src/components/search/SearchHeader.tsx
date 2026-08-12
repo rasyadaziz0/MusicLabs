@@ -1,8 +1,9 @@
 'use client';
 
-import { Search as SearchIcon } from 'lucide-react';
 import { useTranslation } from '@/context/LanguageContext';
-import { SearchHeaderProps } from '@/types/components/search/SearchHeaderProps';
+import { Search as SearchIcon } from 'lucide-react';
+import { SearchHeaderProps } from "@/types/components/search/SearchHeaderProps";
+
 export function SearchHeader({ inputValue, setInputValue, searchMode, setSearchMode, onCommit }: SearchHeaderProps) {
   const { t } = useTranslation();
   return (

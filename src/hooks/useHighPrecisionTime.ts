@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
 import { TimeSubscriber } from '@/types/hooks/time';
+import { useEffect, useRef } from 'react';
 
 
 

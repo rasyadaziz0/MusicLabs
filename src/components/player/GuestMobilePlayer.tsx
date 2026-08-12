@@ -1,13 +1,13 @@
 'use client';
 import { ArtistParser } from '@/lib/utils/ArtistParser';
 
-import { motion } from 'framer-motion';
-import { Play, Pause, SkipForward, SkipBack, Volume2, Volume, Loader2, Heart, MessageSquare, ListMusic, Ellipsis } from 'lucide-react';
+import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
 import { TimeHelper } from '@/lib/utils/TimeHelper';
+import { motion } from 'framer-motion';
+import { Ellipsis, Heart, ListMusic, Loader2, MessageSquare, Pause, Play, SkipBack, SkipForward, Volume, Volume2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
-import { useState, useRef } from 'react';
+import { useRef, useState } from 'react';
 
 export function GuestMobilePlayer({
   props,

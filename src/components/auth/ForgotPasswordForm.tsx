@@ -1,9 +1,9 @@
 'use client';
 
+import TurnstileWidget from '@/components/auth/TurnstileWidget';
+import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import { FormEvent, useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
-import TurnstileWidget from '@/components/auth/TurnstileWidget';
 
 export default function ForgotPasswordForm() {
   const { resetPasswordForEmail } = useAuth();

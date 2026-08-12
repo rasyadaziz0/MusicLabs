@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { Loader2, Play, Pause, SkipForward, SkipBack, Volume2, Volume1, MessageSquareQuote, ListMusic, Headphones } from 'lucide-react';
-import { TimeHelper } from '@/lib/utils/TimeHelper';
 import { MobileAirPlayPopup } from '@/components/mobile/player/MobileAirPlayPopup';
 import { usePlayer } from '@/context/PlayerContext';
+import { TimeHelper } from '@/lib/utils/TimeHelper';
 import { IMobilePlayerControlsProps } from '@/types/components/mobile';
+import { motion } from 'framer-motion';
+import { Headphones, ListMusic, Loader2, MessageSquareQuote, Pause, Play, SkipBack, SkipForward, Volume1, Volume2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { MobilePlayerControlsController } from './MobilePlayerControlsController';
 
 export function MobilePlayerControls(props: IMobilePlayerControlsProps) {

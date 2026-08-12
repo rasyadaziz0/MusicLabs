@@ -1,5 +1,5 @@
-import { BaseLyricsProvider } from './BaseLyricsProvider';
 import { CleanedQuery, ProviderResult } from '@/types/services/lyrics';
+import { BaseLyricsProvider } from './BaseLyricsProvider';
 
 /**
  * OvhProvider — fetches plain-text lyrics from lyrics.ovh.

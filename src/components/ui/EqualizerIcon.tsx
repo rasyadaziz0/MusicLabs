@@ -1,4 +1,3 @@
-import React from 'react';
 
 export const EqualizerIcon = ({ isPlaying, color = 'white' }: { isPlaying: boolean; color?: 'white' | 'red' }) => {
   const bgClass = color === 'red' ? 'bg-[#FA243C]' : 'bg-white';

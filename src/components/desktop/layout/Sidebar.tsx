@@ -1,18 +1,18 @@
 'use client';
 
+import { GlassBar } from '@/components/ui/LiquidGlass';
+import { useAuth } from '@/context/AuthContext';
+import { useFeatureFlags } from '@/context/FeatureFlagsContext';
+import { useImport } from '@/context/ImportContext';
+import { useTranslation } from '@/context/LanguageContext';
 import { useLibraryPlaylists } from '@/hooks/library/useLibraryPlaylists';
+import { useDiscoverWeekly } from '@/hooks/useDiscoverWeekly';
+import { StyleHelper } from '@/lib/utils/StyleHelper';
+import { AudioLines, ChevronDown, ChevronRight, Clock, Coffee, Heart, Home, LayoutGrid, ListMusic, LogOut, Mic, Music, Pin, PlusSquare, Radio, Search, Sparkles, SquareStack, UserSquare } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, LayoutGrid, Radio, Clock, Mic, SquareStack, Music, UserSquare, Search, ChevronDown, ChevronRight, Pin, Heart, LogOut, PlusSquare, Sparkles, AudioLines, Coffee, ListMusic } from 'lucide-react';
-import { StyleHelper } from '@/lib/utils/StyleHelper';
-import { useDiscoverWeekly } from '@/hooks/useDiscoverWeekly';
-import { useAuth } from '@/context/AuthContext';
-import { useTranslation } from '@/context/LanguageContext';
-import { useFeatureFlags } from '@/context/FeatureFlagsContext';
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { GlassBar } from '@/components/ui/LiquidGlass';
-import { useImport } from '@/context/ImportContext';
+import { useEffect, useState } from 'react';
 
 const navItems = [
   { icon: Search, label: 'Search', href: '/search' },

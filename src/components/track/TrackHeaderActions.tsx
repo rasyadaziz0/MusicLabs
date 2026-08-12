@@ -1,14 +1,19 @@
 'use client';
-
-import { useLikedSongsIndex } from '@/hooks/library/useLikedSongsIndex';
-import { useLikedSongs } from '@/hooks/library/useLikedSongs';
-import { useToggleLikedSong } from '@/hooks/library/useToggleLikedSong';
-import React, { useState } from 'react';
-import { Heart, MoreHorizontal, Loader2 } from 'lucide-react';
 import { Song } from '@/types/music';
-import { useAuth } from '@/context/AuthContext';
+
 import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
-import { TrackHeaderActionsProps } from '@/types/components/track/TrackHeaderActionsProps';
+import { useAuth } from '@/context/AuthContext';
+import { useLikedSongsIndex } from '@/hooks/library/useLikedSongsIndex';
+import { useToggleLikedSong } from '@/hooks/library/useToggleLikedSong';
+import { Heart, Loader2, MoreHorizontal } from 'lucide-react';
+import React, { useState } from 'react';
+
+export interface TrackHeaderActionsProps {
+  /** Serialized Song JSON passed from server component */
+  trackJson: string;
+}
+
+
 export default function TrackHeaderActions({ trackJson }: TrackHeaderActionsProps) {
   const { user, signInWithGoogle } = useAuth();
   const { likedSet } = useLikedSongsIndex();

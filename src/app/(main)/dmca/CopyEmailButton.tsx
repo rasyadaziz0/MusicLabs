@@ -1,7 +1,7 @@
 "use client";
 
+import { Check, Copy } from 'lucide-react';
 import { useState } from 'react';
-import { Copy, Check } from 'lucide-react';
 
 export default function CopyEmailButton({ email }: { email: string }) {
   const [copied, setCopied] = useState(false);

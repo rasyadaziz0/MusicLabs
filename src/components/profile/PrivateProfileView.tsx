@@ -1,11 +1,17 @@
 'use client';
+import { UserProfile } from '@/types/profile';
 
-import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/context/LanguageContext';
 import { ChevronLeft, Lock } from 'lucide-react';
 import Image from 'next/image';
-import { UserProfile } from '@/types/profile';
-import { useTranslation } from '@/context/LanguageContext';
-import { PrivateProfileViewProps } from '@/types/components/profile/PrivateProfileViewProps';
+import { useRouter } from 'next/navigation';
+
+export interface PrivateProfileViewProps {
+  profile: UserProfile;
+  isLoggedIn: boolean;
+}
+
+
 export default function PrivateProfileView({ profile, isLoggedIn }: PrivateProfileViewProps) {
   const router = useRouter();
   const { t } = useTranslation();

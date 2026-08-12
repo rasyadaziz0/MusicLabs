@@ -1,8 +1,8 @@
-import { RadioApiService } from '@/lib/api/RadioApiService';
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { RadioStation } from '@/types/music';
 import { usePlayer } from '@/context/PlayerContext';
+import { RadioStation } from '@/types/music';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
+import * as RadioApiService from '../../../lib/api/radio';
 
 export const CATEGORIES = [
   { key: 'all', label: 'All Stations' },

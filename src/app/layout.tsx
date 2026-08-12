@@ -1,11 +1,11 @@
-import type { Metadata, Viewport } from "next";
-import { Syne, DM_Sans, JetBrains_Mono } from "next/font/google";
-import "./globals.css";
-import "goey-toast/styles.css";
 import ConditionalProviders from "@/components/ConditionalProviders";
 import GooeyToasterProvider from "@/components/GooeyToasterProvider";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import "goey-toast/styles.css";
+import type { Metadata, Viewport } from "next";
+import { DM_Sans, JetBrains_Mono, Syne } from "next/font/google";
+import "./globals.css";
 
 const syne = Syne({
   variable: "--font-display",

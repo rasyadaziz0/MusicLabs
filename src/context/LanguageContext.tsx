@@ -1,12 +1,12 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
 import en from '@/i18n/locales/en.json';
+import es from '@/i18n/locales/es.json';
+import fr from '@/i18n/locales/fr.json';
 import id from '@/i18n/locales/id.json';
 import jp from '@/i18n/locales/jp.json';
 import kr from '@/i18n/locales/kr.json';
-import es from '@/i18n/locales/es.json';
-import fr from '@/i18n/locales/fr.json';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
 const dictionaries: Record<string, any> = {
   en,

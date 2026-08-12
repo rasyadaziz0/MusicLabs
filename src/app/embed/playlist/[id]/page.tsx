@@ -1,9 +1,9 @@
+import { PlaylistRepository } from '@/lib/supabase/repositories/PlaylistRepository';
+import { createClient } from '@/lib/supabase/server';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { Metadata } from 'next';
 import { cache } from 'react';
-import { PlaylistRepository } from '@/lib/supabase/repositories/PlaylistRepository';
 import EmbedPlaylistPlayer from './EmbedPlaylistPlayer';
-import { ImageHelper } from '@/lib/utils/ImageHelper';
-import { createClient } from '@/lib/supabase/server';
 
 const getPlaylistData = cache(async (playlistId: string) => {
   const supabase = await createClient();

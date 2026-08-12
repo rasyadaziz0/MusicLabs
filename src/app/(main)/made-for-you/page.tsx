@@ -1,17 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { Sparkles, ChevronLeft, Loader2 } from 'lucide-react';
+import { TrackCard } from '@/components/home/HomeCards';
+import { LibraryEmptyState } from '@/components/library/LibraryEmptyState';
+import FeatureDisabled from '@/components/ui/FeatureDisabled';
+import { HorizontalScrollSection } from '@/components/ui/HorizontalScrollSection';
 import { useAuth } from '@/context/AuthContext';
+import { useFeatureFlags } from '@/context/FeatureFlagsContext';
 import { usePlayer } from '@/context/PlayerContext';
 import { useMadeForYou } from '@/hooks/useMadeForYou';
-import { LibraryEmptyState } from '@/components/library/LibraryEmptyState';
-import { HorizontalScrollSection } from '@/components/ui/HorizontalScrollSection';
-import { TrackCard } from '@/components/home/HomeCards';
-import { useFeatureFlags } from '@/context/FeatureFlagsContext';
-import FeatureDisabled from '@/components/ui/FeatureDisabled';
+import { ChevronLeft, Sparkles } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function MadeForYouPage() {
   const router = useRouter();

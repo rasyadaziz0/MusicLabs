@@ -1,13 +1,13 @@
 'use client';
 import { ArtistParser } from '@/lib/utils/ArtistParser';
 
-import { Play, Pause, SkipForward, SkipBack, Shuffle, Repeat, Volume2, Loader2, Heart, X, Ellipsis } from 'lucide-react';
+import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
 import { TimeHelper } from '@/lib/utils/TimeHelper';
+import { motion } from 'framer-motion';
+import { Ellipsis, Heart, Loader2, Pause, Play, Repeat, Shuffle, SkipBack, SkipForward, Volume2, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
-import { useState, useRef } from 'react';
+import { useRef, useState } from 'react';
 
 // We reuse the NowPlayingUIProps type but we can omit what we don't need or just pass it
 export function GuestDesktopPlayer({

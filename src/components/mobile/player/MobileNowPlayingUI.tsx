@@ -1,16 +1,16 @@
 'use client';
 
-import { useState } from 'react';
-import { motion, AnimatePresence, useDragControls } from 'framer-motion';
-import { ImageHelper } from '@/lib/utils/ImageHelper';
 import GuestGate from '@/components/auth/GuestGate';
 import type { NowPlayingUIProps } from '@/components/player/NowPlayingUI';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
+import { AnimatePresence, motion, useDragControls } from 'framer-motion';
+import { useState } from 'react';
 
 // Extracted Components
-import { mobileNowPlayingCss } from '@/components/mobile/player/MobileNowPlayingStyles';
-import { MobileNowPlayingBackground } from '@/components/mobile/player/MobileNowPlayingBackground';
-import { MobileLyricsMode } from '@/components/mobile/player/MobileLyricsMode';
 import { MobileArtworkMode } from '@/components/mobile/player/MobileArtworkMode';
+import { MobileLyricsMode } from '@/components/mobile/player/MobileLyricsMode';
+import { MobileNowPlayingBackground } from '@/components/mobile/player/MobileNowPlayingBackground';
+import { mobileNowPlayingCss } from '@/components/mobile/player/MobileNowPlayingStyles';
 import { MobilePlayerControls } from '@/components/mobile/player/MobilePlayerControls';
 import { MobileQueueMode } from '@/components/mobile/player/MobileQueueMode';
 

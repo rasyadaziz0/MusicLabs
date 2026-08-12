@@ -1,14 +1,28 @@
 'use client';
 
-import React from 'react';
-import { Loader2, Pause, Play, Radio as RadioIcon, SkipForward, MonitorSpeaker } from 'lucide-react';
-import Image from 'next/image';
-import { motion } from 'framer-motion';
-import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { GlassBar } from '@/components/ui/LiquidGlass';
 import { usePlayer } from '@/context/PlayerContext';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { StyleHelper } from '@/lib/utils/StyleHelper';
-import { MobilePlayerBarProps } from '@/types/components/mobile/player/MobilePlayerBarProps';
+import { motion } from 'framer-motion';
+import { Loader2, MonitorSpeaker, Pause, Play, Radio as RadioIcon, SkipForward } from 'lucide-react';
+import Image from 'next/image';
+
+export interface MobilePlayerBarProps {
+  currentTrack: any;
+  isPlaying: boolean;
+  isResolving: boolean;
+  isGuestPreview: boolean;
+  isRadio: boolean;
+  radioMeta: any;
+  togglePlay: () => void;
+  nextTrack: () => void;
+  setIsNowPlayingOpen: (open: boolean) => void;
+  isDevicesOpen?: boolean;
+  setIsDevicesOpen?: (open: boolean) => void;
+}
+
+
 export default function MobilePlayerBar({
   currentTrack,
   isPlaying,

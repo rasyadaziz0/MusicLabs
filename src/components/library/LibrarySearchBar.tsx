@@ -1,7 +1,14 @@
 'use client';
 
 import { Search } from 'lucide-react';
-import { LibrarySearchBarProps } from '@/types/components/library/LibrarySearchBarProps';
+
+export interface LibrarySearchBarProps {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+}
+
+
 export function LibrarySearchBar({
   value,
   onChange,

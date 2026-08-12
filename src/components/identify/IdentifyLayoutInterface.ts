@@ -1,8 +1,8 @@
-import { Song } from '@/types/music';
-import { IdentifyMode, IdentifyState } from '@/types/hooks/identify';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
-import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 import { useIdentifyQuota } from '@/hooks/useIdentifyQuota';
+import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
+import { IdentifyMode, IdentifyState } from '@/types/hooks/identify';
+import { Song } from '@/types/music';
 
 export interface IIdentifyLayoutProps {
   mode: IdentifyMode;

@@ -1,10 +1,10 @@
-import Image from 'next/image';
-import { Play, Pause, MoreHorizontal, Music, Link as LinkIcon, Code, Maximize2 } from 'lucide-react';
-import { EmbedBrandLogo } from '../../_components/EmbedBrandLogo';
-import { EmbedPromoModal } from '../../_components/EmbedPromoModal';
-import { EmbedProgressBar } from '../../_components/EmbedProgressBar';
-import { EmbedPreviewBadge } from '../../_components/EmbedPreviewBadge';
 import { EmbedPlayerState } from '@/types/controllers/embed';
+import { Code, Link as LinkIcon, Maximize2, MoreHorizontal, Music, Pause, Play } from 'lucide-react';
+import Image from 'next/image';
+import { EmbedBrandLogo } from '../../_components/EmbedBrandLogo';
+import { EmbedPreviewBadge } from '../../_components/EmbedPreviewBadge';
+import { EmbedProgressBar } from '../../_components/EmbedProgressBar';
+import { EmbedPromoModal } from '../../_components/EmbedPromoModal';
 
 export interface EmbedTrackPlayerUIProps {
   trackId: string;

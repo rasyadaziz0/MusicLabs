@@ -1,9 +1,25 @@
-import React from 'react';
-import { StyleHelper } from '@/lib/utils/StyleHelper';
-import { Volume2, VolumeX, MessageSquare, ListMusic, MonitorSpeaker } from 'lucide-react';
 import QueuePopup from '@/components/player/QueuePopup';
 import { usePlayer } from '@/context/PlayerContext';
-import { DesktopExtraControlsProps } from '@/types/components/desktop/player/DesktopExtraControlsProps';
+import { StyleHelper } from '@/lib/utils/StyleHelper';
+import { ListMusic, MessageSquare, MonitorSpeaker, Volume2, VolumeX } from 'lucide-react';
+
+export interface DesktopExtraControlsProps {
+  currentTrack: any;
+  hasTrack: boolean;
+  volume: number;
+  setVolume: (val: number) => void;
+  isMuted: boolean;
+  isVolumeSliderOpen: boolean;
+  setIsVolumeSliderOpen: (open: boolean) => void;
+  isQueueOpen: boolean;
+  setIsQueueOpen: (open: boolean) => void;
+  isLyricsOpen: boolean;
+  setIsLyricsOpen: (open: boolean) => void;
+  isDevicesOpen?: boolean;
+  setIsDevicesOpen?: (open: boolean) => void;
+}
+
+
 export default function DesktopExtraControls({
   currentTrack, hasTrack, volume, setVolume, isMuted,
   isVolumeSliderOpen, setIsVolumeSliderOpen,

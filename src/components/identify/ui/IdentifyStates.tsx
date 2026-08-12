@@ -1,9 +1,24 @@
-import { AudioLines, Mic, Loader2, AlertCircle, Music2 } from 'lucide-react';
-import { IdentifyMode, IdentifyState } from '@/types/hooks/identify';
 import { useAudioRecorder } from '@/hooks/useAudioRecorder';
-import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 import { useIdentifyQuota } from '@/hooks/useIdentifyQuota';
-import { IdentifyStatesProps } from '@/types/components/identify/ui/IdentifyStatesProps';
+import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
+import { IdentifyMode, IdentifyState } from '@/types/hooks/identify';
+import { AlertCircle, AudioLines, Loader2, Mic, Music2 } from 'lucide-react';
+
+export interface IdentifyStatesProps {
+  state: IdentifyState;
+  mode: IdentifyMode;
+  recorder: ReturnType<typeof useAudioRecorder>;
+  speech: ReturnType<typeof useSpeechRecognition>;
+  quota: ReturnType<typeof useIdentifyQuota>;
+  rawMatch: { title: string; artist: string; album?: string } | null;
+  errorMessage: string;
+  onAuddIdentify: () => void;
+  onSpeechStart: () => void;
+  onCancel: () => void;
+  onReset: () => void;
+}
+
+
 export function IdentifyStates({
   state,
   mode,

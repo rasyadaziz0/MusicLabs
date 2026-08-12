@@ -1,8 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { UseIdentifyQuotaReturn } from '@/types/hooks/identify';
+import { useCallback, useEffect, useState } from 'react';
 
 const MAX_MONTHLY_REQUESTS = 300;
 

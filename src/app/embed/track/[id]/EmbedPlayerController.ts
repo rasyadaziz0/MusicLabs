@@ -1,5 +1,5 @@
 import { YouTubePlayerInstance } from '@/types/components/embed';
-import { EmbedPlayerState, EmbedPlayerControllerOptions } from '@/types/controllers/embed';
+import { EmbedPlayerControllerOptions, EmbedPlayerState } from '@/types/controllers/embed';
 
 const API_BASE = process.env.NEXT_PUBLIC_EXPRESS_API_URL || process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || '';
 

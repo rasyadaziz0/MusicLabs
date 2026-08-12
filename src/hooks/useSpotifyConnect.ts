@@ -1,18 +1,16 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { ConnectRepository } from '@/lib/supabase/repositories/ConnectRepository';
-import { ConnectEngine } from '@/lib/services/ConnectEngine';
 import {
-  DeviceInfo,
-  ConnectBroadcastMessage,
-  RemoteCommandType,
-  RemotePlaybackState,
-  HandoffPayload,
-  StateSyncPayload,
+    ConnectBroadcastMessage,
+    DeviceInfo,
+    RemoteCommandType,
+    RemotePlaybackState,
+    StateSyncPayload
 } from '@/types/connect';
-import { Song } from '@/types/music';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import * as ConnectEngine from '../lib/services/connect';
 
 import { UseSpotifyConnectOptions } from '@/types/hooks/spotify';
 

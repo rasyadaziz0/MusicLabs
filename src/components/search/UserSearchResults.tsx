@@ -1,8 +1,9 @@
 'use client';
+import { UserProfile } from '@/types/profile';
 
 import UserCard from '@/components/ui/UserCard';
-import { UserProfile } from '@/types/profile';
-import { UserSearchResultsProps } from '@/types/components/search/UserSearchResultsProps';
+import { UserSearchResultsProps } from "@/types/components/search/UserSearchResultsProps";
+
 export function UserSearchResults({ isUsersLoading, usersData, query }: UserSearchResultsProps) {
   if (isUsersLoading) {
     return (

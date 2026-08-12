@@ -1,5 +1,5 @@
-import { Song } from '@/types/music';
 import { PlaylistRecord, PlaylistTrackRow } from '@/types/models/Playlist';
+import { Song } from '@/types/music';
 
 export interface IPlaylistRepository {
   getUserPlaylists(userId: string): Promise<PlaylistRecord[]>;

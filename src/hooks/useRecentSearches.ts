@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const RECENT_SEARCHES_KEY = 'musiclabs_recent_searches';
 const MAX_RECENT_SEARCHES = 15;

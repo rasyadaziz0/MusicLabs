@@ -1,9 +1,8 @@
 'use client';
 
-import React from 'react';
-import Link from 'next/link';
-import { Home, Settings2, ShieldAlert } from 'lucide-react';
 import { useTranslation } from '@/context/LanguageContext';
+import { Home, ShieldAlert } from 'lucide-react';
+import Link from 'next/link';
 
 export default function FeatureDisabled() {
   const { t } = useTranslation();

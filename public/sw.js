@@ -11,7 +11,7 @@ self.addEventListener('fetch', (event) => {
   
   // Bypass Service Worker untuk request lintas origin (seperti API Supabase, YouTube, dll)
   // Ini menghindari error CORS: "The value of the 'Access-Control-Allow-Origin' header in the response must not be the wildcard '*'"
-  if (url.origin !== self.location.origin) {
+  if (url.origin !== self.location.origin || url.pathname.startsWith('/_vercel')) {
     return;
   }
 

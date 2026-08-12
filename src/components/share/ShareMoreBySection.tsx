@@ -1,16 +1,22 @@
 'use client';
+import { Song } from '@/types/music';
 
+import { HorizontalScrollSection } from '@/components/ui/HorizontalScrollSection';
+import { usePlayer } from '@/context/PlayerContext';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { SlugHelper } from '@/lib/utils/SlugHelper';
-import React from 'react';
+import { MoreHorizontal, Play } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Play, MoreHorizontal } from 'lucide-react';
-import { Song } from '@/types/music';
-import { ImageHelper } from '@/lib/utils/ImageHelper';
-import { usePlayer } from '@/context/PlayerContext';
-import { HorizontalScrollSection } from '@/components/ui/HorizontalScrollSection';
-import { ShareMoreBySectionProps } from '@/types/components/share/ShareMoreBySectionProps';
+
+export interface ShareMoreBySectionProps {
+  title: string;
+  tracks: Song[];
+  artistId?: string;
+}
+
+
 export function ShareMoreBySection({ title, tracks, artistId }: ShareMoreBySectionProps) {
   const { playTrack } = usePlayer();
   const router = useRouter();

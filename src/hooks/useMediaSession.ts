@@ -1,7 +1,6 @@
-import { useEffect } from 'react';
-import { Song } from '@/types/music';
 import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { UseMediaSessionProps } from '@/types/hooks/media';
+import { useEffect } from 'react';
 
 export function useMediaSession({
   currentTrack,

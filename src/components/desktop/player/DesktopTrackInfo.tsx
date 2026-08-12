@@ -1,23 +1,30 @@
+import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
+import { usePlayer } from '@/context/PlayerContext';
 import { ArtistParser } from '@/lib/utils/ArtistParser';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { SlugHelper } from '@/lib/utils/SlugHelper';
-import React from 'react';
 import { StyleHelper } from '@/lib/utils/StyleHelper';
-import { Radio as RadioIcon, Loader2, Maximize2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { gooeyToast as toast } from 'goey-toast';
+import { Loader2, Maximize2, MoreHorizontal, Radio as RadioIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { ImageHelper } from '@/lib/utils/ImageHelper';
-import { gooeyToast as toast } from 'goey-toast';
-import { MoreHorizontal, Share, Link2, Timer } from 'lucide-react';
-import TrackLikeButton from '@/components/ui/TrackLikeButton';
-import { TimeHelper } from '@/lib/utils/TimeHelper';
-import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
-import AddToPlaylistButton from '@/components/ui/AddToPlaylistButton';
-import AddToQueueButton from '@/components/ui/AddToQueueButton';
-import { usePlayer } from '@/context/PlayerContext';
-import { SleepTimerCountdown } from '@/components/player/SleepTimerCountdown';
+import React from 'react';
 
-import { DesktopTrackInfoProps } from '@/types/components/desktop/player/DesktopTrackInfoProps';
+export interface DesktopTrackInfoProps {
+  currentTrack: any;
+  hasTrack: boolean;
+  isRadio: boolean;
+  radioMeta: any;
+  isResolving: boolean;
+  currentTime: number;
+  duration: number;
+  seek: (val: number) => void;
+  setIsNowPlayingOpen: (open: boolean) => void;
+  isVolumeSliderOpen?: boolean;
+}
+
+
 export default function DesktopTrackInfo({
   currentTrack, hasTrack, isRadio, radioMeta, isResolving,
   currentTime, duration, seek, setIsNowPlayingOpen, isVolumeSliderOpen

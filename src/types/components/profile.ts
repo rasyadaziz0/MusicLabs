@@ -1,5 +1,5 @@
-import { UserProfile } from '@/types/profile';
 import { PlaylistRecord } from '@/types/models/Playlist';
+import { UserProfile } from '@/types/profile';
 
 export interface MyProfileInitialData {
   userId: string;

@@ -1,9 +1,15 @@
 'use client';
-
-import { Play, Pause } from 'lucide-react';
-import { usePlayer } from '@/context/PlayerContext';
 import { Song } from '@/types/music';
-import { TrackPlayButtonProps } from '@/types/components/track/TrackPlayButtonProps';
+
+import { usePlayer } from '@/context/PlayerContext';
+import { Pause, Play } from 'lucide-react';
+
+export interface TrackPlayButtonProps {
+  /** Serialized Song JSON passed from server component */
+  trackJson: string;
+}
+
+
 /**
  * Client-side Play button for the SSR track detail page.
  * Receives the Song object as a JSON string from the server component

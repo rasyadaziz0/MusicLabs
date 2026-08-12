@@ -1,9 +1,9 @@
 'use client';
 
-import { MusicApiService } from '@/lib/api/MusicApiService';
-import { useState, useEffect, useRef } from 'react';
-import { LrcLine } from '@/types/utils/lrc';
 import { useSettings } from '@/context/SettingsContext';
+import { MusicApiService } from '@/lib/api/MusicApiService';
+import { LrcLine } from '@/types/utils/lrc';
+import { useEffect, useRef, useState } from 'react';
 
 // In-memory cache per track
 const romanizationCache = new Map<string, Map<number, string>>();

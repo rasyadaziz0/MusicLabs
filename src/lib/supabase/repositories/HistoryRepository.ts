@@ -1,8 +1,8 @@
 import { MusicApiService } from '@/lib/api/MusicApiService';
-import { SupabaseClient } from '@supabase/supabase-js';
+import { WeeklyTrackPlay } from '@/types/models/History';
 import { Song } from '@/types/music';
 import { IHistoryRepository } from '@/types/repositories/IHistoryRepository';
-import { WeeklyTrackPlay } from '@/types/models/History';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 export class HistoryRepository implements IHistoryRepository {
   constructor(private supabase: SupabaseClient) {}

@@ -1,5 +1,5 @@
-import { LrcLine } from '@/types/utils/lrc';
 import { Song } from '@/types/music';
+import { LrcLine } from '@/types/utils/lrc';
 
 export interface LyricsUIProps {
   currentTrack: Song;

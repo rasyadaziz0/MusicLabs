@@ -1,8 +1,8 @@
 import { headers } from 'next/headers';
 import React from 'react';
-import BaseLayout from './BaseLayout';
 import Sidebar from '../../desktop/layout/Sidebar';
 import MobileNav from '../../mobile/layout/MobileNav';
+import BaseLayout from './BaseLayout';
 
 export default async function LayoutContainer({ children }: { children: React.ReactNode }) {
   const headersList = await headers();

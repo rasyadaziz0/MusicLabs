@@ -1,13 +1,28 @@
 'use client';
+import { UserProfile } from '@/types/profile';
 
+import { InstagramIcon, TikTokIcon, XIcon } from '@/components/icons/SocialIcons';
+import { gooeyToast as toast } from 'goey-toast';
+import { ArrowLeft, CheckCircle2, Heart, ListMusic, Share2, User, UserCheck, Users } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { gooeyToast as toast } from 'goey-toast';
-import { LogOut, ListMusic, Heart, Users, UserCheck, User, Share2, ArrowLeft, Globe, CheckCircle2 } from 'lucide-react';
-import { UserProfile } from '@/types/profile';
-import { TikTokIcon, InstagramIcon, XIcon } from '@/components/icons/SocialIcons';
-import { ProfileHeroProps } from '@/types/components/profile/sections/ProfileHeroProps';
+
+export interface ProfileHeroProps {
+  user: any;
+  profile: UserProfile | null;
+  stats: {
+    playlistCount: number;
+    likedCount: number;
+    followerCount: number;
+    followingCount: number;
+  };
+  handleSignOut: () => void;
+  setFollowModalTab: (tab: 'followers' | 'following') => void;
+  setFollowModalOpen: (open: boolean) => void;
+}
+
+
 export function ProfileHero({
   user,
   profile,

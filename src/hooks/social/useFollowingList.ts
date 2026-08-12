@@ -1,10 +1,8 @@
 'use client';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/context/AuthContext';
 import { SocialRepository } from '@/lib/supabase/repositories/SocialRepository';
-import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
-import { type FollowCounts, type UserProfile } from '@/types/profile';
+import { type UserProfile } from '@/types/profile';
+import { useQuery } from '@tanstack/react-query';
 
 export function useFollowingList(userId: string | null) {
   return useQuery<UserProfile[]>({

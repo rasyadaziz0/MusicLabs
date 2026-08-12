@@ -1,12 +1,22 @@
 'use client';
 
-import { useEffect, useRef, useLayoutEffect } from 'react';
-import { createPortal } from 'react-dom';
-import { getPortalRoot } from '@/lib/utils/portalRoot';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { getPortalRoot } from '@/lib/utils/portalRoot';
 import { StyleHelper } from '@/lib/utils/StyleHelper';
-import { ContextMenuProps } from '@/types/components/ui/context-menu/ContextMenuProps';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useLayoutEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
+
+export interface ContextMenuProps {
+  isOpen: boolean;
+  onClose: () => void;
+  position?: { x: number; y: number } | null;
+  mobileHeader?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}
+
+
 export function ContextMenu({
   isOpen,
   onClose,
@@ -100,6 +110,8 @@ export function ContextMenu({
               exit={{ y: "100%", opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="fixed inset-x-0 bottom-0 z-[101] bg-[#1c1c1e] rounded-t-3xl pt-2 pb-safe shadow-2xl flex flex-col"
+              onMouseDown={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
             >
               <div className="w-12 h-1.5 bg-white/20 rounded-full mx-auto my-3" />
               {mobileHeader}
@@ -132,6 +144,8 @@ export function ContextMenu({
             left: position.x,
             top: position.y,
           }}
+          onMouseDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
         >
           {children}
         </motion.div>

@@ -1,5 +1,5 @@
+import { AlertTriangle, ExternalLink, Mail, Shield } from 'lucide-react';
 import { Metadata } from 'next';
-import { Shield, Mail, AlertTriangle, ExternalLink } from 'lucide-react';
 import CopyEmailButton from './CopyEmailButton';
 
 export const metadata: Metadata = {

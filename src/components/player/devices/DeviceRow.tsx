@@ -1,10 +1,10 @@
 'use client';
-
-import React from 'react';
-import { Laptop, Smartphone, Tablet, Volume2 } from 'lucide-react';
-import { StyleHelper } from '@/lib/utils/StyleHelper';
 import { DeviceInfo } from '@/types/connect';
-import { DeviceRowProps } from '@/types/components/player/devices/DeviceRowProps';
+
+import { StyleHelper } from '@/lib/utils/StyleHelper';
+import { Laptop, Smartphone, Tablet, Volume2 } from 'lucide-react';
+import { DeviceRowProps } from "@/types/components/player/devices/DeviceRowProps";
+
 export function DeviceRow({ device, isActive, isMe, onSelect }: DeviceRowProps) {
   const getIcon = (type: string, active: boolean) => {
     const className = StyleHelper.cn("w-5 h-5", active ? "text-[#1db954]" : "text-white/70");

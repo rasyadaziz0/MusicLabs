@@ -1,11 +1,11 @@
 'use client';
 
-import { useAuth } from '@/context/AuthContext';
-import { useIdentifyController } from '@/hooks/useIdentifyController';
 import { AppleMusicIdentifyLayout } from '@/components/identify/AppleMusicIdentifyLayout';
 import { AuthGate } from '@/components/identify/AuthGate';
-import { useFeatureFlags } from '@/context/FeatureFlagsContext';
 import FeatureDisabled from '@/components/ui/FeatureDisabled';
+import { useAuth } from '@/context/AuthContext';
+import { useFeatureFlags } from '@/context/FeatureFlagsContext';
+import { useIdentifyController } from '@/hooks/useIdentifyController';
 
 export default function IdentifyPage() {
   const { flags } = useFeatureFlags();

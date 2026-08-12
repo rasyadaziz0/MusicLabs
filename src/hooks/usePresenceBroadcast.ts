@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useSettings } from '@/context/SettingsContext';
 import { PresenceRepository } from '@/lib/supabase/repositories/PresenceRepository';
 import { Song } from '@/types/music';
+import { useEffect, useRef } from 'react';
 
 /**
  * Broadcasts the current playing track to `user_presence` table in Supabase.

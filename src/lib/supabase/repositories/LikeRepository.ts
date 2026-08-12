@@ -1,8 +1,8 @@
 import { MusicApiService } from '@/lib/api/MusicApiService';
-import { SupabaseClient } from '@supabase/supabase-js';
+import { LikedSongRow } from '@/types/models/Like';
 import { Song } from '@/types/music';
 import { ILikeRepository } from '@/types/repositories/ILikeRepository';
-import { LikedSongRow } from '@/types/models/Like';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 export class LikeRepository implements ILikeRepository {
   constructor(private supabase: SupabaseClient) {}

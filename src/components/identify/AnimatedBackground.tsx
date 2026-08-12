@@ -1,7 +1,12 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { AnimatedBackgroundProps } from '@/types/components/identify/AnimatedBackgroundProps';
+import { AnimatePresence, motion } from 'framer-motion';
+
+export interface AnimatedBackgroundProps {
+  isRecordingOrProcessing: boolean;
+}
+
+
 export function AnimatedBackground({ isRecordingOrProcessing }: AnimatedBackgroundProps) {
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden">

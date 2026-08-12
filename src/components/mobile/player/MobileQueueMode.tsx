@@ -1,30 +1,44 @@
 'use client';
 
-import React, { useMemo, useState, useRef } from 'react';
-import Image from 'next/image';
-import { usePlayer } from '@/context/PlayerContext';
 import { QueuePopupController } from '@/components/player/QueuePopupController';
 import { SortableTrackRow } from '@/components/player/SortableTrackRow';
-import { ImageHelper } from '@/lib/utils/ImageHelper';
-import { Heart, MoreHorizontal, Shuffle, Repeat, Infinity as InfinityIcon, Disc, Menu } from 'lucide-react';
 import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
+import { usePlayer } from '@/context/PlayerContext';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
+    closestCenter,
+    DndContext,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
 } from '@dnd-kit/core';
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-  useSortable,
-} from '@dnd-kit/sortable';
 import { restrictToVerticalAxis, restrictToWindowEdges } from '@dnd-kit/modifiers';
+import {
+    SortableContext,
+    sortableKeyboardCoordinates,
+    useSortable,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { MobileQueueModeProps } from '@/types/components/mobile/player/MobileQueueModeProps';
+import { Disc, Heart, Infinity as InfinityIcon, MoreHorizontal, Repeat, Shuffle } from 'lucide-react';
+import Image from 'next/image';
+import { useMemo, useRef, useState } from 'react';
+
+export interface MobileQueueModeProps {
+  currentTrack: any;
+  coverUrl: string;
+  artistNames: string;
+  isLiked: boolean;
+  handleToggleLike?: (e?: any) => void;
+  onClose: () => void;
+  isShuffled: boolean;
+  repeatMode: string;
+  toggleShuffle: () => void;
+  cycleRepeatMode: () => void;
+  setIsDevicesOpen?: (val: boolean) => void;
+}
+
 // Exact Apple Music iOS Sortable Track Row
 function AppleMusicQueueRow({ track, onClick }: { track: any; onClick: () => void }) {
   const [isRowMenuOpen, setIsRowMenuOpen] = useState(false);

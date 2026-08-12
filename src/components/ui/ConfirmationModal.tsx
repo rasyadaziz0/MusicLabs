@@ -1,9 +1,20 @@
 'use client';
 
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { AlertCircle } from 'lucide-react';
-import { ConfirmationModalProps } from '@/types/components/ui/ConfirmationModalProps';
+
+export interface ConfirmationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  description: string;
+  confirmText?: string;
+  cancelText?: string;
+  isDestructive?: boolean;
+}
+
+
 export function ConfirmationModal({
   isOpen,
   onClose,

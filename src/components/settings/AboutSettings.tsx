@@ -1,5 +1,5 @@
+import { BookOpen, Code2, Cookie, ExternalLink, FileText, Info, Mail, Scale, Shield } from 'lucide-react';
 import Link from 'next/link';
-import { Info, FileText, Shield, ExternalLink, Cookie, Scale, Code2, Mail, BookOpen } from 'lucide-react';
 import { SectionHeader } from './SettingsUI';
 
 export function AboutSettings({ t }: { t: (key: string) => string }) {

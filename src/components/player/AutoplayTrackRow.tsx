@@ -1,11 +1,12 @@
 'use client';
+import { SortableTrack } from '@/types/player/controller';
 
 import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { TimeHelper } from '@/lib/utils/TimeHelper';
-import Image from 'next/image';
-import { SortableTrack } from '@/types/player/controller';
 import { Plus, X } from 'lucide-react';
-import { AutoplayTrackRowProps } from '@/types/components/player/AutoplayTrackRowProps';
+import Image from 'next/image';
+import { AutoplayTrackRowProps } from "@/types/components/player/AutoplayTrackRowProps";
+
 export function AutoplayTrackRow({ track, onClick, onPromote, onRemove }: AutoplayTrackRowProps) {
   return (
     <div

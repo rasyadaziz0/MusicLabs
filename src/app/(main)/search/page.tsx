@@ -1,15 +1,15 @@
 'use client';
 
-import { useSearchUsers } from '@/hooks/social/useSearchUsers';
-import { Suspense, useEffect, useState, useRef } from 'react';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { decodeQuery, encodeQuery } from '@/lib/utils/searchEncode';
-import {  useMusicSearch  } from '@/hooks/useMusicSearch';
-import { SearchHeader } from '@/components/search/SearchHeader';
-import { RecentAndTrending } from '@/components/search/RecentAndTrending';
-import { UserSearchResults } from '@/components/search/UserSearchResults';
 import { MusicSearchResults } from '@/components/search/MusicSearchResults';
+import { RecentAndTrending } from '@/components/search/RecentAndTrending';
+import { SearchHeader } from '@/components/search/SearchHeader';
+import { UserSearchResults } from '@/components/search/UserSearchResults';
+import { useSearchUsers } from '@/hooks/social/useSearchUsers';
+import { useMusicSearch } from '@/hooks/useMusicSearch';
 import { useRecentSearches } from '@/hooks/useRecentSearches';
+import { decodeQuery, encodeQuery } from '@/lib/utils/searchEncode';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useRef, useState } from 'react';
 
 function useDebouncedValue<T>(value: T, delayMs: number): T {
   const [debounced, setDebounced] = useState(value);

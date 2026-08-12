@@ -1,10 +1,19 @@
 'use client';
-
-import { useState } from 'react';
-import { ChevronRight } from 'lucide-react';
-import { TopSongRow } from '@/components/ui/TopSongRow';
 import { Song } from '@/types/music';
-import { ArtistTopSongsProps } from '@/types/components/artist/ArtistTopSongsProps';
+
+import { TopSongRow } from '@/components/ui/TopSongRow';
+import { ChevronRight } from 'lucide-react';
+import { useState } from 'react';
+
+export interface ArtistTopSongsProps {
+  topTracks: Song[];
+  isTracksLoading: boolean;
+  currentTrackId?: string;
+  isPlaying: boolean;
+  playTrack: (song: Song, list: Song[], index?: number | string) => void;
+}
+
+
 export function ArtistTopSongs({
   topTracks,
   isTracksLoading,

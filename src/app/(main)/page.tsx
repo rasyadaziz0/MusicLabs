@@ -1,13 +1,13 @@
 'use client';
-import { useEffect, useRef } from 'react';
-import gsap from 'gsap';
-import { useHomeViewModel } from '@/hooks/useHomeViewModel';
 import { GuestBanner } from '@/components/home/HomeCards';
-import { useDiscoverWeekly } from '@/hooks/useDiscoverWeekly';
 import { HomeHeader } from '@/components/home/sections/HomeHeader';
-import { TopPicksSection } from '@/components/home/sections/TopPicksSection';
 import { RecentlyPlayedSection } from '@/components/home/sections/RecentlyPlayedSection';
+import { TopPicksSection } from '@/components/home/sections/TopPicksSection';
+import { useDiscoverWeekly } from '@/hooks/useDiscoverWeekly';
+import { useHomeViewModel } from '@/hooks/useHomeViewModel';
+import gsap from 'gsap';
 import dynamic from 'next/dynamic';
+import { useEffect, useRef } from 'react';
 
 const MobileStationsSection = dynamic(() => import('@/components/home/sections/MobileStationsSection').then(mod => mod.MobileStationsSection), { ssr: false });
 const SocialFeedSection = dynamic(() => import('@/components/home/sections/SocialFeedSection').then(mod => mod.SocialFeedSection), { ssr: false });

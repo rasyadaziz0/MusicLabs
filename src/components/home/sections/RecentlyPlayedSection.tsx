@@ -1,9 +1,17 @@
-import { Song } from '@/types/music';
 import { TrackCard } from '@/components/home/HomeCards';
-import { User } from '@supabase/supabase-js';
-import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 import { ScrollArrows } from '@/components/ui/ScrollArrows';
-import { RecentlyPlayedSectionProps } from '@/types/components/home/sections/RecentlyPlayedSectionProps';
+import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
+import { Song } from '@/types/music';
+import { User } from '@supabase/supabase-js';
+
+export interface RecentlyPlayedSectionProps {
+  recentlyPlayedSongs: Song[];
+  isRecentLoading: boolean;
+  user: User | null;
+  playTrack: (song: Song, context: Song[], index?: number | string) => void;
+}
+
+
 export function RecentlyPlayedSection({ recentlyPlayedSongs, isRecentLoading, user, playTrack }: RecentlyPlayedSectionProps) {
   const { scrollRef, canScrollLeft, canScrollRight, scroll } = useHorizontalScroll();
 

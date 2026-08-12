@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
 import { uploadImage } from '@/lib/utils/uploadImage';
+import { EditProfileFormMeta, EditProfileFormState } from '@/types/hooks/profile';
 import { gooeyToast as toast } from 'goey-toast';
-import { EditProfileFormState, EditProfileFormMeta } from '@/types/hooks/profile';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 // ── Constants ──
 

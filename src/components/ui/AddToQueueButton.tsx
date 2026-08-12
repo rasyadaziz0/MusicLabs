@@ -1,12 +1,19 @@
 'use client';
-
-import { ListPlus } from 'lucide-react';
 import { Song } from '@/types/music';
-import { StyleHelper } from '@/lib/utils/StyleHelper';
+
 import { usePlayer } from '@/context/PlayerContext';
+import { StyleHelper } from '@/lib/utils/StyleHelper';
+import { ListPlus } from 'lucide-react';
 import { useState } from 'react';
 import { ContextMenuItem } from './context-menu/ContextMenuItem';
-import { AddToQueueButtonProps } from '@/types/components/ui/AddToQueueButtonProps';
+
+export interface AddToQueueButtonProps {
+  track: Song;
+  className?: string;
+  showText?: boolean;
+}
+
+
 export default function AddToQueueButton({ track, className, showText = false }: AddToQueueButtonProps) {
   const { addToQueue } = usePlayer();
   const [added, setAdded] = useState(false);

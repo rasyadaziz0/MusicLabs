@@ -1,14 +1,12 @@
 'use client';
 
-import { useFollowCounts } from '@/hooks/social/useFollowCounts';
+import { useAuth } from '@/context/AuthContext';
 import { useLibraryPlaylists } from '@/hooks/library/useLibraryPlaylists';
 import { useLikedSongs } from '@/hooks/library/useLikedSongs';
-import { MusicApiService } from '@/lib/api/MusicApiService';
-import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '@/context/AuthContext';
-import { getRecentPlays, getListeningStats } from '@/lib/supabase/music';
+import { useFollowCounts } from '@/hooks/social/useFollowCounts';
+import { getListeningStats, getRecentPlays } from '@/lib/supabase/music';
 import { ProfileRepository } from '@/lib/supabase/repositories/ProfileRepository';
-import { UserProfile } from '@/types/profile';
+import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 
 export function useProfileViewModel() {

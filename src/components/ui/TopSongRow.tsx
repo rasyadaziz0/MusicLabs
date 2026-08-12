@@ -1,10 +1,10 @@
-import { useState, useRef, useEffect } from 'react';
-import Image from 'next/image';
-import { Play, MoreHorizontal, Share } from 'lucide-react';
-import { Song } from '@/types/music';
-import { ImageHelper } from '@/lib/utils/ImageHelper';
-import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
 import { EqualizerIcon } from '@/components/ui/EqualizerIcon';
+import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
+import { Song } from '@/types/music';
+import { MoreHorizontal, Play } from 'lucide-react';
+import Image from 'next/image';
+import { useEffect, useRef, useState } from 'react';
 
 export function TopSongRow({
   song,

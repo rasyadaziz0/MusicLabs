@@ -1,7 +1,8 @@
-import { useEffect, useRef } from 'react';
 import { LrcLine } from '@/types/utils/lrc';
+import { useEffect, useRef } from 'react';
 import { KaraokeWordAnimator } from './KaraokeWordAnimator';
-import { KaraokeLineProps } from '@/types/components/player/lyrics/KaraokeLineProps';
+import { KaraokeLineProps } from "@/types/components/player/lyrics/KaraokeLineProps";
+
 export function KaraokeLine({ line, currentTime, isActive }: KaraokeLineProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const animatorRef = useRef<KaraokeWordAnimator | null>(null);

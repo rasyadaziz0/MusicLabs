@@ -1,9 +1,21 @@
-import { Users, UserCheck, Globe, Share2, CheckCircle2, ListMusic } from 'lucide-react';
-import Image from 'next/image';
-import { gooeyToast as toast } from 'goey-toast';
+import { InstagramIcon, TikTokIcon, XIcon } from '@/components/icons/SocialIcons';
 import FollowButton from '@/components/ui/FollowButton';
-import { TikTokIcon, InstagramIcon, XIcon } from '@/components/icons/SocialIcons';
-import { OtherProfileHeroProps } from '@/types/components/profile/OtherProfileHeroProps';
+import { gooeyToast as toast } from 'goey-toast';
+import { CheckCircle2, Globe, ListMusic, Share2, UserCheck, Users } from 'lucide-react';
+import Image from 'next/image';
+
+export interface OtherProfileHeroProps {
+  userId: string;
+  profile: any;
+  followerCount: number;
+  followingCount: number;
+  playlistCount?: number;
+  isFollowing: boolean;
+  isFollowStatusLoading: boolean;
+  openFollowModal: (tab: 'followers' | 'following') => void;
+}
+
+
 export default function OtherProfileHero({
   userId,
   profile,

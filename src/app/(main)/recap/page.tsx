@@ -1,19 +1,18 @@
 'use client';
 
-import { useEffect, useRef, useMemo } from 'react';
-import Image from 'next/image';
-import { Music, Clock, Mic2, Play, Disc3, ChevronRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import gsap from 'gsap';
-import { useAuth } from '@/context/AuthContext';
-import { useReplayMonthly } from '@/hooks/useReplayMonthly';
-import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
-import { usePlayer } from '@/context/PlayerContext';
-import { StatCard, TopTrackCard, TopArtistCard } from '@/components/recap/RecapCards';
+import { StatCard, TopArtistCard, TopTrackCard } from '@/components/recap/RecapCards';
 import { CustomSelect } from '@/components/ui/CustomSelect';
-import { ScrollArrows } from '@/components/ui/ScrollArrows';
-import { useFeatureFlags } from '@/context/FeatureFlagsContext';
 import FeatureDisabled from '@/components/ui/FeatureDisabled';
+import { ScrollArrows } from '@/components/ui/ScrollArrows';
+import { useAuth } from '@/context/AuthContext';
+import { useFeatureFlags } from '@/context/FeatureFlagsContext';
+import { usePlayer } from '@/context/PlayerContext';
+import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
+import { useReplayMonthly } from '@/hooks/useReplayMonthly';
+import { AnimatePresence, motion } from 'framer-motion';
+import gsap from 'gsap';
+import { Disc3 } from 'lucide-react';
+import { useEffect, useMemo, useRef } from 'react';
 
 // ── Helpers ─────────────────────────────────────────────────
 

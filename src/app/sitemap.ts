@@ -1,6 +1,6 @@
+import { createClient } from '@/lib/supabase/server';
 import { SlugHelper } from '@/lib/utils/SlugHelper';
 import type { MetadataRoute } from 'next';
-import { createClient } from '@/lib/supabase/server';
 
 /**
  * Dynamic sitemap fetching indexed tracks from the database.

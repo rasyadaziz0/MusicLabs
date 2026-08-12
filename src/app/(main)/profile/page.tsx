@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
 import { getServerCurrentUser, getServerUserProfile } from '@/lib/supabase/server-fetches';
+import { redirect } from 'next/navigation';
 
 export default async function ProfileRedirect() {
   const user = await getServerCurrentUser();

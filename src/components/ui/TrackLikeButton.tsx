@@ -1,14 +1,20 @@
 'use client';
-
-import { useLikedSongsIndex } from '@/hooks/library/useLikedSongsIndex';
-import { useLikedSongs } from '@/hooks/library/useLikedSongs';
-import { useToggleLikedSong } from '@/hooks/library/useToggleLikedSong';
-import { Heart, Loader2 } from 'lucide-react';
 import { Song } from '@/types/music';
-import { StyleHelper } from '@/lib/utils/StyleHelper';
+
 import { useAuth } from '@/context/AuthContext';
+import { useLikedSongsIndex } from '@/hooks/library/useLikedSongsIndex';
+import { useToggleLikedSong } from '@/hooks/library/useToggleLikedSong';
+import { StyleHelper } from '@/lib/utils/StyleHelper';
+import { Heart, Loader2 } from 'lucide-react';
 import { ContextMenuItem } from './context-menu/ContextMenuItem';
-import { TrackLikeButtonProps } from '@/types/components/ui/TrackLikeButtonProps';
+
+export interface TrackLikeButtonProps {
+  track: Song;
+  className?: string;
+  asMenuItem?: boolean;
+}
+
+
 export default function TrackLikeButton({ track, className, asMenuItem }: TrackLikeButtonProps) {
   const { user, signInWithGoogle } = useAuth();
   const { likedSet } = useLikedSongsIndex();

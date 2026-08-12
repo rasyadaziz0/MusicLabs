@@ -1,8 +1,21 @@
-import React from 'react';
-import { StyleHelper } from '@/lib/utils/StyleHelper';
-import { Play, Pause, SkipForward, SkipBack, Repeat, Shuffle, Loader2 } from 'lucide-react';
 import { usePlayer } from '@/context/PlayerContext';
-import { DesktopPlaybackControlsProps } from '@/types/components/desktop/player/DesktopPlaybackControlsProps';
+import { StyleHelper } from '@/lib/utils/StyleHelper';
+import { Loader2, Pause, Play, Repeat, Shuffle, SkipBack, SkipForward } from 'lucide-react';
+
+export interface DesktopPlaybackControlsProps {
+  hasTrack: boolean;
+  isPlaying: boolean;
+  isResolving: boolean;
+  isShuffled: boolean;
+  repeatMode: 'none' | 'one' | 'all';
+  togglePlay: () => void;
+  nextTrack: () => void;
+  prevTrack: () => void;
+  toggleShuffle: () => void;
+  cycleRepeatMode: () => void;
+}
+
+
 export default function DesktopPlaybackControls({
   hasTrack, isPlaying, isResolving, isShuffled, repeatMode,
   togglePlay, nextTrack, prevTrack, toggleShuffle, cycleRepeatMode

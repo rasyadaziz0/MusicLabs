@@ -1,10 +1,15 @@
 'use client';
-
-import Link from 'next/link';
-import Image from 'next/image';
-import { Plus } from 'lucide-react';
 import { AlbumData } from '@/types/components/ui';
-import { ArtistLatestReleaseProps } from '@/types/components/artist/ArtistLatestReleaseProps';
+
+import { Plus } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+
+export interface ArtistLatestReleaseProps {
+  latestRelease: AlbumData | null;
+}
+
+
 export function ArtistLatestRelease({ latestRelease }: ArtistLatestReleaseProps) {
   return (
     <div>

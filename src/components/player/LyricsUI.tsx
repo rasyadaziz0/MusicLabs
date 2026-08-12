@@ -1,16 +1,17 @@
 'use client';
-
-import { LrcLine } from '@/types/utils/lrc';
 import { Song } from '@/types/music';
-import { motion, animate } from 'framer-motion';
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { LyricsHeader } from './lyrics/LyricsHeader';
+import { LrcLine } from '@/types/utils/lrc';
+
+import { useSettings } from '@/context/SettingsContext';
+import { animate, motion } from 'framer-motion';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { LyricLine } from './lyrics/LyricLine';
+import { LyricsHeader } from './lyrics/LyricsHeader';
 import { LyricsSkeleton } from './lyrics/LyricsSkeleton';
 import { LyricStyleManager } from './lyrics/LyricStyleManager';
-import { useSettings } from '@/context/SettingsContext';
-import { LyricsUIProps } from '@/types/components/player/LyricsUIProps';
 import './LyricsUI.css';
+import { LyricsUIProps } from "@/types/components/player/LyricsUIProps";
+
 export default function LyricsUI({
   currentTrack,
   lines,

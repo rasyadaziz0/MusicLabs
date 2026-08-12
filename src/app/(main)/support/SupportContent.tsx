@@ -1,10 +1,9 @@
 'use client';
 
-import React from 'react';
-import { Coffee, Heart } from 'lucide-react';
-import { useTranslation } from '@/context/LanguageContext';
-import { useFeatureFlags } from '@/context/FeatureFlagsContext';
 import FeatureDisabled from '@/components/ui/FeatureDisabled';
+import { useFeatureFlags } from '@/context/FeatureFlagsContext';
+import { useTranslation } from '@/context/LanguageContext';
+import { Coffee, Heart } from 'lucide-react';
 
 export default function SupportContent() {
   const { t } = useTranslation();

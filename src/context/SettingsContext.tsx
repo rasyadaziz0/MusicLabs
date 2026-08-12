@@ -1,8 +1,8 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { useAuth } from './AuthContext';
 import { SettingsService } from '@/lib/services/SettingsService';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { useAuth } from './AuthContext';
 
 import { UserSettings } from '@/types/context/settings';
 

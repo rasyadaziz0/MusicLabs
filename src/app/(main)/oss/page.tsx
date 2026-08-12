@@ -1,5 +1,5 @@
-import { Metadata } from 'next';
 import { Code2 } from 'lucide-react';
+import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Open Source - AcadMusic',

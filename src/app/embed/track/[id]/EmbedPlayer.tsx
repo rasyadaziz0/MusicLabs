@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { EmbedPlayerController } from './EmbedPlayerController';
 import { EmbedPlayerState } from '@/types/controllers/embed';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { EmbedPlayerController } from './EmbedPlayerController';
 import { EmbedTrackPlayerUI } from './EmbedTrackPlayerUI';
 
 // ─── Props ───────────────────────────────────────────────────────────────────

@@ -1,13 +1,25 @@
 'use client';
 import { ArtistParser } from '@/lib/utils/ArtistParser';
 
-import { useState, useRef } from 'react';
+import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
+import { motion } from 'framer-motion';
+import { Ellipsis, Heart, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { Loader2, Heart, Ellipsis } from 'lucide-react';
-import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
-import { MobileArtworkModeProps } from '@/types/components/mobile/player/MobileArtworkModeProps';
+import { useRef, useState } from 'react';
+
+export interface MobileArtworkModeProps {
+  currentTrack: any;
+  coverUrl: string | null;
+  isPlaying: boolean;
+  isPreview: boolean;
+  isLiked: boolean;
+  toggleLikeMutation: any;
+  handleToggleLike: (e?: any) => void;
+  onClose: () => void;
+}
+
+
 export function MobileArtworkMode({
   currentTrack, coverUrl, isPlaying, isPreview, isLiked, toggleLikeMutation, handleToggleLike, onClose
 }: MobileArtworkModeProps) {

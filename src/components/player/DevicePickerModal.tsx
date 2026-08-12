@@ -1,14 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
-import { getPortalRoot } from '@/lib/utils/portalRoot';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Laptop, Smartphone, Tablet, X, Edit3, Check, Loader2, MonitorSpeaker, Volume2 } from 'lucide-react';
-import { usePlayer } from '@/context/PlayerContext';
-import { StyleHelper } from '@/lib/utils/StyleHelper';
 import { GlassBar } from '@/components/ui/LiquidGlass';
-import { DevicePickerModalProps } from '@/types/components/player/DevicePickerModalProps';
+import { usePlayer } from '@/context/PlayerContext';
+import { getPortalRoot } from '@/lib/utils/portalRoot';
+import { StyleHelper } from '@/lib/utils/StyleHelper';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Check, Edit3, Laptop, Loader2, MonitorSpeaker, Smartphone, Tablet, Volume2, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { DevicePickerModalProps } from "@/types/components/player/DevicePickerModalProps";
+
 export default function DevicePickerModal({ isOpen, onClose }: DevicePickerModalProps) {
   const {
     myTabId,

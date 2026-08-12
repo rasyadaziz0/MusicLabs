@@ -1,19 +1,16 @@
 'use client';
 
-import React from 'react';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { AudioLines, Mic, Play, Search, AlertCircle, Music, RefreshCw, Check } from 'lucide-react';
-import { ImageHelper } from '@/lib/utils/ImageHelper';
+import { AlertCircle, AudioLines, Mic, Music, RefreshCw } from 'lucide-react';
+import type {
+    IIdentifyFeedbackProps,
+    IIdentifyIdleProps,
+    IIdentifyProcessingProps,
+    IIdentifyRecordingProps,
+    IIdentifyResultsProps,
+} from './IdentifyLayoutInterface';
 import { IdentifySongResultUI } from './IdentifySongResultUI';
 import { SingSayResultUI } from './SingSayResultUI';
-import type {
-  IIdentifyIdleProps,
-  IIdentifyRecordingProps,
-  IIdentifyProcessingProps,
-  IIdentifyResultsProps,
-  IIdentifyFeedbackProps,
-} from './IdentifyLayoutInterface';
 
 export function WaveformBar({ delay }: { delay: number }) {
   return (

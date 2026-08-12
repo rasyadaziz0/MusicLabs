@@ -1,16 +1,16 @@
 'use client';
 
-import { useUpdatePlaylist } from '@/hooks/library/useUpdatePlaylist';
-import { FormEvent, useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
-import { getPlaylistById } from '@/lib/supabase/music';
-import { useQuery } from '@tanstack/react-query';
-import { Music, AlertCircle, Loader2, Upload } from 'lucide-react';
-import Image from 'next/image';
-import { uploadImage } from '@/lib/utils/uploadImage';
-import { gooeyToast as toast } from 'goey-toast';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
+import { useAuth } from '@/context/AuthContext';
+import { useUpdatePlaylist } from '@/hooks/library/useUpdatePlaylist';
+import { getPlaylistById } from '@/lib/supabase/music';
+import { uploadImage } from '@/lib/utils/uploadImage';
+import { useQuery } from '@tanstack/react-query';
+import { gooeyToast as toast } from 'goey-toast';
+import { AlertCircle, Loader2, Music, Upload } from 'lucide-react';
+import Image from 'next/image';
+import { useParams, useRouter } from 'next/navigation';
+import { FormEvent, useEffect, useState } from 'react';
 
 export default function EditPlaylistPage() {
   const router = useRouter();

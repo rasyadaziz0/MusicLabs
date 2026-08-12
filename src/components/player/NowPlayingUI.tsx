@@ -1,9 +1,7 @@
 'use client';
 
-import React from 'react';
-import { usePlayer } from '@/context/PlayerContext';
-import dynamic from 'next/dynamic';
 import type { NowPlayingState } from '@/hooks/useNowPlaying';
+import dynamic from 'next/dynamic';
 
 export type NowPlayingUIProps = NowPlayingState & {
   isOpen: boolean;

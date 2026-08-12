@@ -1,5 +1,5 @@
-import { Song } from '@/types/music';
 import { WeeklyTrackPlay } from '@/types/models/History';
+import { Song } from '@/types/music';
 
 export interface IHistoryRepository {
   recordRecentPlay(userId: string, trackId: string): Promise<void>;

@@ -1,9 +1,14 @@
 'use client';
 
-import React from 'react';
-import { useRouter } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
-import { TrackBackButtonProps } from '@/types/components/track/TrackBackButtonProps';
+import { useRouter } from 'next/navigation';
+import React from 'react';
+
+export interface TrackBackButtonProps {
+  mode: 'desktop' | 'mobile';
+}
+
+
 export default function TrackBackButton({ mode }: TrackBackButtonProps) {
   const router = useRouter();
 

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { GooeyToaster } from 'goey-toast';
+import { useEffect, useState } from 'react';
 
 export default function GooeyToasterProvider() {
   const [mounted, setMounted] = useState(false);

@@ -10,6 +10,12 @@ export const createImage = (url: string): Promise<HTMLImageElement> =>
     image.src = url;
   });
 
+function canvasSupportsWebp(): boolean {
+  const c = document.createElement('canvas');
+  c.width = c.height = 1;
+  return c.toDataURL('image/webp').startsWith('data:image/webp');
+}
+
 export async function getCroppedImg(
   imageSrc: string,
   pixelCrop: { x: number; y: number; width: number; height: number },
@@ -60,12 +66,13 @@ export async function getCroppedImg(
   );
 
   return new Promise((resolve, reject) => {
+    const type = canvasSupportsWebp() ? 'image/webp' : 'image/jpeg';
     croppedCanvas.toBlob((blob) => {
       if (blob) {
         resolve(blob);
       } else {
         reject(new Error('Canvas is empty'));
       }
-    }, 'image/jpeg', 0.95);
+    }, type, 0.85);
   });
 }
