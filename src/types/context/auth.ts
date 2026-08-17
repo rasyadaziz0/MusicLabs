@@ -10,6 +10,7 @@ export interface AuthContextType {
   loading: boolean;
   signInWithGoogle: (redirectPath?: string) => Promise<AuthActionResult>;
   signInWithPassword: (email: string, password: string, captchaToken?: string) => Promise<AuthActionResult>;
+  signInWithMagicLink: (email: string, captchaToken?: string) => Promise<AuthActionResult>;
   signUpWithPassword: (email: string, password: string, fullName: string, captchaToken?: string) => Promise<AuthActionResult>;
   signOut: () => Promise<AuthActionResult>;
   resetPasswordForEmail: (email: string, captchaToken?: string) => Promise<AuthActionResult>;

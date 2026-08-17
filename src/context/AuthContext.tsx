@@ -91,6 +91,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
   const signInWithPassword = (email: string, password: string, captchaToken?: string) => 
     authService.signInWithPassword(email, password, captchaToken);
+
+  const signInWithMagicLink = (email: string, captchaToken?: string) =>
+    authService.signInWithMagicLink(email, captchaToken);
     
   const signUpWithPassword = (email: string, password: string, fullName: string, captchaToken?: string) => 
     authService.signUpWithPassword(email, password, fullName, captchaToken);
@@ -113,7 +116,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthContext.Provider
       value={{ 
-        user, session, loading, signInWithGoogle, signInWithPassword, 
+        user, session, loading, signInWithGoogle, signInWithPassword, signInWithMagicLink,
         signUpWithPassword, signOut, resetPasswordForEmail, updatePassword, updateProfile 
       }}
     >

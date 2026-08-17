@@ -14,7 +14,7 @@ export class AuthService {
     return AuthService.instance;
   }
 
-  private mapAuthErrorMessage(action: 'login' | 'register' | 'google' | 'logout'): string {
+  private mapAuthErrorMessage(action: 'login' | 'register' | 'google' | 'logout' | 'magic_link'): string {
     switch (action) {
       case 'login':
         return 'Email atau Password salah, coba lagi';
@@ -24,6 +24,8 @@ export class AuthService {
         return 'Login Google belum berhasil. Coba ulang lagi.';
       case 'logout':
         return 'Logout gagal. Coba ulang lagi.';
+      case 'magic_link':
+        return 'Gagal mengirim magic link. Pastikan email terdaftar dan coba lagi.';
       default:
         return 'Terjadi gangguan autentikasi. Coba lagi.';
     }
@@ -66,16 +68,42 @@ export class AuthService {
     return { error: null };
   }
 
+  /**
+   * Send a passwordless Magic Link to the user's email.
+   * `shouldCreateUser: false` prevents account creation via this method,
+   * so only existing registered users can request a link.
+   */
+  public async signInWithMagicLink(email: string, captchaToken?: string): Promise<AuthActionResult> {
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const confirmUrl = new URL('/auth/confirm', origin || 'http://localhost:3000');
+    confirmUrl.searchParams.set('next', '/');
+
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: confirmUrl.toString(),
+        shouldCreateUser: false,
+        ...(captchaToken ? { captchaToken } : {}),
+      },
+    });
+
+    if (error) {
+      console.error('Auth signInWithMagicLink gagal:', error);
+      return { error: this.mapAuthErrorMessage('magic_link') };
+    }
+    return { error: null };
+  }
+
   public async signUpWithPassword(email: string, password: string, fullName: string, captchaToken?: string): Promise<AuthActionResult> {
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
-    const callbackUrl = new URL('/auth/callback', origin || 'http://localhost:3000');
+    const confirmUrl = new URL('/auth/confirm', origin || 'http://localhost:3000');
     
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { full_name: fullName },
-        emailRedirectTo: callbackUrl.toString(),
+        emailRedirectTo: confirmUrl.toString(),
         ...(captchaToken ? { captchaToken } : {})
       },
     });
@@ -103,10 +131,11 @@ export class AuthService {
 
   public async resetPasswordForEmail(email: string, captchaToken?: string): Promise<AuthActionResult> {
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
-    const callbackUrl = new URL('/update-password', origin || 'http://localhost:3000');
+    const confirmUrl = new URL('/auth/confirm', origin || 'http://localhost:3000');
+    confirmUrl.searchParams.set('next', '/update-password');
     
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: callbackUrl.toString(),
+      redirectTo: confirmUrl.toString(),
       ...(captchaToken ? { captchaToken } : {})
     });
 

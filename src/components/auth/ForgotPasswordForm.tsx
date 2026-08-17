@@ -41,7 +41,7 @@ export default function ForgotPasswordForm() {
       return;
     }
 
-    setSuccessMessage('Tautan reset password berhasil dikirim! Silakan cek kotak masuk email Anda.');
+    setSuccessMessage('Tautan reset password berhasil dikirim! Silakan cek kotak masuk email Anda Atau cek folder spam di email Anda.');
   };
 
   return (

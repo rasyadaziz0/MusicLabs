@@ -3,14 +3,14 @@
 import TurnstileWidget from '@/components/auth/TurnstileWidget';
 import { useAuth } from '@/context/AuthContext';
 import { useFeatureFlags } from '@/context/FeatureFlagsContext';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Mail } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 
 export default function LoginForm() {
   const { flags } = useFeatureFlags();
-  const { user, loading, signInWithGoogle, signInWithPassword } = useAuth();
+  const { user, loading, signInWithGoogle, signInWithPassword, signInWithMagicLink } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextPath = useMemo(() => {
@@ -34,10 +34,12 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [captchaToken, setCaptchaToken] = useState('');
+  const [loginMode, setLoginMode] = useState<'password' | 'magic_link'>('password');
 
   useEffect(() => {
     if (!loading && user) {
@@ -46,14 +48,19 @@ export default function LoginForm() {
   }, [loading, nextPath, router, user]);
 
   const validateForm = () => {
-    if (!email.trim() || !password.trim()) {
-      return 'Email dan password wajib diisi.';
+    if (!email.trim()) {
+      return 'Email wajib diisi.';
     }
     if (!/\S+@\S+\.\S+/.test(email)) {
       return 'Format email tidak valid.';
     }
-    if (password.length < 6) {
-      return 'Password minimal 6 karakter.';
+    if (loginMode === 'password') {
+      if (!password.trim()) {
+        return 'Password wajib diisi.';
+      }
+      if (password.length < 6) {
+        return 'Password minimal 6 karakter.';
+      }
     }
     if (!captchaToken) {
       return 'Tolong selesaikan verifikasi captcha.';
@@ -64,6 +71,7 @@ export default function LoginForm() {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setErrorMessage(null);
+    setSuccessMessage(null);
 
     const validationError = validateForm();
     if (validationError) {
@@ -72,6 +80,21 @@ export default function LoginForm() {
     }
 
     setIsSubmitting(true);
+
+    if (loginMode === 'magic_link') {
+      const { error } = await signInWithMagicLink(email.trim(), captchaToken);
+      setIsSubmitting(false);
+
+      if (error) {
+        setErrorMessage(error);
+        return;
+      }
+
+      setSuccessMessage('Link login telah dikirim! Cek kotak masuk email kamu.');
+      return;
+    }
+
+    // Mode: password
     const { error } = await signInWithPassword(email.trim(), password, captchaToken);
     setIsSubmitting(false);
 
@@ -122,7 +145,12 @@ export default function LoginForm() {
             />
           </div>
 
-          <div>
+          {/* Password field — hidden in magic_link mode with smooth transition */}
+          <div
+            className={`transition-all duration-300 ease-in-out overflow-hidden ${
+              loginMode === 'password' ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'
+            }`}
+          >
             <div className="mb-1 flex items-center justify-between">
               <label htmlFor="password" className="block text-sm font-medium text-white/90">
                 Password
@@ -161,7 +189,7 @@ export default function LoginForm() {
                 {errorMessage}
               </p>
               
-              {failedAttempts >= 3 && (
+              {failedAttempts >= 3 && loginMode === 'password' && (
                 <div className="rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary/90 text-center animate-in fade-in slide-in-from-top-2">
                   <p className="mb-2">Lupa akun atau password?</p>
                   <Link 
@@ -175,6 +203,12 @@ export default function LoginForm() {
             </div>
           )}
 
+          {successMessage && (
+            <p className="rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-3 py-2 text-sm text-emerald-200">
+              {successMessage}
+            </p>
+          )}
+
           <div className="flex justify-center">
             <TurnstileWidget onSuccess={(token) => setCaptchaToken(token)} />
           </div>
@@ -184,7 +218,25 @@ export default function LoginForm() {
             disabled={isSubmitting || isGoogleLoading}
             className="w-full rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isSubmitting ? 'Memproses...' : 'Login'}
+            {isSubmitting
+              ? 'Memproses...'
+              : loginMode === 'magic_link'
+                ? 'Kirim Link Login ke Email'
+                : 'Login'}
+          </button>
+
+          {/* Toggle between password and magic link mode */}
+          <button
+            type="button"
+            onClick={() => {
+              setLoginMode((prev) => (prev === 'password' ? 'magic_link' : 'password'));
+              setErrorMessage(null);
+              setSuccessMessage(null);
+            }}
+            className="w-full flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white/70 transition hover:bg-white/10 hover:text-white"
+          >
+            <Mail size={16} />
+            {loginMode === 'password' ? 'Login pakai Magic Link' : 'Login pakai Password'}
           </button>
         </form>
 
