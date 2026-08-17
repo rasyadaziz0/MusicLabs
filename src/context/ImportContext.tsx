@@ -14,6 +14,7 @@ const ImportContext = createContext<ImportContextType | undefined>(undefined);
 
 export function ImportProvider({ children }: { children: ReactNode }) {
   const [isImporting, setIsImporting] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
   const [importProgress, setImportProgress] = useState<number | null>(null);
   const queryClient = useQueryClient();
   const { user } = useAuth();
@@ -55,6 +56,14 @@ export function ImportProvider({ children }: { children: ReactNode }) {
             
             // Fade out progress
             setIsImporting(false);
+            setIsCancelling(false);
+            setTimeout(() => setImportProgress(null), 500);
+          } else if (newRecord.status === 'cancelled') {
+            toast.info('Import berhasil dibatalkan.');
+            queryClient.invalidateQueries({ queryKey: ['library-playlists', user.id] });
+            
+            setIsImporting(false);
+            setIsCancelling(false);
             setTimeout(() => setImportProgress(null), 500);
           }
         }
@@ -81,8 +90,30 @@ export function ImportProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const cancelImport = async () => {
+    if (!isImporting || isCancelling) return;
+
+    setIsCancelling(true);
+
+    try {
+      await importService.cancelImport();
+      
+      // API call succeeded, reset state immediately instead of waiting for realtime event
+      toast.info('Import berhasil dibatalkan.');
+      if (user) {
+        queryClient.invalidateQueries({ queryKey: ['library-playlists', user.id] });
+      }
+      setIsImporting(false);
+      setIsCancelling(false);
+      setTimeout(() => setImportProgress(null), 500);
+    } catch (err: any) {
+      // If the API call itself failed, reset cancelling state so user can retry
+      setIsCancelling(false);
+    }
+  };
+
   return (
-    <ImportContext.Provider value={{ isImporting, importProgress, startImport }}>
+    <ImportContext.Provider value={{ isImporting, isCancelling, importProgress, startImport, cancelImport }}>
       {children}
     </ImportContext.Provider>
   );

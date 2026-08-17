@@ -311,3 +311,14 @@ body {
 .gooey-description {
   padding-bottom: 12px !important;
 }
+
+/* Fix for long text notifications pushing off-center */
+[data-goey-toast], .goey-toast {
+  max-width: 90vw !important;
+  width: 450px !important;
+}
+
+[data-goey-toast] *, .goey-toast * {
+  white-space: normal !important;
+  word-break: break-word !important;
+}

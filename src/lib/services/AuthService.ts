@@ -131,8 +131,9 @@ export class AuthService {
     bannerUrl?: string;
     socialInstagram?: string; socialTwitter?: string; socialTiktok?: string;
     isPublic?: boolean; showNowPlaying?: boolean; showRecentlyPlayed?: boolean;
-    lyricsFontSize?: string; romanizationEnabled?: boolean;
-    searchRegion?: string;
+    lyricsFontSize?: 'small' | 'medium' | 'large';
+    romanizationEnabled?: boolean;
+    timezone?: string;
   }): Promise<{ error: string | null; user?: any }> {
     const authUpdateData: any = {};
     if (data.name !== undefined) authUpdateData.name = data.name;
@@ -177,7 +178,7 @@ export class AuthService {
       if (data.showRecentlyPlayed !== undefined) profileUpdates.show_recently_played = data.showRecentlyPlayed;
       if (data.lyricsFontSize !== undefined) profileUpdates.lyrics_font_size = data.lyricsFontSize;
       if (data.romanizationEnabled !== undefined) profileUpdates.romanization_enabled = data.romanizationEnabled;
-      if (data.searchRegion !== undefined) profileUpdates.search_region = data.searchRegion;
+      if (data.timezone !== undefined) profileUpdates.timezone = data.timezone;
 
       try {
         await ProfileRepository.getInstance().updateProfile(userData.user.id, profileUpdates);

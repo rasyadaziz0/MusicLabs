@@ -53,6 +53,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  // Auto-detect and sync timezone
+  useEffect(() => {
+    if (!user) return;
+    
+    const syncTimezone = async () => {
+      try {
+        const localTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (!localTz) return;
+
+        // Fetch current timezone from DB
+        const { data } = await supabase
+          .from('profiles')
+          .select('timezone')
+          .eq('id', user.id)
+          .single();
+          
+        if (data && data.timezone !== localTz) {
+          // Update timezone if it changed or is missing
+          await supabase
+            .from('profiles')
+            .update({ timezone: localTz })
+            .eq('id', user.id);
+          console.log(`[Timezone] Synced to ${localTz}`);
+        }
+      } catch (err) {
+        console.error('Failed to sync timezone', err);
+      }
+    };
+    
+    syncTimezone();
+  }, [user]);
+
   const authService = AuthService.getInstance();
 
   const signInWithGoogle = (redirectPath = '/') => authService.signInWithGoogle(redirectPath);

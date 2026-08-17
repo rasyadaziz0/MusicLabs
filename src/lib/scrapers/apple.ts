@@ -34,53 +34,48 @@ export class AppleScraper implements PlaylistScraper {
       if (match && match[1]) {
         try {
           const data = JSON.parse(match[1]);
-          // Finding the playlist object can be tricky as the JSON tree is deep.
-          // We can recursively search for objects with type === 'playlists'
-          const findPlaylists = (obj: any): any[] => {
-            let results: any[] = [];
+          
+          function traverse(obj: any) {
             if (Array.isArray(obj)) {
-              for (const item of obj) results = results.concat(findPlaylists(item));
+              for (const item of obj) traverse(item);
             } else if (typeof obj === 'object' && obj !== null) {
-              if (obj.type === 'playlists' || obj.type === 'library-playlists') {
-                results.push(obj);
-              }
-              for (const key in obj) {
-                results = results.concat(findPlaylists(obj[key]));
-              }
-            }
-            return results;
-          };
-
-          const playlists = findPlaylists(data);
-          if (playlists.length > 0) {
-            const playlist = playlists[0];
-            playlistName = playlist.attributes?.name || playlistName;
-            
-            // Format artwork URL
-            let rawCover = playlist.attributes?.artwork?.url;
-            if (rawCover) {
-              coverUrl = rawCover.replace('{w}', '500').replace('{h}', '500').replace('{f}', 'jpg');
-            }
-            playlistId = playlist.id || playlistId;
-
-            const tracksData = playlist.relationships?.tracks?.data || [];
-            for (const t of tracksData) {
-              if (!t.attributes) continue;
-              const attr = t.attributes;
-              let trackCover = attr.artwork?.url;
-              if (trackCover) {
-                trackCover = trackCover.replace('{w}', '150').replace('{h}', '150').replace('{f}', 'jpg');
+              
+              // Find playlist details
+              if (obj.kind === 'playlist' && obj.title) {
+                 playlistName = obj.title;
+              } else if (obj.title && obj.artwork && !obj.artistName && !obj.duration) {
+                 if (playlistName === 'Apple Music Playlist') {
+                     playlistName = obj.title;
+                     if (obj.artwork?.dictionary?.url) {
+                         coverUrl = obj.artwork.dictionary.url.replace('{w}', '500').replace('{h}', '500').replace('{f}', 'jpg');
+                     }
+                 }
               }
               
-              tracks.push({
-                title: attr.name,
-                artist: attr.artistName,
-                album: attr.albumName,
-                duration: Math.floor((attr.durationInMillis || 0) / 1000),
-                coverUrl: trackCover
-              });
+              // Find tracks
+              if (obj.contentDescriptor?.kind === 'song' && obj.title && obj.artistName) {
+                 const trackAlbum = obj.tertiaryLinks?.[0]?.title || '';
+                 let trackCover = '';
+                 if (obj.artwork?.dictionary?.url) {
+                    trackCover = obj.artwork.dictionary.url.replace('{w}', '150').replace('{h}', '150').replace('{f}', 'jpg');
+                 }
+                 tracks.push({
+                   title: obj.title,
+                   artist: obj.artistName,
+                   album: trackAlbum,
+                   duration: Math.floor((obj.duration || 0) / 1000),
+                   coverUrl: trackCover
+                 });
+              }
+              
+              for (const key in obj) {
+                traverse(obj[key]);
+              }
             }
           }
+          
+          traverse(data);
+          
         } catch (err) {
           console.error("Error parsing Apple Music JSON", err);
         }

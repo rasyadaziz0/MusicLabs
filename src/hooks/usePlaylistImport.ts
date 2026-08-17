@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 export function usePlaylistImport() {
   const { flags } = useFeatureFlags();
   const { user, signInWithGoogle } = useAuth();
-  const { startImport, isImporting, importProgress } = useImport();
+  const { startImport, isImporting, importProgress, cancelImport, isCancelling } = useImport();
   const searchParams = useSearchParams();
 
   const [loading, setLoading] = useState(false);
@@ -99,6 +99,8 @@ export function usePlaylistImport() {
     errorMessage,
     callbackMessage,
     importProgress,
+    cancelImport,
+    isCancelling,
     handleConnectSpotify,
     handleUrlImport,
     handleSaveToLibrary

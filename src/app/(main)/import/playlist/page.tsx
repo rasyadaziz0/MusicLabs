@@ -20,6 +20,8 @@ export default function ImportPlaylistPage() {
     errorMessage,
     callbackMessage,
     importProgress,
+    cancelImport,
+    isCancelling,
     handleConnectSpotify,
     handleUrlImport,
     handleSaveToLibrary
@@ -100,13 +102,28 @@ export default function ImportPlaylistPage() {
               
               {!scrapedResult && importProgress !== null && (
                 <div className="rounded-2xl border border-white/10 bg-black/20 p-5 space-y-4 animate-in fade-in slide-in-from-bottom-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-2 w-2 rounded-full bg-[#FA243C] animate-pulse"></div>
-                    <h3 className="text-sm font-bold text-white">Import sedang berjalan di latar belakang...</h3>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="h-2 w-2 rounded-full bg-[#FA243C] animate-pulse"></div>
+                      <h3 className="text-sm font-bold text-white">
+                        {isCancelling ? 'Membatalkan import...' : 'Import sedang berjalan di latar belakang...'}
+                      </h3>
+                    </div>
+                    <button
+                      onClick={cancelImport}
+                      disabled={isCancelling}
+                      className="rounded-full border border-red-500/30 bg-red-500/10 px-4 py-1.5 text-xs font-semibold text-red-400 transition-all hover:bg-red-500/20 hover:border-red-500/50 disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      {isCancelling ? 'Membatalkan...' : 'Batalkan'}
+                    </button>
                   </div>
                   <div className="w-full bg-white/10 rounded-full h-3 overflow-hidden relative">
                     <div
-                      className="bg-gradient-to-r from-[#FA243C] to-red-500 h-3 rounded-full transition-all duration-500 ease-out"
+                      className={`h-3 rounded-full transition-all duration-500 ease-out ${
+                        isCancelling
+                          ? 'bg-gradient-to-r from-yellow-500 to-orange-500 animate-pulse'
+                          : 'bg-gradient-to-r from-[#FA243C] to-red-500'
+                      }`}
                       style={{ width: `${importProgress}%` }}
                     ></div>
                     <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-white mix-blend-difference">{importProgress}%</span>

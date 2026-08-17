@@ -19,7 +19,8 @@ export interface AuthContextType {
     bannerUrl?: string;
     socialInstagram?: string; socialTwitter?: string; socialTiktok?: string;
     isPublic?: boolean; showNowPlaying?: boolean; showRecentlyPlayed?: boolean;
-    lyricsFontSize?: string; romanizationEnabled?: boolean;
-    searchRegion?: string;
-  }) => Promise<AuthActionResult>;
+    lyricsFontSize?: 'small' | 'medium' | 'large';
+    romanizationEnabled?: boolean;
+    timezone?: string;
+  }) => Promise<{ user?: any; error?: string }>;
 }

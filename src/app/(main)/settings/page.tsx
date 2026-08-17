@@ -58,7 +58,7 @@ export default function SettingsPage() {
           setShowRecentlyPlayed(data.show_recently_played ?? true);
           setLyricsFontSize(data.lyrics_font_size || 'medium');
           setRomanizationEnabled(data.romanization_enabled ?? true);
-          if (data.search_region) setSearchRegion(data.search_region);
+
         }
         setIsFetching(false);
       };
@@ -92,9 +92,8 @@ export default function SettingsPage() {
       isPublic,
       showNowPlaying,
       showRecentlyPlayed,
-      lyricsFontSize,
+      lyricsFontSize: lyricsFontSize as 'small' | 'medium' | 'large',
       romanizationEnabled,
-      searchRegion,
     });
 
     if (updateError) {

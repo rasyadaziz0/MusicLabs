@@ -76,4 +76,31 @@ export class ImportService {
       throw err;
     }
   }
+
+  public async cancelImport(): Promise<void> {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error('Sesi login tidak ditemukan. Silakan login ulang.');
+      }
+
+      const baseUrl = process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || process.env.NEXT_PUBLIC_EXPRESS_API_URL || '';
+      const res = await fetch(`${baseUrl}/api/import/cancel`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Gagal membatalkan import.');
+      }
+    } catch (err: any) {
+      console.error('Cancel import error:', err);
+      toast.error('Gagal membatalkan import: ' + err.message);
+      throw err;
+    }
+  }
 }
