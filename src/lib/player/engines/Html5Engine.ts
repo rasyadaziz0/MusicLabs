@@ -54,8 +54,11 @@ export class Html5Engine {
   /** Set a new source URL and start playing */
   playSrc(src: string): void {
     if (!this.audio) return;
+    console.log('[Html5Engine] Setting audio.src to:', src);
     this.audio.src = src;
-    this.audio.play().catch(console.error);
+    this.audio.play().catch(e => {
+      console.error('[Html5Engine] play() failed for src:', src, e);
+    });
   }
 
   resume(): void {

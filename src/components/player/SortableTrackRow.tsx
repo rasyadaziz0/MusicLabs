@@ -30,7 +30,7 @@ export function SortableTrackRow({ track, onClick }: SortableTrackRowProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className="queue-track-row"
+      className="flex items-center gap-3 py-2 px-1 hover:bg-white/10 active:bg-white/15 rounded-xl transition-all cursor-pointer select-none group w-full"
       onClick={onClick}
     >
       {/* Album art */}

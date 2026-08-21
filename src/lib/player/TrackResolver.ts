@@ -5,7 +5,7 @@ import * as PlayerCache from './cache';
 
 import { ResolveResult } from '@/types/player/resolver';
 
-const API_BASE = process.env.NEXT_PUBLIC_EXPRESS_API_URL || process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || '';
+const API_BASE = process.env.NEXT_PUBLIC_EXPRESS_API_URL || process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || 'https://api.cadhost.sbs';
 
 // ─── Class ───
 export class TrackResolver {
@@ -87,7 +87,7 @@ export class TrackResolver {
   async fetchAudioStreamUrl(videoId: string): Promise<string | null> {
     try {
       const headers = await this.getAuthHeaders();
-      const res = await fetch(`${(process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || process.env.NEXT_PUBLIC_EXPRESS_API_URL) || ''}/api/audio/${videoId}`, { headers });
+      const res = await fetch(`${(process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || process.env.NEXT_PUBLIC_EXPRESS_API_URL) || ''}/api/audio/${videoId}?proxy=1`, { headers });
       if (!res.ok) return null;
       const data = await res.json();
       return data.url || null;
@@ -102,7 +102,7 @@ export class TrackResolver {
     const controller = this.controller!;
 
     try {
-      // 1. Try cached or fresh video ID → HTML5 audio stream
+      // 1. Try cached or fresh video ID → YouTube IFrame
       let videoId: string | null = PlayerCache.getFallbackVideoId(track.id);
       if (!videoId) {
         videoId = await resolveToYoutubeId(track.name, artistName, track.id, { signal, duration: track.duration });
@@ -111,17 +111,20 @@ export class TrackResolver {
       if (getCurrentTrackId() !== track.id) return { type: 'error' };
 
       if (videoId) {
-        // Use proxy URL to avoid IP binding (403) issues on mobile and reduce resolve latency
+        /*
+        // [HTML5 PROXY LOGIC - DISABLED TEMPORARILY]
+        // YouTube blocks our VPS Datacenter IP (403 Forbidden). 
+        // Once a residential proxy or IPv6 block is configured on the VPS, uncomment this to restore background play.
         const { data: { session } } = await supabase.auth.getSession();
         const token = session?.access_token || '';
-        
         if (token) {
           const audioUrl = `${API_BASE}/api/audio/${videoId}?proxy=1&token=${encodeURIComponent(token)}`;
           return { type: 'html5', audioUrl };
-        } else {
-          console.warn('Guest user on mobile: falling back to YouTube IFrame (background play may not work)');
-          return { type: 'youtube', videoId };
         }
+        */
+        
+        console.warn('Mobile playback: forcing YouTube IFrame to bypass VPS IP blocks (background play may be limited)');
+        return { type: 'youtube', videoId };
       }
 
       return await this.resolvePreview(track);
