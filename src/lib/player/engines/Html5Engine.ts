@@ -23,6 +23,16 @@ export class Html5Engine {
     this.audio.addEventListener('pause', this.handlePause);
   }
 
+  /** Call this synchronously during a user interaction to unlock autoplay on mobile */
+  unlock(): void {
+    if (!this.audio) return;
+    if (this.audio.src === '' || this.audio.src.endsWith(window.location.host + '/')) {
+      // Play a tiny silent data URI to unlock the audio element
+      this.audio.src = 'data:audio/mp3;base64,//OExAAAAANIAAAAAExBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq';
+      this.audio.play().catch(() => {});
+    }
+  }
+
   destroy(): void {
     if (!this.audio) return;
     this.audio.removeEventListener('ended', this.handleEnded);

@@ -162,6 +162,7 @@ export class PlayerController {
   // ────────────────────────────────────────
 
   async playTrack(track: Song, newQueue?: Song[], target?: number | string): Promise<void> {
+    this.router.html5.unlock();
     this.resolver.abort();
 
     if (newQueue) {

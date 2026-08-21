@@ -111,14 +111,12 @@ export class TrackResolver {
       if (getCurrentTrackId() !== track.id) return { type: 'error' };
 
       if (videoId) {
-        const audioUrl = await this.fetchAudioStreamUrl(videoId);
-
-        if (getCurrentTrackId() !== track.id) return { type: 'error' };
-
-        if (audioUrl) {
-          return { type: 'html5', audioUrl };
-        }
-        return { type: 'youtube', videoId };
+        // Use proxy URL to avoid IP binding (403) issues on mobile and reduce resolve latency
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token || '';
+        const audioUrl = `${API_BASE}/api/audio/${videoId}?proxy=1&token=${encodeURIComponent(token)}`;
+        
+        return { type: 'html5', audioUrl };
       }
 
       return await this.resolvePreview(track);
