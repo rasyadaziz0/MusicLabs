@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 import { GlassBar } from '@/components/ui/LiquidGlass';
 import { DynamicGradientBackground } from '@/components/player/DynamicGradientBackground';
 
@@ -212,6 +213,18 @@ export default function MaintenancePage() {
               </svg>
               Support Developer
             </a>
+
+            <div className="h-3.5 w-[1px] bg-white/20" />
+
+            <Link
+              href="/status"
+              className="flex items-center gap-2 rounded-full hover:bg-white/[0.08] px-3 py-1.5 text-[12px] font-medium text-white/70 transition-all hover:text-white"
+            >
+              <svg className="h-3.5 w-3.5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Check Status
+            </Link>
 
             {/* loading indicator */}
             <div className="flex items-center gap-[3px]">

@@ -54,8 +54,8 @@ export async function proxy(request: NextRequest) {
   }
 
   if (isMaintenance) {
-    // Biar gak infinite loop kalo udah di halaman maintenance
-    if (request.nextUrl.pathname === '/maintenance') {
+    // Biar gak infinite loop kalo udah di halaman maintenance, dan biarkan user akses /status
+    if (request.nextUrl.pathname === '/maintenance' || request.nextUrl.pathname === '/status') {
       return NextResponse.next();
     }
     
