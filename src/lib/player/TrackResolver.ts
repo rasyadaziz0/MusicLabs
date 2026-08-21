@@ -114,9 +114,14 @@ export class TrackResolver {
         // Use proxy URL to avoid IP binding (403) issues on mobile and reduce resolve latency
         const { data: { session } } = await supabase.auth.getSession();
         const token = session?.access_token || '';
-        const audioUrl = `${API_BASE}/api/audio/${videoId}?proxy=1&token=${encodeURIComponent(token)}`;
         
-        return { type: 'html5', audioUrl };
+        if (token) {
+          const audioUrl = `${API_BASE}/api/audio/${videoId}?proxy=1&token=${encodeURIComponent(token)}`;
+          return { type: 'html5', audioUrl };
+        } else {
+          console.warn('Guest user on mobile: falling back to YouTube IFrame (background play may not work)');
+          return { type: 'youtube', videoId };
+        }
       }
 
       return await this.resolvePreview(track);
