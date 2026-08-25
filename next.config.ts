@@ -17,14 +17,6 @@ const nextConfig: NextConfig = {
   },
   output: 'standalone',
 
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_EXPRESS_API_URL || 'http://localhost:3001'}/api/:path*`,
-      },
-    ];
-  },
 
   // ─── Security Headers ───────────────────────────────────────────────────────
   async headers() {
