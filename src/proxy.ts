@@ -3,6 +3,11 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function proxy(request: NextRequest) {
+  // Fast path: kalau env explicitly OFF, skip DB check entirely
+  if (process.env.MAINTENANCE_MODE === 'false') {
+    return NextResponse.next();
+  }
+
   let isMaintenance = false;
   let flagLoadedFromDb = false;
 
@@ -54,12 +59,20 @@ export async function proxy(request: NextRequest) {
   }
 
   if (isMaintenance) {
-    // Biar gak infinite loop kalo udah di halaman maintenance, dan biarkan user akses /status
-    if (request.nextUrl.pathname === '/maintenance' || request.nextUrl.pathname === '/status') {
+    // Biar gak infinite loop kalo udah di halaman maintenance
+    if (request.nextUrl.pathname === '/maintenance') {
       return NextResponse.next();
     }
+
+    // Tutup akses API dengan rapi — kembalikan 503 JSON agar client tidak error parsing
+    if (request.nextUrl.pathname.startsWith('/api')) {
+      return NextResponse.json(
+        { success: false, error: 'Service is currently under maintenance.', isMaintenance: true },
+        { status: 503 }
+      );
+    }
     
-    // Redirect semua trafik halaman (kecuali aset statis) ke halaman maintenance
+    // Redirect semua trafik halaman ke halaman maintenance
     return NextResponse.rewrite(new URL('/maintenance', request.url));
   }
 
@@ -76,6 +89,6 @@ export const config = {
      * - favicon.ico (favicon file)
      * - public files (like robots.txt, sitemap.xml, images, etc.)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$|.*\\.svg$|.*\\.xml$|.*\\.txt$|.*\\.html$|.*\\.json$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.png$|.*\\.jpg$|.*\\.svg$|.*\\.xml$|.*\\.txt$|.*\\.html$|.*\\.json$).*)',
   ],
 };

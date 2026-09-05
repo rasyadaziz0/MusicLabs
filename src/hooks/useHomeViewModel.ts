@@ -1,4 +1,4 @@
-﻿import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { usePlayer } from '@/context/PlayerContext';
 import { MusicApiService } from '@/lib/api/MusicApiService';
 import * as MoodService from '@/lib/services/mood';
@@ -26,18 +26,25 @@ export function useHomeViewModel() {
     queryKey: ['homeFeed'],
     queryFn: () => MusicApiService.getHomeFeed(),
     retry: 1, // don't retry too many times if backend is dead
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 30, // 30 minutes
+    refetchOnWindowFocus: false,
   });
 
   const { data: dbRecentPlays, isLoading: isRecentLoading } = useQuery({
     queryKey: ['recentPlays', user?.id],
     queryFn: () => getRecentPlays(user!.id),
     enabled: !!user?.id,
+    staleTime: 1000 * 60 * 2, // 2 minutes
+    refetchOnWindowFocus: false,
   });
 
   const { data: socialFeed, isLoading: isSocialFeedLoading } = useQuery({
     queryKey: ['socialFeed', user?.id],
     queryFn: () => SocialRepository.getInstance().getSocialFeed(),
     enabled: !!user?.id,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
   });
 
   const { data: moodSongsData, isLoading: isMoodSongsLoading } = useQuery<Song[]>({

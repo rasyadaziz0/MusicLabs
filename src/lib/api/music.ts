@@ -12,13 +12,26 @@ if (!BASE_URL && typeof window !== 'undefined') {
 }
 
 
-  export async function apiFetchInternal<T>(path: string, options: RequestInit = {}): Promise<T> {
+let cachedToken: string | null = null;
+let tokenExpiry = 0;
+
+async function getAuthToken(): Promise<string | null> {
+  if (cachedToken && Date.now() < tokenExpiry) {
+    return cachedToken;
+  }
   const supabase = createClient();
   const { data: { session } } = await supabase.auth.getSession();
+  cachedToken = session?.access_token ?? null;
+  tokenExpiry = Date.now() + 5 * 60 * 1000; // cache for 5 minutes
+  return cachedToken;
+}
+
+export async function apiFetchInternal<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const token = await getAuthToken();
   
   const headers = new Headers(options.headers || {});
-  if (session?.access_token) {
-    headers.set('Authorization', `Bearer ${session.access_token}`);
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
   }
 
   const url = path.startsWith('http') ? path : `${BASE_URL}${path}`;
