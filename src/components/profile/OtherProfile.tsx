@@ -12,6 +12,7 @@ import { useEffect, useRef, useState } from 'react';
 import NowPlayingCard from './NowPlayingCard';
 import OtherProfileHero from './OtherProfileHero';
 import OtherProfilePlaylists from './OtherProfilePlaylists';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 
 export interface OtherProfileProps {
@@ -20,7 +21,9 @@ export interface OtherProfileProps {
 }
 
 
-export default function OtherProfile({ initialData, isMobile }: OtherProfileProps) {
+export default function OtherProfile({ initialData, isMobile: propIsMobile }: OtherProfileProps) {
+  const detectedIsMobile = useIsMobile();
+  const isMobile = propIsMobile !== undefined ? propIsMobile : detectedIsMobile;
   const {
     userId,
     profile,

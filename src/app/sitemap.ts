@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 import { SlugHelper } from '@/lib/utils/SlugHelper';
 import type { MetadataRoute } from 'next';
 
@@ -9,51 +9,69 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://music.rasyadazizan.site';
   const now = new Date();
 
-  // Fetch indexed tracks
-  const supabase = await createClient();
-  const { data: tracks } = await supabase
-    .from('indexed_tracks')
-    .select('track_id, name, artist_name, updated_at, raw_data')
-    .order('updated_at', { ascending: false })
-    .limit(1000); // Max 1000 tracks per sitemap file for now
+  // Fetch indexed tracks without touching cookies or headers
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const supabaseKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    '';
 
   const trackEntries: MetadataRoute.Sitemap = [];
   const artistMap = new Map<string, Date>();
   const albumMap = new Map<string, Date>();
 
-  (tracks || []).forEach((t) => {
-    const updatedAt = new Date(t.updated_at);
+  if (supabaseUrl && supabaseKey) {
+    try {
+      const supabase = createClient(supabaseUrl, supabaseKey, {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+        },
+      });
+      const { data: tracks } = await supabase
+        .from('indexed_tracks')
+        .select('track_id, name, artist_name, updated_at, raw_data')
+        .order('updated_at', { ascending: false })
+        .limit(1000); // Max 1000 tracks per sitemap file for now
 
-    // Track entry
-    trackEntries.push({
-      url: `${baseUrl}${SlugHelper.buildTrackPath(t.artist_name, t.name, t.track_id)}`,
-      lastModified: updatedAt,
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    });
+      (tracks || []).forEach((t) => {
+        const updatedAt = new Date(t.updated_at);
 
-    // Extract unique artist IDs
-    const rawData = t.raw_data;
-    if (rawData) {
-      if (rawData.artists?.primary && Array.isArray(rawData.artists.primary)) {
-        rawData.artists.primary.forEach((artist: any) => {
-          if (artist.id) {
-            // Keep the latest updated_at for each artist
-            if (!artistMap.has(artist.id) || artistMap.get(artist.id)! < updatedAt) {
-              artistMap.set(artist.id, updatedAt);
+        // Track entry
+        trackEntries.push({
+          url: `${baseUrl}${SlugHelper.buildTrackPath(t.artist_name, t.name, t.track_id)}`,
+          lastModified: updatedAt,
+          changeFrequency: 'weekly',
+          priority: 0.9,
+        });
+
+        // Extract unique artist IDs
+        const rawData = t.raw_data;
+        if (rawData) {
+          if (rawData.artists?.primary && Array.isArray(rawData.artists.primary)) {
+            rawData.artists.primary.forEach((artist: any) => {
+              if (artist.id) {
+                // Keep the latest updated_at for each artist
+                if (!artistMap.has(artist.id) || artistMap.get(artist.id)! < updatedAt) {
+                  artistMap.set(artist.id, updatedAt);
+                }
+              }
+            });
+          }
+
+          // Extract unique album IDs
+          if (rawData.album?.id) {
+            if (!albumMap.has(rawData.album.id) || albumMap.get(rawData.album.id)! < updatedAt) {
+              albumMap.set(rawData.album.id, updatedAt);
             }
           }
-        });
-      }
-
-      // Extract unique album IDs
-      if (rawData.album?.id) {
-        if (!albumMap.has(rawData.album.id) || albumMap.get(rawData.album.id)! < updatedAt) {
-          albumMap.set(rawData.album.id, updatedAt);
         }
-      }
+      });
+    } catch {
+      // Graceful fallback during build if DB is unreachable
     }
-  });
+  }
 
   const artistEntries: MetadataRoute.Sitemap = Array.from(artistMap.entries()).map(([id, lastModified]) => ({
     url: `${baseUrl}/artist/${id}`,

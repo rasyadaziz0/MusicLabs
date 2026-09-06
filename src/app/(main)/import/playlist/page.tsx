@@ -5,8 +5,9 @@ import { usePlaylistImport } from '@/hooks/usePlaylistImport';
 import ImportUrlForm from './components/ImportUrlForm';
 import ScrapedResultPreview from './components/ScrapedResultPreview';
 import SpotifyAuthConnect from './components/SpotifyAuthConnect';
+import { Suspense } from 'react';
 
-export default function ImportPlaylistPage() {
+function ImportPlaylistContent() {
   const {
     user,
     signInWithGoogle,
@@ -147,5 +148,13 @@ export default function ImportPlaylistPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ImportPlaylistPage() {
+  return (
+    <Suspense fallback={null}>
+      <ImportPlaylistContent />
+    </Suspense>
   );
 }

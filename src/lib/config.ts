@@ -1,5 +1,5 @@
-export const API_BASE = process.env.NEXT_PUBLIC_EXPRESS_API_URL;
-
-if (!API_BASE) {
-  throw new Error('NEXT_PUBLIC_EXPRESS_API_URL wajib diisi');
-}
+export const API_BASE =
+  process.env.NEXT_PUBLIC_EXPRESS_API_URL ||
+  process.env.NEXT_PUBLIC_MUSIC_API_URL ||
+  process.env.NEXT_PUBLIC_YTMUSIC_API_URL ||
+  '';

@@ -24,6 +24,7 @@ import { FavoriteSongsSection } from './sections/FavoriteSongsSection';
 import { PlaylistsSection } from './sections/PlaylistsSection';
 import { ProfileHero } from './sections/ProfileHero';
 import { RecentlyPlayedSection } from './sections/RecentlyPlayedSection';
+import { useIsMobile } from '@/hooks/useIsMobile';
 
 
 export interface MyProfileProps {
@@ -32,7 +33,9 @@ export interface MyProfileProps {
 }
 
 
-export default function MyProfile({ initialData, isMobile }: MyProfileProps) {
+export default function MyProfile({ initialData, isMobile: propIsMobile }: MyProfileProps) {
+  const detectedIsMobile = useIsMobile();
+  const isMobile = propIsMobile !== undefined ? propIsMobile : detectedIsMobile;
   const router = useRouter();
   const { user, signOut, loading: authLoading } = useAuth();
   const { playTrack } = usePlayer();

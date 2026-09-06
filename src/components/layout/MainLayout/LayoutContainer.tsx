@@ -1,25 +1,14 @@
-import { headers } from 'next/headers';
 import React from 'react';
 import Sidebar from '../../desktop/layout/Sidebar';
 import MobileNav from '../../mobile/layout/MobileNav';
 import BaseLayout from './BaseLayout';
 
-export default async function LayoutContainer({ children }: { children: React.ReactNode }) {
-  const headersList = await headers();
-  const userAgent = headersList.get('user-agent') || '';
-  // Only true cellphones get Mobile UI. iPads and Tablets get the exact same UI as Desktop (isMobile = false).
-  const isMobile = /(?:iPhone|iPod|Windows Phone|Android.*Mobile|Mobi)/i.test(userAgent) && !/iPad/i.test(userAgent);
-
-  if (isMobile) {
-    return (
-      <BaseLayout isMobile={true} renderNavigation={() => <MobileNav />}>
-        {children}
-      </BaseLayout>
-    );
-  }
-
+export default function LayoutContainer({ children }: { children: React.ReactNode }) {
   return (
-    <BaseLayout isMobile={false} renderNavigation={() => <Sidebar />}>
+    <BaseLayout
+      renderDesktopNav={() => <Sidebar />}
+      renderMobileNav={() => <MobileNav />}
+    >
       {children}
     </BaseLayout>
   );
