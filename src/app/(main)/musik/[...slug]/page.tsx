@@ -17,6 +17,9 @@ const getResolvedTrack = cache(async (trackId: string) => {
   return await trackResolver.resolveTrack(trackId);
 });
 
+// Cache track page at Edge CDN for 1 hour (3600s) to absorb repeated crawler visits
+export const revalidate = 3600;
+
 interface PageProps {
   params: Promise<{ slug: string[] }>;
 }

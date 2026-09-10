@@ -4,7 +4,10 @@ import type { MetadataRoute } from 'next';
 
 /**
  * Dynamic sitemap fetching indexed tracks from the database.
+ * Cached on Edge CDN for 24 hours (86400s) to prevent bot crawl overload.
  */
+export const revalidate = 86400;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://music.rasyadazizan.site';
   const now = new Date();

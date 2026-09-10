@@ -3,6 +3,9 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { cache } from 'react';
 
+// Cache album page at Edge CDN for 1 hour (3600s) to absorb repeated crawler visits
+export const revalidate = 3600;
+
 interface PageProps {
   params: Promise<{ id: string }>;
 }

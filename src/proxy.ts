@@ -2,6 +2,23 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export async function proxy(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  // 1. Immediately drop common vulnerability scanner probes with 404 at Edge
+  // This prevents bot scans (e.g. /wp-login.php, /.env) from hitting dynamic routes/Serverless Functions.
+  if (
+    pathname.endsWith('.php') ||
+    pathname.endsWith('.asp') ||
+    pathname.endsWith('.aspx') ||
+    pathname.endsWith('.env') ||
+    pathname.includes('/.git') ||
+    pathname.startsWith('/wp-') ||
+    pathname.startsWith('/cgi-bin') ||
+    pathname.startsWith('/phpmyadmin')
+  ) {
+    return new NextResponse(null, { status: 404 });
+  }
+
   // Fast path: Only check maintenance when explicitly enabled via env var.
   // This eliminates ALL Supabase queries and overhead from the Edge middleware.
   if (process.env.MAINTENANCE_MODE !== 'true') {
