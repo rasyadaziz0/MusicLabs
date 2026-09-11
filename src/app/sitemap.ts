@@ -21,8 +21,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '';
 
   const trackEntries: MetadataRoute.Sitemap = [];
-  const artistMap = new Map<string, Date>();
-  const albumMap = new Map<string, Date>();
 
   if (supabaseUrl && supabaseKey) {
     try {
@@ -34,9 +32,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       });
       const { data: tracks } = await supabase
         .from('indexed_tracks')
-        .select('track_id, name, artist_name, updated_at, raw_data')
+        .select('track_id, name, artist_name, updated_at')
         .order('updated_at', { ascending: false })
-        .limit(1000); // Max 1000 tracks per sitemap file for now
+        .limit(1000); // Max 1000 tracks per sitemap file
 
       (tracks || []).forEach((t) => {
         const updatedAt = new Date(t.updated_at);
@@ -48,47 +46,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           changeFrequency: 'weekly',
           priority: 0.9,
         });
-
-        // Extract unique artist IDs
-        const rawData = t.raw_data;
-        if (rawData) {
-          if (rawData.artists?.primary && Array.isArray(rawData.artists.primary)) {
-            rawData.artists.primary.forEach((artist: any) => {
-              if (artist.id) {
-                // Keep the latest updated_at for each artist
-                if (!artistMap.has(artist.id) || artistMap.get(artist.id)! < updatedAt) {
-                  artistMap.set(artist.id, updatedAt);
-                }
-              }
-            });
-          }
-
-          // Extract unique album IDs
-          if (rawData.album?.id) {
-            if (!albumMap.has(rawData.album.id) || albumMap.get(rawData.album.id)! < updatedAt) {
-              albumMap.set(rawData.album.id, updatedAt);
-            }
-          }
-        }
       });
     } catch {
       // Graceful fallback during build if DB is unreachable
     }
   }
-
-  const artistEntries: MetadataRoute.Sitemap = Array.from(artistMap.entries()).map(([id, lastModified]) => ({
-    url: `${baseUrl}/artist/${id}`,
-    lastModified,
-    changeFrequency: 'monthly',
-    priority: 0.8,
-  }));
-
-  const albumEntries: MetadataRoute.Sitemap = Array.from(albumMap.entries()).map(([id, lastModified]) => ({
-    url: `${baseUrl}/album/${id}`,
-    lastModified,
-    changeFrequency: 'monthly',
-    priority: 0.8,
-  }));
 
   return [
     // ── Core pages ──
@@ -137,7 +99,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.3,
     },
     ...trackEntries,
-    ...artistEntries,
-    ...albumEntries,
   ];
 }
