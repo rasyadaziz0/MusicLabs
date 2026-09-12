@@ -2,6 +2,7 @@
 
 import { supabase } from '@/lib/supabase/client';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
 
 import { FeatureFlagsContextType } from '@/types/context/featureflags';
 
@@ -19,12 +20,38 @@ const defaultFlags: FeatureFlags = {
   feature_public_profiles: true,
   feature_google_login: true,
   feature_manual_register: true,
+  feature_maintenance: false,
 };
 
 const FeatureFlagsContext = createContext<FeatureFlagsContextType>({
   flags: defaultFlags,
   loading: true,
 });
+
+function MaintenanceWatcher({ children }: { children: React.ReactNode }) {
+  const { flags, loading } = useFeatureFlags();
+  const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (loading) return;
+
+    const isMaintenancePath = pathname === '/maintenance' || pathname.startsWith('/maintenance/');
+    const isBypassPath = pathname.startsWith('/api') || pathname.startsWith('/_next') || pathname.startsWith('/embed');
+
+    if (flags.feature_maintenance && !isMaintenancePath && !isBypassPath) {
+      router.replace('/maintenance');
+    } else if (!flags.feature_maintenance && isMaintenancePath) {
+      router.replace('/');
+    }
+  }, [flags.feature_maintenance, loading, pathname, router]);
+
+  if (!loading && flags.feature_maintenance && !pathname.startsWith('/maintenance') && !pathname.startsWith('/embed')) {
+    return null;
+  }
+
+  return <>{children}</>;
+}
 
 export function FeatureFlagsProvider({ children }: { children: React.ReactNode }) {
   const [flags, setFlags] = useState<FeatureFlags>(defaultFlags);
@@ -63,7 +90,7 @@ export function FeatureFlagsProvider({ children }: { children: React.ReactNode }
 
     fetchFlags();
 
-    // Optionally set up realtime subscription if needed later
+    // Set up realtime subscription to listen for instant toggles from Supabase
     const subscription = supabase
       .channel('feature_flags_changes')
       .on(
@@ -97,7 +124,9 @@ export function FeatureFlagsProvider({ children }: { children: React.ReactNode }
 
   return (
     <FeatureFlagsContext.Provider value={{ flags, loading }}>
-      {children}
+      <MaintenanceWatcher>
+        {children}
+      </MaintenanceWatcher>
     </FeatureFlagsContext.Provider>
   );
 }

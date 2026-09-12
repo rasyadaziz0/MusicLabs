@@ -1,5 +1,8 @@
 # Abaikan folder backend sepenuhnya dari Vercel
 backend/
+docs/
+scripts/
+TEMUAN.md
 
 # Node modules & logs
 node_modules/

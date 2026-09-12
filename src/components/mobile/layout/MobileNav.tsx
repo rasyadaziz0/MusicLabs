@@ -13,14 +13,22 @@ const navItems = [
   { icon: Library, label: 'Library', href: '/library' },
 ];
 
+import { useFeatureFlags } from '@/context/FeatureFlagsContext';
+
 export default function MobileNav() {
   const pathname = usePathname();
+  const { flags } = useFeatureFlags();
+
+  const activeNavItems = navItems.filter((item) => {
+    if (item.href === '/radio' && !flags.feature_radio) return false;
+    return true;
+  });
 
   return (
     <div className="fixed bottom-6 left-4 right-4 z-40 flex items-center gap-2">
       <GlassBar className="flex-1 rounded-full h-[68px] shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
         <div className="flex h-full items-center justify-around px-2">
-          {navItems.map((item) => {
+          {activeNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
             const isIdentify = item.label === 'Identify';

@@ -43,6 +43,19 @@ AGENTS.md
 agents.md
 CLAUDE.md
 claude.md
+
+# Internal Docs, Security Findings & Scripts
+docs/
+/docs/
+scripts/
+/scripts/
+TEMUAN.md
+/TEMUAN.md
+
+# Backend Service
+backend/
+/backend/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

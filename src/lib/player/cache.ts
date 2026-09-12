@@ -26,7 +26,8 @@
     try {
       localStorage.removeItem(getFallbackCacheKey(trackId));
       
-      const regex = new RegExp(`^yt_resolve_v\\d+_${trackId}`);
+      const escapedTrackId = trackId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`^yt_resolve_v\\d+_${escapedTrackId}`);
       const keysToRemove: string[] = [];
       for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);

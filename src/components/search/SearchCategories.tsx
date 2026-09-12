@@ -1,16 +1,17 @@
 'use client';
 
 import Link from 'next/link';
+import { useFeatureFlags } from '@/context/FeatureFlagsContext';
 
-const categories = [
-  { title: 'AcadMusic Radio', bg: '#FA243C' },
+const rawCategories = [
+  { title: 'AcadMusic Radio', bg: '#FA243C', href: '/radio', flag: 'feature_radio' },
   { title: 'Sleep', bg: '#29326D' },
   { title: 'Chill', bg: '#1A6B4A' },
   { title: 'New in Electronic', bg: '#D3286E' },
   { title: 'K-Pop', bg: '#FF6275' },
   { title: 'Pop', bg: '#FA58B6' },
   { title: 'Hip-Hop/Rap', bg: '#162E93' },
-  { title: 'Replay Monthly', bg: 'linear-gradient(135deg, #FF9B26, #FA58B6, #2F2FE4)', href: '/recap' },
+  { title: 'Replay Monthly', bg: 'linear-gradient(135deg, #FF9B26, #FA58B6, #2F2FE4)', href: '/recap', flag: 'feature_recap' },
   { title: 'Rock', bg: '#1A1953' },
   { title: 'R&B', bg: '#FA243C' },
   { title: 'Jazz', bg: '#10B981' },
@@ -18,6 +19,13 @@ const categories = [
 ];
 
 export function SearchCategories() {
+  const { flags } = useFeatureFlags();
+
+  const categories = rawCategories.filter((cat) => {
+    if (cat.flag && flags[cat.flag] === false) return false;
+    return true;
+  });
+
   return (
     <div className="space-y-6">
       <h2 className="text-[20px] font-bold text-white">Browse Categories</h2>

@@ -197,7 +197,7 @@ export default function Sidebar() {
                 )}
 
                 {/* Item setelah Artists (Albums, Songs, Made for You) */}
-                {libraryItemsKeys.slice(2).map((item) => {
+                {libraryItemsKeys.slice(2).filter((item) => item.key !== 'made_for_you' || flags.feature_ai_discover).map((item) => {
                   const Icon = item.icon;
                   const isActive = pathname === item.href;
                   return (
