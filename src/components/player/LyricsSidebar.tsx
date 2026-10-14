@@ -62,7 +62,14 @@ export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
     };
   }, [activeIndex, lines, scrollRef]);
 
-  if (!mounted) return null;
+  const isStation = Boolean(
+    currentTrack?.isStation ||
+    currentTrack?.isRadio ||
+    currentTrack?.label === 'YouTube Live Station' ||
+    currentTrack?.album?.name === 'Live Station'
+  );
+
+  if (!mounted || isStation) return null;
 
   const content = (
     <AnimatePresence>

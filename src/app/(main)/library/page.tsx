@@ -1,15 +1,18 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
+import { useFeatureFlags } from '@/context/FeatureFlagsContext';
+import { useImport } from '@/context/ImportContext';
 import { useLibraryPlaylists } from '@/hooks/library/useLibraryPlaylists';
 import { useDiscoverWeekly } from '@/hooks/useDiscoverWeekly';
-import { ChevronRight, Heart, Library, Mic, Music, PlusSquare, Sparkles, SquareStack } from 'lucide-react';
+import { Bookmark, ChevronRight, Heart, Library, ListMusic, Mic, Music, PlusSquare, Sparkles, SquareStack } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
 const libraryMenu = [
   { label: 'Playlists', icon: Library, href: '/library/playlists' },
   { label: 'Favourite Songs', icon: Heart, href: '/library/liked' },
+  { label: 'Liked Playlists', icon: Bookmark, href: '/library/liked-playlists' },
   { label: 'Artists', icon: Mic, href: '/library/artists' },
   { label: 'Albums', icon: SquareStack, href: '/library/albums' },
   { label: 'Songs', icon: Music, href: '/library/songs' },
@@ -18,8 +21,17 @@ const libraryMenu = [
 
 export default function LibraryPage() {
   const { user, signInWithGoogle } = useAuth();
+  const { flags } = useFeatureFlags();
+  const { isImporting, importProgress } = useImport();
   const { data: playlists = [], isLoading: isPlaylistsLoading } = useLibraryPlaylists();
   const { hasPlaylist, playlistId } = useDiscoverWeekly();
+
+  const menuItems = [
+    ...libraryMenu,
+    ...(flags.feature_import_playlist
+      ? [{ label: 'Import Playlist', icon: ListMusic, href: '/import/playlist' }]
+      : []),
+  ];
 
   if (!user) {
     return (
@@ -42,9 +54,21 @@ export default function LibraryPage() {
       <div className="px-5 md:px-8 pt-4 pb-4">
         <div className="flex items-center justify-between mb-2">
           <h1 className="text-[34px] font-bold text-white tracking-tight">Library</h1>
-          <Link href="/playlist/create" className="text-[#FA243C] p-2 -mr-2 rounded-full hover:bg-white/5 transition-colors">
-            <PlusSquare size={24} />
-          </Link>
+          <div className="flex items-center gap-2">
+            {flags.feature_import_playlist && (
+              <Link
+                href="/import/playlist"
+                className="text-xs font-semibold px-3 py-1.5 rounded-full bg-white/10 text-white/90 border border-white/10 hover:bg-white/20 transition-colors flex items-center gap-1.5"
+                title="Import Playlist"
+              >
+                <ListMusic size={15} className={isImporting ? "text-[#FA243C] animate-pulse" : "text-[#FA243C]"} />
+                <span>Import</span>
+              </Link>
+            )}
+            <Link href="/playlist/create" className="text-[#FA243C] p-2 -mr-2 rounded-full hover:bg-white/5 transition-colors">
+              <PlusSquare size={24} />
+            </Link>
+          </div>
         </div>
         <div className="h-[1px] w-full bg-white/10" />
       </div>
@@ -52,10 +76,18 @@ export default function LibraryPage() {
       {/* List Menu */}
       <div className="px-5 md:px-8">
         <div className="flex flex-col">
-          {libraryMenu.map((item) => {
+          {menuItems.map((item) => {
+            const isImportItem = item.label === 'Import Playlist';
             return (
               <Link key={item.label} href={item.href} className="group flex items-center justify-between py-3.5 border-b border-white/5 active:bg-white/5 transition-colors md:hover:bg-white/[0.02] md:-mx-4 md:px-4 md:rounded-lg md:border-b-0">
-                <span className="text-[20px] text-white/90 font-normal tracking-tight">{item.label}</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-[20px] text-white/90 font-normal tracking-tight">{item.label}</span>
+                  {isImportItem && isImporting && (
+                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#FA243C]/20 text-[#FA243C] border border-[#FA243C]/30 animate-pulse">
+                      {importProgress ?? 0}%
+                    </span>
+                  )}
+                </div>
                 <ChevronRight size={20} className="text-white/20 group-active:text-white/50 group-hover:text-white/40" />
               </Link>
             );
@@ -113,11 +145,18 @@ export default function LibraryPage() {
                        <Music size={36} className="text-[#FA243C]/50" />
                      </div>
                    )}
+                   {playlist.is_liked && (
+                     <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md flex items-center gap-1 text-[10px] text-[#FA243C] font-semibold border border-white/10">
+                       <Heart size={10} fill="currentColor" />
+                     </div>
+                   )}
                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                 </div>
                 <div className="px-0.5 mt-1">
                   <p className="text-[14px] md:text-[15px] font-medium text-white/95 truncate leading-snug">{playlist.name}</p>
-                  <p className="text-[13px] text-white/50 truncate mt-0.5">Playlist</p>
+                  <p className="text-[13px] text-white/50 truncate mt-0.5">
+                    {playlist.is_liked ? 'Liked Playlist' : 'Playlist'}
+                  </p>
                 </div>
               </Link>
             ))}

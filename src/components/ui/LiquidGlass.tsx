@@ -38,10 +38,10 @@ export const GlassBar = forwardRef<HTMLDivElement, GlassBarProps>(
           backdropFilter: 'blur(22px) saturate(180%) brightness(1.05)',
           WebkitBackdropFilter: 'blur(22px) saturate(180%) brightness(1.05)',
           boxShadow:
-            'inset 0 1px 1px rgba(255, 255, 255, 0.23),' +
-            'inset 0 -1px 1px rgba(255,255,255,0.08),' +
-            'inset 0 0 0 1px rgba(255,255,255,0.05),' +
-            '0 12px 34px rgba(0,0,0,0.45)',
+            'inset 0 1px 1px rgba(255, 255, 255, 0.29),' +
+            'inset 0 -1px 1px rgba(255, 255, 255, 0.16),' +
+            'inset 0 0 0 1px rgba(255,255,255,0.08),' +
+            '0 12px 34px rgba(0, 0, 0, 0.26)',
           ...style,
         }}
         {...props}

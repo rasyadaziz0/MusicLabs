@@ -35,23 +35,25 @@ export default function DesktopExtraControls({
         "flex items-center gap-[18px] md:max-xl:gap-[10px] transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] md:portrait:hidden",
         isVolumeSliderOpen ? "opacity-0 pointer-events-none scale-95" : "opacity-100 scale-100"
       )}>
-        <button
-          onClick={() => {
-            if (!hasTrack) return;
-            setIsLyricsOpen(!isLyricsOpen);
-            if (!isLyricsOpen) {
-              setIsQueueOpen(false);
-              setIsDevicesOpen?.(false);
-            }
-          }}
-          className={StyleHelper.cn(
-            "transition-colors cursor-pointer",
-            hasTrack ? (isLyricsOpen ? "text-[#ff3b30]" : "text-white/70 hover:text-white") : "text-white/20 pointer-events-none"
-          )}
-          title="Lirik"
-        >
-          <MessageSquare size={18} strokeWidth={2.5} />
-        </button>
+        {!Boolean(currentTrack?.isStation || currentTrack?.isRadio || currentTrack?.label === 'YouTube Live Station' || currentTrack?.album?.name === 'Live Station') && (
+          <button
+            onClick={() => {
+              if (!hasTrack) return;
+              setIsLyricsOpen(!isLyricsOpen);
+              if (!isLyricsOpen) {
+                setIsQueueOpen(false);
+                setIsDevicesOpen?.(false);
+              }
+            }}
+            className={StyleHelper.cn(
+              "transition-colors cursor-pointer",
+              hasTrack ? (isLyricsOpen ? "text-[#ff3b30]" : "text-white/70 hover:text-white") : "text-white/20 pointer-events-none"
+            )}
+            title="Lirik"
+          >
+            <MessageSquare size={18} strokeWidth={2.5} />
+          </button>
+        )}
         <div className="relative flex items-center justify-center">
           <button
             onClick={() => {

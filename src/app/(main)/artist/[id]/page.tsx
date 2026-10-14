@@ -41,8 +41,6 @@ const getArtistData = cache(async (rawId: string) => {
 
     // Validate: if backend returned a dummy artist, try search by name fallback
     if (artist && ArtistParser.isDummyArtist(artist, rawId)) {
-      // The name is the raw ID — we can't search with that meaningfully.
-      // Return null so the page shows 404
       return { artist: null, topTracks: [], albums: [] };
     }
 
@@ -178,6 +176,7 @@ export default async function ArtistPage({ params }: PageProps) {
       />
 
       <ArtistPageClient
+        artistId={rawId}
         artistName={artist.name}
         heroImage={heroImage}
         topTracks={topTracks}

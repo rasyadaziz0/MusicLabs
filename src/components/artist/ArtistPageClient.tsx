@@ -5,11 +5,13 @@ import { Song } from '@/types/music';
 import { ArtistHero } from '@/components/artist/ArtistHero';
 import { ArtistLatestRelease } from '@/components/artist/ArtistLatestRelease';
 import { ArtistTopSongs } from '@/components/artist/ArtistTopSongs';
+import { StationBanner } from '@/components/artist/StationBanner';
 import { AlbumCard } from '@/components/ui/AlbumCard';
 import { HorizontalScrollSection } from '@/components/ui/HorizontalScrollSection';
 import { usePlayer } from '@/context/PlayerContext';
 
 export interface ArtistPageClientProps {
+  artistId?: string;
   artistName: string;
   heroImage: string | null;
   topTracks: Song[];
@@ -21,6 +23,7 @@ export interface ArtistPageClientProps {
 
 
 export default function ArtistPageClient({
+  artistId,
   artistName,
   heroImage,
   topTracks,
@@ -42,6 +45,7 @@ export default function ArtistPageClient({
       {/* ────────────────── HERO SECTION ────────────────── */}
       <ArtistHero
         name={artistName}
+        artistId={artistId}
         heroImage={heroImage}
         hasTracks={topTracks.length > 0}
         handlePlayAll={handlePlayAll}
@@ -63,6 +67,11 @@ export default function ArtistPageClient({
           />
 
         </div>
+
+        {/* ── Artist Station Banner ── */}
+        {artistId && (
+          <StationBanner artistId={artistId} artistName={artistName} />
+        )}
 
         {/* ── Albums (horizontal scroll) ── */}
         {fullAlbums.length > 0 && (

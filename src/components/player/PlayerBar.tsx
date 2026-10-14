@@ -68,6 +68,13 @@ export default function PlayerBar({ isMobile: propIsMobile }: PlayerBarProps = {
     }
   }, [isNowPlayingOpen]);
 
+  // Close lyrics sidebar if a live station is playing
+  useEffect(() => {
+    if (currentTrack?.isStation || currentTrack?.isRadio || currentTrack?.label === 'YouTube Live Station' || currentTrack?.album?.name === 'Live Station') {
+      setIsLyricsOpen(false);
+    }
+  }, [currentTrack]);
+
   // Add body class to shift scroll arrows when right sidebar is open
   useEffect(() => {
     if (isLyricsOpen || isQueueOpen || isDevicesOpen) {

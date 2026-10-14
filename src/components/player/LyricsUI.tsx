@@ -183,7 +183,9 @@ export default function LyricsUI({
                 color: 'rgba(255,255,255,0.3)',
               }}
             >
-              Lirik tidak tersedia.
+              {Boolean(currentTrack?.isStation || currentTrack?.isRadio || currentTrack?.label === 'YouTube Live Station' || currentTrack?.album?.name === 'Live Station')
+                ? 'Lirik tidak tersedia untuk siaran langsung.'
+                : 'Lirik tidak tersedia.'}
             </motion.div>
           )}
         </div>

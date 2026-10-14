@@ -3,11 +3,13 @@ import { createClient } from './client';
 
 import { HistoryRepository } from './repositories/HistoryRepository';
 import { LikeRepository } from './repositories/LikeRepository';
+import { PlaylistLikeRepository } from './repositories/PlaylistLikeRepository';
 import { PlaylistRepository } from './repositories/PlaylistRepository';
 
 import { WeeklyTrackPlay } from '@/types/models/History';
 import { LikedSongRow } from '@/types/models/Like';
 import { PlaylistRecord } from '@/types/models/Playlist';
+import { PlaylistSearchResult } from '@/types/models/PlaylistLike';
 
 export const supabase = createClient();
 
@@ -15,8 +17,9 @@ export const supabase = createClient();
 const playlistRepo = new PlaylistRepository(supabase);
 const likeRepo = new LikeRepository(supabase);
 const historyRepo = new HistoryRepository(supabase);
+const playlistLikeRepo = new PlaylistLikeRepository(supabase);
 
-export type { LikedSongRow, PlaylistRecord, WeeklyTrackPlay };
+export type { LikedSongRow, PlaylistRecord, PlaylistSearchResult, WeeklyTrackPlay };
 
 // ── Playlist Repository Exports ─────────────────────────────
 export const getUserPlaylists = (userId: string) => playlistRepo.getUserPlaylists(userId);
@@ -34,7 +37,15 @@ export const reorderPlaylistTracks = (playlistId: string, trackIdsInOrder: strin
 // The discover weekly ones took a client parameter in the old implementation
 // Let's bind them to use the instance (the client is internal to the repo now)
 export const getOrCreateDiscoverWeeklyPlaylist = (client: SupabaseClient, userId: string) => playlistRepo.getOrCreateDiscoverWeeklyPlaylist(userId);
-export const updateDiscoverWeeklyTracks = (client: SupabaseClient, playlistId: string, trackIds: string[]) => playlistRepo.updateDiscoverWeeklyTracks(playlistId, trackIds);
+export const togglePlaylistVisibility = (playlistId: string, currentPublicStatus: boolean) => playlistRepo.toggleVisibility(playlistId, currentPublicStatus);
+export const searchPublicPlaylists = (query: string, page = 1, limit = 20) => playlistRepo.searchPublicPlaylists(query, page, limit);
+
+// ── Playlist Like Repository Exports ────────────────────────
+export const isPlaylistLiked = (userId: string, playlistId: string) => playlistLikeRepo.isLiked(userId, playlistId);
+export const togglePlaylistLike = (userId: string, playlistId: string) => playlistLikeRepo.toggleLike(userId, playlistId);
+export const getPlaylistLikeCount = (playlistId: string) => playlistLikeRepo.getLikeCount(playlistId);
+export const getLikedPlaylists = (userId: string) => playlistLikeRepo.getLikedPlaylists(userId);
+export const getLikedPlaylistIds = (userId: string) => playlistLikeRepo.getLikedPlaylistIds(userId);
 
 // ── Like Repository Exports ─────────────────────────────────
 export const getLikedSongs = (userId: string) => likeRepo.getLikedSongs(userId);

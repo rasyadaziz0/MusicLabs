@@ -16,4 +16,6 @@ export class MusicApiService {
   static get getAlbum() { return Module.getAlbum; }
   static get getSongsByIds() { return Module.getSongsByIds; }
   static get getSongLyrics() { return Module.getSongLyrics; }
+  static get getArtistStation() { return Module.getArtistStation; }
+  static get getArtistFollowersCount() { return Module.getArtistFollowersCount; }
 }

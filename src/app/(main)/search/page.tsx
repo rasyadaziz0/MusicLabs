@@ -1,9 +1,11 @@
 'use client';
 
 import { MusicSearchResults } from '@/components/search/MusicSearchResults';
+import { PlaylistSearchResults } from '@/components/search/PlaylistSearchResults';
 import { RecentAndTrending } from '@/components/search/RecentAndTrending';
 import { SearchHeader } from '@/components/search/SearchHeader';
 import { UserSearchResults } from '@/components/search/UserSearchResults';
+import { useSearchPlaylists } from '@/hooks/playlist/useSearchPlaylists';
 import { useSearchUsers } from '@/hooks/social/useSearchUsers';
 import { useMusicSearch } from '@/hooks/useMusicSearch';
 import { useRecentSearches } from '@/hooks/useRecentSearches';
@@ -33,9 +35,9 @@ function SearchPageContent() {
   const queryFromUrl = decodeQuery(rawQuery);
 
   const [inputValue, setInputValue] = useState(queryFromUrl);
-  const debouncedQuery = useDebouncedValue(inputValue, 500);
+  const debouncedQuery = useDebouncedValue(inputValue, 300);
   const query = debouncedQuery.trim();
-  const [searchMode, setSearchMode] = useState<'music' | 'users'>('music');
+  const [searchMode, setSearchMode] = useState<'music' | 'users' | 'playlists'>('music');
 
   const lastPushedQueryRef = useRef(queryFromUrl);
   const { addSearch } = useRecentSearches();
@@ -73,6 +75,7 @@ function SearchPageContent() {
 
   // Data Hooks
   const { data: usersData, isLoading: isUsersLoading } = useSearchUsers(searchMode === 'users' ? query : '');
+  const { playlists: playlistResults, isLoading: isPlaylistsLoading } = useSearchPlaylists(searchMode === 'playlists' ? query : '');
 
   const {
     isLoading,
@@ -84,6 +87,7 @@ function SearchPageContent() {
     displayedSongs,
     selectedArtist,
     topResult,
+    topResults,
   } = useMusicSearch(searchMode === 'music' ? query : '');
 
   return (
@@ -96,12 +100,18 @@ function SearchPageContent() {
         onCommit={handleSearchCommit}
       />
 
-      {query.length > 2 ? (
+      {query.length >= 1 ? (
         <div className="space-y-1">
           {searchMode === 'users' ? (
             <UserSearchResults
               isUsersLoading={isUsersLoading}
               usersData={usersData}
+              query={query}
+            />
+          ) : searchMode === 'playlists' ? (
+            <PlaylistSearchResults
+              isLoading={isPlaylistsLoading}
+              playlists={playlistResults}
               query={query}
             />
           ) : (
@@ -116,6 +126,7 @@ function SearchPageContent() {
               selectedArtist={selectedArtist}
               rankedSongsLength={rankedSongs.length}
               topResult={topResult}
+              topResults={topResults}
             />
           )}
         </div>

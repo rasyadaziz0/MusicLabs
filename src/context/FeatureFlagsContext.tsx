@@ -18,6 +18,7 @@ const defaultFlags: FeatureFlags = {
   feature_ai_discover: true,
   feature_tip: true,
   feature_public_profiles: true,
+  feature_artist_follow: true,
   feature_google_login: true,
   feature_manual_register: true,
   feature_maintenance: false,

@@ -4,28 +4,81 @@ import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
 import { usePlayer } from '@/context/PlayerContext';
 import { MusicApiService } from '@/lib/api/MusicApiService';
 import { ImageHelper } from '@/lib/utils/ImageHelper';
+import { TopSearchResultItem } from '@/types/hooks/search';
 import { Song } from '@/types/music';
 import { gooeyToast as toast } from 'goey-toast';
 import { MoreHorizontal, Play, Search as SearchIcon } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
 
-export function TopResultGridItem({ item, onPlay, onClick }: { item: any, onPlay: (song: Song) => void, onClick: (item: any) => void }) {
+export function TopResultGridItem({
+  item,
+  onPlay,
+  onClick,
+}: {
+  item: TopSearchResultItem | { type: string; data: any; id?: string };
+  onPlay: (song: Song) => void;
+  onClick: (item: any) => void;
+}) {
   const [isLoading, setIsLoading] = useState(false);
-  const [contextMenu, setContextMenu] = useState<{ isOpen: boolean; x: number; y: number }>({ isOpen: false, x: 0, y: 0 });
-  const { shufflePlay } = usePlayer();
+  const [contextMenu, setContextMenu] = useState<{
+    isOpen: boolean;
+    x: number;
+    y: number;
+  }>({ isOpen: false, x: 0, y: 0 });
+  const { playTrack, shufflePlay } = usePlayer();
+
   const isSong = item.type === 'song';
+  const isArtist = item.type === 'artist';
+  const isAlbum = item.type === 'album';
+
   const title = isSong ? item.data.name : item.data.title;
   const subtitle = isSong
-    ? [...(item.data.artists?.primary || []), ...(item.data.artists?.featured || [])].map((a: any) => a.name).join(', ')
-    : item.data.description || 'Artist';
-  const imageUrl = ImageHelper.getBestImageUrl(item.data.image || []);
+    ? [
+        ...(item.data.artists?.primary || []),
+        ...(item.data.artists?.featured || []),
+      ]
+        .map((a: any) => a.name)
+        .join(', ')
+    : isAlbum
+      ? item.data.artist || 'Album'
+      : item.data.description || 'Artist';
+
+  const imageUrl = isAlbum
+    ? item.data.cover_big ||
+      item.data.cover_xl ||
+      item.data.cover ||
+      item.data.cover_medium ||
+      ImageHelper.getBestImageUrl(item.data.image || [])
+    : ImageHelper.getBestImageUrl(item.data.image || []);
 
   const handlePlay = async (e: React.MouseEvent) => {
     e.stopPropagation();
+
     if (isSong) {
-      onPlay(item.data);
-    } else {
+      onPlay(item.data as Song);
+      return;
+    }
+
+    if (isAlbum) {
+      try {
+        setIsLoading(true);
+        const albumData = await MusicApiService.getAlbum(item.data.id);
+        const tracks: Song[] = albumData?.tracks || [];
+        if (tracks.length > 0) {
+          playTrack(tracks[0], tracks);
+        } else {
+          toast.error('No tracks found in this album');
+        }
+      } catch (err) {
+        toast.error('Failed to load album tracks');
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
+    if (isArtist) {
       try {
         setIsLoading(true);
         const topTracks = await MusicApiService.getArtistTopTracks(item.data.id);
@@ -48,9 +101,11 @@ export function TopResultGridItem({ item, onPlay, onClick }: { item: any, onPlay
     setContextMenu({
       isOpen: true,
       x: e.clientX,
-      y: e.clientY
+      y: e.clientY,
     });
   };
+
+  const typeLabel = isSong ? 'Song' : isAlbum ? 'Album' : 'Artist';
 
   return (
     <div
@@ -58,9 +113,19 @@ export function TopResultGridItem({ item, onPlay, onClick }: { item: any, onPlay
       onContextMenu={isSong ? handleContextMenu : undefined}
       className="group relative flex items-center gap-4 p-4 rounded-[14px] bg-white/[0.05] hover:bg-white/[0.1] transition-colors cursor-pointer"
     >
-      <div className={`relative w-[76px] h-[76px] flex-shrink-0 bg-white/5 ${isSong ? 'rounded-lg' : 'rounded-full'} overflow-hidden shadow-sm`}>
+      <div
+        className={`relative w-[76px] h-[76px] flex-shrink-0 bg-white/5 ${
+          isArtist ? 'rounded-full' : 'rounded-lg'
+        } overflow-hidden shadow-sm`}
+      >
         {imageUrl ? (
-          <Image src={imageUrl} alt={title} fill sizes="80px" className="object-cover" />
+          <Image
+            src={imageUrl}
+            alt={title}
+            fill
+            sizes="80px"
+            className="object-cover"
+          />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-white/5">
             <SearchIcon size={24} className="text-white/20" />
@@ -74,6 +139,7 @@ export function TopResultGridItem({ item, onPlay, onClick }: { item: any, onPlay
             <button
               onClick={handlePlay}
               className="w-10 h-10 bg-black/60 rounded-full flex items-center justify-center hover:scale-105 hover:bg-black/80 text-white transition-all"
+              aria-label={`Play ${title}`}
             >
               <Play fill="currentColor" size={18} className="ml-1" />
             </button>
@@ -82,9 +148,11 @@ export function TopResultGridItem({ item, onPlay, onClick }: { item: any, onPlay
       </div>
 
       <div className="flex flex-col justify-center flex-1 min-w-0 pr-2">
-        <h3 className="text-[15px] font-semibold text-white truncate w-full mb-0.5">{title}</h3>
+        <h3 className="text-[15px] font-semibold text-white truncate w-full mb-0.5">
+          {title}
+        </h3>
         <p className="text-[13px] font-medium text-white/50 truncate w-full">
-          {isSong ? 'Song' : 'Artist'} {subtitle ? `· ${subtitle}` : ''}
+          {typeLabel} {subtitle ? `· ${subtitle}` : ''}
         </p>
       </div>
 
@@ -92,6 +160,7 @@ export function TopResultGridItem({ item, onPlay, onClick }: { item: any, onPlay
         <button
           onClick={handleContextMenu}
           className="w-8 h-8 rounded-full flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0"
+          aria-label="More options"
         >
           <MoreHorizontal size={18} />
         </button>
@@ -102,7 +171,7 @@ export function TopResultGridItem({ item, onPlay, onClick }: { item: any, onPlay
           track={item.data}
           isOpen={contextMenu.isOpen}
           position={{ x: contextMenu.x, y: contextMenu.y }}
-          onClose={() => setContextMenu(prev => ({ ...prev, isOpen: false }))}
+          onClose={() => setContextMenu((prev) => ({ ...prev, isOpen: false }))}
         />
       )}
     </div>

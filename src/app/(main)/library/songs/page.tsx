@@ -10,6 +10,7 @@ import TrackLikeButton from '@/components/ui/TrackLikeButton';
 import { useAuth } from '@/context/AuthContext';
 import { usePlayer } from '@/context/PlayerContext';
 import { useLibrarySongs } from '@/hooks/library/useLibrarySongs';
+import * as SearchHelper from '@/lib/utils/search';
 import { Song } from '@/types/music';
 import { ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -25,24 +26,37 @@ export default function LibrarySongsPage() {
   const [sortMode, setSortMode] = useState<SortMode>('recent');
 
   const filteredSongs = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-    const result = normalizedQuery
-      ? songs.filter((song) => {
-          const artist = song.artists.primary.map((item) => item.name).join(' ').toLowerCase();
-          const album = song.album?.name?.toLowerCase() ?? '';
-          return `${song.name} ${artist} ${album}`.toLowerCase().includes(normalizedQuery);
-        })
-      : songs;
-
-    const sorted = [...result];
-    if (sortMode === 'title') {
-      sorted.sort((a, b) => a.name.localeCompare(b.name));
-    } else if (sortMode === 'artist') {
-      sorted.sort((a, b) =>
-        (a.artists.primary[0]?.name ?? '').localeCompare(b.artists.primary[0]?.name ?? '')
-      );
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) {
+      const sorted = [...songs];
+      if (sortMode === 'title') {
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+      } else if (sortMode === 'artist') {
+        sorted.sort((a, b) =>
+          (a.artists.primary[0]?.name ?? '').localeCompare(b.artists.primary[0]?.name ?? '')
+        );
+      }
+      return sorted;
     }
-    return sorted;
+
+    const scored = songs
+      .map((song, index) => ({
+        song,
+        score: SearchHelper.scoreSongMatch(song, trimmedQuery, index),
+      }))
+      .filter((item) => item.score >= 45);
+
+    if (sortMode === 'title') {
+      scored.sort((a, b) => a.song.name.localeCompare(b.song.name));
+    } else if (sortMode === 'artist') {
+      scored.sort((a, b) =>
+        (a.song.artists.primary[0]?.name ?? '').localeCompare(b.song.artists.primary[0]?.name ?? '')
+      );
+    } else {
+      scored.sort((a, b) => b.score - a.score);
+    }
+
+    return scored.map((item) => item.song);
   }, [query, songs, sortMode]);
 
   return (

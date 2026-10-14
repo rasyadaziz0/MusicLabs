@@ -45,6 +45,7 @@ CLAUDE.md
 claude.md
 
 # Internal Docs, Security Findings & Scripts
+.md/
 docs/
 /docs/
 scripts/
@@ -60,8 +61,10 @@ backend/
 *.tsbuildinfo
 next-env.d.ts
 
-# local cache
+# local cache & scratch
 .cache/
+scratch/
+/scratch/
 
 .vercel
 /backend/

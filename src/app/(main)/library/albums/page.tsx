@@ -5,6 +5,7 @@ import { LibrarySearchBar } from '@/components/library/LibrarySearchBar';
 import { CustomSelect } from '@/components/ui/CustomSelect';
 import { useAuth } from '@/context/AuthContext';
 import { useLibraryAlbums } from '@/hooks/library/useLibraryAlbums';
+import * as SearchHelper from '@/lib/utils/search';
 import { ChevronLeft, Disc3 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -19,22 +20,43 @@ export default function LibraryAlbumsPage() {
   const [sortMode, setSortMode] = useState<SortMode>('title');
 
   const filteredAlbums = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-    const result = normalizedQuery
-      ? albums.filter((album) =>
-          `${album.name} ${album.artistName}`.toLowerCase().includes(normalizedQuery)
-        )
-      : albums;
-
-    const sorted = [...result];
-    if (sortMode === 'artist') {
-      sorted.sort((a, b) => a.artistName.localeCompare(b.artistName));
-    } else if (sortMode === 'year') {
-      sorted.sort((a, b) => Number(b.year || 0) - Number(a.year || 0));
-    } else {
-      sorted.sort((a, b) => a.name.localeCompare(b.name));
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) {
+      const sorted = [...albums];
+      if (sortMode === 'artist') {
+        sorted.sort((a, b) => a.artistName.localeCompare(b.artistName));
+      } else if (sortMode === 'year') {
+        sorted.sort((a, b) => Number(b.year || 0) - Number(a.year || 0));
+      } else {
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+      }
+      return sorted;
     }
-    return sorted;
+
+    const scored = albums
+      .map((album, index) => ({
+        album,
+        score: SearchHelper.scoreAlbumMatch(
+          {
+            title: album.name,
+            artist: album.artistName,
+            nb_tracks: album.songCount,
+          },
+          trimmedQuery,
+          index
+        ),
+      }))
+      .filter((item) => item.score >= 45);
+
+    if (sortMode === 'artist') {
+      scored.sort((a, b) => a.album.artistName.localeCompare(b.album.artistName));
+    } else if (sortMode === 'year') {
+      scored.sort((a, b) => Number(b.album.year || 0) - Number(a.album.year || 0));
+    } else {
+      scored.sort((a, b) => b.score - a.score);
+    }
+
+    return scored.map((item) => item.album);
   }, [albums, query, sortMode]);
 
   return (

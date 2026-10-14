@@ -13,14 +13,6 @@ import QueryProvider from '@/context/QueryProvider';
 import { SettingsProvider } from '@/context/SettingsContext';
 import { usePathname } from 'next/navigation';
 
-/**
- * ConditionalProviders — Wraps children with the full app provider stack,
- * EXCEPT when the current route starts with `/embed`.
- *
- * Embed routes are lightweight, auth-free widgets that create their own
- * isolated YouTube player. Loading PlayerProvider + YouTubePlayerMount
- * would conflict with the embed's own player and bloat the bundle.
- */
 export default function ConditionalProviders({
   children,
 }: {

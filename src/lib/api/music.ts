@@ -1,4 +1,5 @@
 import { Song } from '@/types/music';
+import { ArtistStation } from '@/types/models/ArtistFollow';
 
 import { createClient } from '@/lib/supabase/client';
 import { ArtistParser } from '@/lib/utils/ArtistParser';
@@ -185,6 +186,24 @@ export async function apiFetchInternal<T>(path: string, options: RequestInit = {
     return null;
   }
 }
+
+// ── Artist Station & Followers ──────────────────────────────────────
+
+export let getArtistStation = async (artistId: string): Promise<ArtistStation> => {
+  const cleanId = ArtistParser.stripArtistIdPrefix(artistId);
+  return apiFetchInternal<ArtistStation>(`/api/artists/${cleanId}/station`);
+};
+
+export let getArtistFollowersCount = async (artistId: string): Promise<number> => {
+  const cleanId = ArtistParser.stripArtistIdPrefix(artistId);
+  try {
+    const res = await apiFetchInternal<{ count: number }>(`/api/artists/${cleanId}/followers/count`);
+    return res?.count ?? 0;
+  } catch {
+    return 0;
+  }
+};
+
 
 
 

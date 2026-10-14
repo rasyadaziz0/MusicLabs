@@ -1,4 +1,5 @@
 import { PlaylistRecord, PlaylistTrackRow } from '@/types/models/Playlist';
+import { PlaylistSearchResult } from '@/types/models/PlaylistLike';
 import { Song } from '@/types/music';
 
 export interface IPlaylistRepository {
@@ -15,6 +16,8 @@ export interface IPlaylistRepository {
   }): Promise<PlaylistRecord>;
   updatePlaylist(playlistId: string, updates: Partial<PlaylistRecord>): Promise<void>;
   togglePinPlaylist(playlistId: string, currentPinStatus: boolean): Promise<boolean>;
+  toggleVisibility(playlistId: string, currentPublicStatus: boolean): Promise<boolean>;
+  searchPublicPlaylists(query: string, page?: number, limit?: number): Promise<PlaylistSearchResult[]>;
   deletePlaylist(playlistId: string): Promise<boolean>;
   getPlaylistTrackIds(playlistId: string): Promise<PlaylistTrackRow[]>;
   getPlaylistTracks(playlistId: string): Promise<Song[]>;

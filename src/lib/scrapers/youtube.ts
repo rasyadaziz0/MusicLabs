@@ -1,5 +1,6 @@
 import { PlaylistScraper, ScrapedPlaylist, ScrapedTrack } from '@/types/services/scrapers';
 import YTMusic from 'ytmusic-api';
+import { YOUTUBE_SCRAPER_CONFIG } from '@/config/youtube';
 
 export class YouTubeScraper implements PlaylistScraper {
   private ytmusic: YTMusic | null = null;
@@ -39,8 +40,9 @@ export class YouTubeScraper implements PlaylistScraper {
     }
 
     const videos = await client.getPlaylistVideos(playlistId);
+    const limitedVideos = videos.slice(0, YOUTUBE_SCRAPER_CONFIG.maxTracks);
 
-    const tracks: ScrapedTrack[] = videos.map((song: any) => {
+    const tracks: ScrapedTrack[] = limitedVideos.map((song: any) => {
       let title = song.name || '';
       let artist = Array.isArray(song.artists) ? song.artists.map((a: any) => a.name).join(', ') : song.artists?.name;
       

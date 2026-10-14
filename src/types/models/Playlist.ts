@@ -8,6 +8,9 @@ export interface PlaylistRecord {
   is_public?: boolean;
   is_discover_weekly?: boolean;
   discover_generated_at?: string | null;
+  like_count?: number;
+  is_liked?: boolean;
+  owner_name?: string;
   created_at?: string;
   updated_at?: string;
 }

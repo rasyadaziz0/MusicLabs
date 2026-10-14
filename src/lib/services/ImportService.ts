@@ -67,12 +67,10 @@ export class ImportService {
         throw new Error(errorData.error || 'Gagal memulai proses impor.');
       }
 
-      toast.success(
-        `Import "${scrapedResult.name}" (${scrapedResult.tracks.length} lagu) sedang diproses di latar belakang. Lagu akan muncul secara bertahap di playlist-mu.`
-      );
+      toast.success(`Mengimpor ${scrapedResult.tracks.length} lagu di latar belakang...`);
     } catch (err: any) {
       console.error('Save to library error:', err);
-      toast.error('Gagal menyimpan playlist ke library: ' + err.message);
+      toast.error('Gagal mengimpor: ' + err.message);
       throw err;
     }
   }

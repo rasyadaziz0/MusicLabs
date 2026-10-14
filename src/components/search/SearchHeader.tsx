@@ -26,19 +26,25 @@ export function SearchHeader({ inputValue, setInputValue, searchMode, setSearchM
         />
       </div>
 
-      {/* Toggle Music / Users */}
+      {/* Toggle Music / Users / Playlists */}
       <div className="flex bg-white/[0.06] rounded-[6px] p-[2px] border border-white/[0.04]">
         <button
           onClick={() => setSearchMode('music')}
-          className={`px-5 py-1 text-[13px] font-medium rounded-[4px] transition-colors ${searchMode === 'music' ? 'bg-white/20 text-white shadow-sm' : 'text-white/60 hover:text-white'}`}
+          className={`px-4 py-1 text-[13px] font-medium rounded-[4px] transition-colors ${searchMode === 'music' ? 'bg-white/20 text-white shadow-sm' : 'text-white/60 hover:text-white'}`}
         >
           Music
         </button>
         <button
           onClick={() => setSearchMode('users')}
-          className={`px-5 py-1 text-[13px] font-medium rounded-[4px] transition-colors ${searchMode === 'users' ? 'bg-white/20 text-white shadow-sm' : 'text-white/60 hover:text-white'}`}
+          className={`px-4 py-1 text-[13px] font-medium rounded-[4px] transition-colors ${searchMode === 'users' ? 'bg-white/20 text-white shadow-sm' : 'text-white/60 hover:text-white'}`}
         >
           Users
+        </button>
+        <button
+          onClick={() => setSearchMode('playlists')}
+          className={`px-4 py-1 text-[13px] font-medium rounded-[4px] transition-colors ${searchMode === 'playlists' ? 'bg-white/20 text-white shadow-sm' : 'text-white/60 hover:text-white'}`}
+        >
+          Playlists
         </button>
       </div>
     </div>

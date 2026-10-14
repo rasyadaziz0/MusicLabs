@@ -10,6 +10,9 @@ import { useMemo, useState } from 'react';
 
 import { LibraryEmptyState } from '@/components/library/LibraryEmptyState';
 import { LibrarySearchBar } from '@/components/library/LibrarySearchBar';
+import { FollowedArtistsList } from '@/components/library/FollowedArtistsList';
+
+import { SearchHelper } from '@/lib/utils/search';
 
 export default function LibraryArtistsPage() {
   const { user, signInWithGoogle } = useAuth();
@@ -17,9 +20,16 @@ export default function LibraryArtistsPage() {
   const [query, setQuery] = useState('');
 
   const filteredArtists = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
-    if (!normalizedQuery) return artists;
-    return artists.filter((artist) => artist.name.toLowerCase().includes(normalizedQuery));
+    const trimmedQuery = query.trim();
+    if (!trimmedQuery) return artists;
+    return artists
+      .map((artist) => ({
+        artist,
+        score: SearchHelper.scoreArtistMatch(artist.name, trimmedQuery),
+      }))
+      .filter(({ score }) => score >= 45)
+      .sort((a, b) => b.score - a.score)
+      .map(({ artist }) => artist);
   }, [artists, query]);
 
   return (
@@ -33,7 +43,7 @@ export default function LibraryArtistsPage() {
 
       <div className="hidden md:block">
         <h1 className="text-3xl font-bold text-white">Artists</h1>
-        <p className="mt-1 text-sm text-white/50">Artis yang paling sering muncul di listening history, likes, dan playlist kamu.</p>
+        <p className="mt-1 text-sm text-white/50">Artis yang kamu ikuti dan artis yang paling sering muncul di library kamu.</p>
       </div>
 
       {!user ? (
@@ -45,11 +55,24 @@ export default function LibraryArtistsPage() {
         />
       ) : (
         <>
-          <LibrarySearchBar
-            value={query}
-            onChange={setQuery}
-            placeholder="Cari artis di library kamu..."
-          />
+          {/* Followed Artists Section */}
+          {!query && (
+            <div className="space-y-3 mb-6">
+              <h2 className="text-xl font-bold text-white tracking-tight">Artis yang Diikuti</h2>
+              <FollowedArtistsList />
+            </div>
+          )}
+
+          <div className="pt-2">
+            <h2 className="text-xl font-bold text-white tracking-tight mb-3">
+              {query ? 'Hasil Pencarian' : 'Semua Artis'}
+            </h2>
+            <LibrarySearchBar
+              value={query}
+              onChange={setQuery}
+              placeholder="Cari artis di library kamu..."
+            />
+          </div>
 
           {isLoading ? (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">

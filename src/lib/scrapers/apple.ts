@@ -1,4 +1,5 @@
 import { PlaylistScraper, ScrapedPlaylist, ScrapedTrack } from '@/types/services/scrapers';
+import { APPLE_SCRAPER_CONFIG } from '@/config/apple';
 
 export class AppleScraper implements PlaylistScraper {
   match(url: string): boolean {
@@ -10,7 +11,7 @@ export class AppleScraper implements PlaylistScraper {
       // 1. Fetch HTML of the Apple Music page
       const response = await fetch(url, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+          'User-Agent': APPLE_SCRAPER_CONFIG.userAgent
         }
       });
       
@@ -93,7 +94,7 @@ export class AppleScraper implements PlaylistScraper {
         name: playlistName,
         description: '',
         coverUrl,
-        tracks,
+        tracks: tracks.slice(0, APPLE_SCRAPER_CONFIG.maxTracks),
         source: 'apple'
       };
 

@@ -1,3 +1,6 @@
+'use client';
+
+import { Loader2 } from 'lucide-react';
 
 interface SpotifyAuthConnectProps {
   loading: boolean;
@@ -6,18 +9,27 @@ interface SpotifyAuthConnectProps {
 
 export default function SpotifyAuthConnect({ loading, onConnect }: SpotifyAuthConnectProps) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-4">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-lg border border-white/5 bg-white/[0.02] p-4 sm:p-5">
       <div>
-        <p className="text-sm font-semibold text-white">Login akun Spotify kamu</p>
-        <p className="text-xs text-muted mt-1">Mewajibkan akun Spotify Developer yang di-whitelist.</p>
+        <p className="text-sm font-semibold text-white">Hubungkan Akun Spotify</p>
+        <p className="text-xs text-white/50 mt-0.5">
+          Khusus akun developer yang telah di-whitelist.
+        </p>
       </div>
       <button
         type="button"
         onClick={onConnect}
         disabled={loading}
-        className="rounded-full bg-[#1DB954] px-5 py-2 text-xs font-bold tracking-wide text-black disabled:cursor-not-allowed disabled:opacity-70 hover:bg-[#1ed760] transition-colors"
+        className="w-full sm:w-auto rounded-lg bg-[#1DB954] px-5 py-2.5 text-xs font-semibold text-black disabled:cursor-not-allowed disabled:opacity-60 hover:bg-[#1ed760] active:scale-95 transition-all flex items-center justify-center gap-2 shrink-0"
       >
-        {loading ? 'Connecting...' : 'Connect with Spotify'}
+        {loading ? (
+          <>
+            <Loader2 size={14} className="animate-spin" />
+            <span>Menghubungkan...</span>
+          </>
+        ) : (
+          <span>Connect Spotify</span>
+        )}
       </button>
     </div>
   );

@@ -51,7 +51,7 @@ export function ImportProvider({ children }: { children: ReactNode }) {
               setImportProgress(Math.round((newRecord.processed_tracks / newRecord.total_tracks) * 100));
             }
           } else if (newRecord.status === 'completed') {
-            toast.success(`Import selesai! ${newRecord.success_tracks}/${newRecord.total_tracks} lagu berhasil dimasukkan.`);
+            toast.success(`Import selesai (${newRecord.success_tracks}/${newRecord.total_tracks} lagu)`);
             queryClient.invalidateQueries({ queryKey: ['library-playlists', user.id] });
             
             // Fade out progress
@@ -59,7 +59,7 @@ export function ImportProvider({ children }: { children: ReactNode }) {
             setIsCancelling(false);
             setTimeout(() => setImportProgress(null), 500);
           } else if (newRecord.status === 'cancelled') {
-            toast.info('Import berhasil dibatalkan.');
+            toast.info('Import dibatalkan');
             queryClient.invalidateQueries({ queryKey: ['library-playlists', user.id] });
             
             setIsImporting(false);

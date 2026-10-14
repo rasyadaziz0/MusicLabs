@@ -26,6 +26,14 @@ export function GuestDesktopPlayer({
     isRadio, radioMeta
   } = props;
 
+  const isStation = Boolean(
+    props.isStation ||
+    currentTrack?.isStation ||
+    currentTrack?.label === 'YouTube Live Station' ||
+    currentTrack?.album?.name === 'Live Station'
+  );
+  const isLiveStream = isRadio || isStation;
+
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const moreMenuRef = useRef<HTMLDivElement>(null);
 
@@ -36,7 +44,7 @@ export function GuestDesktopPlayer({
         <X size={14} strokeWidth={2.5} />
       </button>
 
-      {/* ── MAIN LAYOUT (Centered single pane for guests) ── */}
+      {/* ── MAIN LAYOUT (Centered single pane for guests & live stations) ── */}
       <div style={{ position: 'relative', zIndex: 10, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 24px', margin: '0 auto' }}>
         <div style={{ width: '100%', maxWidth: 440, display: 'flex', flexDirection: 'column' }}>
           {/* Album art */}
@@ -68,6 +76,11 @@ export function GuestDesktopPlayer({
                   <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span style={{ position: 'relative', display: 'flex', height: '6px', width: '6px', flexShrink: 0 }}><span style={{ animation: 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite', position: 'absolute', display: 'inline-flex', height: '100%', width: '100%', borderRadius: '9999px', backgroundColor: '#FA243C', opacity: 0.75 }} /><span style={{ position: 'relative', display: 'inline-flex', borderRadius: '9999px', height: '6px', width: '6px', backgroundColor: '#FA243C' }} /></span>
                     {radioMeta?.station || currentTrack.name} • Live
+                  </span>
+                ) : isStation ? (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ position: 'relative', display: 'flex', height: '6px', width: '6px', flexShrink: 0 }}><span style={{ animation: 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite', position: 'absolute', display: 'inline-flex', height: '100%', width: '100%', borderRadius: '9999px', backgroundColor: '#FA243C', opacity: 0.75 }} /><span style={{ position: 'relative', display: 'inline-flex', borderRadius: '9999px', height: '6px', width: '6px', backgroundColor: '#FA243C' }} /></span>
+                    <span className="text-[#FA243C] font-semibold">{currentTrack.artists?.primary?.[0]?.name || 'Artis'}</span> • Stasiun Live YouTube
                   </span>
                 ) : (
                   <>
@@ -112,7 +125,7 @@ export function GuestDesktopPlayer({
           </div>
 
           {/* Progress bar */}
-          {!isRadio ? (
+          {!isLiveStream ? (
             <div style={{ marginTop: 24 }}>
               <div style={{ position: 'relative', height: 4, background: 'rgba(255,255,255,0.2)', borderRadius: 2 }}>
                 <input type="range" aria-label="Seek time" className="np-range" min={0} max={duration || 0} value={currentTime} onChange={e => seek(Number(e.target.value))} />
@@ -135,13 +148,13 @@ export function GuestDesktopPlayer({
 
           {/* Playback controls */}
           <div style={{ marginTop: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 32 }}>
-            {!isRadio ? (
+            {!isLiveStream ? (
               <button onClick={() => { }} style={{ background: 'none', border: 'none', color: '#e05050', cursor: 'pointer', display: 'flex' }}>
                 <Shuffle size={20} strokeWidth={2.5} />
               </button>
             ) : <div style={{ width: 20 }} />}
             
-            {!isRadio ? (
+            {!isLiveStream ? (
               <button onClick={prevTrack} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex' }}>
                 <SkipBack size={32} fill="currentColor" strokeWidth={0} />
               </button>
@@ -151,13 +164,13 @@ export function GuestDesktopPlayer({
               {isResolving ? <Loader2 size={24} color="#111" style={{ animation: 'spin 1s linear infinite' }} /> : isPlaying ? <Pause size={24} fill="#111" color="#111" /> : <Play size={24} fill="#111" color="#111" style={{ marginLeft: 2 }} />}
             </button>
 
-            {!isRadio ? (
+            {!isLiveStream ? (
               <button onClick={nextTrack} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex' }}>
                 <SkipForward size={32} fill="currentColor" strokeWidth={0} />
               </button>
             ) : <div style={{ width: 32 }} />}
 
-            {!isRadio ? (
+            {!isLiveStream ? (
               <button onClick={() => { }} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.55)', cursor: 'pointer', display: 'flex' }}>
                 <Repeat size={20} strokeWidth={2.5} />
               </button>

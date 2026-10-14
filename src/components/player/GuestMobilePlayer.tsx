@@ -27,6 +27,14 @@ export function GuestMobilePlayer({
     isRadio, radioMeta, setIsGuestGateOpen
   } = props;
 
+  const isStation = Boolean(
+    props.isStation ||
+    currentTrack?.isStation ||
+    currentTrack?.label === 'YouTube Live Station' ||
+    currentTrack?.album?.name === 'Live Station'
+  );
+  const isLiveStream = isRadio || isStation;
+
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const moreMenuRef = useRef<HTMLDivElement>(null);
 
@@ -66,6 +74,11 @@ export function GuestMobilePlayer({
               <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span style={{ position: 'relative', display: 'flex', height: '6px', width: '6px', flexShrink: 0 }}><span style={{ animation: 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite', position: 'absolute', display: 'inline-flex', height: '100%', width: '100%', borderRadius: '9999px', backgroundColor: '#FA243C', opacity: 0.75 }} /><span style={{ position: 'relative', display: 'inline-flex', borderRadius: '9999px', height: '6px', width: '6px', backgroundColor: '#FA243C' }} /></span>
                 {radioMeta?.station || currentTrack.name} • Live
+              </span>
+            ) : isStation ? (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ position: 'relative', display: 'flex', height: '6px', width: '6px', flexShrink: 0 }}><span style={{ animation: 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite', position: 'absolute', display: 'inline-flex', height: '100%', width: '100%', borderRadius: '9999px', backgroundColor: '#FA243C', opacity: 0.75 }} /><span style={{ position: 'relative', display: 'inline-flex', borderRadius: '9999px', height: '6px', width: '6px', backgroundColor: '#FA243C' }} /></span>
+                <span className="text-[#FA243C] font-semibold">{currentTrack.artists?.primary?.[0]?.name || 'Artis'}</span> • Stasiun Live YouTube
               </span>
             ) : (
               <>
@@ -107,7 +120,8 @@ export function GuestMobilePlayer({
       {/* Bottom controls */}
       <div style={{ flexShrink: 0 }}>
         {/* Progress bar */}
-        {!isRadio ? (
+        {/* Progress bar */}
+        {!isLiveStream ? (
           <div style={{ marginBottom: 6 }}>
             <div style={{ position: 'relative', height: 4, background: 'rgba(255,255,255,0.18)', borderRadius: 2 }}>
               <input type="range" aria-label="Seek time" className="np-range" min={0} max={duration || 0} value={currentTime} onChange={e => seek(Number(e.target.value))} />
@@ -130,7 +144,7 @@ export function GuestMobilePlayer({
 
         {/* Playback controls */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 12px', marginBottom: 14, marginTop: 4 }}>
-          {!isRadio ? (
+          {!isLiveStream ? (
             <button onClick={prevTrack} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', padding: 8 }}>
               <SkipBack size={34} fill="currentColor" strokeWidth={0} />
             </button>
@@ -138,7 +152,7 @@ export function GuestMobilePlayer({
           <button onClick={togglePlay} disabled={isResolving} style={{ background: 'none', border: 'none', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0, opacity: isResolving ? 0.5 : 1 }}>
             {isResolving ? <Loader2 size={52} className="animate-spin" /> : isPlaying ? <Pause size={52} fill="currentColor" strokeWidth={0} /> : <Play size={52} fill="currentColor" strokeWidth={0} style={{ marginLeft: 4 }} />}
           </button>
-          {!isRadio ? (
+          {!isLiveStream ? (
             <button onClick={nextTrack} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', padding: 8 }}>
               <SkipForward size={34} fill="currentColor" strokeWidth={0} />
             </button>
@@ -156,10 +170,12 @@ export function GuestMobilePlayer({
         </div>
 
         {/* Bottom action icons */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 48px' }}>
-          <button onClick={() => setIsGuestGateOpen(true)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.45)', cursor: 'pointer', padding: 10, display: 'flex', borderRadius: '50%' }}>
-            <MessageSquare size={22} strokeWidth={1.8} />
-          </button>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: isLiveStream ? 'center' : 'space-between', padding: '0 48px' }}>
+          {!isLiveStream && (
+            <button onClick={() => setIsGuestGateOpen(true)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.45)', cursor: 'pointer', padding: 10, display: 'flex', borderRadius: '50%' }}>
+              <MessageSquare size={22} strokeWidth={1.8} />
+            </button>
+          )}
           <button onClick={() => setIsGuestGateOpen(true)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.45)', cursor: 'pointer', padding: 10, display: 'flex', borderRadius: '50%' }}>
             <ListMusic size={22} strokeWidth={1.8} />
           </button>

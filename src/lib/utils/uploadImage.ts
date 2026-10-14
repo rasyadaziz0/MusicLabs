@@ -18,7 +18,7 @@ export async function uploadImage(
   const options = {
     maxSizeMB: 1,
     maxWidthOrHeight: 1920,
-    useWebWorker: true,
+    useWebWorker: false,
     fileType: 'image/webp',
     initialQuality: 0.8,
   };
@@ -38,61 +38,51 @@ export async function uploadImage(
     }
   }
 
-  // 1. Request presigned URL from backend
-  const extension = finalFile.name.split('.').pop()?.toLowerCase() || '';
-  
-  const presignRes = await fetch(`${API_BASE}/api/upload/presign`, {
+  // 1. Same-origin upload via /api/upload (Zero CORS, 100% reliable server-to-server R2 upload)
+  try {
+    const formData = new FormData();
+    formData.append('file', finalFile);
+    formData.append('folder', folder);
+    if (playlistId) formData.append('playlistId', playlistId);
+
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data.publicUrl) return data.publicUrl;
+    } else {
+      const errData = await res.json().catch(() => ({}));
+      console.warn('[uploadImage] /api/upload returned non-200:', res.status, errData);
+    }
+  } catch (err) {
+    console.warn('[uploadImage] Same-origin /api/upload failed, trying fallback:', err);
+  }
+
+  // 2. Fallback to Express backend if needed
+  const formData = new FormData();
+  formData.append('file', finalFile);
+  formData.append('folder', folder);
+  if (playlistId) formData.append('playlistId', playlistId);
+
+  const directRes = await fetch(`${API_BASE}/api/upload/direct`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({
-      folder,
-      extension,
-      contentType: finalFile.type,
-    }),
+    body: formData,
   });
 
-  if (!presignRes.ok) {
-    const errorData = await presignRes.json().catch(() => ({}));
-    throw new Error(errorData.error || 'Failed to initialize upload');
+  if (directRes.ok) {
+    const directData = await directRes.json();
+    return directData.publicUrl;
   }
 
-  const { uploadUrl, pendingKey } = await presignRes.json();
-
-  // 2. Upload file directly to S3/R2 via Presigned URL (bypass server)
-  const putRes = await fetch(uploadUrl, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': finalFile.type,
-    },
-    body: finalFile, // Raw file, not FormData
-  });
-
-  if (!putRes.ok) {
-    throw new Error('Failed to upload file to storage');
-  }
-
-  // 3. Verify magic bytes and promote file to permanent storage
-  const verifyRes = await fetch(`${API_BASE}/api/upload/verify`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
-      pendingKey,
-      folder,
-      playlistId, // Used by backend for cleanup of old playlist cover
-    }),
-  });
-
-  if (!verifyRes.ok) {
-    const errorData = await verifyRes.json().catch(() => ({}));
-    throw new Error(errorData.error || 'Failed to verify uploaded file');
-  }
-
-  const data = await verifyRes.json();
-  return data.publicUrl;
+  const errorData = await directRes.json().catch(() => ({}));
+  throw new Error(errorData.error || 'Failed to upload image.');
 }

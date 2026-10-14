@@ -36,6 +36,11 @@ export function useNowPlaying(isOpen: boolean) {
   } = usePlayer();
 
   const trackId = currentTrack?.id ?? null;
+  const isStation = Boolean(
+    currentTrack?.isStation ||
+    currentTrack?.label === 'YouTube Live Station' ||
+    currentTrack?.album?.name === 'Live Station'
+  );
   const { lines, isSynced, isLoading: isLyricsLoading } = useLyrics(currentTrack, duration);
   const romanizations = useRomanization(lines, trackId);
   const { user, signInWithGoogle } = useAuth();
@@ -224,6 +229,7 @@ export function useNowPlaying(isOpen: boolean) {
     setIsGuestGateOpen,
     isRadio,
     radioMeta,
+    isStation,
   };
 }
 

@@ -1,5 +1,6 @@
 'use client';
 import { GuestBanner } from '@/components/home/HomeCards';
+import { ArtistStationsSection } from '@/components/home/sections/ArtistStationsSection';
 import { HomeHeader } from '@/components/home/sections/HomeHeader';
 import { RecentlyPlayedSection } from '@/components/home/sections/RecentlyPlayedSection';
 import { TopPicksSection } from '@/components/home/sections/TopPicksSection';
@@ -108,6 +109,9 @@ export default function Home() {
         user={user}
         playTrack={playTrack}
       />
+
+      {/* ── Followed Artist Stations ── */}
+      <ArtistStationsSection />
 
       <MobileStationsSection
         user={user}

@@ -1,3 +1,5 @@
+import { Song } from '../music';
+
 export interface SearchArtistResult {
   id: string;
   title: string;
@@ -13,3 +15,8 @@ export interface RawSearchArtistResult {
   role?: string;
   image?: { quality: string; url: string }[];
 }
+
+export type TopSearchResultItem =
+  | { type: 'song'; data: Song }
+  | { type: 'artist'; data: SearchArtistResult }
+  | { type: 'album'; data: any };

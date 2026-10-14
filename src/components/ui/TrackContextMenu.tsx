@@ -1,24 +1,26 @@
 'use client';
-import { ArtistParser } from '@/lib/utils/ArtistParser';
-import { Song } from '@/types/music';
 
-import { useAuth } from '@/context/AuthContext';
-import { usePlayer } from '@/context/PlayerContext';
-import { useLikedSongsIndex } from '@/hooks/library/useLikedSongsIndex';
-import { useToggleLikedSong } from '@/hooks/library/useToggleLikedSong';
-import { useIsMobile } from '@/hooks/useIsMobile';
-import { escapeHtmlAttr } from '@/lib/utils/escapeHtml';
-import { ImageHelper } from '@/lib/utils/ImageHelper';
-import { SlugHelper } from '@/lib/utils/SlugHelper';
-import { resolveToYoutubeId } from '@/lib/youtube';
-import { gooeyToast as toast } from 'goey-toast';
-import { ChevronRight, Code, Disc3, Heart, Link2, ListPlus, Mic2, PlaySquare, Radio, Share, Timer } from 'lucide-react';
+import React from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import {
+  PlaySquare,
+  ListPlus,
+  Heart,
+  ChevronRight,
+  Radio,
+  Disc3,
+  Mic2,
+  Share,
+  Link2,
+  Code,
+} from 'lucide-react';
+import { Song } from '@/types/music';
 import { ContextMenu } from './context-menu/ContextMenu';
-import { ContextMenuDivider, ContextMenuItem } from './context-menu/ContextMenuItem';
+import { ContextMenuItem, ContextMenuDivider } from './context-menu/ContextMenuItem';
 import { PlaylistSubMenu } from './context-menu/PlaylistSubMenu';
+import { TrackSleepTimerMenu } from './context-menu/TrackSleepTimerMenu';
+import { TrackContextMenuPresenter } from '@/lib/track/TrackContextMenuPresenter';
+import { useTrackContextMenuController } from '@/hooks/track/useTrackContextMenuController';
 
 export interface TrackContextMenuProps {
   track: Song | null;
@@ -28,125 +30,30 @@ export interface TrackContextMenuProps {
   showPlayerControls?: boolean;
 }
 
-
-export function TrackContextMenu({ track, isOpen, position, onClose, showPlayerControls }: TrackContextMenuProps) {
-  const router = useRouter();
-  const { playNext, addToQueue, playTrack, isAutoplayEnabled, toggleAutoplay, setSleepTimer, clearSleepTimer, sleepTimerEndTime } = usePlayer();
-  const { user, signInWithGoogle } = useAuth();
-
-  // Likes
-  const { likedSet } = useLikedSongsIndex();
-  const toggleLikeMutation = useToggleLikedSong();
-  const isLiked = track ? likedSet.has(track.id) : false;
-  const [showPlaylists, setShowPlaylists] = useState(false);
-
-  // Reset sub-menus when closed
-  useEffect(() => {
-    if (!isOpen) setShowPlaylists(false);
-  }, [isOpen]);
+export function TrackContextMenu({
+  track,
+  isOpen,
+  position,
+  onClose,
+  showPlayerControls,
+}: TrackContextMenuProps) {
+  const controller = useTrackContextMenuController({ track, isOpen, onClose });
 
   if (!track) return null;
 
-  const handleAction = async (action: () => void | Promise<void>) => {
-    await action();
-    if (!showPlaylists) {
-      onClose();
-    }
-  };
-
-  const handleLike = async () => {
-    if (!user) {
-      await signInWithGoogle();
-      return;
-    }
-    toggleLikeMutation.mutate(track.id);
-  };
-
-  const getTrackUrl = () => {
-    const artistName = track.artists?.primary?.[0]?.name || 'unknown';
-    return `${window.location.origin}${SlugHelper.buildTrackPath(artistName, track.name, track.id)}`;
-  };
-
-  const handleShare = async () => {
-    const trackUrl = getTrackUrl();
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: track.name,
-          text: `Check out ${track.name} by ${track.artists.primary[0]?.name}`,
-          url: trackUrl,
-        });
-      } catch (err) {
-        // user cancelled or error
-      }
-    } else {
-      navigator.clipboard.writeText(trackUrl);
-      toast.success('Link copied to clipboard', {
-        description: 'You can now share this track anywhere.'
-      });
-    }
-  };
-
-  const handleCreateStation = async () => {
-    toast.promise(
-      (async () => {
-        let videoId = track.id;
-        // If it's a generic itunes or backend id without 'yt-', resolve it
-        if (!videoId.startsWith('yt-')) {
-          const resolved = await resolveToYoutubeId(track.name, track.artists.primary[0]?.name || '', track.id);
-          if (resolved) videoId = resolved;
-        } else {
-          videoId = videoId.replace('yt-', '');
-        }
-
-        const titleParams = new URLSearchParams({
-          title: track.name,
-          artist: track.artists.primary[0]?.name || '',
-          userId: user?.id || 'anonymous'
-        });
-
-        const res = await fetch(`${(process.env.NEXT_PUBLIC_MUSIC_API_URL || process.env.NEXT_PUBLIC_YTMUSIC_API_URL || process.env.NEXT_PUBLIC_EXPRESS_API_URL) || ''}/api/audio/related/${videoId}?${titleParams.toString()}`);
-        if (!res.ok) throw new Error('Failed to fetch station tracks');
-
-        const data = await res.json();
-        const suggestions: Song[] = data.songs || [];
-
-        if (!suggestions || suggestions.length === 0) {
-          throw new Error('No similar tracks found');
-        }
-
-        // Tag as autoplay so QueueManager handles them nicely
-        const taggedSuggestions = suggestions.map(s => ({ ...s, isAutoplay: true }));
-
-        playTrack(track, [track, ...taggedSuggestions]);
-
-        if (!isAutoplayEnabled) {
-          toggleAutoplay();
-        }
-
-        return 'Station created';
-      })(),
-      {
-        loading: 'Creating station...',
-        success: (msg) => msg,
-        error: 'Failed to create station',
-      }
-    );
-  };
-
-  const hasAlbum = !!track.album.id;
-  const hasArtist = track.artists.primary.length > 0 && !!track.artists.primary[0].id;
-
-  const isMobile = useIsMobile();
-  const flyOutDirection = position && typeof window !== 'undefined' && position.x > window.innerWidth / 2 ? 'left' : 'right';
+  const hasAlbum = TrackContextMenuPresenter.hasAlbum(track);
+  const hasArtist = TrackContextMenuPresenter.hasArtist(track);
+  const flyOutDirection = TrackContextMenuPresenter.getFlyoutDirection(position);
+  const coverUrl = TrackContextMenuPresenter.getCoverImage(track);
+  const artistNames = TrackContextMenuPresenter.getArtistNames(track);
 
   const renderMenuItems = () => {
-    if (showPlaylists && isMobile) {
+    if (controller.showPlaylists && controller.isMobile) {
       return (
         <PlaylistSubMenu
           track={track}
           onClose={onClose}
-          onBack={() => setShowPlaylists(false)}
+          onBack={() => controller.setShowPlaylists(false)}
         />
       );
     }
@@ -156,44 +63,52 @@ export function TrackContextMenu({ track, isOpen, position, onClose, showPlayerC
         <ContextMenuItem
           icon={<PlaySquare size={15} />}
           label="Play Next"
-          onClick={() => handleAction(() => playNext(track))}
+          onClick={controller.handlePlayNext}
         />
         <ContextMenuItem
           icon={<ListPlus size={15} />}
           label="Play Last"
-          onClick={() => handleAction(() => addToQueue(track))}
+          onClick={controller.handleAddToQueue}
         />
 
         <ContextMenuDivider />
 
         <ContextMenuItem
-          icon={<Heart size={15} fill={isLiked ? "currentColor" : "none"} />}
-          label={isLiked ? 'Remove from Library' : 'Add to Library'}
-          onClick={(e) => { e.stopPropagation(); handleLike(); onClose(); }}
-          danger={isLiked}
+          icon={<Heart size={15} fill={controller.isLiked ? 'currentColor' : 'none'} />}
+          label={controller.isLiked ? 'Remove from Library' : 'Add to Library'}
+          onClick={(e) => {
+            e.stopPropagation();
+            controller.handleToggleLike();
+          }}
+          danger={controller.isLiked}
         />
 
         <div
           className="relative"
-          onMouseEnter={() => !isMobile && setShowPlaylists(true)}
-          onMouseLeave={() => !isMobile && setShowPlaylists(false)}
+          onMouseEnter={() => !controller.isMobile && controller.setShowPlaylists(true)}
+          onMouseLeave={() => !controller.isMobile && controller.setShowPlaylists(false)}
         >
           <ContextMenuItem
             icon={<ListPlus size={15} />}
             label="Add to a Playlist"
-            onClick={(e) => { e.stopPropagation(); if (isMobile) setShowPlaylists(true); }}
-            rightElement={!isMobile && <ChevronRight size={14} />}
-            className={!isMobile && showPlaylists ? "bg-white/10" : ""}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (controller.isMobile) controller.setShowPlaylists(true);
+            }}
+            rightElement={!controller.isMobile && <ChevronRight size={14} />}
+            className={!controller.isMobile && controller.showPlaylists ? 'bg-white/10' : ''}
           />
-          {!isMobile && showPlaylists && (
+          {!controller.isMobile && controller.showPlaylists && (
             <div
-              className={`absolute top-0 ${flyOutDirection === 'left' ? 'right-full mr-1' : 'left-full ml-1'} w-56 bg-[#1a1a1c] border border-white/10 rounded-xl shadow-2xl backdrop-blur-xl`}
+              className={`absolute top-0 ${
+                flyOutDirection === 'left' ? 'right-full mr-1' : 'left-full ml-1'
+              } w-56 bg-[#1a1a1c] border border-white/10 rounded-xl shadow-2xl backdrop-blur-xl`}
               onClick={(e) => e.stopPropagation()}
             >
               <PlaylistSubMenu
                 track={track}
                 onClose={onClose}
-                onBack={() => setShowPlaylists(false)}
+                onBack={() => controller.setShowPlaylists(false)}
                 hideHeader
               />
             </div>
@@ -203,7 +118,7 @@ export function TrackContextMenu({ track, isOpen, position, onClose, showPlayerC
         <ContextMenuItem
           icon={<Radio size={15} />}
           label="Create Station"
-          onClick={() => handleAction(handleCreateStation)}
+          onClick={controller.handleCreateStation}
         />
 
         <ContextMenuDivider />
@@ -212,14 +127,14 @@ export function TrackContextMenu({ track, isOpen, position, onClose, showPlayerC
           <ContextMenuItem
             icon={<Disc3 size={15} />}
             label="Go to Album"
-            onClick={() => handleAction(() => router.push(`/album/${track.album.id}`))}
+            onClick={controller.handleGoToAlbum}
           />
         )}
         {hasArtist && (
           <ContextMenuItem
             icon={<Mic2 size={15} />}
             label="Go to Artist"
-            onClick={() => handleAction(() => router.push(ArtistParser.getArtistLink(track.artists.primary[0])))}
+            onClick={controller.handleGoToArtist}
           />
         )}
 
@@ -228,72 +143,26 @@ export function TrackContextMenu({ track, isOpen, position, onClose, showPlayerC
         <ContextMenuItem
           icon={<Share size={15} />}
           label="Share"
-          onClick={() => handleAction(handleShare)}
+          onClick={controller.handleShare}
         />
         <ContextMenuItem
           icon={<Link2 size={15} />}
           label="Copy Link"
-          onClick={() => {
-            navigator.clipboard.writeText(getTrackUrl());
-            toast.success('Link copied to clipboard');
-            onClose();
-          }}
+          onClick={controller.handleCopyLink}
         />
         <ContextMenuItem
           icon={<Code size={15} />}
           label="Copy Embed Code"
-          onClick={() => {
-            const appUrl = typeof window !== 'undefined' ? window.location.origin : '';
-            const escapedTitle = escapeHtmlAttr(track.name);
-            const escapedArtist = track.artists?.primary?.[0]?.name ? escapeHtmlAttr(track.artists.primary[0].name) : '';
-            const embedTitle = `${escapedTitle} — ${escapedArtist} | AcadMusic Embed`;
-            const src = `${appUrl}/embed/track/${track.id}`;
-            const iframe = `<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="175" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="${src}" title="${embedTitle}"></iframe>`;
-            navigator.clipboard.writeText(iframe);
-            toast.success('Embed code copied', { description: 'Paste into any website to embed this track.' });
-            onClose();
-          }}
+          onClick={controller.handleCopyEmbedCode}
         />
 
         {showPlayerControls && (
-          <>
-            <ContextMenuDivider />
-            <div className="px-3 py-2">
-              <div className="text-[12px] text-white/50 mb-2 flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <Timer size={14} /> Sleep Timer
-                </div>
-                {sleepTimerEndTime && (
-                  <span className="text-white/80 font-medium">Active</span>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {[15, 30, 45, 60].map(mins => (
-                  <button
-                    key={mins}
-                    onClick={() => {
-                      setSleepTimer(mins);
-                      onClose();
-                    }}
-                    className="flex-1 text-[11px] bg-white/10 hover:bg-white/20 text-white px-1 py-1 rounded transition-colors text-center"
-                  >
-                    {mins}m
-                  </button>
-                ))}
-                {sleepTimerEndTime && (
-                  <button
-                    onClick={() => {
-                      clearSleepTimer();
-                      onClose();
-                    }}
-                    className="w-full mt-1.5 text-[11px] bg-[#FA243C]/20 hover:bg-[#FA243C]/40 text-[#FA243C] py-1.5 rounded transition-colors"
-                  >
-                    Batalkan Timer
-                  </button>
-                )}
-              </div>
-            </div>
-          </>
+          <TrackSleepTimerMenu
+            sleepTimerEndTime={controller.sleepTimerEndTime}
+            onSetTimer={controller.setSleepTimer}
+            onClearTimer={controller.clearSleepTimer}
+            onClose={onClose}
+          />
         )}
       </div>
     );
@@ -302,13 +171,19 @@ export function TrackContextMenu({ track, isOpen, position, onClose, showPlayerC
   const mobileHeader = (
     <div className="px-5 pb-4 pt-2 flex items-center gap-4 border-b border-white/10">
       <div className="relative w-14 h-14 rounded-md overflow-hidden flex-shrink-0 bg-white/10">
-        {ImageHelper.getBestImageUrl(track.image) && (
-          <Image src={ImageHelper.getBestImageUrl(track.image)!} alt={track.name} fill sizes="56px" className="object-cover" />
+        {coverUrl && (
+          <Image
+            src={coverUrl}
+            alt={track.name}
+            fill
+            sizes="56px"
+            className="object-cover"
+          />
         )}
       </div>
       <div className="flex-1 min-w-0">
         <h3 className="text-lg font-bold text-white truncate">{track.name}</h3>
-        <p className="text-sm text-white/50 truncate">{track.artists.primary.map(a => a.name).join(', ')}</p>
+        <p className="text-sm text-white/50 truncate">{artistNames}</p>
       </div>
     </div>
   );

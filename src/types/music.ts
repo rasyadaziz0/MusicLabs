@@ -60,6 +60,7 @@ export interface Song {
   youtubeId?: string;       // Resolved YouTube video ID
   queueItemId?: string;     // Unique identifier for duplicate songs in queue
   isRadio?: boolean;        // True if this is a radio stream
+  isStation?: boolean;      // True if this is an artist YouTube Live station stream
   radioStreamUrl?: string;  // Direct stream URL for radio
   radioMeta?: {             // Live metadata from icecast stream
     title: string;          // e.g. "Artist - Song Title"

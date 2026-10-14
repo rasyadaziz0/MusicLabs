@@ -12,7 +12,7 @@ export default function NowPlaying({ isOpen, onClose, isMobile, isDevicesOpen, s
 
   if (!state.currentTrack) return null;
 
-  if (!user || state.isRadio) {
+  if (!user || state.isRadio || state.isStation) {
     return <GuestNowPlayingUI {...state} isOpen={isOpen} onClose={onClose} isMobile={isMobile} isDevicesOpen={isDevicesOpen} setIsDevicesOpen={setIsDevicesOpen} />;
   }
 

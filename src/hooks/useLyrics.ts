@@ -34,6 +34,15 @@ export function useLyrics(currentTrack: Song | null, actualDuration: number = 0)
       return;
     }
 
+    const track = trackRef.current;
+    // Station/Live streams and radio stations do not have synchronized lyrics
+    if (track.isStation || track.isRadio || track.label === 'YouTube Live Station' || track.album?.name === 'Live Station') {
+      setLines([]);
+      setIsSynced(false);
+      setIsLoading(false);
+      return;
+    }
+
     // Check cache first
     const cached = lyricsCache.get(trackId);
     if (cached) {
@@ -49,7 +58,6 @@ export function useLyrics(currentTrack: Song | null, actualDuration: number = 0)
       return;
     }
 
-    const track = trackRef.current;
     const artistName = track.artists.primary[0]?.name ?? '';
     if (!track.name || !artistName) {
       setLines([]);

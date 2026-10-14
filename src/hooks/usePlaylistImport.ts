@@ -99,6 +99,7 @@ export function usePlaylistImport() {
     errorMessage,
     callbackMessage,
     importProgress,
+    isImporting,
     cancelImport,
     isCancelling,
     handleConnectSpotify,
