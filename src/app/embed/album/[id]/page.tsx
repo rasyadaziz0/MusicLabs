@@ -5,6 +5,9 @@ import EmbedPlaylistPlayer from '../../playlist/[id]/EmbedPlaylistPlayer';
 
 const getAlbumData = cache(async (rawId: string) => {
   const itunesId = rawId.replace(/^itunes-album-/, '');
+  if (!itunesId || !/^[A-Za-z0-9_-]{1,64}$/.test(itunesId)) {
+    return null;
+  }
   const baseUrl = API_BASE;
   try {
     const res = await fetch(`${baseUrl}/api/albums/${itunesId}`, { headers: { 'Origin': process.env.NEXT_PUBLIC_APP_URL || 'https://music.rasyadazizan.site' }, next: { revalidate: 3600 } });
@@ -56,7 +59,7 @@ export default async function EmbedAlbumPage({ params }: PageProps) {
   const albumTracks = album.tracks || [];
 
   // Map album tracks to the same shape used by EmbedPlaylistPlayer
-  const mappedTracks = albumTracks.map(t => ({
+  const mappedTracks = albumTracks.map((t: any) => ({
     id: t.id,
     name: t.name,
     artistName: t.artists?.primary?.[0]?.name || album.artist || 'Unknown Artist',

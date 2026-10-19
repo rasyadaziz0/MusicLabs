@@ -19,6 +19,11 @@ const nextConfig: NextConfig = {
 
   // ─── Security Headers ───────────────────────────────────────────────────────
   async headers() {
+    const isDev = process.env.NODE_ENV === 'development';
+    const devEval = isDev ? " 'unsafe-eval'" : "";
+
+    const allowedEmbedAncestors = `'self' https://*.rasyadazizan.site https://rasyadazizan.site${isDev ? ' http://localhost:* http://127.0.0.1:*' : ''}`;
+
     return [
       {
         source: '/(.*)',
@@ -28,7 +33,7 @@ const nextConfig: NextConfig = {
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(self), geolocation=()' },
           { key: 'X-DNS-Prefetch-Control', value: 'on' },
-          { key: 'Content-Security-Policy', value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://www.youtube.com https://s.ytimg.com https://challenges.cloudflare.com https://va.vercel-scripts.com https://static.cloudflareinsights.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https: http:; font-src 'self' data:; connect-src 'self' https: http: wss:; media-src 'self' blob: https: http:; frame-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';" },
+          { key: 'Content-Security-Policy', value: `default-src 'self'; script-src 'self' 'unsafe-inline'${devEval} https://apis.google.com https://www.youtube.com https://s.ytimg.com https://challenges.cloudflare.com https://va.vercel-scripts.com https://static.cloudflareinsights.com; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https:; font-src 'self' data:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.cadhost.sbs https://img.rasyadazizan.site https://*.rasyadazizan.site https://challenges.cloudflare.com https://va.vercel-scripts.com https://static.cloudflareinsights.com; media-src 'self' blob: https:; frame-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';` },
         ],
       },
       {
@@ -36,10 +41,8 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.youtube.com https://s.ytimg.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; frame-src https://www.youtube.com; media-src https:; connect-src 'self' https:; object-src 'none'; base-uri 'self'; frame-ancestors *;",
+            value: `default-src 'self'; script-src 'self' 'unsafe-inline'${devEval} https://www.youtube.com https://s.ytimg.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:; frame-src https://www.youtube.com; media-src https:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.cadhost.sbs https://img.rasyadazizan.site https://*.rasyadazizan.site https://static.cloudflareinsights.com; object-src 'none'; base-uri 'self'; frame-ancestors ${allowedEmbedAncestors};`,
           },
-          // Override X-Frame-Options for legacy browsers that don't support CSP frame-ancestors
-          { key: 'X-Frame-Options', value: 'ALLOWALL' },
         ],
       },
       {
@@ -48,7 +51,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Strict-Transport-Security',
-            value: 'max-age=31536000; includeSubDomains',
+            value: 'max-age=31536000; includeSubDomains; preload',
           },
         ],
       },

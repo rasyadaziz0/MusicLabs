@@ -2,6 +2,7 @@
 
 import { LibraryEmptyState } from '@/components/library/LibraryEmptyState';
 import { useAuth } from '@/context/AuthContext';
+import { useTranslation } from '@/context/LanguageContext';
 import { useLibraryAlbums } from '@/hooks/library/useLibraryAlbums';
 import { useLibraryPlaylists } from '@/hooks/library/useLibraryPlaylists';
 import { Disc3, Music } from 'lucide-react';
@@ -10,6 +11,7 @@ import Link from 'next/link';
 import { useMemo } from 'react';
 
 export default function RecentlyAddedPage() {
+  const { t } = useTranslation();
   const { user, signInWithGoogle } = useAuth();
   const { data: playlists = [], isLoading: isPlaylistsLoading } = useLibraryPlaylists();
   const { albums, isLoading: isAlbumsLoading } = useLibraryAlbums();
@@ -36,7 +38,7 @@ export default function RecentlyAddedPage() {
           type: 'playlist',
           id: p.id,
           name: p.name,
-          subtitle: 'Playlist',
+          subtitle: p.is_liked ? t('library.liked_playlist') : t('library.playlist'),
           imageUrl: p.cover_url || null,
           href: `/playlist/${p.id}`,
           isValidLink: true,
@@ -48,7 +50,7 @@ export default function RecentlyAddedPage() {
           type: 'album',
           id: a.id,
           name: a.name,
-          subtitle: a.artistName || 'Album',
+          subtitle: a.artistName || t('sidebar.albums'),
           imageUrl: a.imageUrl || null,
           href: `/album/${a.id}`,
           isValidLink: Boolean(a.id && !a.id.includes('::')),
@@ -57,15 +59,15 @@ export default function RecentlyAddedPage() {
     }
 
     return items;
-  }, [playlists, albums]);
+  }, [playlists, albums, t]);
 
   if (!user) {
     return (
       <div className="mx-auto max-w-[1400px] px-4 pt-8 pb-32">
         <LibraryEmptyState
-          title="Login dulu buat lihat aktivitas terbaru"
-          description="Aktivitas playlist dan album kamu bakal muncul di sini."
-          ctaLabel="Login with Google"
+          title={t('library.login_recent_title')}
+          description={t('library.login_recent_desc')}
+          ctaLabel={t('library.login_google')}
           onCtaClick={() => signInWithGoogle('/library/recent')}
         />
       </div>
@@ -75,8 +77,8 @@ export default function RecentlyAddedPage() {
   return (
     <div className="mx-auto max-w-[1400px] space-y-6 px-4 pb-32 pt-2 md:px-8 md:pt-8">
       <div>
-        <h1 className="text-[28px] md:text-3xl font-bold tracking-tight text-white mb-1">Recently Added</h1>
-        <p className="text-sm text-white/50">Campuran album dan playlist terbaru yang ada di library kamu.</p>
+        <h1 className="text-[28px] md:text-3xl font-bold tracking-tight text-white mb-1">{t('sidebar.recently_added')}</h1>
+        <p className="text-sm text-white/50">{t('library.recent_desc')}</p>
       </div>
 
       {isLoading ? (

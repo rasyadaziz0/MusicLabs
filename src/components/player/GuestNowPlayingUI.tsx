@@ -24,7 +24,7 @@ export function GuestNowPlayingUI(props: NowPlayingUIProps) {
 
   if (!currentTrack) return null;
   const progress = duration ? (currentTime / duration) * 100 : 0;
-  const coverUrl = ImageHelper.getBestImageUrl(currentTrack.image);
+  const coverUrl = ImageHelper.getBestImageUrl(currentTrack.image) ?? '';
 
   return (
     <AnimatePresence>

@@ -7,14 +7,14 @@ export function AboutSettings({ t }: { t: (key: string) => string }) {
 
   return (
     <>
-      <SectionHeader title="About AcadMusic" />
+      <SectionHeader title={t('settings.about')} />
       <div className="bg-white/[0.03] rounded-2xl border border-white/[0.06] overflow-hidden mb-8">
         
         {/* Version */}
         <div className="flex items-center justify-between px-4 py-3.5 border-b border-white/[0.04]">
           <span className="flex items-center gap-3 text-[14px] text-white/80 font-medium">
             <Info size={18} className={iconClass} />
-            Version
+            {t('settings.version')}
           </span>
           <span className="text-[13px] text-white/40">v1.0.0 (Beta)</span>
         </div>
@@ -26,7 +26,7 @@ export function AboutSettings({ t }: { t: (key: string) => string }) {
         >
           <span className="flex items-center gap-3 text-[14px] text-white/80">
             <FileText size={18} className={iconClass} />
-            Terms of Use
+            {t('settings.terms_of_use')}
           </span>
           <ExternalLink size={16} className="text-white/20 group-hover:text-white/60 transition-colors" />
         </Link>
@@ -38,7 +38,7 @@ export function AboutSettings({ t }: { t: (key: string) => string }) {
         >
           <span className="flex items-center gap-3 text-[14px] text-white/80">
             <Shield size={18} className={iconClass} />
-            Privacy Policy
+            {t('settings.privacy_policy')}
           </span>
           <ExternalLink size={16} className="text-white/20 group-hover:text-white/60 transition-colors" />
         </Link>
@@ -50,7 +50,7 @@ export function AboutSettings({ t }: { t: (key: string) => string }) {
         >
           <span className="flex items-center gap-3 text-[14px] text-white/80">
             <Cookie size={18} className={iconClass} />
-            Cookie Policy
+            {t('settings.cookie_policy')}
           </span>
           <ExternalLink size={16} className="text-white/20 group-hover:text-white/60 transition-colors" />
         </Link>
@@ -62,7 +62,7 @@ export function AboutSettings({ t }: { t: (key: string) => string }) {
         >
           <span className="flex items-center gap-3 text-[14px] text-white/80">
             <Scale size={18} className={iconClass} />
-            Copyright / DMCA
+            {t('settings.dmca')}
           </span>
           <ExternalLink size={16} className="text-white/20 group-hover:text-white/60 transition-colors" />
         </Link>
@@ -74,7 +74,7 @@ export function AboutSettings({ t }: { t: (key: string) => string }) {
         >
           <span className="flex items-center gap-3 text-[14px] text-white/80">
             <Code2 size={18} className={iconClass} />
-            Open Source Licenses
+            {t('settings.oss_licenses')}
           </span>
           <ExternalLink size={16} className="text-white/20 group-hover:text-white/60 transition-colors" />
         </Link>
@@ -86,7 +86,7 @@ export function AboutSettings({ t }: { t: (key: string) => string }) {
         >
           <span className="flex items-center gap-3 text-[14px] text-white/80">
             <BookOpen size={18} className={iconClass} />
-            About AcadMusic
+            {t('settings.about')}
           </span>
           <ExternalLink size={16} className="text-white/20 group-hover:text-white/60 transition-colors" />
         </Link>
@@ -98,7 +98,7 @@ export function AboutSettings({ t }: { t: (key: string) => string }) {
         >
           <span className="flex items-center gap-3 text-[14px] text-white/80">
             <Mail size={18} className={iconClass} />
-            Contact Support
+            {t('settings.contact_support')}
           </span>
           <ExternalLink size={16} className="text-white/20 group-hover:text-white/60 transition-colors" />
         </a>

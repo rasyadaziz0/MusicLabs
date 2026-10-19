@@ -8,15 +8,15 @@ if (typeof window !== 'undefined' && typeof Node !== 'undefined') {
     if (child.parentNode !== this) {
       return child;
     }
-    return originalRemoveChild.call(this, child);
+    return originalRemoveChild.call(this, child) as T;
   };
 
   const originalInsertBefore = Node.prototype.insertBefore;
   Node.prototype.insertBefore = function <T extends Node>(newNode: T, referenceNode: Node | null): T {
     if (referenceNode && referenceNode.parentNode !== this) {
-      return originalInsertBefore.call(this, newNode, null);
+      return originalInsertBefore.call(this, newNode, null) as T;
     }
-    return originalInsertBefore.call(this, newNode, referenceNode);
+    return originalInsertBefore.call(this, newNode, referenceNode) as T;
   };
 }
 

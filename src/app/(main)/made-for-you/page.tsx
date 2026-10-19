@@ -6,6 +6,7 @@ import FeatureDisabled from '@/components/ui/FeatureDisabled';
 import { HorizontalScrollSection } from '@/components/ui/HorizontalScrollSection';
 import { useAuth } from '@/context/AuthContext';
 import { useFeatureFlags } from '@/context/FeatureFlagsContext';
+import { useTranslation } from '@/context/LanguageContext';
 import { usePlayer } from '@/context/PlayerContext';
 import { useMadeForYou } from '@/hooks/useMadeForYou';
 import { ChevronLeft, Sparkles } from 'lucide-react';
@@ -14,6 +15,7 @@ import { useRouter } from 'next/navigation';
 
 export default function MadeForYouPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { flags } = useFeatureFlags();
   const { user, signInWithGoogle } = useAuth();
   const { playTrack } = usePlayer();
@@ -29,7 +31,7 @@ export default function MadeForYouPage() {
         <Link href="/library" className="rounded-full p-2 -ml-2 text-[#FA243C] hover:bg-white/5 transition-colors">
           <ChevronLeft size={28} strokeWidth={2.5} />
         </Link>
-        <h1 className="text-[28px] font-bold tracking-tight text-white">Made For You</h1>
+        <h1 className="text-[28px] font-bold tracking-tight text-white">{t('sidebar.made_for_you')}</h1>
       </div>
 
       <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-[#FA243C]/20 via-[#2F2FE4]/10 to-transparent p-6 md:p-8">
@@ -37,11 +39,11 @@ export default function MadeForYouPage() {
           <div>
             <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-white/70">
               <Sparkles size={14} className="text-[#FA243C]" />
-              Personal Mixes
+              {t('library.personal_mixes')}
             </div>
-            <h1 className="text-3xl font-bold tracking-tight text-white md:text-4xl">Made For You</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-white md:text-4xl">{t('sidebar.made_for_you')}</h1>
             <p className="mt-3 max-w-2xl text-sm text-white/60 md:text-base">
-              Kumpulan mix personal yang dibangun dari history, lagu yang kamu like, mood, dan Discover Weekly.
+              {t('library.made_for_you_full_desc')}
             </p>
           </div>
         </div>
@@ -49,9 +51,9 @@ export default function MadeForYouPage() {
 
       {!user ? (
         <LibraryEmptyState
-          title="Login dulu buat buka personal mixes"
-          description="Begitu login, halaman ini bakal otomatis ngumpulin mix dari listening history dan lagu yang kamu suka."
-          ctaLabel="Login with Google"
+          title={t('library.login_mixes_title')}
+          description={t('library.login_mixes_desc')}
+          ctaLabel={t('library.login_google')}
           onCtaClick={() => signInWithGoogle('/made-for-you')}
         />
       ) : (

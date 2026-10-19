@@ -1,15 +1,17 @@
 'use client';
 
+import { useTranslation } from '@/context/LanguageContext';
 import { Check, Edit3, X } from 'lucide-react';
 import React, { useState } from 'react';
 import { DeviceRenameFooterProps } from "@/types/components/player/devices/DeviceRenameFooterProps";
 
 export function DeviceRenameFooter({ currentLabel, onRename }: DeviceRenameFooterProps) {
+  const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState('');
 
   const handleStartRename = () => {
-    setEditName(currentLabel || 'My Device');
+    setEditName(currentLabel || t('connect.this_device'));
     setIsEditing(true);
   };
 
@@ -34,14 +36,14 @@ export function DeviceRenameFooter({ currentLabel, onRename }: DeviceRenameFoote
             type="text"
             value={editName}
             onChange={(e) => setEditName(e.target.value)}
-            placeholder="Nama perangkat..."
+            placeholder={t('connect.device_name')}
             autoFocus
             className="flex-1 px-3 py-1.5 text-xs rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-[#1db954]"
           />
           <button
             type="submit"
             className="p-1.5 rounded-xl bg-[#1db954] text-black hover:bg-[#1db954]/90 transition-colors font-bold flex items-center justify-center flex-shrink-0"
-            title="Simpan"
+            title={t('common.save')}
           >
             <Check className="w-4 h-4" />
           </button>
@@ -49,7 +51,7 @@ export function DeviceRenameFooter({ currentLabel, onRename }: DeviceRenameFoote
             type="button"
             onClick={() => setIsEditing(false)}
             className="p-1.5 rounded-xl bg-white/10 text-white/70 hover:text-white transition-colors flex-shrink-0"
-            title="Batal"
+            title={t('common.cancel')}
           >
             <X className="w-4 h-4" />
           </button>
@@ -60,7 +62,7 @@ export function DeviceRenameFooter({ currentLabel, onRename }: DeviceRenameFoote
           className="flex items-center justify-center gap-2 w-full py-2.5 text-xs font-semibold text-white/60 hover:text-white rounded-xl hover:bg-white/5 transition-colors border border-white/5"
         >
           <Edit3 className="w-3.5 h-3.5" />
-          <span className="truncate">Ganti nama perangkat ini ({currentLabel || 'Perangkat Ini'})</span>
+          <span className="truncate">{t('connect.rename_this_device')} ({currentLabel || t('connect.this_device')})</span>
         </button>
       )}
     </div>

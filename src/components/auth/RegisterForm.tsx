@@ -24,7 +24,7 @@ export default function RegisterForm() {
       if (url.origin !== window.location.origin) return '/';
       
       const safePath = url.pathname + url.search;
-      if (!safePath.startsWith('/') || safePath.startsWith('//')) return '/';
+      if (!safePath.startsWith('/') || safePath.startsWith('//') || safePath.includes('\\')) return '/';
       return safePath;
     } catch {
       return '/';

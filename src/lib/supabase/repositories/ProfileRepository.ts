@@ -38,7 +38,7 @@ export class ProfileRepository implements IProfileRepository {
     const { data, error } = await this.supabase
       .from('profiles')
       .select(PROFILE_COLUMNS)
-      .ilike('username', username)
+      .ilike('username', username.trim())
       .maybeSingle();
 
     if (error) {
@@ -58,9 +58,29 @@ export class ProfileRepository implements IProfileRepository {
   }
 
   async deleteAccount(userId: string): Promise<void> {
-    // These should ideally be done via a Postgres function or ON DELETE CASCADE
-    // but doing it explicitly here for completeness based on existing logic.
-    await Promise.all([
+    // 1. Try server endpoint which uses admin client to delete auth.users & all related rows
+    try {
+      const res = await fetch('/api/account/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (res.ok) {
+        return;
+      }
+    } catch {
+      // If fetch fails (e.g. running in server context), fallback to RPC or direct deletion
+    }
+
+    // 2. Try database RPC if deployed
+    try {
+      const { error: rpcError } = await this.supabase.rpc('delete_user_account');
+      if (!rpcError) return;
+    } catch {
+      // Fallback
+    }
+
+    // 3. Client-side explicit rows cleanup fallback
+    await Promise.allSettled([
       this.supabase.from('listening_history').delete().eq('user_id', userId),
       this.supabase.from('liked_tracks').delete().eq('user_id', userId),
       this.supabase.from('playlists').delete().eq('user_id', userId),
@@ -69,7 +89,6 @@ export class ProfileRepository implements IProfileRepository {
       this.supabase.from('playlist_collaborators').delete().eq('user_id', userId),
     ]);
     
-    // Finally delete profile (and auth user if trigger exists)
     const { error } = await this.supabase.from('profiles').delete().eq('id', userId);
     if (error) throw error;
   }

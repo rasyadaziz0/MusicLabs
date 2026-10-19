@@ -6,6 +6,9 @@ import { cache } from 'react';
 import EmbedPlaylistPlayer from './EmbedPlaylistPlayer';
 
 const getPlaylistData = cache(async (playlistId: string) => {
+  if (!playlistId || !/^[A-Za-z0-9_-]{1,64}$/.test(playlistId)) {
+    return null;
+  }
   const supabase = await createClient();
   const repo = new PlaylistRepository(supabase);
   try {

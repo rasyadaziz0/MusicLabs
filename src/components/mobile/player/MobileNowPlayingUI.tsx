@@ -30,7 +30,7 @@ export default function MobileNowPlayingUI(props: NowPlayingUIProps) {
   const dragControls = useDragControls();
 
   if (!currentTrack) return null;
-  const coverUrl = ImageHelper.getBestImageUrl(currentTrack.image);
+  const coverUrl = ImageHelper.getBestImageUrl(currentTrack.image) ?? '';
   const artistNames = currentTrack.artists.primary.map((a: any) => a.name).join(', ');
 
   return (

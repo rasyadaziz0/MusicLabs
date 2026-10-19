@@ -33,6 +33,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -44,18 +45,29 @@ agents.md
 CLAUDE.md
 claude.md
 
-# Internal Docs, Security Findings & Scripts
+# Internal Docs, Reports, PDFs, Security Findings & Scripts
 .md/
 docs/
 /docs/
+Report/
+/Report/
+docs dokumentasi/
+/docs dokumentasi/
+pdf materi/
+/pdf materi/
 scripts/
 /scripts/
 TEMUAN.md
 /TEMUAN.md
+SECURITY_AUDIT*.md
+/SECURITY_AUDIT*.md
 
-# Backend Service
+# Backend Service & Tests
 backend/
 /backend/
+__tests__/
+/backend/__tests__/
+*.test.ts
 
 # typescript
 *.tsbuildinfo
@@ -66,7 +78,4 @@ next-env.d.ts
 scratch/
 /scratch/
 
-.vercel
-/backend/
- 
 .vercel

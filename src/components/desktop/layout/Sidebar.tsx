@@ -110,7 +110,7 @@ export default function Sidebar() {
             {flags.feature_identify && (
               <Link href="/identify" className={navLinkClass(pathname === '/identify')}>
                 <AudioLines size={18} className="text-[#FA243C]" />
-                <span>Identify Song</span>
+                <span>{t('sidebar.identify')}</span>
               </Link>
             )}
             {flags.feature_import_playlist && (
@@ -124,7 +124,7 @@ export default function Sidebar() {
                 />
                 <div className="relative z-10 flex items-center gap-4 w-full">
                   <ListMusic size={18} className={isImporting ? "text-[#FA243C] animate-pulse" : "text-[#FA243C]"} />
-                  <span>Import Playlist</span>
+                  <span>{t('sidebar.import_playlist')}</span>
                 </div>
               </Link>
             )}
@@ -145,7 +145,7 @@ export default function Sidebar() {
                       {isPinsOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                     </div>
                     <Pin size={16} className="text-[#FA243C]" />
-                    <span className="text-[13px] font-medium ml-1">Pins</span>
+                    <span className="text-[13px] font-medium ml-1">{t('sidebar.pins')}</span>
                   </button>
                   {isPinsOpen && (
                     <div className="mt-1 space-y-0.5 ml-2 border-l border-white/10 pl-2">
@@ -161,7 +161,7 @@ export default function Sidebar() {
                       ))}
                       {playlists.filter(p => p.is_pinned).length === 0 && (
                         <div className="px-3 py-1.5 mx-2 text-[12px] text-white/40 italic">
-                          No pinned playlists
+                          {t('sidebar.no_pinned_playlists')}
                         </div>
                       )}
                     </div>
@@ -185,14 +185,14 @@ export default function Sidebar() {
                   <Link key="discover-weekly" href={discoverWeeklyHref} className={navLinkClass(isDiscoverWeeklyActive)}>
                     <Sparkles size={18} className={isRecentlyUpdated ? "text-white" : "text-[#FA243C]"} />
                     <span className={isRecentlyUpdated ? "text-white font-bold" : ""}>
-                      Discover Weekly
+                      {t('sidebar.discover_weekly')}
                       {isRecentlyUpdated && <span className="ml-2 text-[9px] bg-white/20 text-white px-1.5 py-0.5 rounded-full">NEW</span>}
                     </span>
                   </Link>
                 ) : (
                   <Link key="Artists" href="/library/artists" className={navLinkClass(pathname === '/library/artists')}>
                     <Mic size={18} className="text-[#FA243C]" />
-                    <span>Artists</span>
+                    <span>{t('sidebar.artists')}</span>
                   </Link>
                 )}
 
@@ -241,13 +241,13 @@ export default function Sidebar() {
             <div className="px-4 mt-2">
               <div className="rounded-xl bg-white/[0.04] border border-white/[0.08] p-4">
                 <p className="text-[13px] text-white/70 leading-relaxed mb-3">
-                  Sign in to create playlists, save your favorite songs, and more.
+                  {t('sidebar.guest_prompt')}
                 </p>
                 <Link
                   href="/login"
                   className="block w-full text-center py-2 rounded-lg bg-[#d91d31] text-white text-[13px] font-semibold hover:bg-[#b01627] transition-colors"
                 >
-                  Sign In
+                  {t('sidebar.sign_in')}
                 </Link>
               </div>
             </div>

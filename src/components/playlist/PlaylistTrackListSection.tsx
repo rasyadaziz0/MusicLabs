@@ -4,6 +4,7 @@ import AddToPlaylistButton from '@/components/ui/AddToPlaylistButton';
 import AddToQueueButton from '@/components/ui/AddToQueueButton';
 import { AppleMusicTrackList } from '@/components/ui/AppleMusicTrackList';
 import TrackLikeButton from '@/components/ui/TrackLikeButton';
+import { useTranslation } from '@/context/LanguageContext';
 import { PlaylistPresenter } from '@/lib/playlist/PlaylistPresenter';
 import { Song } from '@/types/music';
 import { Trash2 } from 'lucide-react';
@@ -24,6 +25,8 @@ export function PlaylistTrackListSection({
   onReorder,
   onRemoveTrack,
 }: PlaylistTrackListSectionProps) {
+  const { t } = useTranslation();
+
   if (isLoading) {
     return (
       <div className="space-y-4 w-full">
@@ -37,9 +40,9 @@ export function PlaylistTrackListSection({
   if (!presenter.hasTracks) {
     return (
       <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-6 py-16 text-center mt-8">
-        <h2 className="text-xl font-bold mb-2">Playlist is empty</h2>
+        <h2 className="text-xl font-bold mb-2">{t('library.playlist_empty')}</h2>
         <p className="text-sm text-white/50">
-          Find and add songs from the search page or your library.
+          {t('library.playlist_empty_desc')}
         </p>
       </div>
     );

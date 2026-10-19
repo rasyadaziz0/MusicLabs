@@ -8,6 +8,7 @@ import { AppleMusicTrackList } from '@/components/ui/AppleMusicTrackList';
 import { CustomSelect } from '@/components/ui/CustomSelect';
 import TrackLikeButton from '@/components/ui/TrackLikeButton';
 import { useAuth } from '@/context/AuthContext';
+import { useTranslation } from '@/context/LanguageContext';
 import { usePlayer } from '@/context/PlayerContext';
 import { useLibrarySongs } from '@/hooks/library/useLibrarySongs';
 import * as SearchHelper from '@/lib/utils/search';
@@ -19,6 +20,7 @@ import { useMemo, useState } from 'react';
 type SortMode = 'recent' | 'title' | 'artist';
 
 export default function LibrarySongsPage() {
+  const { t } = useTranslation();
   const { user, signInWithGoogle } = useAuth();
   const { playTrack } = usePlayer();
   const { songs, isLoading } = useLibrarySongs();
@@ -65,19 +67,19 @@ export default function LibrarySongsPage() {
         <Link href="/library" className="rounded-full p-2 -ml-2 text-[#FA243C] hover:bg-white/5 transition-colors">
           <ChevronLeft size={28} strokeWidth={2.5} />
         </Link>
-        <h1 className="text-[28px] font-bold tracking-tight text-white">Songs</h1>
+        <h1 className="text-[28px] font-bold tracking-tight text-white">{t('sidebar.songs')}</h1>
       </div>
 
       <div className="hidden md:block">
-        <h1 className="text-3xl font-bold text-white">Songs</h1>
-        <p className="mt-1 text-sm text-white/50">Semua lagu yang kebentuk dari likes, recent plays, dan playlist kamu.</p>
+        <h1 className="text-3xl font-bold text-white">{t('sidebar.songs')}</h1>
+        <p className="mt-1 text-sm text-white/50">{t('library.songs_desc')}</p>
       </div>
 
       {!user ? (
         <LibraryEmptyState
-          title="Login dulu buat buka Library Songs"
-          description="Setelah login, semua lagu yang kamu like, putar, atau simpan di playlist bakal muncul di sini."
-          ctaLabel="Login with Google"
+          title={t('library.login_songs_title')}
+          description={t('library.login_songs_desc')}
+          ctaLabel={t('library.login_google')}
           onCtaClick={() => signInWithGoogle('/library/songs')}
         />
       ) : (
@@ -87,16 +89,16 @@ export default function LibrarySongsPage() {
               <LibrarySearchBar
                 value={query}
                 onChange={setQuery}
-                placeholder="Cari lagu, artis, atau album..."
+                placeholder={t('search.placeholder')}
               />
             </div>
             <CustomSelect
               value={sortMode}
               onChange={(val) => setSortMode(val as SortMode)}
               options={[
-                { value: 'recent', label: 'Paling relevan' },
-                { value: 'title', label: 'Judul A-Z' },
-                { value: 'artist', label: 'Artis A-Z' },
+                { value: 'recent', label: t('library.sort_relevant') },
+                { value: 'title', label: t('library.sort_title') },
+                { value: 'artist', label: t('library.sort_artist') },
               ]}
               className="z-50"
             />

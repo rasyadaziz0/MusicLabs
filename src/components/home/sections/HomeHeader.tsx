@@ -1,3 +1,4 @@
+import { useTranslation } from '@/context/LanguageContext';
 import { User } from '@supabase/supabase-js';
 import { LogOut } from 'lucide-react';
 import Image from 'next/image';
@@ -12,10 +13,12 @@ export interface HomeHeaderProps {
 
 
 export function HomeHeader({ user, isProfileOpen, setIsProfileOpen, handleSignOut }: HomeHeaderProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="px-2">
       <header className="flex items-center justify-between">
-        <h1 className="text-[34px] font-bold tracking-tight text-white mb-2">Home</h1>
+        <h1 className="text-[34px] font-bold tracking-tight text-white mb-2">{t('sidebar.home')}</h1>
         {user && (
           <div className="relative z-50 mb-2 lg:hidden">
             <button
@@ -42,14 +45,14 @@ export function HomeHeader({ user, isProfileOpen, setIsProfileOpen, handleSignOu
                     className="w-full text-left px-4 py-2 text-[13px] text-white/80 hover:bg-white/5 transition-colors flex items-center gap-2"
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-                    <span>Profile</span>
+                    <span>{t('common.profile')}</span>
                   </Link>
                   <button
                     onClick={handleSignOut}
                     className="w-full text-left px-4 py-2 text-[13px] text-red-400 hover:bg-white/5 transition-colors flex items-center gap-2"
                   >
                     <LogOut size={14} />
-                    <span>Sign out</span>
+                    <span>{t('settings.sign_out')}</span>
                   </button>
                 </div>
               </>

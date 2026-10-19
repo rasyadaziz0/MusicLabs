@@ -1,4 +1,5 @@
 'use client';
+import { useTranslation } from '@/context/LanguageContext';
 import { ArtistParser } from '@/lib/utils/ArtistParser';
 
 import { ImageHelper } from '@/lib/utils/ImageHelper';
@@ -21,6 +22,8 @@ export function TopPicksCard({
   gradient: string;
   onPlay: () => void;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div
       className="group relative flex-shrink-0 w-[260px] md:w-[310px] aspect-[4/5] rounded-[16px] overflow-hidden cursor-pointer shadow-md transition-transform hover:scale-[1.02]"
@@ -48,7 +51,7 @@ export function TopPicksCard({
 
       <div className="absolute bottom-0 left-0 p-5 w-full bg-gradient-to-t from-black/60 to-transparent">
         <p className="text-white/90 text-[11px] font-semibold mb-1 uppercase tracking-widest">
-          {index % 2 === 0 ? 'Trending' : 'Top Hit'}
+          {index % 2 === 0 ? t('home.trending') : t('home.top_hit')}
         </p>
         <h3 className="text-2xl md:text-[28px] font-bold text-white mb-1 line-clamp-2 leading-tight">
           {song.name}
@@ -252,18 +255,20 @@ export function SocialActivityCard({
 
 // ── Guest Banner ────────────────────────────────────────────
 export function GuestBanner() {
+  const { t } = useTranslation();
+
   return (
     <section className="px-2">
       <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-[#FA243C]/20 via-[#FA243C]/10 to-transparent border border-[#FA243C]/20 p-6 flex items-center justify-between">
         <div>
-          <h3 className="text-[16px] font-bold text-white mb-1">Get the full experience</h3>
-          <p className="text-[13px] text-white/50">Sign in to save songs, create playlists, and listen to full tracks.</p>
+          <h3 className="text-[16px] font-bold text-white mb-1">{t('home.get_full_experience')}</h3>
+          <p className="text-[13px] text-white/50">{t('home.get_full_experience_desc')}</p>
         </div>
         <Link
           href="/login"
           className="flex-shrink-0 ml-4 px-5 py-2 rounded-full bg-[#FA243C] text-white text-[13px] font-semibold hover:bg-[#FA243C]/90 transition-colors"
         >
-          Sign In
+          {t('sidebar.sign_in')}
         </Link>
       </div>
     </section>

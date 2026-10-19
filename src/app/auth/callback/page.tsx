@@ -15,7 +15,8 @@ function AuthCallbackInner() {
 
     const handleAuth = async () => {
       const nextPath = searchParams.get('next');
-      const safeNextPath = (nextPath?.startsWith('/') && !nextPath.startsWith('//')) ? nextPath : '/';
+      const isSafePath = (url: string) => url.startsWith('/') && !url.startsWith('//') && !url.includes('\\');
+      const safeNextPath = (nextPath && isSafePath(nextPath)) ? nextPath : '/';
 
       // Wait for Supabase to detect & process the session from the URL hash/code.
       // onAuthStateChange fires SIGNED_IN once the implicit-flow tokens are ingested.

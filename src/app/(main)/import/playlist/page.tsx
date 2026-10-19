@@ -3,11 +3,13 @@
 import FeatureDisabled from '@/components/ui/FeatureDisabled';
 import PlaylistImporter from '@/components/playlist/PlaylistImporter';
 import { useFeatureFlags } from '@/context/FeatureFlagsContext';
+import { useTranslation } from '@/context/LanguageContext';
 import { ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense } from 'react';
 
 function ImportPlaylistContent() {
+  const { t } = useTranslation();
   const { flags } = useFeatureFlags();
 
   if (!flags.feature_import_playlist) {
@@ -24,11 +26,11 @@ function ImportPlaylistContent() {
         >
           <ChevronLeft size={28} strokeWidth={2.5} />
         </Link>
-        <h1 className="text-[28px] font-bold tracking-tight text-white">Import Playlist</h1>
+        <h1 className="text-[28px] font-bold tracking-tight text-white">{t('importer.title')}</h1>
       </div>
 
       {/* Desktop Header */}
-      <h1 className="text-3xl font-bold text-white mb-6 hidden md:block">Import Playlist</h1>
+      <h1 className="text-3xl font-bold text-white mb-6 hidden md:block">{t('importer.title')}</h1>
 
       <PlaylistImporter />
     </div>

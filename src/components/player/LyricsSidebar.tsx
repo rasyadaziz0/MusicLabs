@@ -1,6 +1,7 @@
 'use client';
 
 import { GlassBar } from '@/components/ui/LiquidGlass';
+import { useTranslation } from '@/context/LanguageContext';
 import { usePlayer } from '@/context/PlayerContext';
 import { useSettings } from '@/context/SettingsContext';
 import { useLyrics } from '@/hooks/useLyrics';
@@ -17,6 +18,7 @@ import './lyrics/sidebar.css';
 import { LyricsSidebarProps } from "@/types/components/player/LyricsSidebarProps";
 
 export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
+  const { t } = useTranslation();
   const { currentTrack, currentTime, seek, duration } = usePlayer();
   const { settings } = useSettings();
   const trackId = currentTrack?.id ?? null;
@@ -127,7 +129,7 @@ export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
               ) : !currentTrack ? (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60%', gap: '10px' }}>
                   <Music2 size={28} color="rgba(255,255,255,0.15)" />
-                  <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.3)', margin: 0 }}>Play a song to see lyrics</p>
+                  <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.3)', margin: 0 }}>{t('player.play_to_see_lyrics')}</p>
                 </div>
               ) : lines.length > 0 ? (
                 <div style={{ animation: 'lyricsFadeIn 0.5s ease-out' }}>
@@ -164,7 +166,7 @@ export default function LyricsSidebar({ isOpen, onClose }: LyricsSidebarProps) {
                 </div>
               ) : (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60%' }}>
-                  <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.3)', margin: 0 }}>No lyrics available</p>
+                  <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.3)', margin: 0 }}>{t('player.no_lyrics')}</p>
                 </div>
               )}
               </div>

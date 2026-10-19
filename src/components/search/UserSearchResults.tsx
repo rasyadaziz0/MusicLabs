@@ -1,10 +1,12 @@
 'use client';
 import { UserProfile } from '@/types/profile';
 
+import { useTranslation } from '@/context/LanguageContext';
 import UserCard from '@/components/ui/UserCard';
 import { UserSearchResultsProps } from "@/types/components/search/UserSearchResultsProps";
 
 export function UserSearchResults({ isUsersLoading, usersData, query }: UserSearchResultsProps) {
+  const { t } = useTranslation();
   if (isUsersLoading) {
     return (
       <div className="space-y-4 mt-4">
@@ -35,7 +37,7 @@ export function UserSearchResults({ isUsersLoading, usersData, query }: UserSear
 
   return (
     <div className="text-center py-20">
-      <p className="text-xl text-white/50 font-medium">No users found for &quot;{query}&quot;</p>
+      <p className="text-xl text-white/50 font-medium">{t('search.no_results')} &quot;{query}&quot;</p>
     </div>
   );
 }

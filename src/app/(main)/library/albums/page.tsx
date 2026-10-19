@@ -4,6 +4,7 @@ import { LibraryEmptyState } from '@/components/library/LibraryEmptyState';
 import { LibrarySearchBar } from '@/components/library/LibrarySearchBar';
 import { CustomSelect } from '@/components/ui/CustomSelect';
 import { useAuth } from '@/context/AuthContext';
+import { useTranslation } from '@/context/LanguageContext';
 import { useLibraryAlbums } from '@/hooks/library/useLibraryAlbums';
 import * as SearchHelper from '@/lib/utils/search';
 import { ChevronLeft, Disc3 } from 'lucide-react';
@@ -14,6 +15,7 @@ import { useMemo, useState } from 'react';
 type SortMode = 'title' | 'artist' | 'year';
 
 export default function LibraryAlbumsPage() {
+  const { t } = useTranslation();
   const { user, signInWithGoogle } = useAuth();
   const { albums, isLoading } = useLibraryAlbums();
   const [query, setQuery] = useState('');
@@ -65,19 +67,19 @@ export default function LibraryAlbumsPage() {
         <Link href="/library" className="rounded-full p-2 -ml-2 text-[#FA243C] hover:bg-white/5 transition-colors">
           <ChevronLeft size={28} strokeWidth={2.5} />
         </Link>
-        <h1 className="text-[28px] font-bold tracking-tight text-white">Albums</h1>
+        <h1 className="text-[28px] font-bold tracking-tight text-white">{t('sidebar.albums')}</h1>
       </div>
 
       <div className="hidden md:block">
-        <h1 className="text-3xl font-bold text-white">Albums</h1>
-        <p className="mt-1 text-sm text-white/50">Album yang kebentuk dari track yang pernah kamu putar, simpan, dan masuk playlist.</p>
+        <h1 className="text-3xl font-bold text-white">{t('sidebar.albums')}</h1>
+        <p className="mt-1 text-sm text-white/50">{t('library.albums_desc')}</p>
       </div>
 
       {!user ? (
         <LibraryEmptyState
-          title="Login dulu buat lihat album library"
-          description="Begitu login, album bakal otomatis terkumpul dari aktivitas dengerin musik kamu."
-          ctaLabel="Login with Google"
+          title={t('library.login_albums_title')}
+          description={t('library.login_albums_desc')}
+          ctaLabel={t('library.login_google')}
           onCtaClick={() => signInWithGoogle('/library/albums')}
         />
       ) : (
@@ -87,16 +89,16 @@ export default function LibraryAlbumsPage() {
               <LibrarySearchBar
                 value={query}
                 onChange={setQuery}
-                placeholder="Cari album atau artis..."
+                placeholder={t('library.search_albums_placeholder')}
               />
             </div>
             <CustomSelect
               value={sortMode}
               onChange={(val) => setSortMode(val as SortMode)}
               options={[
-                { value: 'title', label: 'Album A-Z' },
-                { value: 'artist', label: 'Artis A-Z' },
-                { value: 'year', label: 'Tahun terbaru' },
+                { value: 'title', label: t('library.sort_album_az') },
+                { value: 'artist', label: t('library.sort_artist_az') },
+                { value: 'year', label: t('library.sort_year_newest') },
               ]}
               className="z-50"
             />
@@ -132,7 +134,7 @@ export default function LibraryAlbumsPage() {
                       <p className="line-clamp-1 text-sm font-semibold text-white">{album.name}</p>
                       <p className="line-clamp-1 text-xs text-white/50">{album.artistName}</p>
                       <p className="mt-0.5 text-xs text-white/35">
-                        {album.year || 'Unknown year'} • {album.songCount} lagu
+                        {album.year || 'Unknown year'} • {album.songCount} {t('tracklist.songs_count')}
                       </p>
                     </div>
                   </div>
@@ -149,14 +151,14 @@ export default function LibraryAlbumsPage() {
             </div>
           ) : (
             <LibraryEmptyState
-              title={query ? 'Album nggak ketemu' : 'Belum ada album di library'}
+              title={query ? t('library.album_not_found') : t('library.no_albums_yet')}
               description={
                 query
-                  ? 'Coba cari judul album atau nama artis lain.'
-                  : 'Mulai dengerin dan simpan beberapa lagu dulu buat ngisi koleksi album.'
+                  ? t('library.album_not_found_desc')
+                  : t('library.no_albums_yet_desc')
               }
               ctaHref="/search"
-              ctaLabel="Cari Lagu"
+              ctaLabel={t('library.search_songs')}
             />
           )}
         </>

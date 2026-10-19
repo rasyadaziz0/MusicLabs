@@ -4,7 +4,7 @@
  */
 import { supabase } from './supabase/client';
 
-const CACHE_KEY_PREFIX = 'yt_resolve_v7_';
+const CACHE_KEY_PREFIX = 'yt_resolve_v8_';
 
 import { API_BASE } from './config';
 

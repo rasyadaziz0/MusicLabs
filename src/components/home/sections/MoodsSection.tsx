@@ -1,3 +1,4 @@
+import { useTranslation } from '@/context/LanguageContext';
 import { TrackCard } from '@/components/home/HomeCards';
 import { ScrollArrows } from '@/components/ui/ScrollArrows';
 import { MOOD_PLAYLISTS } from '@/config/moods';
@@ -15,12 +16,13 @@ export interface MoodsSectionProps {
 
 
 export function MoodsSection({ selectedMood, setSelectedMood, moodSongs, isMoodSongsLoading, playTrack }: MoodsSectionProps) {
+  const { t } = useTranslation();
   const { scrollRef, canScrollLeft, canScrollRight, scroll } = useHorizontalScroll();
 
   return (
     <section className="px-2 pt-4">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-[20px] font-bold text-white">Moods & Activities</h2>
+        <h2 className="text-[20px] font-bold text-white">{t('home.moods_title')}</h2>
       </div>
       <div className="flex flex-wrap gap-2 mb-6">
         {MOOD_PLAYLISTS.map((mood) => {
@@ -64,7 +66,7 @@ export function MoodsSection({ selectedMood, setSelectedMood, moodSongs, isMoodS
             />
           ))}
           {!isMoodSongsLoading && moodSongs.length === 0 && (
-            <p className="text-sm text-muted">No songs available for this mood.</p>
+            <p className="text-sm text-muted">{t('home.no_mood_songs')}</p>
           )}
         </div>
       </div>

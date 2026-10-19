@@ -1,3 +1,4 @@
+import { useTranslation } from '@/context/LanguageContext';
 import { ScrollArrows } from '@/components/ui/ScrollArrows';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 import { User } from '@supabase/supabase-js';
@@ -11,6 +12,7 @@ export interface MobileStationsSectionProps {
 
 
 export function MobileStationsSection({ user, discoverPlaylistId }: MobileStationsSectionProps) {
+  const { t } = useTranslation();
   const { scrollRef, canScrollLeft, canScrollRight, scroll } = useHorizontalScroll();
 
   if (!user) return null;
@@ -18,7 +20,7 @@ export function MobileStationsSection({ user, discoverPlaylistId }: MobileStatio
   return (
     <section className="px-2 pt-4 md:hidden">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-[20px] font-bold text-white">Made For You</h2>
+        <h2 className="text-[20px] font-bold text-white">{t('sidebar.made_for_you')}</h2>
       </div>
       <div className="relative group/section">
         <ScrollArrows 
@@ -62,8 +64,8 @@ export function MobileStationsSection({ user, discoverPlaylistId }: MobileStatio
               <span className="text-white font-bold text-[11px] tracking-tight ml-[3px] mt-[1px]">AcadMusic</span>
             </div>
           </div>
-          <p className="text-white font-medium text-[14px] line-clamp-1 leading-snug">Made For You</p>
-          <p className="text-muted text-[13px] line-clamp-1 mt-0.5">Stasiun musik personal</p>
+          <p className="text-white font-medium text-[14px] line-clamp-1 leading-snug">{t('sidebar.made_for_you')}</p>
+          <p className="text-muted text-[13px] line-clamp-1 mt-0.5">{t('home.personal_station')}</p>
         </Link>
 
         {/* Discover Weekly Card */}
@@ -101,8 +103,8 @@ export function MobileStationsSection({ user, discoverPlaylistId }: MobileStatio
                 <span className="text-white font-bold text-[11px] tracking-tight ml-[3px] mt-[1px]">AcadMusic</span>
               </div>
             </div>
-            <p className="text-white font-medium text-[14px] line-clamp-1 leading-snug">Discover Weekly</p>
-            <p className="text-muted text-[13px] line-clamp-1 mt-0.5">Lagu baru tiap minggu</p>
+            <p className="text-white font-medium text-[14px] line-clamp-1 leading-snug">{t('sidebar.discover_weekly')}</p>
+            <p className="text-muted text-[13px] line-clamp-1 mt-0.5">{t('home.new_songs_weekly')}</p>
           </Link>
         ) : (
           <div className="group flex-shrink-0 w-[160px] text-left opacity-50 cursor-not-allowed">
@@ -110,8 +112,8 @@ export function MobileStationsSection({ user, discoverPlaylistId }: MobileStatio
               <Sparkles size={36} className="text-white opacity-50 mb-2" />
               <span className="text-white/50 font-bold text-[18px] leading-tight text-center tracking-tight">Discover<br />Weekly</span>
             </div>
-            <p className="text-white/50 font-medium text-[14px] line-clamp-1 leading-snug">Belum Tersedia</p>
-            <p className="text-muted text-[13px] line-clamp-1 mt-0.5">Butuh history lagu</p>
+            <p className="text-white/50 font-medium text-[14px] line-clamp-1 leading-snug">{t('home.not_available_yet')}</p>
+            <p className="text-muted text-[13px] line-clamp-1 mt-0.5">{t('home.need_history')}</p>
           </div>
         )}
       </div>

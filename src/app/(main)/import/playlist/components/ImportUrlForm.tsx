@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useTranslation } from '@/context/LanguageContext';
 import { Clipboard, X, Loader2, Check } from 'lucide-react';
 
 interface ImportUrlFormProps {
@@ -11,6 +12,7 @@ interface ImportUrlFormProps {
 }
 
 export default function ImportUrlForm({ spotifyUrl, setSpotifyUrl, loading, onSubmit }: ImportUrlFormProps) {
+  const { t } = useTranslation();
   const [pastedFeedback, setPastedFeedback] = useState(false);
 
   const handlePaste = async () => {
@@ -43,7 +45,7 @@ export default function ImportUrlForm({ spotifyUrl, setSpotifyUrl, loading, onSu
           <input
             id="playlist-url"
             type="text"
-            placeholder="Tempel tautan Spotify, Apple Music, atau YouTube Music..."
+            placeholder={t('importer.paste_placeholder')}
             value={spotifyUrl}
             onChange={(e) => setSpotifyUrl(e.target.value)}
             className="w-full bg-white/5 border border-white/10 rounded-lg pl-3.5 pr-24 py-3 text-[14px] text-white placeholder:text-white/30 focus:outline-none focus:border-[#FA243C] focus:bg-white/10 transition-colors"
@@ -55,7 +57,7 @@ export default function ImportUrlForm({ spotifyUrl, setSpotifyUrl, loading, onSu
                 type="button"
                 onClick={handleClear}
                 className="p-1.5 text-white/40 hover:text-white rounded-md transition-colors"
-                title="Hapus"
+                title={t('common.delete')}
               >
                 <X size={15} />
               </button>
@@ -64,10 +66,10 @@ export default function ImportUrlForm({ spotifyUrl, setSpotifyUrl, loading, onSu
                 type="button"
                 onClick={handlePaste}
                 className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-white/70 hover:text-white bg-white/5 hover:bg-white/10 rounded-md border border-white/10 transition-colors"
-                title="Tempel dari Clipboard"
+                title="Paste from Clipboard"
               >
                 {pastedFeedback ? <Check size={12} className="text-white" /> : <Clipboard size={12} />}
-                <span>{pastedFeedback ? 'Ditempel!' : 'Tempel'}</span>
+                <span>{pastedFeedback ? 'Pasted!' : 'Paste'}</span>
               </button>
             )}
           </div>
@@ -87,10 +89,10 @@ export default function ImportUrlForm({ spotifyUrl, setSpotifyUrl, loading, onSu
           {loading ? (
             <>
               <Loader2 size={14} className="animate-spin" />
-              <span>Memproses...</span>
+              <span>{t('importer.importing')}</span>
             </>
           ) : (
-            <span>Extract Playlist</span>
+            <span>{t('importer.start_import')}</span>
           )}
         </button>
       </div>

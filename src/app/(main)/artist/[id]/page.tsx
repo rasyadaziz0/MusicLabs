@@ -27,6 +27,9 @@ const getArtistData = cache(async (rawId: string) => {
   }
 
   const cleanId = ArtistParser.stripArtistIdPrefix(rawId);
+  if (!cleanId || !/^[A-Za-z0-9_-]{1,64}$/.test(cleanId)) {
+    return { artist: null, topTracks: [], albums: [] };
+  }
 
   try {
     const [artistRes, topTracksRes, albumsRes] = await Promise.all([
@@ -67,6 +70,9 @@ async function searchArtistByName(baseUrl: string, artistName: string) {
 
     const foundArtist = results[0];
     const foundId = ArtistParser.stripArtistIdPrefix(foundArtist.id || '');
+    if (!foundId || !/^[A-Za-z0-9_-]{1,64}$/.test(foundId)) {
+      return { artist: null, topTracks: [], albums: [] };
+    }
 
     // Step 2: Fetch full artist data using the resolved ID
     const [artistRes, topTracksRes, albumsRes] = await Promise.all([

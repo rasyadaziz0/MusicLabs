@@ -2,6 +2,7 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { useFeatureFlags } from '@/context/FeatureFlagsContext';
+import { useTranslation } from '@/context/LanguageContext';
 import { useLibraryPlaylists } from '@/hooks/library/useLibraryPlaylists';
 import { ChevronLeft, Heart, ListMusic, PlusSquare } from 'lucide-react';
 import Link from 'next/link';
@@ -24,6 +25,7 @@ function getGradient(id: string) {
 }
 
 export default function AllPlaylistsPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { flags } = useFeatureFlags();
   const { data: playlists = [], isLoading: isPlaylistsLoading } = useLibraryPlaylists();
@@ -36,7 +38,7 @@ export default function AllPlaylistsPage() {
           <Link href="/library" className="p-2 -ml-2 text-[#FA243C] hover:bg-white/5 rounded-full transition-colors">
             <ChevronLeft size={28} strokeWidth={2.5} />
           </Link>
-          <h1 className="text-[28px] font-bold text-white tracking-tight">Playlists</h1>
+          <h1 className="text-[28px] font-bold text-white tracking-tight">{t('sidebar.playlists')}</h1>
         </div>
         <div className="flex items-center gap-2">
           {flags.feature_import_playlist && (
@@ -45,7 +47,7 @@ export default function AllPlaylistsPage() {
               className="text-xs font-semibold px-3 py-1.5 rounded-full bg-white/10 text-white/90 border border-white/10 hover:bg-white/20 transition-colors flex items-center gap-1.5"
             >
               <ListMusic size={14} className="text-[#FA243C]" />
-              <span>Import</span>
+              <span>{t('library.import')}</span>
             </Link>
           )}
           <Link href="/playlist/create" className="text-[#FA243C] p-2 rounded-full hover:bg-white/5 transition-colors">
@@ -56,7 +58,7 @@ export default function AllPlaylistsPage() {
 
       {/* Desktop Header */}
       <div className="hidden md:flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-white">Playlists</h1>
+        <h1 className="text-3xl font-bold text-white">{t('sidebar.playlists')}</h1>
         <div className="flex items-center gap-3">
           {flags.feature_import_playlist && (
             <Link
@@ -64,7 +66,7 @@ export default function AllPlaylistsPage() {
               className="text-xs font-semibold px-4 py-2 rounded-full bg-white/10 text-white/90 border border-white/10 hover:bg-white/20 transition-colors flex items-center gap-2"
             >
               <ListMusic size={16} className="text-[#FA243C]" />
-              <span>Import Playlist</span>
+              <span>{t('sidebar.import_playlist')}</span>
             </Link>
           )}
           <Link
@@ -72,7 +74,7 @@ export default function AllPlaylistsPage() {
             className="text-xs font-semibold px-4 py-2 rounded-full bg-[#FA243C] text-white hover:bg-[#ff3b53] transition-colors flex items-center gap-1.5"
           >
             <PlusSquare size={16} />
-            <span>Create Playlist</span>
+            <span>{t('library.create_playlist')}</span>
           </Link>
         </div>
       </div>
@@ -92,12 +94,12 @@ export default function AllPlaylistsPage() {
                 <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-2 text-[#FA243C]">
                   <ListMusic size={24} />
                 </div>
-                <p className="text-[13px] font-semibold text-white/90">Import Playlist</p>
+                <p className="text-[13px] font-semibold text-white/90">{t('sidebar.import_playlist')}</p>
                 <p className="text-[11px] text-white/40 mt-0.5">Spotify • Apple Music</p>
               </div>
               <div className="mt-1 px-0.5">
-                <p className="text-[13px] font-medium text-white/90 truncate">Import Playlist</p>
-                <p className="text-[12px] text-white/50 truncate">Transfer to Library</p>
+                <p className="text-[13px] font-medium text-white/90 truncate">{t('sidebar.import_playlist')}</p>
+                <p className="text-[12px] text-white/50 truncate">{t('library.transfer_to_library')}</p>
               </div>
             </Link>
           )}
@@ -113,7 +115,7 @@ export default function AllPlaylistsPage() {
             </div>
             <div className="mt-1 px-0.5">
               <p className="text-[13px] font-medium text-white/90 truncate flex items-center gap-1">
-                Favourite Songs <span className="text-[#FA243C] text-[10px]">★</span>
+                {t('sidebar.favourite_songs')} <span className="text-[#FA243C] text-[10px]">★</span>
               </p>
               <p className="text-[12px] text-white/50 truncate">AcadMusic</p>
             </div>
@@ -143,7 +145,7 @@ export default function AllPlaylistsPage() {
                 <div className="mt-1 px-0.5">
                   <p className="text-[13px] font-medium text-white/90 truncate">{playlist.name}</p>
                   <p className="text-[12px] text-white/50 truncate">
-                    {playlist.is_liked ? 'Liked Playlist' : (user?.user_metadata?.name || 'AcadMusic')}
+                    {playlist.is_liked ? t('library.liked_playlist') : (user?.user_metadata?.name || 'AcadMusic')}
                   </p>
                 </div>
               </Link>

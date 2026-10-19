@@ -88,7 +88,7 @@ export function usePlaylistController() {
     playlistId ?? null
   );
 
-  const { data: collaborators = [] } = usePlaylistCollaborators(playlistId);
+  const { data: collaborators = [] } = usePlaylistCollaborators(playlistId ?? null);
 
   const { data: ownerProfile } = useQuery({
     queryKey: ['user-profile', playlist?.user_id],

@@ -177,7 +177,7 @@ export class EmbedPlaylistPlayerController {
       if (!this.ytPlayer) {
         this.createYTPlayer(videoId);
       } else {
-        this.ytPlayer.loadVideoById(videoId);
+        (this.ytPlayer as any).loadVideoById?.(videoId);
         this.emit({ isLoading: false }); // Will auto-play due to loadVideoById
       }
     } catch {
@@ -189,7 +189,7 @@ export class EmbedPlaylistPlayerController {
     if (this.isDestroyed) return;
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
 
-    this.ytPlayer = new window.YT.Player('embed-yt-player', {
+    this.ytPlayer = new (window as any).YT.Player('embed-yt-player', {
       height: '1',
       width: '1',
       videoId,

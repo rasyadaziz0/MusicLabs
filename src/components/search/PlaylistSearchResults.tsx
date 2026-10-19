@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslation } from '@/context/LanguageContext';
 import { PlaylistSearchCard } from '@/components/search/PlaylistSearchCard';
 import { PlaylistSearchResult } from '@/types/models/PlaylistLike';
 import { motion } from 'framer-motion';
@@ -32,10 +33,11 @@ export function PlaylistSearchResults({
   isLoading,
   query,
 }: PlaylistSearchResultsProps) {
+  const { t } = useTranslation();
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <h2 className="text-xl font-bold text-white tracking-tight">Playlists</h2>
+        <h2 className="text-xl font-bold text-white tracking-tight">{t('search.playlists')}</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
           {[...Array(6)].map((_, i) => (
             <div key={i} className="flex flex-col gap-2 p-2.5 rounded-2xl bg-white/[0.02] border border-white/5 animate-pulse">
@@ -55,11 +57,11 @@ export function PlaylistSearchResults({
         <div className="w-14 h-14 rounded-full bg-white/5 flex items-center justify-center mb-4 text-white/40">
           <Library size={28} />
         </div>
-        <h3 className="text-lg font-bold text-white mb-1">No public playlists found</h3>
+        <h3 className="text-lg font-bold text-white mb-1">{t('profile.no_public_playlists')}</h3>
         <p className="text-sm text-white/50 max-w-sm">
           {query
-            ? `We couldn't find any public playlists matching "${query}".`
-            : 'Try searching for playlist titles.'}
+            ? `${t('search.no_results')} "${query}".`
+            : t('profile.no_public_playlists')}
         </p>
       </div>
     );
@@ -68,8 +70,8 @@ export function PlaylistSearchResults({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-white tracking-tight">Playlists</h2>
-        <span className="text-xs text-white/40">{playlists.length} found</span>
+        <h2 className="text-xl font-bold text-white tracking-tight">{t('search.playlists')}</h2>
+        <span className="text-xs text-white/40">{playlists.length} {t('search.found')}</span>
       </div>
 
       <motion.div

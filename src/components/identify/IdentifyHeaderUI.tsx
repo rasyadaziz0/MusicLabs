@@ -1,6 +1,7 @@
 'use client';
 
 import { ChevronLeft } from 'lucide-react';
+import { useTranslation } from '@/context/LanguageContext';
 import type { IIdentifyHeaderProps } from './IdentifyLayoutInterface';
 
 export function IdentifyHeaderUI({
@@ -11,6 +12,7 @@ export function IdentifyHeaderUI({
   quota,
   onBack,
 }: IIdentifyHeaderProps) {
+  const { t } = useTranslation();
   const isRecordingOrProcessing = state === 'recording' || state === 'processing';
 
   return (
@@ -18,7 +20,7 @@ export function IdentifyHeaderUI({
       <button
         onClick={onBack}
         className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/15 border border-white/5 flex items-center justify-center text-white/80 active:scale-95 transition-all outline-none flex-shrink-0 shadow-sm"
-        title="Kembali"
+        title={t('common.back')}
       >
         <ChevronLeft size={22} strokeWidth={2.2} />
       </button>
@@ -34,7 +36,7 @@ export function IdentifyHeaderUI({
               : 'text-white/65 hover:text-white font-medium disabled:opacity-40'
           }`}
         >
-          Identify Song
+          {t('identify.title')}
         </button>
         <button
           onClick={() => setMode('speech')}
@@ -46,7 +48,7 @@ export function IdentifyHeaderUI({
           } ${!speech.isSupported ? 'opacity-30' : ''}`}
           title={!speech.isSupported ? 'Speech recognition not supported in this browser' : ''}
         >
-          Sing / Say
+          {t('identify.sing_say')}
         </button>
       </div>
 
@@ -54,11 +56,11 @@ export function IdentifyHeaderUI({
       <div className="flex items-center justify-end flex-shrink-0">
         {mode === 'audd' ? (
           <div className="bg-white/10 border border-white/5 rounded-full px-3 py-1.5 text-[11px] sm:text-[12px] font-mono text-white/85 tracking-tight whitespace-nowrap shadow-sm">
-            <span className="text-white font-bold">{quota.remaining}</span> / 300 Left
+            <span className="text-white font-bold">{quota.remaining}</span> / 300 {t('identify.left_this_month')}
           </div>
         ) : (
           <div className="bg-[#fc3c44]/10 border border-[#fc3c44]/20 rounded-full px-3 py-1.5 text-[11px] sm:text-[12px] font-semibold text-[#fc3c44] tracking-wider uppercase whitespace-nowrap shadow-sm">
-            Unlimited
+            {t('identify.unlimited')}
           </div>
         )}
       </div>

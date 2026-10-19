@@ -1,11 +1,13 @@
 'use client';
 
+import { useTranslation } from '@/context/LanguageContext';
 import { useRecentSearches } from '@/hooks/useRecentSearches';
 import { Clock, TrendingUp, X } from 'lucide-react';
 import { SearchCategories } from './SearchCategories';
 import { RecentAndTrendingProps } from '@/types/components/search/RecentAndTrendingProps';
 
 export function RecentAndTrending({ onSearch }: RecentAndTrendingProps) {
+  const { t } = useTranslation();
   const { recentSearches, removeSearch, clearAll } = useRecentSearches();
 
   const curatedTrending = ['Taylor Swift', 'New Releases', 'Top 50', 'Pop Hits', 'Viral 50'];
@@ -15,9 +17,9 @@ export function RecentAndTrending({ onSearch }: RecentAndTrendingProps) {
       {recentSearches.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-[20px] font-bold text-white">Recent Searches</h2>
+            <h2 className="text-[20px] font-bold text-white">{t('search.recent_searches')}</h2>
             <button onClick={clearAll} className="text-xs font-medium text-white/50 hover:text-white transition-colors">
-              Clear All
+              {t('search.clear_all')}
             </button>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -38,7 +40,7 @@ export function RecentAndTrending({ onSearch }: RecentAndTrendingProps) {
       )}
 
       <div className="space-y-4">
-        <h2 className="text-[20px] font-bold text-white">Trending</h2>
+        <h2 className="text-[20px] font-bold text-white">{t('search.trending')}</h2>
         <div className="flex flex-wrap gap-2">
           {curatedTrending.map((search) => (
             <div key={search} className="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full px-4 py-2 transition-colors cursor-pointer" onClick={() => onSearch(search)}>

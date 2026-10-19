@@ -6,18 +6,19 @@ import { Home, Library, Radio, Search } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-const navItems = [
-  { icon: Home, label: 'Home', href: '/' },
-  { icon: Radio, label: 'Radio', href: '/radio' },
-  // { icon: AudioLines, label: 'Identify', href: '/identify' },
-  { icon: Library, label: 'Library', href: '/library' },
-];
-
+import { useTranslation } from '@/context/LanguageContext';
 import { useFeatureFlags } from '@/context/FeatureFlagsContext';
+
+const navItems = [
+  { icon: Home, key: 'home', href: '/' },
+  { icon: Radio, key: 'radio', href: '/radio' },
+  { icon: Library, key: 'library', href: '/library' },
+];
 
 export default function MobileNav() {
   const pathname = usePathname();
   const { flags } = useFeatureFlags();
+  const { t } = useTranslation();
 
   const activeNavItems = navItems.filter((item) => {
     if (item.href === '/radio' && !flags.feature_radio) return false;
@@ -31,7 +32,6 @@ export default function MobileNav() {
           {activeNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
-            const isIdentify = item.label === 'Identify';
 
             return (
               <Link
@@ -39,15 +39,13 @@ export default function MobileNav() {
                 href={item.href}
                 className={StyleHelper.cn(
                   "flex flex-col items-center justify-center flex-1 h-full gap-1 transition-all",
-                  isIdentify && !isActive
-                    ? "text-[#FA243C]/70 hover:text-[#FA243C]"
-                    : isActive
-                      ? "text-[#fc3c44] scale-105"
-                      : "text-white/60 hover:text-white"
+                  isActive
+                    ? "text-[#fc3c44] scale-105"
+                    : "text-white/60 hover:text-white"
                 )}
               >
                 <Icon size={24} className={isActive ? "fill-[#fc3c44]" : ""} strokeWidth={isActive ? 2 : 1.5} />
-                <span className="text-[10px] font-medium">{item.label}</span>
+                <span className="text-[10px] font-medium">{t(`sidebar.${item.key}`)}</span>
               </Link>
             );
           })}

@@ -30,7 +30,12 @@ export class ConnectRepository implements IConnectRepository {
 
     if (!this.channel) {
       this.channelName = targetChannel;
-      this.channel = supabase.channel(targetChannel);
+      this.channel = supabase.channel(targetChannel, {
+        config: {
+          private: true,
+          broadcast: { self: false },
+        },
+      });
 
       this.channel
         .on('presence', { event: 'sync' }, () => {

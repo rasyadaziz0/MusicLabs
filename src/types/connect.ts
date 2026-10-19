@@ -77,6 +77,7 @@ export interface RemoteCommand {
 export interface HandoffPayload {
   type: 'HANDOFF';
   targetTabInstanceId: string;
+  senderTabId?: string;
   track: Song;
   queue: Song[];
   queueIndex: number;

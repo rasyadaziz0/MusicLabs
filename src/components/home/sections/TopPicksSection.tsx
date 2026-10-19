@@ -1,3 +1,4 @@
+import { useTranslation } from '@/context/LanguageContext';
 import { TopPicksCard } from '@/components/home/HomeCards';
 import { ScrollArrows } from '@/components/ui/ScrollArrows';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
@@ -17,6 +18,7 @@ const topPicksGradients = [
 ];
 
 export function TopPicksSection({ trendingSongs, playTrack }: TopPicksSectionProps) {
+  const { t } = useTranslation();
   const { scrollRef, canScrollLeft, canScrollRight, scroll } = useHorizontalScroll();
 
   if (!trendingSongs || trendingSongs.length === 0) return null;
@@ -24,7 +26,7 @@ export function TopPicksSection({ trendingSongs, playTrack }: TopPicksSectionPro
   return (
     <section className="px-2">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-[20px] font-bold text-white">Top Picks for You</h2>
+        <h2 className="text-[20px] font-bold text-white">{t('home.top_picks')}</h2>
       </div>
       <div className="relative group/section">
         <ScrollArrows 

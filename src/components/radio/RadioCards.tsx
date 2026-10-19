@@ -1,5 +1,6 @@
 import { StyleHelper } from '@/lib/utils/StyleHelper';
 import { RadioStation } from '@/types/music';
+import { useTranslation } from '@/context/LanguageContext';
 import { Globe, Loader2, Pause, Play, Radio, Signal } from 'lucide-react';
 
 export function NowPlayingRadioBanner({
@@ -13,6 +14,7 @@ export function NowPlayingRadioBanner({
   isPlaying: boolean;
   togglePlay: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <section className="px-2">
       <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-[#FA243C]/15 via-[#FA243C]/5 to-transparent border border-[#FA243C]/20 p-5">
@@ -36,7 +38,7 @@ export function NowPlayingRadioBanner({
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#FA243C] opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[#FA243C]" />
               </span>
-              Now Playing
+              {t('radio.now_playing')}
             </p>
             <p className="text-[16px] font-bold text-white truncate leading-snug">
               {radioMeta?.title && radioMeta.title !== 'Connecting...' && radioMeta.title !== 'Live Radio'
@@ -167,11 +169,12 @@ export function RadioSkeletonGrid() {
 }
 
 export function RadioEmptyState({ searchQuery }: { searchQuery: string }) {
+  const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
       <Globe size={48} className="text-white/10 mb-4" />
       <p className="text-white/40 text-[15px]">
-        {searchQuery ? 'No stations found for your search' : 'No stations available in this category'}
+        {searchQuery ? t('radio.no_stations_found') : t('radio.no_stations_available')}
       </p>
     </div>
   );

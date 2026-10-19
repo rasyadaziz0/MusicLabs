@@ -1,3 +1,4 @@
+import { useTranslation } from '@/context/LanguageContext';
 import { Check, ChevronLeft, Play, Shuffle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { ReactNode } from 'react';
@@ -30,6 +31,7 @@ export function AppleMusicHeader({
   topRightActions,
   backHref,
 }: AppleMusicHeaderProps) {
+  const { t } = useTranslation();
   const router = useRouter();
 
   const handleBack = (e: React.MouseEvent) => {
@@ -49,7 +51,7 @@ export function AppleMusicHeader({
                 className="inline-flex items-center gap-2 px-3.5 py-1.5 text-white/70 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-colors text-sm font-medium active:scale-95 shadow-md"
               >
                 <ChevronLeft size={18} strokeWidth={2.5} />
-                Kembali
+                {t('common.back')}
               </button>
             </div>
             <div className="block md:hidden">
@@ -108,7 +110,7 @@ export function AppleMusicHeader({
                 onClick={onPlay}
               >
                 <Play size={18} fill="currentColor" />
-                Play
+                {t('player.play')}
               </button>
             )}
             

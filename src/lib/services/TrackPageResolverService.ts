@@ -56,6 +56,10 @@ export class TrackPageResolverService {
       return null;
     }
     const trackId = SlugHelper.restoreTrackId(cleanId);
+    if (!trackId) {
+      console.debug(`${this.loggerPrefix} Invalid cleanId in slug segment: "${cleanId}"`);
+      return null;
+    }
     return { cleanId, trackId };
   }
 
@@ -70,6 +74,10 @@ export class TrackPageResolverService {
     try {
       const baseUrl = API_BASE || 'http://localhost:3001';
       const cleanId = trackId.replace(/^itunes-/, '');
+      if (!cleanId || !/^[A-Za-z0-9_-]{1,64}$/.test(cleanId)) {
+        console.warn(`${this.loggerPrefix} Invalid trackId characters: "${trackId}"`);
+        return null;
+      }
       const res = await fetch(`${baseUrl}/api/tracks/${cleanId}`, { next: { revalidate: 3600 } });
       if (!res.ok) {
         console.debug(`${this.loggerPrefix} Backend returned error for "${trackId}"`);
@@ -90,7 +98,7 @@ export class TrackPageResolverService {
 
     try {
       const cleanId = ArtistParser.stripArtistIdPrefix(artistId);
-      if (cleanId && !ArtistParser.isSearchBasedId(artistId)) {
+      if (cleanId && !ArtistParser.isSearchBasedId(artistId) && /^[A-Za-z0-9_-]{1,64}$/.test(cleanId)) {
         const res = await fetch(`${baseUrl}/api/artists/${cleanId}/top?limit=20`, { next: { revalidate: 3600 } });
         if (res.ok) {
           const json = await res.json();

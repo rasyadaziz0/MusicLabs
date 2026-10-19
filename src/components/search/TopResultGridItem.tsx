@@ -2,6 +2,7 @@
 
 import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
 import { usePlayer } from '@/context/PlayerContext';
+import { useTranslation } from '@/context/LanguageContext';
 import { MusicApiService } from '@/lib/api/MusicApiService';
 import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { TopSearchResultItem } from '@/types/hooks/search';
@@ -20,6 +21,7 @@ export function TopResultGridItem({
   onPlay: (song: Song) => void;
   onClick: (item: any) => void;
 }) {
+  const { t } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [contextMenu, setContextMenu] = useState<{
     isOpen: boolean;
@@ -105,7 +107,7 @@ export function TopResultGridItem({
     });
   };
 
-  const typeLabel = isSong ? 'Song' : isAlbum ? 'Album' : 'Artist';
+  const typeLabel = isSong ? t('tracklist.song') : isAlbum ? t('tracklist.album') : t('tracklist.artist');
 
   return (
     <div

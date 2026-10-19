@@ -1,8 +1,6 @@
 import { registerTimeGetter } from '@/hooks/useHighPrecisionTime';
-import { recordRecentPlay } from '@/lib/supabase/music';
 import { Song } from '@/types/music';
 import { PlayerControllerOptions, PlayerState } from '@/types/player/controller';
-import { gooeyToast as toast } from 'goey-toast';
 import { AudioRouter } from './AudioRouter';
 import { QueueManager } from './QueueManager';
 import { SleepTimer } from './SleepTimer';
@@ -11,6 +9,9 @@ import * as PlayerCache from './cache';
 import { Html5Engine } from './engines/Html5Engine';
 import { RadioEngine } from './engines/RadioEngine';
 import { YouTubeEngine } from './engines/YouTubeEngine';
+import { PlaybackCoordinator } from './playback/PlaybackCoordinator';
+import { RadioPlaybackHandler } from './playback/RadioPlaybackHandler';
+import { PlaybackHistoryRecorder } from './playback/PlaybackHistoryRecorder';
 
 export const INITIAL_STATE: PlayerState = {
   currentTrack: null,
@@ -32,13 +33,25 @@ export const INITIAL_STATE: PlayerState = {
   isAutoplayEnabled: false,
 };
 
-// ─── Controller ───
+// Re-export modular player sub-components
+export {
+  PlaybackCoordinator,
+  RadioPlaybackHandler,
+  PlaybackHistoryRecorder,
+  QueueManager,
+  AudioRouter,
+  SleepTimer,
+  TrackResolver,
+};
 
 export class PlayerController {
   private router: AudioRouter;
   private queueMgr: QueueManager;
   private sleepTimer: SleepTimer;
   private resolver: TrackResolver;
+  private coordinator: PlaybackCoordinator;
+  private radioHandler: RadioPlaybackHandler;
+  private historyRecorder: PlaybackHistoryRecorder;
 
   private emit: (patch: Partial<PlayerState>) => void;
 
@@ -46,19 +59,18 @@ export class PlayerController {
   private _currentTrack: Song | null = null;
   private _isPlaying = false;
   private _volume = 1;
-  private _lastRecordedTrack: string | null = null;
-  private _userId: string | null = null;
   private _isMobile = false;
   private _progressTimer: NodeJS.Timeout | null = null;
 
   constructor(options: PlayerControllerOptions) {
     this.emit = options.onStateChange;
     this.resolver = new TrackResolver();
-    
+    this.historyRecorder = new PlaybackHistoryRecorder();
+
     // Cleanup old player caches
     PlayerCache.cleanupOldVersions();
 
-    // ── YouTube Engine ──
+    // ── Engine Setup ──
     const ytEngine = new YouTubeEngine({
       onPlay: () => this.emit({ isPlaying: true }),
       onPause: () => this.emit({ isPlaying: false }),
@@ -71,17 +83,15 @@ export class PlayerController {
           this.nextTrack();
         }
       },
-      onError: (errorCode) => this.handleYouTubeError(errorCode),
+      onError: (errorCode) => this.coordinator.handleYouTubeError(errorCode),
     });
 
-    // ── HTML5 Engine ──
     const html5Engine = new Html5Engine({
       onPlay: () => this.emit({ isPlaying: true }),
       onPause: () => this.emit({ isPlaying: false }),
       onEnded: () => this.nextTrack(),
     });
 
-    // ── Radio Engine ──
     const radioEngine = new RadioEngine({
       onPlay: () => this.emit({ isPlaying: true }),
       onPause: () => this.emit({ isPlaying: false }),
@@ -94,10 +104,19 @@ export class PlayerController {
       },
     });
 
-    // ── Audio Router ──
     this.router = new AudioRouter(ytEngine, html5Engine, radioEngine);
     ytEngine.initialize();
     html5Engine.initialize(1);
+
+    // ── Sub-handlers ──
+    this.radioHandler = new RadioPlaybackHandler(this.router, this.emit);
+    this.coordinator = new PlaybackCoordinator({
+      router: this.router,
+      resolver: this.resolver,
+      emit: this.emit,
+      stopRadio: () => this.radioHandler.stopRadio(),
+      getCurrentTrack: () => this._currentTrack,
+    });
 
     // ── High-precision time getter for karaoke ──
     registerTimeGetter(() => {
@@ -149,17 +168,9 @@ export class PlayerController {
     }
   }
 
-  // ────────────────────────────────────────
-  //  User / Auth
-  // ────────────────────────────────────────
-
   setUserId(userId: string | null): void {
-    this._userId = userId;
+    this.historyRecorder.setUserId(userId);
   }
-
-  // ────────────────────────────────────────
-  //  Playback
-  // ────────────────────────────────────────
 
   async playTrack(track: Song, newQueue?: Song[], target?: number | string): Promise<void> {
     this.router.html5.unlock();
@@ -179,226 +190,38 @@ export class PlayerController {
     this._currentTrack = track;
     this.resolver.resetFallbackTrack();
 
-    // Record recent play
-    this.recordPlay(track);
+    // Record listening history
+    this.historyRecorder.recordPlay(track);
 
-    // ── Radio ──
+    // Live Radio stream
     if (track.isRadio && track.radioStreamUrl) {
-      this.playRadioStream(track);
+      this.radioHandler.playRadioStream(
+        track,
+        this._volume,
+        () => this._currentTrack?.id ?? null
+      );
       return;
     }
 
-    this.stopRadio();
+    this.radioHandler.stopRadio();
 
-    // ── Guest (no user) → preview only ──
-    if (!this._userId) {
+    // Guest preview only (unauthenticated users)
+    if (!this.historyRecorder.getUserId()) {
       this.emit({ isResolving: true, isGuestPreview: true });
-      await this.applyPreviewFallback(track);
+      await this.coordinator.applyPreviewFallback(track);
       return;
     }
 
     this.emit({ isResolving: true });
     this.router.html5.stop();
 
-    // ── Mobile path ──
     if (this._isMobile) {
       this.router.youtube.stop();
-      await this.playMobile(track);
-      return;
-    }
-
-    // ── Desktop path ──
-    await this.playDesktop(track);
-  }
-
-  private async playDesktop(track: Song): Promise<void> {
-    const result = await this.resolver.resolveDesktop(
-      track,
-      () => this._currentTrack?.id ?? null
-    );
-
-    if (this._currentTrack?.id !== track.id) return;
-
-    switch (result.type) {
-      case 'youtube':
-        if (result.videoId && this.router.youtube.isReady()) {
-          this.router.setActive('youtube');
-          this.router.youtube.loadVideo(result.videoId);
-          this.emit({ isResolving: false });
-        } else if (result.videoId) {
-          // YT IFrame not ready — try HTML5 audio stream
-          console.warn('YT IFrame not ready, trying HTML5 Audio stream for desktop');
-          const audioUrl = await this.resolver.fetchAudioStreamUrl(result.videoId);
-          if (this._currentTrack?.id !== track.id) return;
-
-          if (audioUrl) {
-            this.router.setActive('html5');
-            this.emit({ isPreview: false, isResolving: false });
-            this.router.html5.playSrc(audioUrl);
-          } else {
-            await this.applyPreviewFallback(track);
-          }
-        } else {
-          await this.applyPreviewFallback(track);
-        }
-        break;
-
-      case 'preview':
-        if (result.audioUrl) {
-          this.applyPreviewResult(result.audioUrl);
-        } else {
-          this.emit({ isResolving: false, isError: true });
-          toast.error('Lagu tidak tersedia');
-        }
-        break;
-
-      default:
-        // 'error' — aborted or failed
-        break;
-    }
-  }
-
-  private async playMobile(track: Song): Promise<void> {
-    const result = await this.resolver.resolveMobile(
-      track,
-      () => this._currentTrack?.id ?? null
-    );
-
-    if (this._currentTrack?.id !== track.id) return;
-
-    switch (result.type) {
-      case 'html5':
-        if (result.audioUrl) {
-          this.router.setActive('html5');
-          this.emit({ isPreview: false, isResolving: false });
-          this.router.html5.playSrc(result.audioUrl);
-        }
-        break;
-
-      case 'youtube':
-        if (result.videoId && this.router.youtube.isReady()) {
-          this.router.setActive('youtube');
-          this.router.youtube.loadVideo(result.videoId);
-          this.emit({ isResolving: false });
-        } else {
-          await this.applyPreviewFallback(track);
-        }
-        break;
-
-      case 'preview':
-        if (result.audioUrl) {
-          this.applyPreviewResult(result.audioUrl);
-        } else {
-          this.emit({ isResolving: false, isError: true });
-          toast.error('Lagu tidak tersedia');
-        }
-        break;
-
-      default:
-        break;
-    }
-  }
-
-  // ────────────────────────────────────────
-  //  Preview helpers
-  // ────────────────────────────────────────
-
-  private applyPreviewResult(audioUrl: string): void {
-    this.emit({ isPreview: true, isResolving: false });
-    this.router.setActive('html5');
-    this.stopRadio();
-    this.router.youtube.stop();
-    this.router.html5.playSrc(audioUrl);
-  }
-
-  private async applyPreviewFallback(track: Song): Promise<void> {
-    const result = await this.resolver.resolvePreview(track);
-
-    if (this._currentTrack?.id !== track.id) return;
-
-    if (result.type === 'preview' && result.audioUrl) {
-      this.applyPreviewResult(result.audioUrl);
+      await this.coordinator.playMobile(track);
     } else {
-      this.emit({ isResolving: false, isError: true });
-      toast.error('Lagu tidak tersedia');
+      await this.coordinator.playDesktop(track);
     }
   }
-
-  // ────────────────────────────────────────
-  //  YouTube error handler
-  // ────────────────────────────────────────
-
-  private async handleYouTubeError(errorCode: number): Promise<void> {
-    const activeTrack = this._currentTrack;
-    if (!activeTrack) {
-      await this.applyPreviewFallback(activeTrack!);
-      return;
-    }
-
-    // Invalidate the problematic videoId cache to force a fresh resolve next time
-    PlayerCache.invalidate(activeTrack.id);
-
-    // Embed-blocked codes → try re-resolve
-    if (errorCode === 101 || errorCode === 150) {
-      this.emit({ isResolving: true });
-
-      const result = await this.resolver.resolveEmbedFallback(
-        activeTrack,
-        () => this._currentTrack?.id ?? null
-      );
-
-      if (this._currentTrack?.id !== activeTrack.id) return;
-
-      switch (result.type) {
-        case 'youtube':
-          if (result.videoId) {
-            this.router.youtube.loadVideo(result.videoId);
-            this.emit({ isResolving: false });
-            return;
-          }
-          break;
-        case 'preview':
-          if (result.audioUrl) {
-            this.applyPreviewResult(result.audioUrl);
-            return;
-          }
-          break;
-        default:
-          break;
-      }
-    }
-
-    console.error('Player Error. Falling back to preview.', errorCode);
-    await this.applyPreviewFallback(activeTrack);
-  }
-
-  // ────────────────────────────────────────
-  //  Radio
-  // ────────────────────────────────────────
-
-  private stopRadio(): void {
-    this.router.radio.stop();
-    this.emit({ isRadio: false, radioMeta: null });
-  }
-
-  private playRadioStream(track: Song): void {
-    this.router.html5.stop();
-    this.router.youtube.stop();
-    this.stopRadio();
-
-    this.emit({ isRadio: true, isPreview: false, isGuestPreview: false, isResolving: false });
-    this.router.setActive('radio');
-
-    this.router.radio.play(
-      track,
-      this._volume,
-      () => this._currentTrack?.id ?? null,
-    );
-  }
-
-  // ────────────────────────────────────────
-  //  Queue / Navigation
-  // ────────────────────────────────────────
 
   nextTrack(): void {
     this.resolver.abort();
@@ -475,7 +298,6 @@ export class PlayerController {
     this.queueMgr.reorderQueue(startIndex, endIndex);
   }
 
-
   shufflePlay(tracks: Song[]): void {
     if (tracks.length === 0) return;
     const firstTrack = this.queueMgr.shuffleAndPlay(tracks);
@@ -494,10 +316,6 @@ export class PlayerController {
     this.queueMgr.toggleAutoplay();
   }
 
-  // ────────────────────────────────────────
-  //  Sleep Timer
-  // ────────────────────────────────────────
-
   setSleepTimer(minutes: number): void {
     this.sleepTimer.start(minutes);
   }
@@ -506,29 +324,9 @@ export class PlayerController {
     this.sleepTimer.stop();
   }
 
-  // ────────────────────────────────────────
-  //  State sync (called by React wrapper)
-  // ────────────────────────────────────────
-
-  /** Sync isPlaying from React state into the controller's internal ref */
   syncIsPlaying(isPlaying: boolean): void {
     this._isPlaying = isPlaying;
   }
-
-  // ────────────────────────────────────────
-  //  Listening history
-  // ────────────────────────────────────────
-
-  private recordPlay(track: Song): void {
-    if (this._userId && this._lastRecordedTrack !== track.id) {
-      this._lastRecordedTrack = track.id;
-      recordRecentPlay(this._userId, track.id).catch(console.error);
-    }
-  }
-
-  // ────────────────────────────────────────
-  //  Lifecycle
-  // ────────────────────────────────────────
 
   destroy(): void {
     if (this._progressTimer) clearInterval(this._progressTimer);

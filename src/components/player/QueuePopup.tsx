@@ -1,6 +1,7 @@
 'use client';
 
 import { GlassBar } from '@/components/ui/LiquidGlass';
+import { useTranslation } from '@/context/LanguageContext';
 import { usePlayer } from '@/context/PlayerContext';
 import { getPortalRoot } from '@/lib/utils/portalRoot';
 import {
@@ -28,6 +29,7 @@ import { SortableTrackRow } from './SortableTrackRow';
 import { QueuePopupProps } from "@/types/components/player/QueuePopupProps";
 
 export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
+  const { t } = useTranslation();
   const player = usePlayer();
   // Instantiate the controller pattern (OOP approach) to handle the complex queue mapping and DnD logic
   const controller = useMemo(() => new QueuePopupController(player), [player]);
@@ -81,7 +83,7 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
                     </svg>
                   </button>
                   <span className="queue-header-title">
-                    Up next
+                    {t('player.up_next')}
                   </span>
                 </div>
                 <div className="queue-header-right">
@@ -89,12 +91,12 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
                     onClick={controller.clearQueue}
                     className="queue-btn-clear"
                   >
-                    Clear
+                    {t('player.clear')}
                   </button>
                   <button
                     onClick={controller.cycleRepeatMode}
                     className={`queue-btn-action ${controller.repeatMode !== 'none' ? 'active' : 'inactive'}`}
-                    aria-label="Loop"
+                    aria-label={t('player.loop')}
                   >
                     {/* Repeat / Infinity icon */}
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -115,7 +117,7 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
                   <button
                     onClick={player.toggleAutoplay}
                     className={`queue-btn-action ${player.isAutoplayEnabled ? 'active' : 'inactive'}`}
-                    aria-label="Autoplay"
+                    aria-label={t('player.autoplay')}
                   >
                     <Infinity size={20} strokeWidth={2.5} />
                   </button>
@@ -127,7 +129,7 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
                 {!controller.hasUpcomingTracks ? (
                   <div className="queue-empty-state">
                     <p className="queue-empty-text">
-                      No upcoming tracks
+                      {t('player.no_upcoming')}
                     </p>
                   </div>
                 ) : (
@@ -149,7 +151,7 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
                       >
                         {controller.manualItems.length > 0 && (
                           <div className="queue-section-title">
-                            Playing Next
+                            {t('player.playing_next')}
                           </div>
                         )}
                         {controller.manualItems.map((track) => (
@@ -165,7 +167,7 @@ export default function QueuePopup({ isOpen, onClose }: QueuePopupProps) {
                     {controller.autoplayItems.length > 0 && (
                       <>
                         <div className="queue-section-title-autoplay queue-section-title">
-                          <span>Autoplay</span>
+                          <span>{t('player.autoplay')}</span>
                           <Infinity size={14} strokeWidth={2.5} />
                         </div>
                         {controller.autoplayItems.map((track) => (

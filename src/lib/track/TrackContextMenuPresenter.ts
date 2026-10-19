@@ -27,12 +27,13 @@ export class TrackContextMenuPresenter {
 
   public static getEmbedCode(track: Song, origin?: string): string {
     const base = origin ?? this.getOrigin();
+    const safeTrackId = encodeURIComponent(track.id || '').replace(/['"]/g, '');
     const escapedTitle = escapeHtmlAttr(track.name);
     const escapedArtist = track.artists?.primary?.[0]?.name
       ? escapeHtmlAttr(track.artists.primary[0].name)
       : '';
-    const embedTitle = `${escapedTitle} — ${escapedArtist} | AcadMusic Embed`;
-    const src = `${base}/embed/track/${track.id}`;
+    const embedTitle = escapeHtmlAttr(`${track.name} — ${track.artists?.primary?.[0]?.name || ''} | AcadMusic Embed`);
+    const src = escapeHtmlAttr(`${base}/embed/track/${safeTrackId}`);
     return `<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="175" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="${src}" title="${embedTitle}"></iframe>`;
   }
 
@@ -57,7 +58,7 @@ export class TrackContextMenuPresenter {
   }
 
   public static getCoverImage(track: Song): string | null {
-    return ImageHelper.getBestImageUrl(track.image);
+    return ImageHelper.getBestImageUrl(track.image) ?? null;
   }
 
   public static getFlyoutDirection(position: { x: number; y: number } | null): 'left' | 'right' {

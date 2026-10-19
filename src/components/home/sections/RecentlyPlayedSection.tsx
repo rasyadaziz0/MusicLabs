@@ -1,3 +1,4 @@
+import { useTranslation } from '@/context/LanguageContext';
 import { TrackCard } from '@/components/home/HomeCards';
 import { ScrollArrows } from '@/components/ui/ScrollArrows';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
@@ -13,12 +14,13 @@ export interface RecentlyPlayedSectionProps {
 
 
 export function RecentlyPlayedSection({ recentlyPlayedSongs, isRecentLoading, user, playTrack }: RecentlyPlayedSectionProps) {
+  const { t } = useTranslation();
   const { scrollRef, canScrollLeft, canScrollRight, scroll } = useHorizontalScroll();
 
   return (
     <section className="px-2">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-[20px] font-bold text-white">{user ? 'Recently Played' : 'Trending Now'}</h2>
+        <h2 className="text-[20px] font-bold text-white">{user ? t('home.recently_played') : t('home.trending_now')}</h2>
       </div>
       <div className="relative group/section">
         <ScrollArrows 
@@ -45,7 +47,7 @@ export function RecentlyPlayedSection({ recentlyPlayedSongs, isRecentLoading, us
               />
             ))
           ) : (
-            <p className="text-sm text-muted">No recently played songs.</p>
+            <p className="text-sm text-muted">{t('home.no_recently_played')}</p>
           )}
         </div>
       </div>

@@ -66,10 +66,10 @@ export default function PrivateProfileView({ profile, isLoggedIn }: PrivateProfi
         <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl px-6 py-5 max-w-sm w-full text-center">
           <Lock size={20} className="text-white/30 mx-auto mb-3" />
           <p className="text-[15px] font-semibold text-white/80 mb-1.5">
-            Akun ini bersifat privat
+            {t('profile.private_title')}
           </p>
           <p className="text-[13px] text-white/40 leading-relaxed">
-            Profil ini disetel ke privat oleh pemiliknya. Kamu tidak bisa melihat playlist dan aktivitas mereka.
+            {t('profile.private_desc')}
           </p>
         </div>
       </div>

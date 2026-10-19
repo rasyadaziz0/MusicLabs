@@ -1,19 +1,25 @@
 'use client';
 
 import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/lib/supabase/client';
 import { ConnectRepository } from '@/lib/supabase/repositories/ConnectRepository';
 import {
-    ConnectBroadcastMessage,
-    DeviceInfo,
-    RemoteCommandType,
-    RemotePlaybackState,
-    StateSyncPayload
+  ConnectBroadcastMessage,
+  DeviceInfo,
+  RemoteCommandType,
+  RemotePlaybackState,
+  StateSyncPayload,
 } from '@/types/connect';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import * as ConnectEngine from '../lib/services/connect';
-
+import { ConnectPayloadBuilder } from '../lib/services/connect/ConnectPayloadBuilder';
+import { ConnectBroadcastRouter } from '../lib/services/connect/ConnectBroadcastRouter';
 import { UseSpotifyConnectOptions } from '@/types/hooks/spotify';
 
+/**
+ * useSpotifyConnect
+ * React hook connecting local audio playback to the Supabase Realtime multi-device ecosystem.
+ */
 export function useSpotifyConnect(options: UseSpotifyConnectOptions) {
   const { user } = useAuth();
   const repo = ConnectRepository.getInstance();
@@ -22,6 +28,9 @@ export function useSpotifyConnect(options: UseSpotifyConnectOptions) {
   const [deviceLabel, setDeviceLabel] = useState(() => ConnectEngine.getOrCreateDeviceLabel());
 
   const [connectedDevices, setConnectedDevices] = useState<DeviceInfo[]>([]);
+  const connectedDevicesRef = useRef<DeviceInfo[]>([]);
+  connectedDevicesRef.current = connectedDevices;
+
   const [activeTabId, setActiveTabId] = useState<string | null>(null);
   const [isElecting, setIsElecting] = useState(false);
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
@@ -53,115 +62,92 @@ export function useSpotifyConnect(options: UseSpotifyConnectOptions) {
     [myTabId]
   );
 
+  const sendFullSync = useCallback(() => {
+    const cbs = callbacksRef.current;
+    const track = cbs.getCurrentTrack();
+    if (!track) return;
+
+    const payload = ConnectPayloadBuilder.buildFullSync('track_change', {
+      track,
+      queue: cbs.getQueue(),
+      queueIndex: cbs.getQueueIndex(),
+      position: cbs.getCurrentTime(),
+      isPlaying: cbs.getIsPlaying(),
+      volume: cbs.getVolume(),
+      duration: cbs.getDuration(),
+      isShuffled: cbs.getIsShuffled(),
+      repeatMode: cbs.getRepeatMode(),
+    });
+
+    sendBroadcast(payload);
+  }, [sendBroadcast]);
+
   const handleBroadcast = useCallback(
     (msg: ConnectBroadcastMessage) => {
-      const cbs = callbacksRef.current;
-      if (!msg || !msg.type) return;
-
-      if (msg.type === 'CLAIM_ACTIVE') {
-        setActiveTabId(msg.tabInstanceId);
-        setIsElecting(false);
-        if (msg.tabInstanceId !== myTabId) {
-          cbs.onActivePlayerPause();
-        }
-        return;
-      }
-
-      if (msg.type === 'AUTOPLAY_BLOCKED') {
-        if (msg.tabInstanceId === activeTabId) {
-          setAutoplayBlocked(true);
-        }
-        return;
-      }
-
-      if (msg.type === 'REQUEST_FULL_SYNC') {
-        if (isActivePlayer) {
-          const track = cbs.getCurrentTrack();
-          if (track) {
-            sendBroadcast({
-              type: 'FULL_SYNC',
-              event: 'track_change',
-              track,
-              queue: cbs.getQueue(),
-              queueIndex: cbs.getQueueIndex(),
-              position: cbs.getCurrentTime(),
-              timestamp: Date.now(),
-              isPlaying: cbs.getIsPlaying(),
-              volume: cbs.getVolume(),
-              duration: cbs.getDuration(),
-              isShuffled: cbs.getIsShuffled(),
-              repeatMode: cbs.getRepeatMode(),
-            });
-          }
-        }
-        return;
-      }
-
-      if (isActivePlayer) {
-        if (msg.type === 'REMOTE_CMD') {
-          cbs.onReceiveCommand(msg.command, msg.payload);
-        } else if (msg.type === 'HANDOFF' && msg.targetTabInstanceId === myTabId) {
-          cbs.onReceiveHandoff(msg);
-        }
-        return;
-      }
-
-      if (!isActivePlayer) {
-        if (msg.type === 'FULL_SYNC') {
-          setRemoteState({
-            track: msg.track,
-            isPlaying: msg.isPlaying,
-            position: msg.position,
-            timestamp: Date.now(), // Use local time to avoid clock skew
-            volume: msg.volume,
-            duration: msg.duration,
-            queue: msg.queue,
-            queueIndex: msg.queueIndex,
-            isShuffled: msg.isShuffled,
-            repeatMode: msg.repeatMode,
-          });
-        } else if (msg.type === 'LIGHTWEIGHT_SYNC') {
-          setRemoteState((prev) => {
-            if (!prev) return null;
-            return {
-              ...prev,
-              isPlaying: msg.isPlaying,
-              position: msg.position,
-              timestamp: Date.now(), // Use local time to avoid clock skew
-              volume: msg.volume,
-            };
-          });
-        }
-      }
+      ConnectBroadcastRouter.route(msg, {
+        myTabId,
+        activeTabId,
+        isActivePlayer,
+        connectedDevices: connectedDevicesRef.current,
+        callbacks: callbacksRef.current,
+        onSetActiveTab: (tabId) => {
+          setActiveTabId(tabId);
+          setIsElecting(false);
+        },
+        onSetAutoplayBlocked: setAutoplayBlocked,
+        onUpdateRemoteState: setRemoteState,
+        onSendFullSync: sendFullSync,
+      });
     },
-    [myTabId, activeTabId, isActivePlayer, sendBroadcast]
+    [myTabId, activeTabId, isActivePlayer, sendFullSync]
   );
 
   useEffect(() => {
     if (!user?.id || !myTabId) return;
+    let isCancelled = false;
 
-    repo.joinChannel(
-      user.id,
-      (devices) => {
-        setConnectedDevices(devices);
-        setIsElecting(true);
-        if (electionTimerRef.current) clearTimeout(electionTimerRef.current);
-        electionTimerRef.current = setTimeout(() => runElection(devices), 1500);
-      },
-      handleBroadcast
-    );
+    const initChannel = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+          await supabase.realtime.setAuth(session.access_token);
+        }
+      } catch (err) {
+        console.warn('[Connect] Failed to set realtime auth token:', err);
+      }
 
-    repo.trackPresence({
-      tabInstanceId: myTabId,
-      label: deviceLabel,
-      deviceType: ConnectEngine.detectDeviceType(),
-      isActivePlayer: false,
-      joinedAt: Date.now(),
-    });
+      if (isCancelled) return;
 
-    return () => repo.leaveChannel();
+      repo.joinChannel(
+        user.id,
+        (devices) => {
+          setConnectedDevices(devices);
+          connectedDevicesRef.current = devices;
+          setIsElecting(true);
+          if (electionTimerRef.current) clearTimeout(electionTimerRef.current);
+          electionTimerRef.current = setTimeout(() => runElection(devices), 1500);
+        },
+        handleBroadcast
+      );
+
+      repo.trackPresence({
+        tabInstanceId: myTabId,
+        label: deviceLabel,
+        deviceType: ConnectEngine.detectDeviceType(),
+        isActivePlayer: false,
+        joinedAt: Date.now(),
+      });
+    };
+
+    initChannel();
+
+    return () => {
+      isCancelled = true;
+      repo.leaveChannel();
+    };
   }, [user?.id, myTabId, deviceLabel, repo, runElection, handleBroadcast]);
 
+  // Interpolate remote track position every 1 second
   useEffect(() => {
     if (isActivePlayer || !remoteState?.isPlaying) return;
     const interval = setInterval(() => {
@@ -182,22 +168,23 @@ export function useSpotifyConnect(options: UseSpotifyConnectOptions) {
     return () => clearInterval(interval);
   }, [isActivePlayer, remoteState?.isPlaying]);
 
+  // Periodic lightweight sync from active player to remotes
   useEffect(() => {
     if (!isActivePlayer) return;
     syncIntervalRef.current = setInterval(() => {
       const track = callbacksRef.current.getCurrentTrack();
       if (!track) return;
-      sendBroadcast({
-        type: 'LIGHTWEIGHT_SYNC',
-        event: 'seek',
+
+      const payload = ConnectPayloadBuilder.buildLightweightSync('seek', {
         trackId: track.id,
         position: callbacksRef.current.getCurrentTime(),
-        timestamp: Date.now(),
         isPlaying: callbacksRef.current.getIsPlaying(),
         volume: callbacksRef.current.getVolume(),
         duration: callbacksRef.current.getDuration(),
       });
+      sendBroadcast(payload);
     }, 4000);
+
     return () => {
       if (syncIntervalRef.current) clearInterval(syncIntervalRef.current);
     };
@@ -207,9 +194,8 @@ export function useSpotifyConnect(options: UseSpotifyConnectOptions) {
     (targetId: string) => {
       const track = callbacksRef.current.getCurrentTrack();
       if (!track) return;
-      sendBroadcast({
-        type: 'HANDOFF',
-        targetTabInstanceId: targetId,
+
+      const handoffMsg = ConnectPayloadBuilder.buildHandoff(targetId, myTabId, {
         track,
         queue: callbacksRef.current.getQueue(),
         queueIndex: callbacksRef.current.getQueueIndex(),
@@ -219,20 +205,17 @@ export function useSpotifyConnect(options: UseSpotifyConnectOptions) {
         isShuffled: callbacksRef.current.getIsShuffled(),
         repeatMode: callbacksRef.current.getRepeatMode(),
       });
-      sendBroadcast({ type: 'CLAIM_ACTIVE', tabInstanceId: targetId });
+
+      sendBroadcast(handoffMsg);
+      sendBroadcast(ConnectPayloadBuilder.buildClaimActive(targetId));
     },
-    [sendBroadcast]
+    [sendBroadcast, myTabId]
   );
 
   const sendRemoteCommand = useCallback(
     (command: RemoteCommandType, payload?: { time?: number; volume?: number }) => {
-      sendBroadcast({
-        type: 'REMOTE_CMD',
-        command,
-        payload: payload ? { time: payload.time, volume: payload.volume } : undefined,
-        optimisticId: ConnectEngine.generateUUID(),
-        senderTabId: myTabId,
-      });
+      const cmdMsg = ConnectPayloadBuilder.buildRemoteCommand(command, myTabId, payload);
+      sendBroadcast(cmdMsg);
     },
     [myTabId, sendBroadcast]
   );
@@ -264,31 +247,27 @@ export function useSpotifyConnect(options: UseSpotifyConnectOptions) {
       if (!track) return;
 
       if (event === 'track_change' || event === 'queue_change') {
-        sendBroadcast({
-          type: 'FULL_SYNC',
-          event,
+        const payload = ConnectPayloadBuilder.buildFullSync(event, {
           track,
           queue: callbacksRef.current.getQueue(),
           queueIndex: callbacksRef.current.getQueueIndex(),
           position: callbacksRef.current.getCurrentTime(),
-          timestamp: Date.now(),
           isPlaying: callbacksRef.current.getIsPlaying(),
           volume: callbacksRef.current.getVolume(),
           duration: callbacksRef.current.getDuration(),
           isShuffled: callbacksRef.current.getIsShuffled(),
           repeatMode: callbacksRef.current.getRepeatMode(),
         });
+        sendBroadcast(payload);
       } else {
-        sendBroadcast({
-          type: 'LIGHTWEIGHT_SYNC',
-          event,
+        const payload = ConnectPayloadBuilder.buildLightweightSync(event, {
           trackId: track.id,
           position: callbacksRef.current.getCurrentTime(),
-          timestamp: Date.now(),
           isPlaying: callbacksRef.current.getIsPlaying(),
           volume: callbacksRef.current.getVolume(),
           duration: callbacksRef.current.getDuration(),
         });
+        sendBroadcast(payload);
       }
     },
     [isActivePlayer, sendBroadcast]

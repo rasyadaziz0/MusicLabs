@@ -6,6 +6,7 @@ import { AppleMusicHeader } from '@/components/ui/AppleMusicHeader';
 import { AppleMusicTrackList } from '@/components/ui/AppleMusicTrackList';
 import TrackLikeButton from '@/components/ui/TrackLikeButton';
 import { useAuth } from '@/context/AuthContext';
+import { useTranslation } from '@/context/LanguageContext';
 import { usePlayer } from '@/context/PlayerContext';
 import { useLikedSongs } from '@/hooks/library/useLikedSongs';
 import { Heart, Link2, MoreHorizontal, Play, Share, Shuffle } from 'lucide-react';
@@ -15,6 +16,7 @@ import { gooeyToast as toast } from 'goey-toast';
 import { useEffect, useRef, useState } from 'react';
 
 export default function LikedSongsPage() {
+  const { t } = useTranslation();
   const { user, signInWithGoogle } = useAuth();
   const { playTrack, shufflePlay } = usePlayer();
   const { data: likedSongs = [], isLoading } = useLikedSongs();
@@ -42,8 +44,8 @@ export default function LikedSongsPage() {
     <>
       <div className="space-y-8">
         <AppleMusicHeader
-          title={<div className="flex items-center gap-2">Favourite Songs <Heart className="text-red-500" fill="currentColor" size={24} /></div>}
-          description="Updated Today"
+          title={<div className="flex items-center gap-2">{t('sidebar.favourite_songs')} <Heart className="text-red-500" fill="currentColor" size={24} /></div>}
+          description={t('library.updated_today')}
           cover={
             <>
               <div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent opacity-50"></div>
@@ -74,7 +76,7 @@ export default function LikedSongsPage() {
                     }} 
                     className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between"
                   >
-                    <span>Play All</span>
+                    <span>{t('library.play_all')}</span>
                     <Play size={15} fill="currentColor" className="text-white/60" />
                   </button>
                   <button 
@@ -84,7 +86,7 @@ export default function LikedSongsPage() {
                     }} 
                     className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between"
                   >
-                    <span>Shuffle Play</span>
+                    <span>{t('library.shuffle_play')}</span>
                     <Shuffle size={15} className="text-white/60" />
                   </button>
                   
@@ -94,7 +96,7 @@ export default function LikedSongsPage() {
                     onClick={handleShare} 
                     className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between"
                   >
-                    <span>Share</span>
+                    <span>{t('context_menu.share')}</span>
                     <Share size={15} className="text-white/60" />
                   </button>
                   
@@ -108,7 +110,7 @@ export default function LikedSongsPage() {
                     }} 
                     className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between"
                   >
-                    <span>Copy Link</span>
+                    <span>{t('context_menu.copy_link')}</span>
                     <Link2 size={15} className="text-white/60" />
                   </button>
                 </div>
@@ -122,14 +124,14 @@ export default function LikedSongsPage() {
             <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-primary/15 text-primary">
               <Heart size={28} />
             </div>
-            <h2 className="mb-2 text-2xl font-bold">Login dulu untuk buka liked songs</h2>
-            <p className="text-muted">Setelah login, lagu yang kamu like bakal otomatis muncul di sini.</p>
+            <h2 className="mb-2 text-2xl font-bold">{t('library.login_liked_title')}</h2>
+            <p className="text-muted">{t('library.login_liked_desc')}</p>
             <button
               type="button"
               onClick={() => signInWithGoogle()}
               className="mt-5 rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black"
             >
-              Login with Google
+              {t('library.login_google')}
             </button>
           </div>
         ) : isLoading ? (
@@ -161,12 +163,12 @@ export default function LikedSongsPage() {
             <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-primary/15 text-primary">
               <Heart size={28} />
             </div>
-            <h2 className="mb-2 text-2xl font-bold">No liked songs yet</h2>
+            <h2 className="mb-2 text-2xl font-bold">{t('library.no_liked_songs')}</h2>
             <p className="text-muted">
-              Tap ikon hati dari player atau hasil pencarian buat nyimpen lagu ke sini.
+              {t('library.no_liked_songs_desc')}
             </p>
             <Link href="/search" className="mt-5 inline-flex rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white">
-              Cari Lagu
+              {t('library.search_songs')}
             </Link>
           </div>
         )}

@@ -6,6 +6,7 @@ import FeatureDisabled from '@/components/ui/FeatureDisabled';
 import { ScrollArrows } from '@/components/ui/ScrollArrows';
 import { useAuth } from '@/context/AuthContext';
 import { useFeatureFlags } from '@/context/FeatureFlagsContext';
+import { useTranslation } from '@/context/LanguageContext';
 import { usePlayer } from '@/context/PlayerContext';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 import { useReplayMonthly } from '@/hooks/useReplayMonthly';
@@ -32,6 +33,7 @@ function generateYears(startYear = 2024) {
 // ── Main Page ───────────────────────────────────────────────
 
 export default function RecapPage() {
+  const { t } = useTranslation();
   const { flags } = useFeatureFlags();
   const { user, signInWithGoogle } = useAuth();
   const { playTrack } = usePlayer();
@@ -94,7 +96,7 @@ export default function RecapPage() {
           onClick={() => signInWithGoogle()}
           className="px-8 py-3 rounded-full bg-[#FA243C] text-white font-bold hover:bg-opacity-90 transition-all active:scale-95"
         >
-          Sign In
+          {t('sidebar.sign_in')}
         </button>
       </div>
     );
@@ -177,7 +179,7 @@ export default function RecapPage() {
               {!hasData ? (
                 <div className="flex flex-col items-center justify-center py-20 text-center">
                   <Disc3 size={64} className="text-white/10 mb-6" />
-                  <h3 className="text-[24px] font-bold text-white mb-2 tracking-tight">Nothing to hear here.</h3>
+                  <h3 className="text-[24px] font-bold text-white mb-2 tracking-tight">{t('recap.nothing_here')}</h3>
                   <p className="text-[16px] text-white/50 max-w-sm">
                     You haven&apos;t played any tracks in {monthLabel}. Go listen to some music!
                   </p>
@@ -188,7 +190,7 @@ export default function RecapPage() {
                   {/* Milestones (Stats) */}
                   <section>
                     <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-[26px] md:text-[32px] font-bold text-white tracking-tight">Milestones</h2>
+                      <h2 className="text-[26px] md:text-[32px] font-bold text-white tracking-tight">{t('recap.milestones')}</h2>
                     </div>
                     <div className="relative group/section">
                       <ScrollArrows 
@@ -237,7 +239,7 @@ export default function RecapPage() {
                   {/* Top Songs */}
                   <section>
                     <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-[26px] md:text-[32px] font-bold text-white tracking-tight">Top Songs</h2>
+                      <h2 className="text-[26px] md:text-[32px] font-bold text-white tracking-tight">{t('recap.top_tracks')}</h2>
                     </div>
                     <div className="relative group/section">
                       <ScrollArrows 
@@ -264,7 +266,7 @@ export default function RecapPage() {
                   {topArtists.length > 0 && (
                     <section>
                       <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-[26px] md:text-[32px] font-bold text-white tracking-tight">Top Artists</h2>
+                        <h2 className="text-[26px] md:text-[32px] font-bold text-white tracking-tight">{t('recap.top_artists')}</h2>
                       </div>
                       <div className="relative group/section">
                         <ScrollArrows 

@@ -50,7 +50,8 @@ export class PlaylistPresenter {
   get coverUrl(): string {
     return (
       this.playlist?.cover_url ||
-      ImageHelper.getBestImageUrl(this.tracks[0]?.image ?? [])
+      ImageHelper.getBestImageUrl(this.tracks[0]?.image ?? []) ||
+      ''
     );
   }
 
@@ -96,8 +97,9 @@ export class PlaylistPresenter {
 
   getEmbedSnippet(origin = ''): string {
     if (!this.playlist) return '';
+    const safePlaylistId = encodeURIComponent(this.playlist.id || '').replace(/['"]/g, '');
     const escapedTitle = escapeHtmlAttr(this.playlist.name);
-    const src = `${origin}/embed/playlist/${this.playlist.id}`;
+    const src = escapeHtmlAttr(`${origin}/embed/playlist/${safePlaylistId}`);
     return `<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="450" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="${src}" title="${escapedTitle}"></iframe>`;
   }
 }

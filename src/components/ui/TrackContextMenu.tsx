@@ -15,6 +15,7 @@ import {
   Code,
 } from 'lucide-react';
 import { Song } from '@/types/music';
+import { useTranslation } from '@/context/LanguageContext';
 import { ContextMenu } from './context-menu/ContextMenu';
 import { ContextMenuItem, ContextMenuDivider } from './context-menu/ContextMenuItem';
 import { PlaylistSubMenu } from './context-menu/PlaylistSubMenu';
@@ -37,6 +38,7 @@ export function TrackContextMenu({
   onClose,
   showPlayerControls,
 }: TrackContextMenuProps) {
+  const { t } = useTranslation();
   const controller = useTrackContextMenuController({ track, isOpen, onClose });
 
   if (!track) return null;
@@ -62,12 +64,12 @@ export function TrackContextMenu({
       <div className="py-1">
         <ContextMenuItem
           icon={<PlaySquare size={15} />}
-          label="Play Next"
+          label={t('context_menu.play_next')}
           onClick={controller.handlePlayNext}
         />
         <ContextMenuItem
           icon={<ListPlus size={15} />}
-          label="Play Last"
+          label={t('context_menu.play_last')}
           onClick={controller.handleAddToQueue}
         />
 
@@ -75,7 +77,7 @@ export function TrackContextMenu({
 
         <ContextMenuItem
           icon={<Heart size={15} fill={controller.isLiked ? 'currentColor' : 'none'} />}
-          label={controller.isLiked ? 'Remove from Library' : 'Add to Library'}
+          label={controller.isLiked ? t('context_menu.remove_from_library') : t('context_menu.add_to_library')}
           onClick={(e) => {
             e.stopPropagation();
             controller.handleToggleLike();
@@ -90,7 +92,7 @@ export function TrackContextMenu({
         >
           <ContextMenuItem
             icon={<ListPlus size={15} />}
-            label="Add to a Playlist"
+            label={t('context_menu.add_to_playlist')}
             onClick={(e) => {
               e.stopPropagation();
               if (controller.isMobile) controller.setShowPlaylists(true);
@@ -117,7 +119,7 @@ export function TrackContextMenu({
 
         <ContextMenuItem
           icon={<Radio size={15} />}
-          label="Create Station"
+          label={t('context_menu.create_station')}
           onClick={controller.handleCreateStation}
         />
 
@@ -126,14 +128,14 @@ export function TrackContextMenu({
         {hasAlbum && (
           <ContextMenuItem
             icon={<Disc3 size={15} />}
-            label="Go to Album"
+            label={t('context_menu.go_to_album')}
             onClick={controller.handleGoToAlbum}
           />
         )}
         {hasArtist && (
           <ContextMenuItem
             icon={<Mic2 size={15} />}
-            label="Go to Artist"
+            label={t('context_menu.go_to_artist')}
             onClick={controller.handleGoToArtist}
           />
         )}
@@ -142,17 +144,17 @@ export function TrackContextMenu({
 
         <ContextMenuItem
           icon={<Share size={15} />}
-          label="Share"
+          label={t('context_menu.share')}
           onClick={controller.handleShare}
         />
         <ContextMenuItem
           icon={<Link2 size={15} />}
-          label="Copy Link"
+          label={t('context_menu.copy_link')}
           onClick={controller.handleCopyLink}
         />
         <ContextMenuItem
           icon={<Code size={15} />}
-          label="Copy Embed Code"
+          label={t('context_menu.copy_embed_code')}
           onClick={controller.handleCopyEmbedCode}
         />
 

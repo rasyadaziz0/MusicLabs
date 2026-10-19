@@ -3,6 +3,7 @@
 import { ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React from 'react';
+import { useTranslation } from '@/context/LanguageContext';
 
 export interface TrackBackButtonProps {
   mode: 'desktop' | 'mobile';
@@ -11,6 +12,7 @@ export interface TrackBackButtonProps {
 
 export default function TrackBackButton({ mode }: TrackBackButtonProps) {
   const router = useRouter();
+  const { t } = useTranslation();
 
   const handleBack = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -28,7 +30,7 @@ export default function TrackBackButton({ mode }: TrackBackButtonProps) {
         className="inline-flex items-center gap-2 px-3.5 py-1.5 text-white/70 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-full transition-colors text-sm font-medium active:scale-95 shadow-md"
       >
         <ChevronLeft size={18} strokeWidth={2.5} />
-        Kembali
+        {t('common.back')}
       </button>
     );
   }
@@ -37,8 +39,8 @@ export default function TrackBackButton({ mode }: TrackBackButtonProps) {
   return (
     <button
       onClick={handleBack}
-      aria-label="Kembali"
-      title="Kembali"
+      aria-label={t('common.back')}
+      title={t('common.back')}
       className="p-2 text-[#FA243C] hover:bg-white/5 rounded-full transition-colors flex items-center justify-center active:scale-90"
     >
       <ChevronLeft size={28} strokeWidth={2.5} />

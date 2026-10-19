@@ -1,11 +1,13 @@
 'use client';
 import { DeviceInfo } from '@/types/connect';
 
+import { useTranslation } from '@/context/LanguageContext';
 import { StyleHelper } from '@/lib/utils/StyleHelper';
 import { Laptop, Smartphone, Tablet, Volume2 } from 'lucide-react';
 import { DeviceRowProps } from "@/types/components/player/devices/DeviceRowProps";
 
 export function DeviceRow({ device, isActive, isMe, onSelect }: DeviceRowProps) {
+  const { t } = useTranslation();
   const getIcon = (type: string, active: boolean) => {
     const className = StyleHelper.cn("w-5 h-5", active ? "text-[#1db954]" : "text-white/70");
     if (type === 'mobile') return <Smartphone className={className} />;
@@ -37,12 +39,12 @@ export function DeviceRow({ device, isActive, isMe, onSelect }: DeviceRowProps) 
             </span>
             {isMe && (
               <span className="px-1.5 py-0.5 rounded text-[10px] uppercase font-bold bg-white/10 text-white/70 flex-shrink-0">
-                Ini
+                {t('connect.this_device')}
               </span>
             )}
           </div>
           <span className="text-xs text-white/50 truncate">
-            {isActive ? 'Memutar audio di sini' : 'Klik untuk memindahkan'}
+            {isActive ? t('connect.playing_here') : t('connect.click_to_switch')}
           </span>
         </div>
       </div>

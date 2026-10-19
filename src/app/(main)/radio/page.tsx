@@ -8,11 +8,13 @@ import { useEffect, useRef } from 'react';
 import { NowPlayingRadioBanner, RadioEmptyState, RadioSkeletonGrid, RadioStationCard } from '@/components/radio/RadioCards';
 import FeatureDisabled from '@/components/ui/FeatureDisabled';
 import { useFeatureFlags } from '@/context/FeatureFlagsContext';
+import { useTranslation } from '@/context/LanguageContext';
 import { CATEGORIES, useRadioController } from './useRadioController';
 
 export default function RadioPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { flags } = useFeatureFlags();
+  const { t } = useTranslation();
 
   const {
     currentTrack,
@@ -62,10 +64,10 @@ export default function RadioPage() {
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FA243C] to-[#FF6275] flex items-center justify-center">
             <Radio size={22} className="text-white" />
           </div>
-          <h1 className="text-[34px] font-bold tracking-tight text-white">Radio</h1>
+          <h1 className="text-[34px] font-bold tracking-tight text-white">{t('radio.title')}</h1>
         </div>
         <p className="text-[15px] text-white/50 mb-4">
-          Live radio stations from Indonesia and around the world
+          {t('radio.subtitle')}
         </p>
         <div className="h-[1px] w-full bg-white/10" />
       </header>
@@ -86,7 +88,7 @@ export default function RadioPage() {
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" />
           <input
             type="text"
-            placeholder="Search radio stations..."
+            placeholder={t('radio.search_placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full h-11 pl-11 pr-4 rounded-xl bg-white/[0.06] border border-white/10 text-white text-[14px] placeholder:text-white/30 focus:outline-none focus:border-[#FA243C]/40 focus:bg-white/[0.08] transition-colors"

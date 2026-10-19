@@ -2,6 +2,7 @@
 import { Song } from '@/types/music';
 import { LrcLine } from '@/types/utils/lrc';
 
+import { useTranslation } from '@/context/LanguageContext';
 import { useSettings } from '@/context/SettingsContext';
 import { animate, motion } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -25,6 +26,7 @@ export default function LyricsUI({
   romanizations,
   trackId,
 }: LyricsUIProps) {
+  const { t } = useTranslation();
   const { settings } = useSettings();
   const [showRomanization, setShowRomanization] = useState(settings.romanizationEnabled);
   const [isUserScrolling, setIsUserScrolling] = useState(false);
@@ -183,9 +185,7 @@ export default function LyricsUI({
                 color: 'rgba(255,255,255,0.3)',
               }}
             >
-              {Boolean(currentTrack?.isStation || currentTrack?.isRadio || currentTrack?.label === 'YouTube Live Station' || currentTrack?.album?.name === 'Live Station')
-                ? 'Lirik tidak tersedia untuk siaran langsung.'
-                : 'Lirik tidak tersedia.'}
+              {t('player.no_lyrics')}
             </motion.div>
           )}
         </div>

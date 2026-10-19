@@ -1,3 +1,4 @@
+import { useTranslation } from '@/context/LanguageContext';
 import { SocialActivityCard } from '@/components/home/HomeCards';
 import { ScrollArrows } from '@/components/ui/ScrollArrows';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
@@ -12,6 +13,7 @@ export interface SocialFeedSectionProps {
 
 
 export function SocialFeedSection({ user, socialFeed, isSocialFeedLoading, playTrack }: SocialFeedSectionProps) {
+  const { t } = useTranslation();
   const { scrollRef, canScrollLeft, canScrollRight, scroll } = useHorizontalScroll();
 
   if (!user) return null;
@@ -19,7 +21,7 @@ export function SocialFeedSection({ user, socialFeed, isSocialFeedLoading, playT
   return (
     <section className="px-2 pt-4">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-[20px] font-bold text-white">Friend Activity</h2>
+        <h2 className="text-[20px] font-bold text-white">{t('home.friend_activity')}</h2>
       </div>
       <div className="relative group/section">
         <ScrollArrows 
@@ -45,7 +47,7 @@ export function SocialFeedSection({ user, socialFeed, isSocialFeedLoading, playT
               />
             ))
           ) : (
-            <p className="text-sm text-muted">No recent activity from people you follow.</p>
+            <p className="text-sm text-muted">{t('home.no_recent_activity_friends')}</p>
           )}
         </div>
       </div>

@@ -3,46 +3,48 @@
 import { useAuth } from '@/context/AuthContext';
 import { useFeatureFlags } from '@/context/FeatureFlagsContext';
 import { useImport } from '@/context/ImportContext';
+import { useTranslation } from '@/context/LanguageContext';
 import { useLibraryPlaylists } from '@/hooks/library/useLibraryPlaylists';
 import { useDiscoverWeekly } from '@/hooks/useDiscoverWeekly';
 import { Bookmark, ChevronRight, Heart, Library, ListMusic, Mic, Music, PlusSquare, Sparkles, SquareStack } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-const libraryMenu = [
-  { label: 'Playlists', icon: Library, href: '/library/playlists' },
-  { label: 'Favourite Songs', icon: Heart, href: '/library/liked' },
-  { label: 'Liked Playlists', icon: Bookmark, href: '/library/liked-playlists' },
-  { label: 'Artists', icon: Mic, href: '/library/artists' },
-  { label: 'Albums', icon: SquareStack, href: '/library/albums' },
-  { label: 'Songs', icon: Music, href: '/library/songs' },
-  { label: 'Made For You', icon: Sparkles, href: '/made-for-you' },
-];
-
 export default function LibraryPage() {
+  const { t } = useTranslation();
   const { user, signInWithGoogle } = useAuth();
   const { flags } = useFeatureFlags();
   const { isImporting, importProgress } = useImport();
   const { data: playlists = [], isLoading: isPlaylistsLoading } = useLibraryPlaylists();
   const { hasPlaylist, playlistId } = useDiscoverWeekly();
 
+  const libraryMenu = [
+    { key: 'playlists', label: t('sidebar.playlists'), icon: Library, href: '/library/playlists' },
+    { key: 'liked', label: t('sidebar.favourite_songs'), icon: Heart, href: '/library/liked' },
+    { key: 'liked_playlists', label: t('library.liked_playlists'), icon: Bookmark, href: '/library/liked-playlists' },
+    { key: 'artists', label: t('sidebar.artists'), icon: Mic, href: '/library/artists' },
+    { key: 'albums', label: t('sidebar.albums'), icon: SquareStack, href: '/library/albums' },
+    { key: 'songs', label: t('sidebar.songs'), icon: Music, href: '/library/songs' },
+    { key: 'made_for_you', label: t('sidebar.made_for_you'), icon: Sparkles, href: '/made-for-you' },
+  ];
+
   const menuItems = [
     ...libraryMenu,
     ...(flags.feature_import_playlist
-      ? [{ label: 'Import Playlist', icon: ListMusic, href: '/import/playlist' }]
+      ? [{ key: 'import', label: t('sidebar.import_playlist'), icon: ListMusic, href: '/import/playlist' }]
       : []),
   ];
 
   if (!user) {
     return (
       <div className="p-6 md:p-10 pt-16 flex flex-col items-center justify-center min-h-[60vh] text-center">
-        <h1 className="text-[34px] font-bold tracking-tight text-white mb-4">Library</h1>
-        <p className="text-[15px] text-white/60 mb-8 max-w-md">Sign in to access your saved music, playlists, and full library features.</p>
+        <h1 className="text-[34px] font-bold tracking-tight text-white mb-4">{t('sidebar.library')}</h1>
+        <p className="text-[15px] text-white/60 mb-8 max-w-md">{t('sidebar.guest_prompt')}</p>
         <button
           onClick={() => signInWithGoogle()}
           className="px-8 py-3 rounded-full bg-[#FA243C] text-white font-bold hover:bg-opacity-90 transition-all active:scale-95"
         >
-          Sign In
+          {t('sidebar.sign_in')}
         </button>
       </div>
     );
@@ -53,16 +55,16 @@ export default function LibraryPage() {
       {/* Header */}
       <div className="px-5 md:px-8 pt-4 pb-4">
         <div className="flex items-center justify-between mb-2">
-          <h1 className="text-[34px] font-bold text-white tracking-tight">Library</h1>
+          <h1 className="text-[34px] font-bold text-white tracking-tight">{t('sidebar.library')}</h1>
           <div className="flex items-center gap-2">
             {flags.feature_import_playlist && (
               <Link
                 href="/import/playlist"
                 className="text-xs font-semibold px-3 py-1.5 rounded-full bg-white/10 text-white/90 border border-white/10 hover:bg-white/20 transition-colors flex items-center gap-1.5"
-                title="Import Playlist"
+                title={t('sidebar.import_playlist')}
               >
                 <ListMusic size={15} className={isImporting ? "text-[#FA243C] animate-pulse" : "text-[#FA243C]"} />
-                <span>Import</span>
+                <span>{t('library.import')}</span>
               </Link>
             )}
             <Link href="/playlist/create" className="text-[#FA243C] p-2 -mr-2 rounded-full hover:bg-white/5 transition-colors">
@@ -77,9 +79,9 @@ export default function LibraryPage() {
       <div className="px-5 md:px-8">
         <div className="flex flex-col">
           {menuItems.map((item) => {
-            const isImportItem = item.label === 'Import Playlist';
+            const isImportItem = item.key === 'import';
             return (
-              <Link key={item.label} href={item.href} className="group flex items-center justify-between py-3.5 border-b border-white/5 active:bg-white/5 transition-colors md:hover:bg-white/[0.02] md:-mx-4 md:px-4 md:rounded-lg md:border-b-0">
+              <Link key={item.key} href={item.href} className="group flex items-center justify-between py-3.5 border-b border-white/5 active:bg-white/5 transition-colors md:hover:bg-white/[0.02] md:-mx-4 md:px-4 md:rounded-lg md:border-b-0">
                 <div className="flex items-center gap-3">
                   <span className="text-[20px] text-white/90 font-normal tracking-tight">{item.label}</span>
                   {isImportItem && isImporting && (
@@ -105,16 +107,16 @@ export default function LibraryPage() {
             <div>
               <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/60">
                 <Sparkles size={12} className="text-[#FA243C]" />
-                Personal
+                {t('library.personal')}
               </div>
-              <h2 className="text-[22px] font-bold text-white tracking-tight">Made For You</h2>
+              <h2 className="text-[22px] font-bold text-white tracking-tight">{t('sidebar.made_for_you')}</h2>
               <p className="mt-2 max-w-2xl text-sm text-white/55">
-                Buka mix personal dari history, likes, mood, dan Discover Weekly kamu.
+                {t('library.made_for_you_desc')}
               </p>
               {hasPlaylist && playlistId ? (
-                <p className="mt-3 text-xs font-medium text-[#FA243C]">Discover Weekly aktif dan siap diputar</p>
+                <p className="mt-3 text-xs font-medium text-[#FA243C]">{t('library.discover_active')}</p>
               ) : (
-                <p className="mt-3 text-xs font-medium text-white/45">Belum ada Discover Weekly? tenang, sekarang ada halaman khususnya.</p>
+                <p className="mt-3 text-xs font-medium text-white/45">{t('library.discover_empty')}</p>
               )}
             </div>
             <ChevronRight size={20} className="mt-1 text-white/35" />
@@ -124,7 +126,7 @@ export default function LibraryPage() {
 
       {/* Recently Added */}
       <div className="px-5 md:px-8 mt-10">
-        <h2 className="text-[22px] font-bold text-white mb-5 tracking-tight">Recently Added</h2>
+        <h2 className="text-[22px] font-bold text-white mb-5 tracking-tight">{t('sidebar.recently_added')}</h2>
         
         {isPlaylistsLoading ? (
            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-6 md:gap-x-6 md:gap-y-8">
@@ -155,7 +157,7 @@ export default function LibraryPage() {
                 <div className="px-0.5 mt-1">
                   <p className="text-[14px] md:text-[15px] font-medium text-white/95 truncate leading-snug">{playlist.name}</p>
                   <p className="text-[13px] text-white/50 truncate mt-0.5">
-                    {playlist.is_liked ? 'Liked Playlist' : 'Playlist'}
+                    {playlist.is_liked ? t('library.liked_playlist') : t('library.playlist')}
                   </p>
                 </div>
               </Link>
@@ -163,9 +165,9 @@ export default function LibraryPage() {
           </div>
         ) : (
           <div className="text-center py-12 px-4 bg-white/[0.02] rounded-2xl border border-dashed border-white/10">
-             <p className="text-[15px] text-white/50 mb-5">No recent activity.</p>
+             <p className="text-[15px] text-white/50 mb-5">{t('library.no_recent_activity')}</p>
              <Link href="/playlist/create" className="inline-flex items-center justify-center rounded-full bg-white/10 px-6 py-2.5 text-[14px] font-semibold text-white hover:bg-white/20 transition-colors">
-               Create New Playlist
+               {t('library.create_new_playlist')}
              </Link>
           </div>
         )}

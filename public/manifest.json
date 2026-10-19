@@ -3,6 +3,7 @@
   "short_name": "AcadMusic",
   "description": "Your personal music streaming app built with Next.js and Supabase",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#080616",
   "theme_color": "#2F2FE4",

@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslation } from '@/context/LanguageContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AudioLines, Mic } from 'lucide-react';
 
@@ -25,6 +26,7 @@ export function MainIdentifyButton({
   handleSpeechStart,
   handleCancel,
 }: MainIdentifyButtonProps) {
+  const { t } = useTranslation();
   const hasResults = state === 'results' || state === 'no-match' || state === 'error';
 
   return (
@@ -109,11 +111,11 @@ export function MainIdentifyButton({
                   {state === 'idle' && (
                     <>
                       <h3 className="text-3xl font-bold tracking-tight mb-2">
-                        {mode === 'audd' ? 'Tap to Identify' : 'Tap to Speak'}
+                        {mode === 'audd' ? t('identify.tap_to_identify') : t('identify.tap_to_speak')}
                       </h3>
                       {mode === 'audd' && (
                         <p className="text-white/40 text-sm font-medium uppercase tracking-widest">
-                          {quota.remaining} Left This Month
+                          {quota.remaining} {t('identify.left_this_month')}
                         </p>
                       )}
                     </>
@@ -122,7 +124,7 @@ export function MainIdentifyButton({
                   {state === 'recording' && (
                     <>
                       <h3 className="text-2xl font-semibold tracking-tight mb-2">
-                        {mode === 'audd' ? 'Listening...' : 'Speak now...'}
+                        {mode === 'audd' ? t('identify.listening') : t('identify.speak_now')}
                       </h3>
                       {mode === 'audd' && recorder.secondsLeft > 0 && (
                         <p className="text-white/80 font-mono text-xl">
@@ -139,8 +141,8 @@ export function MainIdentifyButton({
 
                   {state === 'processing' && (
                     <>
-                      <h3 className="text-2xl font-semibold tracking-tight mb-2">Finding Match...</h3>
-                      <p className="text-white/40 text-sm animate-pulse">This might take a moment</p>
+                      <h3 className="text-2xl font-semibold tracking-tight mb-2">{t('identify.finding_match')}</h3>
+                      <p className="text-white/40 text-sm animate-pulse">{t('identify.moment_wait')}</p>
                     </>
                   )}
                 </motion.div>

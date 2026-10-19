@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useFeatureFlags } from '@/context/FeatureFlagsContext';
+import { useTranslation } from '@/context/LanguageContext';
 
 const rawCategories = [
   { title: 'AcadMusic Radio', bg: '#FA243C', href: '/radio', flag: 'feature_radio' },
@@ -19,6 +20,7 @@ const rawCategories = [
 ];
 
 export function SearchCategories() {
+  const { t } = useTranslation();
   const { flags } = useFeatureFlags();
 
   const categories = rawCategories.filter((cat) => {
@@ -28,7 +30,7 @@ export function SearchCategories() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-[20px] font-bold text-white">Browse Categories</h2>
+      <h2 className="text-[20px] font-bold text-white">{t('search.browse_categories')}</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-5">
         {categories.map((category) => {
           const inner = (

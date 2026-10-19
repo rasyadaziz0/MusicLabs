@@ -110,8 +110,10 @@ export default function AlbumPageClient({
                 <div className="my-1 border-t border-white/10 mx-3" />
                 <button onClick={() => {
                   const appUrl = typeof window !== 'undefined' ? window.location.origin : '';
+                  const safeAlbumId = encodeURIComponent(albumId || '').replace(/['"]/g, '');
+                  if (!safeAlbumId) return;
                   const escapedTitle = escapeHtmlAttr(albumTitle);
-                  const src = `${appUrl}/embed/album/${albumId}`;
+                  const src = escapeHtmlAttr(`${appUrl}/embed/album/${safeAlbumId}`);
                   const iframe = `<iframe allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write" frameborder="0" height="450" style="width:100%;max-width:660px;overflow:hidden;border-radius:10px;" sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation" src="${src}" title="${escapedTitle}"></iframe>`;
                   navigator.clipboard.writeText(iframe);
                   toast.success('Embed code copied', { description: 'Paste into any website to embed this album.' });

@@ -117,7 +117,7 @@ export class EmbedPlayerController {
     
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
 
-    this.ytPlayer = new window.YT.Player('embed-yt-player', {
+    this.ytPlayer = new (window as any).YT.Player('embed-yt-player', {
       height: '1',
       width: '1',
       videoId,

@@ -1,78 +1,52 @@
-import { MusicApiService } from '@/lib/api/MusicApiService';
 import { PlaylistRecord, PlaylistTrackRow } from '@/types/models/Playlist';
 import { PlaylistSearchResult } from '@/types/models/PlaylistLike';
 import { Song } from '@/types/music';
 import { IPlaylistRepository } from '@/types/repositories/IPlaylistRepository';
 import { SupabaseClient } from '@supabase/supabase-js';
+import { DiscoverWeeklyOperations } from './playlist/DiscoverWeeklyOperations';
+import { PlaylistQueryOperations } from './playlist/PlaylistQueryOperations';
+import { PlaylistTrackOperations } from './playlist/PlaylistTrackOperations';
 
+// Re-export modular sub-operation classes
+export { DiscoverWeeklyOperations, PlaylistQueryOperations, PlaylistTrackOperations };
+
+/**
+ * PlaylistRepository
+ * Facade repository implementing IPlaylistRepository, coordinating modular operations
+ * for CRUD, querying, track management, and AI Discover Weekly generation.
+ */
 export class PlaylistRepository implements IPlaylistRepository {
-  constructor(private supabase: SupabaseClient) {}
+  private trackOps: PlaylistTrackOperations;
+  private queryOps: PlaylistQueryOperations;
+  private discoverOps: DiscoverWeeklyOperations;
 
-  async getUserPlaylists(userId: string): Promise<PlaylistRecord[]> {
-    const { data: ownedData, error: ownedError } = await this.supabase
-      .from('playlists')
-      .select('id, user_id, name, description, cover_url, is_pinned, is_public, created_at, updated_at, is_discover_weekly')
-      .eq('user_id', userId);
-
-    if (ownedError) throw ownedError;
-
-    const { data: collabData, error: collabError } = await this.supabase
-      .from('playlist_collaborators')
-      .select('playlists(id, user_id, name, description, cover_url, is_pinned, is_public, created_at, updated_at, is_discover_weekly)')
-      .eq('user_id', userId);
-
-    if (collabError) {
-      console.warn("Notice: collaborative playlists query failed (usually means SQL script not run yet):", collabError?.message || collabError);
-    }
-
-    const collabPlaylists = (collabData ?? [])
-      .map(row => row.playlists as unknown as PlaylistRecord)
-      .filter(Boolean);
-
-    // Fetch liked playlists
-    let likedPlaylists: PlaylistRecord[] = [];
-    try {
-      const { data: likedData, error: likedError } = await this.supabase
-        .from('playlist_likes')
-        .select('playlists:playlist_id(id, user_id, name, description, cover_url, is_pinned, is_public, created_at, updated_at, is_discover_weekly)')
-        .eq('user_id', userId);
-
-      if (!likedError && likedData) {
-        likedPlaylists = (likedData as any[])
-          .map(row => row.playlists as unknown as PlaylistRecord)
-          .filter(Boolean)
-          .map(p => ({ ...p, is_liked: true }));
-      }
-    } catch {
-      // Ignore if playlist_likes table not migrated yet
-    }
-
-    // Filter out Discover Weekly playlists from regular library views
-    const filteredOwnedData = (ownedData ?? []).filter(p => !p.is_discover_weekly);
-    const filteredCollabData = collabPlaylists.filter(p => !p.is_discover_weekly);
-    const filteredLikedData = likedPlaylists.filter(p => !p.is_discover_weekly);
-
-    const allPlaylists = [...filteredOwnedData, ...filteredCollabData, ...filteredLikedData];
-    const uniquePlaylists = Array.from(new Map(allPlaylists.map(p => [p.id, p])).values());
-
-    return uniquePlaylists.sort((a, b) =>
-      new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
-    );
+  constructor(private supabase: SupabaseClient) {
+    this.trackOps = new PlaylistTrackOperations(supabase);
+    this.queryOps = new PlaylistQueryOperations(supabase);
+    this.discoverOps = new DiscoverWeeklyOperations(supabase);
   }
 
-  async getPublicPlaylists(userId: string): Promise<PlaylistRecord[]> {
-    const { data, error } = await this.supabase
-      .from('playlists')
-      .select('id, user_id, name, description, cover_url, is_public, created_at')
-      .eq('user_id', userId)
-      .eq('is_public', true)
-      .order('created_at', { ascending: false });
+  // ─── Query & Discovery Operations ───
 
-    if (error) throw error;
-    return (data ?? []) as PlaylistRecord[];
+  public async getUserPlaylists(userId: string): Promise<PlaylistRecord[]> {
+    return this.queryOps.getUserPlaylists(userId);
   }
 
-  async getPlaylistById(playlistId: string): Promise<PlaylistRecord> {
+  public async getPublicPlaylists(userId: string): Promise<PlaylistRecord[]> {
+    return this.queryOps.getPublicPlaylists(userId);
+  }
+
+  public async searchPublicPlaylists(
+    query: string,
+    page = 1,
+    limit = 20
+  ): Promise<PlaylistSearchResult[]> {
+    return this.queryOps.searchPublicPlaylists(query, page, limit);
+  }
+
+  // ─── Core Playlist CRUD Operations ───
+
+  public async getPlaylistById(playlistId: string): Promise<PlaylistRecord> {
     const { data, error } = await this.supabase
       .from('playlists')
       .select('id, user_id, name, description, cover_url, is_pinned, is_public, created_at, updated_at')
@@ -83,17 +57,21 @@ export class PlaylistRepository implements IPlaylistRepository {
     return data as PlaylistRecord;
   }
 
-  async createPlaylist(input: {
+  public async createPlaylist(input: {
     userId: string;
     name: string;
     description?: string;
     coverUrl?: string;
+    isPublic?: boolean;
+    isDiscoverWeekly?: boolean;
   }): Promise<PlaylistRecord> {
     const payload = {
       user_id: input.userId,
       name: input.name.trim(),
       description: input.description?.trim() || null,
       cover_url: input.coverUrl?.trim() || null,
+      is_public: input.isPublic ?? false,
+      is_discover_weekly: input.isDiscoverWeekly ?? false,
     };
 
     const { data, error } = await this.supabase
@@ -106,7 +84,7 @@ export class PlaylistRepository implements IPlaylistRepository {
     return data as PlaylistRecord;
   }
 
-  async updatePlaylist(playlistId: string, updates: Partial<PlaylistRecord>): Promise<void> {
+  public async updatePlaylist(playlistId: string, updates: Partial<PlaylistRecord>): Promise<void> {
     const { error } = await this.supabase
       .from('playlists')
       .update(updates)
@@ -115,7 +93,7 @@ export class PlaylistRepository implements IPlaylistRepository {
     if (error) throw error;
   }
 
-  async togglePinPlaylist(playlistId: string, currentPinStatus: boolean): Promise<boolean> {
+  public async togglePinPlaylist(playlistId: string, currentPinStatus: boolean): Promise<boolean> {
     const { error } = await this.supabase
       .from('playlists')
       .update({ is_pinned: !currentPinStatus })
@@ -125,7 +103,7 @@ export class PlaylistRepository implements IPlaylistRepository {
     return !currentPinStatus;
   }
 
-  async toggleVisibility(playlistId: string, currentPublicStatus: boolean): Promise<boolean> {
+  public async toggleVisibility(playlistId: string, currentPublicStatus: boolean): Promise<boolean> {
     const newStatus = !currentPublicStatus;
     const { error } = await this.supabase
       .from('playlists')
@@ -136,53 +114,7 @@ export class PlaylistRepository implements IPlaylistRepository {
     return newStatus;
   }
 
-  async searchPublicPlaylists(query: string, page = 1, limit = 20): Promise<PlaylistSearchResult[]> {
-    const cleanQuery = query.replace(/[,()%*\\]/g, ' ').trim();
-    if (!cleanQuery) return [];
-
-    const from = (page - 1) * limit;
-    const to = from + limit - 1;
-
-    try {
-      const { data, error } = await this.supabase
-        .from('playlists')
-        .select(`
-          id, user_id, name, description, cover_url, is_public, created_at, updated_at,
-          profiles:user_id (username, display_name, avatar_url),
-          playlist_tracks (id)
-        `)
-        .eq('is_public', true)
-        .or('is_discover_weekly.is.null,is_discover_weekly.eq.false')
-        .ilike('name', `%${cleanQuery}%`)
-        .order('created_at', { ascending: false })
-        .range(from, to);
-
-      if (error) {
-        console.warn('Search public playlists error:', error.message);
-        return [];
-      }
-
-      return (data ?? []).map((row: any) => ({
-        id: row.id,
-        user_id: row.user_id,
-        name: row.name,
-        description: row.description,
-        cover_url: row.cover_url,
-        is_public: row.is_public,
-        like_count: row.like_count ?? 0,
-        track_count: Array.isArray(row.playlist_tracks) ? row.playlist_tracks.length : 0,
-        owner_name: row.profiles?.display_name || row.profiles?.username || 'Unknown',
-        owner_avatar: row.profiles?.avatar_url || null,
-        created_at: row.created_at,
-        updated_at: row.updated_at,
-      }));
-    } catch (err) {
-      console.warn('searchPublicPlaylists caught error:', err);
-      return [];
-    }
-  }
-
-  async deletePlaylist(playlistId: string): Promise<boolean> {
+  public async deletePlaylist(playlistId: string): Promise<boolean> {
     const { error } = await this.supabase
       .from('playlists')
       .delete()
@@ -192,179 +124,49 @@ export class PlaylistRepository implements IPlaylistRepository {
     return true;
   }
 
-  async getPlaylistTrackIds(playlistId: string): Promise<PlaylistTrackRow[]> {
-    const { data, error } = await this.supabase
-      .from('playlist_tracks')
-      .select('id, playlist_id, track_id, position')
-      .eq('playlist_id', playlistId)
-      .order('position', { ascending: true });
+  // ─── Playlist Track Operations ───
 
-    if (error) throw error;
-    return (data ?? []) as PlaylistTrackRow[];
+  public async getPlaylistTrackIds(playlistId: string): Promise<PlaylistTrackRow[]> {
+    return this.trackOps.getTrackIds(playlistId);
   }
 
-  async getPlaylistTracks(playlistId: string): Promise<Song[]> {
-    const rows = await this.getPlaylistTrackIds(playlistId);
-    if (rows.length === 0) return [];
-    
-    const trackIds = rows.map((row) => row.track_id);
-    const songs = await MusicApiService.getSongsByIds(trackIds);
-    
-    // Attach the unique playlist_track id and map back to maintain order & duplicates
-    return rows.map(row => {
-      const song = songs.find(s => 
-        s.id === row.track_id || 
-        s.id === row.track_id.replace(/^itunes-/, '') || 
-        `itunes-${s.id}` === row.track_id
-      );
-      if (!song) return null;
-      return { ...song, uniqueId: row.id };
-    }).filter(Boolean) as Song[];
+  public async getPlaylistTracks(playlistId: string): Promise<Song[]> {
+    return this.trackOps.getTracks(playlistId);
   }
 
-  async getAllPlaylistTracksForUser(userId: string): Promise<Song[]> {
+  public async getAllPlaylistTracksForUser(userId: string): Promise<Song[]> {
     const playlists = await this.getUserPlaylists(userId);
     if (playlists.length === 0) return [];
-    
-    const playlistIds = playlists.map(p => p.id);
-
-    const { data, error } = await this.supabase
-      .from('playlist_tracks')
-      .select('id, playlist_id, track_id, position')
-      .in('playlist_id', playlistIds)
-      .order('position', { ascending: true });
-
-    if (error) throw error;
-    
-    const rows = (data ?? []) as PlaylistTrackRow[];
-    if (rows.length === 0) return [];
-
-    const uniqueTrackIds = [...new Set(rows.map((row) => row.track_id))];
-    const songs = await MusicApiService.getSongsByIds(uniqueTrackIds);
-
-    return rows.map(row => {
-      const song = songs.find(s => 
-        s.id === row.track_id || 
-        s.id === row.track_id.replace(/^itunes-/, '') || 
-        `itunes-${s.id}` === row.track_id
-      );
-      if (!song) return null;
-      return { ...song, uniqueId: row.id };
-    }).filter(Boolean) as Song[];
+    return this.trackOps.getAllTracksForPlaylistIds(playlists.map((p) => p.id));
   }
 
-  async addTrackToPlaylist(playlistId: string, trackId: string): Promise<'SUCCESS' | 'ALREADY_EXISTS'> {
-    const { data: existingRow, error: existingError } = await this.supabase
-      .from('playlist_tracks')
-      .select('playlist_id')
-      .eq('playlist_id', playlistId)
-      .eq('track_id', trackId)
-      .maybeSingle();
-
-    if (existingError) throw existingError;
-    if (existingRow) return 'ALREADY_EXISTS';
-
-    const { data: lastRow, error: positionError } = await this.supabase
-      .from('playlist_tracks')
-      .select('position')
-      .eq('playlist_id', playlistId)
-      .order('position', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (positionError) throw positionError;
-
-    const { error } = await this.supabase.from('playlist_tracks').insert({
-      playlist_id: playlistId,
-      track_id: trackId,
-      position: (lastRow?.position ?? -1) + 1,
-    });
-
-    if (error) throw error;
-    return 'SUCCESS';
-  }
-
-  async removeTrackFromPlaylist(playlistId: string, trackId: string): Promise<void> {
-    const { error } = await this.supabase
-      .from('playlist_tracks')
-      .delete()
-      .eq('playlist_id', playlistId)
-      .eq('track_id', trackId);
-
-    if (error) throw error;
-  }
-
-  async reorderPlaylistTracks(playlistId: string, trackIdsInOrder: string[]): Promise<void> {
-    const promises = trackIdsInOrder.map((trackId, index) =>
-      this.supabase
-        .from('playlist_tracks')
-        .update({ position: index })
-        .eq('playlist_id', playlistId)
-        .eq('track_id', trackId)
-    );
-    await Promise.all(promises);
-  }
-
-  async getOrCreateDiscoverWeeklyPlaylist(
-    userId: string,
-  ): Promise<{ playlist: PlaylistRecord; created: boolean }> {
-    const { data: existing, error: findError } = await this.supabase
-      .from('playlists')
-      .select('id, user_id, name, description, cover_url, is_pinned, is_public, is_discover_weekly, discover_generated_at, created_at, updated_at')
-      .eq('user_id', userId)
-      .eq('is_discover_weekly', true)
-      .maybeSingle();
-
-    if (findError) throw findError;
-    if (existing) return { playlist: existing as PlaylistRecord, created: false };
-
-    const { data: newPl, error: createError } = await this.supabase
-      .from('playlists')
-      .insert({
-        user_id: userId,
-        name: 'Discover Weekly',
-        description: 'Your personal mix of fresh music, updated every week with AI ✨',
-        is_public: false,
-        is_discover_weekly: true,
-        discover_generated_at: new Date().toISOString(),
-      })
-      .select('id, user_id, name, description, cover_url, is_pinned, is_public, is_discover_weekly, discover_generated_at, created_at, updated_at')
-      .single();
-
-    if (createError) throw createError;
-    return { playlist: newPl as PlaylistRecord, created: true };
-  }
-
-  async updateDiscoverWeeklyTracks(
+  public async addTrackToPlaylist(
     playlistId: string,
-    trackIds: string[],
+    trackId: string
+  ): Promise<'SUCCESS' | 'ALREADY_EXISTS'> {
+    return this.trackOps.addTrack(playlistId, trackId);
+  }
+
+  public async removeTrackFromPlaylist(playlistId: string, trackId: string): Promise<void> {
+    return this.trackOps.removeTrack(playlistId, trackId);
+  }
+
+  public async reorderPlaylistTracks(playlistId: string, trackIdsInOrder: string[]): Promise<void> {
+    return this.trackOps.reorderTracks(playlistId, trackIdsInOrder);
+  }
+
+  // ─── Discover Weekly Operations ───
+
+  public async getOrCreateDiscoverWeeklyPlaylist(
+    userId: string
+  ): Promise<{ playlist: PlaylistRecord; created: boolean }> {
+    return this.discoverOps.getOrCreate(userId);
+  }
+
+  public async updateDiscoverWeeklyTracks(
+    playlistId: string,
+    trackIds: string[]
   ): Promise<void> {
-    const { error: delError } = await this.supabase
-      .from('playlist_tracks')
-      .delete()
-      .eq('playlist_id', playlistId);
-
-    if (delError) throw delError;
-
-    if (trackIds.length === 0) return;
-
-    const rows = trackIds.map((trackId, index) => ({
-      playlist_id: playlistId,
-      track_id: trackId,
-      position: index,
-    }));
-
-    const { error: insError } = await this.supabase
-      .from('playlist_tracks')
-      .insert(rows);
-
-    if (insError) throw insError;
-
-    const { error: updateError } = await this.supabase
-      .from('playlists')
-      .update({ discover_generated_at: new Date().toISOString() })
-      .eq('id', playlistId);
-
-    if (updateError) console.error('Failed to update discover_generated_at:', updateError);
+    return this.discoverOps.updateTracks(playlistId, trackIds);
   }
 }

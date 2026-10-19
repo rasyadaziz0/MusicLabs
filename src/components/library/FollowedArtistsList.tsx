@@ -2,6 +2,7 @@
 
 import { FollowedArtistCard } from '@/components/library/FollowedArtistCard';
 import { useAuth } from '@/context/AuthContext';
+import { useTranslation } from '@/context/LanguageContext';
 import { ArtistFollowRepository } from '@/lib/supabase/repositories/ArtistFollowRepository';
 import { FollowedArtist } from '@/types/models/ArtistFollow';
 import { useQuery } from '@tanstack/react-query';
@@ -9,6 +10,7 @@ import { Users } from 'lucide-react';
 import Link from 'next/link';
 
 export function FollowedArtistsList() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const repo = ArtistFollowRepository.getInstance();
 
@@ -43,15 +45,15 @@ export function FollowedArtistsList() {
         <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white/40 mx-auto mb-3">
           <Users size={24} />
         </div>
-        <h3 className="text-base font-semibold text-white">Belum mengikuti artis</h3>
+        <h3 className="text-base font-semibold text-white">{t('library.no_followed_artists')}</h3>
         <p className="text-sm text-white/50 mt-1 max-w-sm mx-auto">
-          Ikuti artis favorit kamu untuk mendengarkan stasiun musik otomatis langsung di halaman Home!
+          {t('library.no_followed_artists_desc')}
         </p>
         <Link
           href="/search"
           className="inline-block mt-4 px-5 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-all"
         >
-          Cari Artis
+          {t('library.search_artists')}
         </Link>
       </div>
     );

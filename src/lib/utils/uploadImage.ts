@@ -4,7 +4,7 @@ import imageCompression from 'browser-image-compression';
 
 export async function uploadImage(
   file: File,
-  folder: 'avatars' | 'banners' | 'playlists' | 'uploads' = 'uploads',
+  folder: 'avatars' | 'banners' | 'playlists' = 'avatars',
   playlistId?: string
 ): Promise<string> {
   const { data: { session } } = await createClient().auth.getSession();

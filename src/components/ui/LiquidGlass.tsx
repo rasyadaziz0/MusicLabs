@@ -151,7 +151,7 @@ export const LiquidGlassCard = ({
     }
     : {};
 
-  const MotionComponent = draggable || expandable ? motion.div : 'div';
+  const MotionComponent = (draggable || expandable ? motion.div : 'div') as any;
 
   const motionProps =
     draggable || expandable

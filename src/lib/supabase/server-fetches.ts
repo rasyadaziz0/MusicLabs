@@ -9,7 +9,7 @@ export async function getServerProfileByUsername(username: string): Promise<User
   const { data, error } = await supabase
     .from('profiles')
     .select(PROFILE_COLUMNS)
-    .eq('username', username)
+    .ilike('username', username.trim())
     .maybeSingle();
 
   if (error) {

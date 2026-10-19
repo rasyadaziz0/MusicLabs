@@ -3,12 +3,14 @@
 import { ArtistStationCard } from '@/components/home/ArtistStationCard';
 import { ScrollArrows } from '@/components/ui/ScrollArrows';
 import { useAuth } from '@/context/AuthContext';
+import { useTranslation } from '@/context/LanguageContext';
 import { useFollowedArtistStations } from '@/hooks/useFollowedArtistStations';
 import { useHorizontalScroll } from '@/hooks/useHorizontalScroll';
 import { Radio } from 'lucide-react';
 
 export function ArtistStationsSection() {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const { data: stations = [], isLoading } = useFollowedArtistStations(10);
   const { scrollRef, canScrollLeft, canScrollRight, scroll } = useHorizontalScroll();
 
@@ -32,7 +34,7 @@ export function ArtistStationsSection() {
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-[20px] font-bold text-white tracking-tight leading-tight">
-                Stasiun Live Artis
+                {t('home.artist_stations_title')}
               </h2>
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FA243C]/20 border border-[#FA243C]/30 text-[#FA243C]">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#FA243C] animate-pulse" />
@@ -40,7 +42,7 @@ export function ArtistStationsSection() {
               </span>
             </div>
             <p className="text-xs text-white/50">
-              Siaran langsung YouTube resmi dari artis yang kamu ikuti
+              {t('home.artist_stations_desc')}
             </p>
           </div>
         </div>

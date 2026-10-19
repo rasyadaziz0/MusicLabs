@@ -2,6 +2,7 @@
 import { ArtistParser } from '@/lib/utils/ArtistParser';
 
 import { useAuth } from '@/context/AuthContext';
+import { useTranslation } from '@/context/LanguageContext';
 import { useLibraryArtists } from '@/hooks/library/useLibraryArtists';
 import { ChevronLeft, Disc3 } from 'lucide-react';
 import Image from 'next/image';
@@ -15,6 +16,7 @@ import { FollowedArtistsList } from '@/components/library/FollowedArtistsList';
 import { SearchHelper } from '@/lib/utils/search';
 
 export default function LibraryArtistsPage() {
+  const { t } = useTranslation();
   const { user, signInWithGoogle } = useAuth();
   const { artists, isLoading } = useLibraryArtists();
   const [query, setQuery] = useState('');
@@ -38,19 +40,19 @@ export default function LibraryArtistsPage() {
         <Link href="/library" className="rounded-full p-2 -ml-2 text-[#FA243C] hover:bg-white/5 transition-colors">
           <ChevronLeft size={28} strokeWidth={2.5} />
         </Link>
-        <h1 className="text-[28px] font-bold tracking-tight text-white">Artists</h1>
+        <h1 className="text-[28px] font-bold tracking-tight text-white">{t('sidebar.artists')}</h1>
       </div>
 
       <div className="hidden md:block">
-        <h1 className="text-3xl font-bold text-white">Artists</h1>
-        <p className="mt-1 text-sm text-white/50">Artis yang kamu ikuti dan artis yang paling sering muncul di library kamu.</p>
+        <h1 className="text-3xl font-bold text-white">{t('sidebar.artists')}</h1>
+        <p className="mt-1 text-sm text-white/50">{t('library.artists_desc')}</p>
       </div>
 
       {!user ? (
         <LibraryEmptyState
-          title="Login dulu buat lihat artist library"
-          description="Nanti daftar artis favorit kamu bakal otomatis kebentuk dari lagu yang kamu simpan dan putar."
-          ctaLabel="Login with Google"
+          title={t('library.login_artists_title')}
+          description={t('library.login_artists_desc')}
+          ctaLabel={t('library.login_google')}
           onCtaClick={() => signInWithGoogle('/library/artists')}
         />
       ) : (
@@ -58,19 +60,19 @@ export default function LibraryArtistsPage() {
           {/* Followed Artists Section */}
           {!query && (
             <div className="space-y-3 mb-6">
-              <h2 className="text-xl font-bold text-white tracking-tight">Artis yang Diikuti</h2>
+              <h2 className="text-xl font-bold text-white tracking-tight">{t('library.followed_artists_title')}</h2>
               <FollowedArtistsList />
             </div>
           )}
 
           <div className="pt-2">
             <h2 className="text-xl font-bold text-white tracking-tight mb-3">
-              {query ? 'Hasil Pencarian' : 'Semua Artis'}
+              {query ? t('library.search_results') : t('library.all_artists')}
             </h2>
             <LibrarySearchBar
               value={query}
               onChange={setQuery}
-              placeholder="Cari artis di library kamu..."
+              placeholder={t('library.search_artists_placeholder')}
             />
           </div>
 
@@ -102,7 +104,7 @@ export default function LibraryArtistsPage() {
                     </div>
                     <div className="px-0.5">
                       <p className="truncate text-sm font-semibold text-white">{artist.name}</p>
-                      <p className="text-xs text-white/45">{artist.songCount} lagu</p>
+                      <p className="text-xs text-white/45">{artist.songCount} {t('tracklist.songs_count')}</p>
                     </div>
                   </div>
                 );
@@ -118,14 +120,14 @@ export default function LibraryArtistsPage() {
             </div>
           ) : (
             <LibraryEmptyState
-              title={query ? 'Artis nggak ketemu' : 'Belum ada artis di library'}
+              title={query ? t('library.artist_not_found') : t('library.no_artists_yet')}
               description={
                 query
-                  ? 'Coba cari nama artis lain.'
-                  : 'Mulai dengarkan atau simpan beberapa lagu dulu biar daftar artis kamu kebentuk.'
+                  ? t('library.artist_not_found_desc')
+                  : t('library.no_artists_yet_desc')
               }
               ctaHref="/search"
-              ctaLabel="Cari Lagu"
+              ctaLabel={t('library.search_songs')}
             />
           )}
         </>

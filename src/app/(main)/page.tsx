@@ -4,6 +4,7 @@ import { ArtistStationsSection } from '@/components/home/sections/ArtistStations
 import { HomeHeader } from '@/components/home/sections/HomeHeader';
 import { RecentlyPlayedSection } from '@/components/home/sections/RecentlyPlayedSection';
 import { TopPicksSection } from '@/components/home/sections/TopPicksSection';
+import { useTranslation } from '@/context/LanguageContext';
 import { useDiscoverWeekly } from '@/hooks/useDiscoverWeekly';
 import { useHomeViewModel } from '@/hooks/useHomeViewModel';
 import gsap from 'gsap';
@@ -15,6 +16,7 @@ const SocialFeedSection = dynamic(() => import('@/components/home/sections/Socia
 const MoodsSection = dynamic(() => import('@/components/home/sections/MoodsSection').then(mod => mod.MoodsSection), { ssr: false });
 
 export default function Home() {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const { playlistId: discoverPlaylistId } = useDiscoverWeekly();
 
@@ -62,15 +64,15 @@ export default function Home() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
         </div>
-        <h2 className="text-xl font-bold text-white">Gagal Terhubung ke Server</h2>
+        <h2 className="text-xl font-bold text-white">{t('home.server_error_title')}</h2>
         <p className="text-white/60 max-w-md">
-          {homeError instanceof Error ? homeError.message : 'Koneksi ke backend gagal. Server mungkin sedang offline atau tidak dapat dijangkau.'}
+          {homeError instanceof Error ? homeError.message : t('home.server_error_desc')}
         </p>
         <button 
           onClick={() => window.location.reload()}
           className="mt-6 px-6 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors font-medium text-sm"
         >
-          Coba Lagi
+          {t('common.try_again')}
         </button>
       </div>
     );
@@ -123,7 +125,7 @@ export default function Home() {
 
       <SocialFeedSection
         user={user}
-        socialFeed={socialFeed}
+        socialFeed={socialFeed ?? []}
         isSocialFeedLoading={isSocialFeedLoading}
         playTrack={playTrack}
       />

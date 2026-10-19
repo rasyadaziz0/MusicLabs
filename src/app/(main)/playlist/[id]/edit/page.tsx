@@ -2,6 +2,7 @@
 
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
 import { useAuth } from '@/context/AuthContext';
+import { useTranslation } from '@/context/LanguageContext';
 import { useUpdatePlaylist } from '@/hooks/library/useUpdatePlaylist';
 import { getPlaylistById } from '@/lib/supabase/music';
 import { uploadImage } from '@/lib/utils/uploadImage';
@@ -13,6 +14,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { FormEvent, useEffect, useState } from 'react';
 
 export default function EditPlaylistPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { id } = useParams();
   const playlistId = Array.isArray(id) ? id[0] : id;
@@ -107,7 +109,7 @@ export default function EditPlaylistPage() {
   return (
     <div className="mx-auto max-w-4xl pt-10 px-6 pb-24">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-[28px] font-bold tracking-tight text-white">Edit Playlist</h1>
+        <h1 className="text-[28px] font-bold tracking-tight text-white">{t('library.edit_playlist')}</h1>
         {user && (
           <div className="flex items-center gap-3">
             <button
@@ -115,7 +117,7 @@ export default function EditPlaylistPage() {
               onClick={() => router.back()}
               className="px-4 py-1.5 text-[13px] font-semibold text-[#FA243C] hover:bg-[#FA243C]/10 rounded-md transition-colors"
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type="submit"
@@ -123,7 +125,7 @@ export default function EditPlaylistPage() {
               disabled={updatePlaylistMutation.isPending || !form.name.trim()}
               className="px-4 py-1.5 text-[13px] font-semibold bg-[#FA243C] text-white rounded-md hover:bg-[#FA243C]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {updatePlaylistMutation.isPending ? 'Saving...' : 'Save'}
+              {updatePlaylistMutation.isPending ? t('common.loading') : t('common.save')}
             </button>
           </div>
         )}

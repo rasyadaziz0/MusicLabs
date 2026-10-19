@@ -1,5 +1,6 @@
 import { useAddTrackToPlaylist } from '@/hooks/library/useAddTrackToPlaylist';
 import { useLibraryPlaylists } from '@/hooks/library/useLibraryPlaylists';
+import { useTranslation } from '@/context/LanguageContext';
 import { Song } from '@/types/music';
 import { gooeyToast as toast } from 'goey-toast';
 import { Plus, X } from 'lucide-react';
@@ -14,6 +15,7 @@ export interface PlaylistSubMenuProps {
 
 
 export function PlaylistSubMenu({ track, onClose, onBack, hideHeader }: PlaylistSubMenuProps) {
+  const { t } = useTranslation();
   const { data: playlists = [] } = useLibraryPlaylists();
   const addPlaylistMutation = useAddTrackToPlaylist();
 
@@ -23,7 +25,7 @@ export function PlaylistSubMenu({ track, onClose, onBack, hideHeader }: Playlist
       {
         onSuccess: (status) => {
           if (status === 'ALREADY_EXISTS') {
-            toast('Already in Playlist', {
+            toast(t('context_menu.already_in_playlist'), {
               description: `This track is already in ${playlistName}.`
             });
           } else {
@@ -39,7 +41,7 @@ export function PlaylistSubMenu({ track, onClose, onBack, hideHeader }: Playlist
     <>
       {!hideHeader && (
         <div className="px-4 py-2 flex items-center justify-between border-b border-white/10 mb-2">
-          <span className="text-sm font-semibold text-white/50 uppercase">Add to Playlist</span>
+          <span className="text-sm font-semibold text-white/50 uppercase">{t('context_menu.add_to_playlist')}</span>
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -54,7 +56,7 @@ export function PlaylistSubMenu({ track, onClose, onBack, hideHeader }: Playlist
       
       {hideHeader && (
         <div className="px-4 py-2 border-b border-white/5 flex items-center mb-1">
-          <span className="text-[11px] font-semibold text-white/50 uppercase tracking-wider">Add to Playlist</span>
+          <span className="text-[11px] font-semibold text-white/50 uppercase tracking-wider">{t('context_menu.add_to_playlist')}</span>
         </div>
       )}
 
@@ -64,14 +66,14 @@ export function PlaylistSubMenu({ track, onClose, onBack, hideHeader }: Playlist
         className="group mb-1 mx-2 flex items-center gap-3 rounded-lg px-2 py-2 text-left text-[13px] font-medium text-white transition-colors hover:bg-white/10"
       >
         <Plus size={16} className="text-[#FA243C]" />
-        <span>New Playlist</span>
+        <span>{t('context_menu.new_playlist')}</span>
       </Link>
 
       <div className="my-1 mx-2 h-px bg-white/5" />
 
       <div className="max-h-48 overflow-y-auto custom-scrollbar">
         {playlists.length === 0 ? (
-          <div className="px-4 py-3 text-sm text-white/50 text-center">No playlists found.</div>
+          <div className="px-4 py-3 text-sm text-white/50 text-center">{t('context_menu.no_playlists_found')}</div>
         ) : (
           playlists.map((p) => (
             <button

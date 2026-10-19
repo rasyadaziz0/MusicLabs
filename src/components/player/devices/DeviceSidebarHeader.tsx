@@ -1,9 +1,11 @@
 'use client';
 
+import { useTranslation } from '@/context/LanguageContext';
 import { MonitorSpeaker, X } from 'lucide-react';
 import { DeviceSidebarHeaderProps } from "@/types/components/player/devices/DeviceSidebarHeaderProps";
 
 export function DeviceSidebarHeader({ onClose }: DeviceSidebarHeaderProps) {
+  const { t } = useTranslation();
   return (
     <div style={{
       display: 'flex',
@@ -21,7 +23,7 @@ export function DeviceSidebarHeader({ onClose }: DeviceSidebarHeaderProps) {
           color: '#fff',
           letterSpacing: '-0.3px',
         }}>
-          Perangkat Terhubung
+          {t('connect.connect_to_device')}
         </span>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -29,7 +31,7 @@ export function DeviceSidebarHeader({ onClose }: DeviceSidebarHeaderProps) {
           onClick={onClose}
           className="p-1 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
           style={{ background: 'none', border: 'none', padding: '4px', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
-          title="Tutup sidebar"
+          title={t('common.close')}
         >
           <X size={18} strokeWidth={2.5} />
         </button>

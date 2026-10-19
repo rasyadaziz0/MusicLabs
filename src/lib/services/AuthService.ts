@@ -32,7 +32,8 @@ export class AuthService {
   }
 
   public async signInWithGoogle(redirectPath: string = '/'): Promise<AuthActionResult> {
-    const redirectTarget = redirectPath.startsWith('/') ? redirectPath : '/';
+    const isSafe = redirectPath.startsWith('/') && !redirectPath.startsWith('//') && !redirectPath.includes('\\');
+    const redirectTarget = isSafe ? redirectPath : '/';
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
     const callbackUrl = new URL('/auth/callback', origin || 'http://localhost:3000');
     callbackUrl.searchParams.set('next', redirectTarget);
@@ -179,10 +180,15 @@ export class AuthService {
 
     if (userData.user) {
       if (data.username !== undefined) {
+        const cleanUsername = data.username.trim().toLowerCase();
+        if (cleanUsername.length < 3 || cleanUsername.length > 30 || !/^[a-z0-9_]+$/.test(cleanUsername)) {
+          return { error: 'Username hanya boleh berupa 3-30 karakter alfanumerik dan garis bawah (_).' };
+        }
+
         const { data: existingUser, error: checkError } = await supabase
           .from('profiles')
           .select('id')
-          .eq('username', data.username)
+          .ilike('username', cleanUsername)
           .neq('id', userData.user.id)
           .maybeSingle();
           
@@ -194,7 +200,7 @@ export class AuthService {
       }
 
       const profileUpdates: any = {};
-      if (data.username !== undefined) profileUpdates.username = data.username;
+      if (data.username !== undefined) profileUpdates.username = data.username.trim().toLowerCase();
       if (data.name !== undefined) profileUpdates.display_name = data.name;
       if (data.bio !== undefined) profileUpdates.bio = data.bio;
       if (data.avatarUrl !== undefined) profileUpdates.avatar_url = data.avatarUrl;

@@ -1,11 +1,13 @@
 'use client';
 
 import { useLikedPlaylists } from '@/hooks/playlist/useLikedPlaylists';
+import { useTranslation } from '@/context/LanguageContext';
 import { ChevronLeft, Heart, Library, Music } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
 export default function LikedPlaylistsPage() {
+  const { t } = useTranslation();
   const { playlists, isLoading, isEmpty } = useLikedPlaylists();
 
   return (
@@ -17,7 +19,7 @@ export default function LikedPlaylistsPage() {
         </Link>
         <div className="flex items-center gap-2">
           <Heart size={22} className="text-[#FA243C] fill-[#FA243C]" />
-          <h1 className="text-[26px] font-bold text-white tracking-tight">Liked Playlists</h1>
+          <h1 className="text-[26px] font-bold text-white tracking-tight">{t('library.liked_playlists')}</h1>
         </div>
       </div>
 
@@ -28,12 +30,12 @@ export default function LikedPlaylistsPage() {
             <Heart size={22} className="text-[#FA243C] fill-[#FA243C]" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-white tracking-tight">Liked Playlists</h1>
-            <p className="text-xs text-white/50 mt-0.5">Public playlists you have saved to your library</p>
+            <h1 className="text-3xl font-bold text-white tracking-tight">{t('library.liked_playlists')}</h1>
+            <p className="text-xs text-white/50 mt-0.5">{t('library.liked_playlists_desc')}</p>
           </div>
         </div>
 
-        <span className="text-xs text-white/40">{playlists.length} playlists</span>
+        <span className="text-xs text-white/40">{playlists.length} {t('sidebar.playlists').toLowerCase()}</span>
       </div>
 
       {isLoading ? (
@@ -51,15 +53,15 @@ export default function LikedPlaylistsPage() {
           <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-white/40">
             <Library size={32} />
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">No liked playlists yet</h2>
+          <h2 className="text-xl font-bold text-white mb-2">{t('library.no_liked_playlists')}</h2>
           <p className="text-sm text-white/50 max-w-sm mb-6">
-            When you like a public playlist from search or another user, it will be saved here in your library.
+            {t('library.no_liked_playlists_desc')}
           </p>
           <Link
             href="/search"
             className="px-6 py-2.5 rounded-full bg-[#FA243C] text-white text-sm font-semibold hover:bg-opacity-90 transition-all active:scale-95"
           >
-            Find Playlists
+            {t('library.find_playlists')}
           </Link>
         </div>
       ) : (
@@ -98,7 +100,7 @@ export default function LikedPlaylistsPage() {
                   {playlist.name}
                 </p>
                 <p className="text-[12px] text-white/50 truncate mt-0.5">
-                  Liked Playlist
+                  {t('library.liked_playlist')}
                 </p>
               </div>
             </Link>

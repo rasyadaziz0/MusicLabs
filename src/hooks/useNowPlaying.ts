@@ -8,32 +8,14 @@ import { useLikedSongsIndex } from '@/hooks/library/useLikedSongsIndex';
 import { useToggleLikedSong } from '@/hooks/library/useToggleLikedSong';
 import { useLyrics } from '@/hooks/useLyrics';
 import { useRomanization } from '@/hooks/useRomanization';
-import { getEffectiveTime } from '@/lib/lyrics/lyricsOffsetStore';
-import { SlugHelper } from '@/lib/utils/SlugHelper';
+import { LyricSyncEngine } from '@/lib/lyrics/LyricSyncEngine';
+import { TrackShareService } from '@/lib/services/TrackShareService';
+import { MenuPositionCalculator } from '@/lib/utils/MenuPositionCalculator';
 import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react';
 
 export function useNowPlaying(isOpen: boolean) {
-  const {
-    currentTrack,
-    isPlaying,
-    isResolving,
-    isPreview,
-    currentTime,
-    duration,
-    volume,
-    togglePlay,
-    nextTrack,
-    prevTrack,
-    seek,
-    setVolume,
-    addToQueue,
-    isRadio,
-    radioMeta,
-    isShuffled,
-    repeatMode,
-    toggleShuffle,
-    cycleRepeatMode,
-  } = usePlayer();
+  const player = usePlayer();
+  const { currentTrack, duration, currentTime } = player;
 
   const trackId = currentTrack?.id ?? null;
   const isStation = Boolean(
@@ -41,9 +23,10 @@ export function useNowPlaying(isOpen: boolean) {
     currentTrack?.label === 'YouTube Live Station' ||
     currentTrack?.album?.name === 'Live Station'
   );
+
   const { lines, isSynced, isLoading: isLyricsLoading } = useLyrics(currentTrack, duration);
   const romanizations = useRomanization(lines, trackId);
-  const { user, signInWithGoogle } = useAuth();
+  const { user } = useAuth();
   const { likedSet } = useLikedSongsIndex();
   const { data: playlists = [], isLoading: isPlaylistsLoading } = useLibraryPlaylists();
   const toggleLikeMutation = useToggleLikedSong();
@@ -62,22 +45,13 @@ export function useNowPlaying(isOpen: boolean) {
   const [isGuestGateOpen, setIsGuestGateOpen] = useState(false);
   const [guestGateAction, setGuestGateAction] = useState('use this feature');
 
-  const activeIndex = useMemo(() => {
-    if (!isSynced || lines.length === 0) return -1;
-    const effectiveTime = getEffectiveTime(currentTime, trackId);
-    if (effectiveTime < lines[0].time) return -1;
-    let lo = 0;
-    let hi = lines.length - 1;
-    while (lo < hi) {
-      const mid = Math.floor((lo + hi + 1) / 2);
-      if (lines[mid].time <= effectiveTime) lo = mid;
-      else hi = mid - 1;
-    }
-    return lo;
-  }, [currentTime, isSynced, lines, trackId]);
+  // Lyric sync index calculation via LyricSyncEngine
+  const activeIndex = useMemo(
+    () => LyricSyncEngine.findActiveIndex(lines, currentTime, trackId, isSynced),
+    [currentTime, isSynced, lines, trackId]
+  );
 
-
-
+  // Close menus when NowPlaying modal closes
   useEffect(() => {
     if (!isOpen) {
       setIsLyricsOpen(false);
@@ -85,6 +59,7 @@ export function useNowPlaying(isOpen: boolean) {
     }
   }, [isOpen]);
 
+  // Click outside listener for moreMenu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
@@ -95,68 +70,42 @@ export function useNowPlaying(isOpen: boolean) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Viewport position calculation via MenuPositionCalculator
   useEffect(() => {
     if (!isMoreMenuOpen || !moreMenuRef.current) return;
-    const rect = moreMenuRef.current.getBoundingClientRect();
-    const spaceBelow = window.innerHeight - rect.bottom;
-    const spaceAbove = rect.top;
-    setOpenMenuUpward(spaceBelow < 420 && spaceAbove > spaceBelow);
+    setOpenMenuUpward(MenuPositionCalculator.shouldOpenUpward(moreMenuRef.current));
   }, [isMoreMenuOpen]);
+
+  // Auth gate guard helper
+  const requireAuth = (action: string): boolean => {
+    if (!user) {
+      setGuestGateAction(action);
+      setIsGuestGateOpen(true);
+      return false;
+    }
+    return true;
+  };
 
   const handleToggleLike = async (event: ReactMouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
-    if (!currentTrack) return;
-    if (!user) { setGuestGateAction('like this song'); setIsGuestGateOpen(true); return; }
+    if (!currentTrack || !requireAuth('like this song')) return;
     toggleLikeMutation.mutate(currentTrack.id);
-  };
-
-  const getTrackUrl = () => {
-    if (!currentTrack) return '';
-    const artistName = currentTrack.artists?.primary?.[0]?.name || 'unknown';
-    return `${window.location.origin}${SlugHelper.buildTrackPath(artistName, currentTrack.name, currentTrack.id)}`;
   };
 
   const handleShareAction = async () => {
     if (!currentTrack) return;
-    const trackUrl = getTrackUrl();
-    const payload = {
-      title: currentTrack.name,
-      text: `${currentTrack.artists.primary.map((a) => a.name).join(', ')} - ${currentTrack.name}`,
-      url: trackUrl,
-    };
-    try {
-      if (typeof navigator !== 'undefined' && 'share' in navigator) {
-        await navigator.share(payload);
-        setIsMoreMenuOpen(false);
-        return;
-      }
-      if (typeof navigator !== 'undefined' && 'clipboard' in navigator) {
-        const cb = (navigator as Navigator & { clipboard?: Clipboard }).clipboard;
-        if (cb?.writeText) await cb.writeText(trackUrl);
-      }
-      setIsMoreMenuOpen(false);
-    } catch (error) {
-      console.error('Gagal membuka aksi share:', error);
-    }
+    await TrackShareService.getInstance().shareTrack(currentTrack);
+    setIsMoreMenuOpen(false);
   };
 
   const handleCopyLinkAction = async () => {
     if (!currentTrack) return;
-    try {
-      const trackUrl = getTrackUrl();
-      if (typeof navigator !== 'undefined' && 'clipboard' in navigator) {
-        const cb = (navigator as Navigator & { clipboard?: Clipboard }).clipboard;
-        if (cb?.writeText) await cb.writeText(trackUrl);
-      }
-      setIsMoreMenuOpen(false);
-    } catch (error) {
-      console.error('Gagal menyalin link lagu:', error);
-    }
+    await TrackShareService.getInstance().copyTrackLink(currentTrack);
+    setIsMoreMenuOpen(false);
   };
 
   const handleAddToLibraryAction = async () => {
-    if (!currentTrack) return;
-    if (!user) { setGuestGateAction('add to your library'); setIsGuestGateOpen(true); return; }
+    if (!currentTrack || !requireAuth('add to your library')) return;
     if (!isLiked) toggleLikeMutation.mutate(currentTrack.id);
   };
 
@@ -166,8 +115,7 @@ export function useNowPlaying(isOpen: boolean) {
   };
 
   const handleAddToPlaylist = async (playlistId: string) => {
-    if (!currentTrack) return;
-    if (!user) { setGuestGateAction('add to a playlist'); setIsGuestGateOpen(true); return; }
+    if (!currentTrack || !requireAuth('add to a playlist')) return;
     setSelectedPlaylistId(playlistId);
     addToPlaylistMutation.mutate(
       { playlistId, trackId: currentTrack.id },
@@ -176,29 +124,29 @@ export function useNowPlaying(isOpen: boolean) {
           setTimeout(() => setSelectedPlaylistId(null), 1200);
           setIsMoreMenuOpen(false);
         },
-      },
+      }
     );
   };
 
   return {
     trackId,
     currentTrack,
-    isPlaying,
-    isResolving,
-    isPreview,
+    isPlaying: player.isPlaying,
+    isResolving: player.isResolving,
+    isPreview: player.isPreview,
     currentTime,
     duration,
-    volume,
-    togglePlay,
-    nextTrack,
-    prevTrack,
-    seek,
-    setVolume,
-    addToQueue,
-    isShuffled,
-    repeatMode,
-    toggleShuffle,
-    cycleRepeatMode,
+    volume: player.volume,
+    togglePlay: player.togglePlay,
+    nextTrack: player.nextTrack,
+    prevTrack: player.prevTrack,
+    seek: player.seek,
+    setVolume: player.setVolume,
+    addToQueue: player.addToQueue,
+    isShuffled: player.isShuffled,
+    repeatMode: player.repeatMode,
+    toggleShuffle: player.toggleShuffle,
+    cycleRepeatMode: player.cycleRepeatMode,
     lines,
     isSynced,
     romanizations,
@@ -227,8 +175,8 @@ export function useNowPlaying(isOpen: boolean) {
     isGuestGateOpen,
     guestGateAction,
     setIsGuestGateOpen,
-    isRadio,
-    radioMeta,
+    isRadio: player.isRadio,
+    radioMeta: player.radioMeta,
     isStation,
   };
 }

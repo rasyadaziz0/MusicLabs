@@ -1,6 +1,7 @@
 'use client';
 
 import { GlassBar } from '@/components/ui/LiquidGlass';
+import { useTranslation } from '@/context/LanguageContext';
 import { usePlayer } from '@/context/PlayerContext';
 import { getPortalRoot } from '@/lib/utils/portalRoot';
 import { DeviceInfo } from '@/types/connect';
@@ -14,6 +15,7 @@ import { DeviceSidebarHeader } from './DeviceSidebarHeader';
 import { DeviceSidebarProps } from "@/types/components/player/devices/DeviceSidebarProps";
 
 export default function DeviceSidebar({ isOpen, onClose }: DeviceSidebarProps) {
+  const { t } = useTranslation();
   const {
     myTabId,
     activeTabId,
@@ -74,7 +76,7 @@ export default function DeviceSidebar({ isOpen, onClose }: DeviceSidebarProps) {
                 {isElecting && (
                   <div className="flex items-center gap-2.5 mx-4 mt-3 p-3 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-medium animate-pulse flex-shrink-0">
                     <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
-                    <span>Menyambungkan ulang ke pemutar aktif…</span>
+                    <span>{t('connect.reconnecting')}</span>
                   </div>
                 )}
 
@@ -90,7 +92,7 @@ export default function DeviceSidebar({ isOpen, onClose }: DeviceSidebarProps) {
                 >
                   {(!connectedDevices || connectedDevices.length === 0) ? (
                     <div className="flex items-center justify-center h-40 text-sm text-white/40">
-                      Tidak ada perangkat lain yang terdeteksi
+                      {t('connect.no_devices')}
                     </div>
                   ) : (
                     connectedDevices.map((device: DeviceInfo, idx: number) => {

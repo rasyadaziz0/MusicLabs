@@ -1,6 +1,7 @@
 'use client';
 
 import { GlassBar } from '@/components/ui/LiquidGlass';
+import { useTranslation } from '@/context/LanguageContext';
 import { usePlayer } from '@/context/PlayerContext';
 import { getPortalRoot } from '@/lib/utils/portalRoot';
 import { StyleHelper } from '@/lib/utils/StyleHelper';
@@ -11,6 +12,7 @@ import { createPortal } from 'react-dom';
 import { DevicePickerModalProps } from "@/types/components/player/DevicePickerModalProps";
 
 export default function DevicePickerModal({ isOpen, onClose }: DevicePickerModalProps) {
+  const { t } = useTranslation();
   const {
     myTabId,
     activeTabId,
@@ -33,7 +35,7 @@ export default function DevicePickerModal({ isOpen, onClose }: DevicePickerModal
   const myDevice = connectedDevices?.find((d: any) => d.tabInstanceId === myTabId);
 
   const handleStartRename = () => {
-    setEditName(myDevice?.label || 'My Device');
+    setEditName(myDevice?.label || t('connect.this_device'));
     setIsEditing(true);
   };
 
@@ -70,7 +72,7 @@ export default function DevicePickerModal({ isOpen, onClose }: DevicePickerModal
               <div className="flex items-center gap-2.5">
                 <MonitorSpeaker className="w-5 h-5 text-[#1db954]" />
                 <h3 className="text-lg font-bold tracking-tight text-white font-display">
-                  Hubungkan ke Perangkat
+                  {t('connect.connect_to_device')}
                 </h3>
               </div>
               <button
@@ -89,14 +91,14 @@ export default function DevicePickerModal({ isOpen, onClose }: DevicePickerModal
                     type="text"
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    placeholder="Nama perangkat..."
+                    placeholder={t('connect.device_name')}
                     autoFocus
                     className="flex-1 px-3 py-1.5 text-xs rounded-xl bg-white/10 border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-[#1db954]"
                   />
                   <button
                     type="submit"
                     className="p-1.5 rounded-xl bg-[#1db954] text-black hover:bg-[#1db954]/90 transition-colors font-bold flex items-center justify-center"
-                    title="Simpan"
+                    title={t('common.save')}
                   >
                     <Check className="w-4 h-4" />
                   </button>
@@ -104,7 +106,7 @@ export default function DevicePickerModal({ isOpen, onClose }: DevicePickerModal
                     type="button"
                     onClick={() => setIsEditing(false)}
                     className="p-1.5 rounded-xl bg-white/10 text-white/70 hover:text-white transition-colors"
-                    title="Batal"
+                    title={t('common.cancel')}
                   >
                     <X className="w-4 h-4" />
                   </button>
@@ -115,7 +117,7 @@ export default function DevicePickerModal({ isOpen, onClose }: DevicePickerModal
                   className="flex items-center justify-center gap-2 w-full py-1.5 text-xs font-semibold text-white/70 hover:text-white rounded-xl hover:bg-white/5 transition-colors border border-white/5"
                 >
                   <Edit3 className="w-3.5 h-3.5 text-[#1db954]" />
-                  <span className="truncate">Ganti nama perangkat ini ({myDevice?.label || 'Perangkat Ini'})</span>
+                  <span className="truncate">{t('connect.rename_this_device')} ({myDevice?.label || t('connect.this_device')})</span>
                 </button>
               )}
             </div>
@@ -124,7 +126,7 @@ export default function DevicePickerModal({ isOpen, onClose }: DevicePickerModal
             {isElecting && (
               <div className="flex items-center gap-2.5 p-3 mb-4 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-medium animate-pulse">
                 <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" />
-                <span>Menyambungkan ulang ke pemutar aktif…</span>
+                <span>{t('connect.reconnecting')}</span>
               </div>
             )}
 
@@ -132,7 +134,7 @@ export default function DevicePickerModal({ isOpen, onClose }: DevicePickerModal
             <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-1">
               {connectedDevices?.length === 0 ? (
                 <div className="py-8 text-center text-sm text-white/40">
-                  Tidak ada perangkat lain yang terdeteksi
+                  {t('connect.no_devices')}
                 </div>
               ) : (
                 connectedDevices?.map((device: any, idx: number) => {
@@ -164,12 +166,12 @@ export default function DevicePickerModal({ isOpen, onClose }: DevicePickerModal
                             </span>
                             {isMe && (
                               <span className="px-1.5 py-0.5 rounded text-[10px] uppercase font-bold bg-white/10 text-white/70">
-                                Ini
+                                {t('connect.this_device')}
                               </span>
                             )}
                           </div>
                           <span className="text-xs text-white/50 truncate">
-                            {isActive ? 'Memutar audio di sini' : 'Klik untuk memindahkan'}
+                            {isActive ? t('connect.playing_here') : t('connect.click_to_switch')}
                           </span>
                         </div>
                       </div>

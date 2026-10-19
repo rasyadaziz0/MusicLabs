@@ -4,6 +4,7 @@ import PlaylistImporter from '@/components/playlist/PlaylistImporter';
 import { ToggleSwitch } from '@/components/ui/ToggleSwitch';
 import { useAuth } from '@/context/AuthContext';
 import { useFeatureFlags } from '@/context/FeatureFlagsContext';
+import { useTranslation } from '@/context/LanguageContext';
 import { useCreatePlaylist } from '@/hooks/library/useCreatePlaylist';
 import { uploadImage } from '@/lib/utils/uploadImage';
 import { gooeyToast as toast } from 'goey-toast';
@@ -13,6 +14,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { FormEvent, Suspense, useState } from 'react';
 
 function CreatePlaylistContent() {
+  const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, signInWithGoogle } = useAuth();
@@ -76,7 +78,7 @@ function CreatePlaylistContent() {
       {/* Top Header */}
       <div className="flex items-center justify-between mb-5">
         <h1 className="text-[26px] sm:text-[28px] font-bold tracking-tight text-white">
-          {activeTab === 'import' ? 'Import Playlist' : 'New Playlist'}
+          {activeTab === 'import' ? t('importer.title') : t('context_menu.new_playlist')}
         </h1>
         <div className="flex items-center gap-2 sm:gap-3">
           <button
@@ -84,7 +86,7 @@ function CreatePlaylistContent() {
             onClick={() => router.back()}
             className="px-3.5 py-1.5 text-[13px] font-semibold text-[#FA243C] hover:bg-[#FA243C]/10 active:bg-[#FA243C]/20 rounded-md transition-colors"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           {activeTab === 'create' && user && (
             <button
@@ -93,7 +95,7 @@ function CreatePlaylistContent() {
               disabled={createPlaylistMutation.isPending || !form.name.trim()}
               className="px-4 py-1.5 text-[13px] font-semibold bg-[#FA243C] text-white rounded-md hover:bg-[#FA243C]/90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
-              {createPlaylistMutation.isPending ? 'Creating...' : 'Create'}
+              {createPlaylistMutation.isPending ? t('common.loading') : t('library.create_playlist')}
             </button>
           )}
         </div>

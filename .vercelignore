@@ -1,8 +1,18 @@
 # Abaikan folder backend sepenuhnya dari Vercel
 backend/
+backend/__tests__/
+__tests__/
+*.test.ts
+*.test.js
+
+# Internal Docs, Reports, PDFs, Security Findings
+Report/
+docs dokumentasi/
+pdf materi/
 docs/
 scripts/
 TEMUAN.md
+SECURITY_AUDIT*.md
 
 # Node modules & logs
 node_modules/
@@ -10,9 +20,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Mac
+# Mac & OS
 .DS_Store
 
 # Local env files
 .env*.local
 .env
+

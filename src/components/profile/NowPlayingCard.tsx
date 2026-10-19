@@ -2,125 +2,36 @@
 
 import { TrackContextMenu } from '@/components/ui/TrackContextMenu';
 import { useTranslation } from '@/context/LanguageContext';
-import { usePlayer } from '@/context/PlayerContext';
-import { MusicApiService } from '@/lib/api/MusicApiService';
-import { supabase } from '@/lib/supabase/client';
-import { PresenceData } from '@/types/components/profile/PresenceData';
-import { Song } from '@/types/music';
+import { useNowPlayingCardController } from '@/hooks/profile/useNowPlayingCardController';
+import { NowPlayingCardPresenter } from '@/lib/profile/NowPlayingCardPresenter';
 import { AnimatePresence, motion } from 'framer-motion';
-import { gooeyToast as toast } from 'goey-toast';
 import { Loader2, MoreHorizontal, Music2, Play } from 'lucide-react';
 import Image from 'next/image';
-import { useEffect, useRef, useState } from 'react';
-// Only show presence if updated within the last 5 minutes
-const STALE_THRESHOLD_MS = 5 * 60 * 1000;
 
-function isPresenceFresh(updatedAt: string): boolean {
-  return Date.now() - new Date(updatedAt).getTime() < STALE_THRESHOLD_MS;
+interface NowPlayingCardProps {
+  userId: string;
 }
 
 /**
- * Shows what another user is currently listening to.
- * Fetches from `user_presence` table and auto-refreshes every 30s.
+ * Pure UI View: Shows what another user is currently listening to.
+ * Presentation & state lifecycle are decoupled via NowPlayingCardPresenter & useNowPlayingCardController.
  */
-export default function NowPlayingCard({ userId }: { userId: string }) {
+export default function NowPlayingCard({ userId }: NowPlayingCardProps) {
   const { t } = useTranslation();
-  const [presence, setPresence] = useState<PresenceData | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [contextMenuTrack, setContextMenuTrack] = useState<Song | null>(null);
-  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
-  
-  const { playTrack } = usePlayer();
-  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const {
+    presence,
+    isLoading,
+    contextMenuTrack,
+    menuPosition,
+    menuButtonRef,
+    handlePlayClick,
+    handleMoreClick,
+    handleCloseContextMenu,
+  } = useNowPlayingCardController({ userId });
 
-  useEffect(() => {
-    let mounted = true;
-
-    const fetchPresence = async () => {
-      const { data } = await supabase
-        .from('user_presence')
-        .select('track_id, track_name, artist_name, cover_url, updated_at')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      if (!mounted) return;
-
-      if (data?.track_id && isPresenceFresh(data.updated_at)) {
-        setPresence(data);
-      } else {
-        setPresence(null);
-      }
-    };
-
-    fetchPresence();
-
-    // Subscribe to realtime updates for this user's presence
-    const channel = supabase
-      .channel(`presence_${userId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'user_presence',
-          filter: `user_id=eq.${userId}`,
-        },
-        (payload) => {
-          if (!mounted) return;
-          if (payload.eventType === 'DELETE' || !payload.new?.track_id) {
-            setPresence(null);
-          } else {
-            setPresence(payload.new as PresenceData);
-          }
-        }
-      )
-      .subscribe();
-
-    // Fallback polling every 60 seconds (in case realtime connection drops)
-    const interval = setInterval(fetchPresence, 60_000);
-
-    return () => {
-      mounted = false;
-      clearInterval(interval);
-      supabase.removeChannel(channel);
-    };
-  }, [userId]);
-
-  const handlePlayClick = async () => {
-    if (!presence?.track_id || isLoading) return;
-    
-    setIsLoading(true);
-    try {
-      const song = await MusicApiService.getSong(presence.track_id);
-      playTrack(song);
-    } catch (error) {
-      console.error('Failed to fetch song:', error);
-      toast.error('Gagal memutar lagu ini');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleMoreClick = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!presence?.track_id || isLoading) return;
-    
-    // Optimistically open menu at pointer, but we need the track first
-    const rect = menuButtonRef.current?.getBoundingClientRect();
-    const pos = rect ? { x: rect.left, y: rect.bottom + 8 } : { x: e.clientX, y: e.clientY };
-    
-    setIsLoading(true);
-    try {
-      const song = await MusicApiService.getSong(presence.track_id);
-      setContextMenuTrack(song);
-      setMenuPosition(pos);
-    } catch (error) {
-      console.error('Failed to fetch song for menu:', error);
-      toast.error('Gagal memuat detail lagu');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const coverUrl = NowPlayingCardPresenter.getCoverUrl(presence);
+  const trackName = NowPlayingCardPresenter.getTrackName(presence);
+  const artistName = NowPlayingCardPresenter.getArtistName(presence);
 
   return (
     <>
@@ -136,10 +47,10 @@ export default function NowPlayingCard({ userId }: { userId: string }) {
           >
             {/* Artwork */}
             <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-white/5 shrink-0 shadow-lg group-hover:scale-105 transition-transform">
-              {presence.cover_url ? (
+              {coverUrl ? (
                 <Image
-                  src={presence.cover_url}
-                  alt={presence.track_name || ''}
+                  src={coverUrl}
+                  alt={trackName}
                   fill
                   sizes="48px"
                   className="object-cover"
@@ -149,7 +60,7 @@ export default function NowPlayingCard({ userId }: { userId: string }) {
                   <Music2 size={18} className="text-white/20" />
                 </div>
               )}
-              
+
               {/* Play / Loading Overlay */}
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                 {isLoading ? (
@@ -173,10 +84,10 @@ export default function NowPlayingCard({ userId }: { userId: string }) {
                 {t('profile.now_playing')}
               </p>
               <p className="text-[14px] font-semibold text-white truncate leading-tight group-hover:text-[#FA243C] transition-colors">
-                {presence.track_name}
+                {trackName}
               </p>
               <p className="text-[12px] text-white/40 truncate mt-0.5">
-                {presence.artist_name}
+                {artistName}
               </p>
             </div>
 
@@ -197,10 +108,7 @@ export default function NowPlayingCard({ userId }: { userId: string }) {
         track={contextMenuTrack}
         isOpen={!!menuPosition}
         position={menuPosition}
-        onClose={() => {
-          setMenuPosition(null);
-          setTimeout(() => setContextMenuTrack(null), 200);
-        }}
+        onClose={handleCloseContextMenu}
       />
     </>
   );

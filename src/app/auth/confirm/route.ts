@@ -26,8 +26,11 @@ export async function GET(request: NextRequest) {
   const code = searchParams.get('code');
   const next = searchParams.get('next') ?? '/';
 
-  // Validate the `next` path to prevent open redirect attacks
-  const safeNext = (next.startsWith('/') && !next.startsWith('//')) ? next : '/';
+  // Validate the `next` path to prevent open redirect attacks (SEC-11: mitigate backslash edge cases)
+  const isSafePath = (url: string) => {
+    return url.startsWith('/') && !url.startsWith('//') && !url.includes('\\');
+  };
+  const safeNext = (next && isSafePath(next)) ? next : '/';
 
   // Supabase SSR defaults to PKCE flow which sends a `code` instead of `token_hash`
   if (code) {

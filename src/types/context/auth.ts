@@ -23,5 +23,5 @@ export interface AuthContextType {
     lyricsFontSize?: 'small' | 'medium' | 'large';
     romanizationEnabled?: boolean;
     timezone?: string;
-  }) => Promise<{ user?: any; error?: string }>;
+  }) => Promise<{ user?: any; error?: string | null }>;
 }

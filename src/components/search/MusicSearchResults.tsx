@@ -7,6 +7,7 @@ import { AppleMusicTrackList } from '@/components/ui/AppleMusicTrackList';
 import { HorizontalScrollSection } from '@/components/ui/HorizontalScrollSection';
 import TrackLikeButton from '@/components/ui/TrackLikeButton';
 import { usePlayer } from '@/context/PlayerContext';
+import { useTranslation } from '@/context/LanguageContext';
 import { ArtistParser } from '@/lib/utils/ArtistParser';
 import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { SlugHelper } from '@/lib/utils/SlugHelper';
@@ -32,6 +33,7 @@ export function MusicSearchResults({
   topResult,
   topResults = [],
 }: MusicSearchResultsProps) {
+  const { t } = useTranslation();
   const { playTrack } = usePlayer();
   const router = useRouter();
   const [isExpandedTopResults, setIsExpandedTopResults] = useState(false);
@@ -101,7 +103,7 @@ export function MusicSearchResults({
                 : ''
             }`}
           >
-            Top Results
+            {t('search.top_results')}
             {!isExpandedTopResults && gridResults.length > 6 && (
               <ChevronRight size={26} className="mt-0.5 text-white/50" />
             )}
@@ -125,7 +127,7 @@ export function MusicSearchResults({
           {displayArtists.length > 0 && (
             <div className="mb-8">
               <HorizontalScrollSection
-                title="Artists"
+                title={t('search.artists')}
                 onSeeAll={() => setIsExpandedTopResults(true)}
               >
                 {displayArtists.map((artist: SearchArtistResult) => {
@@ -168,7 +170,7 @@ export function MusicSearchResults({
 
           {rankedAlbums && rankedAlbums.length > 0 && (
             <div className="mb-8">
-              <HorizontalScrollSection title="Albums">
+              <HorizontalScrollSection title={t('search.albums')}>
                 {rankedAlbums.map((album: any) => {
                   const coverUrl =
                     album.cover_big ||
@@ -224,7 +226,7 @@ export function MusicSearchResults({
 
           {displaySongs.length > 0 && (
             <div className="-mx-4 md:mx-0 mb-8">
-              <h2 className="text-2xl font-bold mb-4 px-4 md:px-0">Songs</h2>
+              <h2 className="text-2xl font-bold mb-4 px-4 md:px-0">{t('search.songs')}</h2>
               <AppleMusicTrackList
                 tracks={displaySongs}
                 onPlayTrack={playTrack}
@@ -254,7 +256,7 @@ export function MusicSearchResults({
                       }}
                       className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between group"
                     >
-                      <span>Share</span>
+                      <span>{t('context_menu.share')}</span>
                       <Share
                         size={15}
                         className="text-white/40 group-hover:text-white/80 transition-colors"
@@ -275,7 +277,7 @@ export function MusicSearchResults({
                       }}
                       className="w-full text-left px-4 py-2.5 text-[13px] font-medium text-white hover:bg-white/10 transition-colors flex items-center justify-between group"
                     >
-                      <span>Copy Link</span>
+                      <span>{t('context_menu.copy_link')}</span>
                       <Link2
                         size={15}
                         className="text-white/40 group-hover:text-white/80 transition-colors"
@@ -296,7 +298,7 @@ export function MusicSearchResults({
         !isArtistNameSongsLoading && (
           <div className="text-center py-20">
             <p className="text-xl text-white/50 font-medium">
-              No results found for &quot;{query}&quot;
+              {t('search.no_results')} &quot;{query}&quot;
             </p>
           </div>
         )}

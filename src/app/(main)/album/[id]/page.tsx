@@ -14,6 +14,9 @@ import { API_BASE } from '@/lib/config';
 
 const getAlbumData = cache(async (rawId: string) => {
   const itunesId = rawId.replace(/^itunes-album-/, '');
+  if (!itunesId || !/^[A-Za-z0-9_-]{1,64}$/.test(itunesId)) {
+    return null;
+  }
   const baseUrl = API_BASE || 'http://localhost:3001';
   try {
     const res = await fetch(`${baseUrl}/api/albums/${itunesId}`, { headers: { 'Origin': process.env.NEXT_PUBLIC_APP_URL || 'https://music.rasyadazizan.site' }, next: { revalidate: 3600 } });

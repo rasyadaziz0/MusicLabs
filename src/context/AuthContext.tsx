@@ -110,7 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (result.user) {
       setUser(result.user); // Update local state directly if profile changes
     }
-    return { error: result.error };
+    return { user: result.user, error: result.error };
   };
 
   return (

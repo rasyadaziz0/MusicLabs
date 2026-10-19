@@ -4,12 +4,14 @@ import { Camera, ChevronLeft, Crop, Loader2, Save } from 'lucide-react';
 
 import { InstagramIcon, TikTokIcon, XIcon } from '@/components/icons/SocialIcons';
 import { ImageCropModal } from '@/components/ui/ImageCropModal';
+import { useTranslation } from '@/context/LanguageContext';
 import { useEditProfileForm } from '@/hooks/useEditProfileForm';
 import { API_BASE } from '@/lib/config';
 import Image from 'next/image';
 import { useState } from 'react';
 
 export default function EditProfilePage() {
+  const { t } = useTranslation();
   const {
     form,
     meta,
@@ -63,7 +65,7 @@ export default function EditProfilePage() {
           >
             <ChevronLeft size={20} className="text-white" />
           </button>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Settings</h1>
+          <h1 className="text-2xl font-bold text-white tracking-tight">{t('settings.title')}</h1>
         </div>
         <button
           onClick={handleSubmit}
@@ -71,7 +73,7 @@ export default function EditProfilePage() {
           className="flex items-center justify-center gap-2 px-5 py-2 rounded-full bg-white text-black font-bold hover:scale-105 transition-transform disabled:opacity-50 disabled:scale-100"
         >
           {meta.isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-          Save
+          {t('common.save')}
         </button>
       </div>
 
