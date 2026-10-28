@@ -1,10 +1,10 @@
-import type { NextConfig } from "next";
 import { loadEnvConfig } from "@next/env";
 
 const projectDir = process.cwd();
 loadEnvConfig(projectDir);
 
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   /* config options here */
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error'] } : false,
@@ -13,9 +13,8 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: ['127.0.0.1', 'localhost', '10.110.2.174', 'music.rasyadazizan.site'],
 
   turbopack: {
-    root: __dirname,
+    root: projectDir,
   },
-
 
   // ─── Security Headers ───────────────────────────────────────────────────────
   async headers() {
@@ -62,11 +61,11 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '*.dzcdn.net',  // Deezer CDN — covers cdn-images, e-cdns-images, etc.
+        hostname: '*.dzcdn.net',
       },
       {
         protocol: 'https',
-        hostname: 'api.deezer.com',            // Deezer API image redirects
+        hostname: 'api.deezer.com',
       },
       {
         protocol: 'https',
@@ -110,18 +109,19 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: '*.spotifycdn.com', // Spotify Cover Arts
+        hostname: '*.spotifycdn.com',
       },
       {
         protocol: 'https',
-        hostname: 'i.scdn.co', // Spotify Tracks Arts
+        hostname: 'i.scdn.co',
       },
       {
         protocol: 'https',
-        hostname: 'mosaic.scdn.co', // Spotify Playlist Mosaic Cover Arts
+        hostname: 'mosaic.scdn.co',
       },
     ],
   },
 };
 
 export default nextConfig;
+
