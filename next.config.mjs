@@ -1,7 +1,4 @@
-import { loadEnvConfig } from "@next/env";
-
 const projectDir = process.cwd();
-loadEnvConfig(projectDir);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -124,4 +121,3 @@ const nextConfig = {
 };
 
 export default nextConfig;
-
