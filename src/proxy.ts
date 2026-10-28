@@ -1,7 +1,13 @@
-import { type NextRequest } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 import { updateSession } from './lib/supabase/middleware';
 
 export async function proxy(request: NextRequest) {
+  // Defense-in-depth: Reject Brotli compressed requests to mitigate Node2Shell (CVE-2026-111497)
+  const contentEncoding = request.headers.get('content-encoding');
+  if (contentEncoding && /\bbr\b/i.test(contentEncoding)) {
+    return new NextResponse('Unsupported Content-Encoding: br is disabled for security', { status: 415 });
+  }
+
   return await updateSession(request);
 }
 
