@@ -1,5 +1,6 @@
 import { Info } from 'lucide-react';
 import { Metadata } from 'next';
+import { APP_VERSION } from '@/config/version';
 
 export const metadata: Metadata = {
   title: 'About - AcadMusic',
@@ -30,7 +31,7 @@ export default function AboutPage() {
             live global radio stations, and seamless background playback on mobile devices.
           </p>
           <p className="pt-4 text-white/50 text-sm">
-            Version 1.1.0  <br />
+            Version {APP_VERSION}  <br />
             Made with ❤️ using Next.js & Supabase.
           </p>
         </div>

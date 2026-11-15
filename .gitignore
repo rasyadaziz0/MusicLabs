@@ -40,6 +40,8 @@ yarn-error.log*
 *.zip
 
 # AI Agents & Docs
+.agents/
+skills-lock.json
 AGENTS.md
 agents.md
 CLAUDE.md
@@ -61,6 +63,8 @@ TEMUAN.md
 /TEMUAN.md
 SECURITY_AUDIT*.md
 /SECURITY_AUDIT*.md
+SECURITY-AUDIT*.md
+/SECURITY-AUDIT*.md
 
 # Backend Service & Tests
 backend/

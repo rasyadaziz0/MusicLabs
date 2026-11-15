@@ -1,6 +1,6 @@
 {
   "name": "my-app",
-  "version": "0.1.0",
+  "version": "1.2.0",
   "private": true,
   "scripts": {
     "dev": "cross-env VERCEL= next dev --turbopack",
@@ -65,13 +65,14 @@
     "vitest": "^4.1.12"
   },
   "overrides": {
+    "minimatch": "^11.0.1",
     "axios": "^1.20.0",
     "sharp": "^0.35.5",
     "source-map-js": "^1.2.2",
     "baseline-browser-mapping": "^2.11.29",
     "undici": "^7.30.1",
     "js-yaml": "^4.3.2",
-    "brace-expansion": "^2.0.2",
+    "brace-expansion": "^5.0.12",
     "@distube/ytdl-core": {
       "undici": "^7.30.1"
     },

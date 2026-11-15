@@ -13,6 +13,9 @@ docs/
 scripts/
 TEMUAN.md
 SECURITY_AUDIT*.md
+SECURITY-AUDIT*.md
+skills-lock.json
+.agents/
 
 # Node modules & logs
 node_modules/

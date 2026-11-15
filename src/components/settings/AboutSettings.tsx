@@ -1,6 +1,7 @@
 import { BookOpen, Code2, Cookie, ExternalLink, FileText, Info, Mail, Scale, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { SectionHeader } from './SettingsUI';
+import { APP_VERSION_LABEL } from '@/config/version';
 
 export function AboutSettings({ t }: { t: (key: string) => string }) {
   const iconClass = "text-[#FA243C]"; // Matching the primary color used in other settings
@@ -16,7 +17,7 @@ export function AboutSettings({ t }: { t: (key: string) => string }) {
             <Info size={18} className={iconClass} />
             {t('settings.version')}
           </span>
-          <span className="text-[13px] text-white/40">v1.0.0 (Beta)</span>
+          <span className="text-[13px] text-white/40">{APP_VERSION_LABEL}</span>
         </div>
 
         {/* Terms of Use */}
