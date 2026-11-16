@@ -84,7 +84,7 @@ export function AppleMusicHeader({
             {title}
           </h1>
           {subtitle && (
-            <p className="text-lg md:text-xl text-[#FA243C] font-medium mb-1">
+            <p className="text-lg md:text-xl text-white/80 font-medium mb-1">
               {subtitle}
             </p>
           )}

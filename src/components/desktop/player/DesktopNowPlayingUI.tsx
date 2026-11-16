@@ -69,7 +69,7 @@ export default function DesktopNowPlayingUI(props: NowPlayingUIProps) {
           exit={{ opacity: 0, y: 14 }}
           transition={{ duration: 0.25, ease: 'easeOut' }}
           style={{
-            position: 'fixed', inset: 0, zIndex: 70, overflow: 'hidden',
+            position: 'fixed', inset: 0, zIndex: 100, overflow: 'hidden',
             fontFamily: "-apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif",
             color: '#fff',
           }}

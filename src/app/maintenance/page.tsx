@@ -203,7 +203,7 @@ export default function MaintenancePage() {
         >
           <div className="flex items-center gap-4 px-5 py-3">
             <a
-              href="https://kreate.gg/acadmusic"
+              href="https://yapp.ink/Acad"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 rounded-full hover:bg-white/[0.08] px-3 py-1.5 text-[12px] font-medium text-white/70 transition-all hover:text-white"

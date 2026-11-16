@@ -1,14 +1,14 @@
 'use client';
 
 import CollaboratorModal from '@/components/playlist/CollaboratorModal';
+import { AppleMusicPlaylistCover } from '@/components/playlist/AppleMusicPlaylistCover';
 import { PlaylistMenu } from '@/components/playlist/PlaylistMenu';
 import { PlaylistSkeleton } from '@/components/playlist/PlaylistSkeleton';
 import { PlaylistTrackListSection } from '@/components/playlist/PlaylistTrackListSection';
 import { AppleMusicHeader } from '@/components/ui/AppleMusicHeader';
 import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
+import { useSetPlaylistTheme } from '@/context/PlaylistThemeContext';
 import { usePlaylistController } from '@/hooks/library/usePlaylistController';
-import { Plus } from 'lucide-react';
-import Image from 'next/image';
 
 export default function PlaylistPage() {
   const {
@@ -23,6 +23,14 @@ export default function PlaylistPage() {
     actions,
   } = usePlaylistController();
 
+  // Dynamic Apple Music playlist background based on playlist cover / photo
+  useSetPlaylistTheme({
+    coverUrl: presenter.coverUrl,
+    playlistName: presenter.name,
+    playlistId: playlistId,
+    enabled: !isLoading,
+  });
+
   if (isLoading) {
     return <PlaylistSkeleton />;
   }
@@ -35,22 +43,11 @@ export default function PlaylistPage() {
         subtitle={presenter.subtitle}
         description={presenter.description}
         cover={
-          <div className="relative w-full h-full group">
-            {presenter.coverUrl ? (
-              <Image
-                src={presenter.coverUrl}
-                alt={presenter.name}
-                fill
-                priority
-                sizes="(max-width: 768px) 100vw, 300px"
-                className="object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-void">
-                <Plus size={64} className="text-white/20" />
-              </div>
-            )}
-          </div>
+          <AppleMusicPlaylistCover
+            name={presenter.name}
+            coverUrl={presenter.coverUrl}
+            priority
+          />
         }
         onPlay={actions.handlePlay}
         onShuffle={actions.handleShuffle}

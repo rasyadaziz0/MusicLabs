@@ -58,6 +58,7 @@ docs dokumentasi/
 pdf materi/
 /pdf materi/
 scripts/
+*.sql
 /scripts/
 TEMUAN.md
 /TEMUAN.md

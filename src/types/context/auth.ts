@@ -22,6 +22,7 @@ export interface AuthContextType {
     isPublic?: boolean; showNowPlaying?: boolean; showRecentlyPlayed?: boolean;
     lyricsFontSize?: 'small' | 'medium' | 'large';
     romanizationEnabled?: boolean;
+    shortcuts?: any;
     timezone?: string;
   }) => Promise<{ user?: any; error?: string | null }>;
 }

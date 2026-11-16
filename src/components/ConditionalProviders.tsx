@@ -4,6 +4,7 @@ import PWARegistration from '@/components/PWARegistration';
 import YouTubePlayerMount from '@/components/YouTubePlayerMount';
 import { LiquidGlassFilters } from '@/components/ui/LiquidGlass';
 import { ArtworkColorsProvider } from '@/context/ArtworkColorsContext';
+import { PlaylistThemeProvider } from '@/context/PlaylistThemeContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { FeatureFlagsProvider } from '@/context/FeatureFlagsContext';
 import { ImportProvider } from '@/context/ImportContext';
@@ -39,8 +40,10 @@ export default function ConditionalProviders({
                 <ImportProvider>
                   <PlayerProvider>
                     <ArtworkColorsProvider>
-                      {children}
-                      <YouTubePlayerMount />
+                      <PlaylistThemeProvider>
+                        {children}
+                        <YouTubePlayerMount />
+                      </PlaylistThemeProvider>
                     </ArtworkColorsProvider>
                   </PlayerProvider>
                 </ImportProvider>

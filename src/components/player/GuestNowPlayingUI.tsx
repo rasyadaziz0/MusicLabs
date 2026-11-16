@@ -43,7 +43,7 @@ export function GuestNowPlayingUI(props: NowPlayingUIProps) {
             if (isMobile && (offset.y > 100 || velocity.y > 500)) props.onClose?.();
           }}
           style={{
-            position: 'fixed', inset: 0, zIndex: 70, overflow: 'hidden',
+            position: 'fixed', inset: 0, zIndex: 100, overflow: 'hidden',
             fontFamily: "-apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif",
             color: '#fff',
           }}

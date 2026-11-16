@@ -1,5 +1,6 @@
 import Footer from '@/components/layout/Footer';
 import ConsoleCleaner from '@/components/ui/ConsoleCleaner';
+import { AppleMusicDynamicBackground } from '@/components/layout/AppleMusicDynamicBackground';
 import { ReactNode } from 'react';
 import PlayerBar from '../../player/PlayerBar';
 
@@ -15,9 +16,9 @@ export default function BaseLayout({
   renderMobileNav,
 }: IMainLayoutProps) {
   return (
-    <div className="flex h-screen overflow-hidden bg-void gradient-mesh relative">
+    <div className="flex h-screen overflow-hidden bg-void relative">
       <ConsoleCleaner />
-      {/* Desktop Sidebar — hidden on mobile */}
+      <AppleMusicDynamicBackground />
       <div className="absolute top-2 left-2 bottom-2 z-20 pointer-events-auto hidden md:block">
         {renderDesktopNav()}
       </div>
@@ -39,7 +40,6 @@ export default function BaseLayout({
           </div>
         </div>
 
-        {/* Mobile Navigation — hidden on desktop */}
         <div className="block md:hidden">
           {renderMobileNav()}
         </div>

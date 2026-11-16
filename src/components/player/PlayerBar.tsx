@@ -14,6 +14,7 @@ import NowPlaying from './NowPlaying';
 import DeviceSidebar from './devices/DeviceSidebar';
 import { PlayerBarProps } from "@/types/components/player/PlayerBarProps";
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { usePlayerKeyboardShortcuts } from '@/hooks/usePlayerKeyboardShortcuts';
 
 const MobilePlayerBar = dynamic(() => import('@/components/mobile/player/MobilePlayerBar'), { ssr: false });
 const DesktopPlayerBar = dynamic(() => import('@/components/desktop/player/DesktopPlayerBar'), { ssr: false });
@@ -58,6 +59,19 @@ export default function PlayerBar({ isMobile: propIsMobile }: PlayerBarProps = {
   const [isLyricsOpen, setIsLyricsOpen] = useState(false);
   const [isDevicesOpen, setIsDevicesOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // YouTube-style keyboard shortcuts & Esc to close Now Playing
+  usePlayerKeyboardShortcuts({
+    currentTrack,
+    togglePlay,
+    nextTrack,
+    prevTrack,
+    seek,
+    currentTime,
+    duration,
+    isNowPlayingOpen,
+    onCloseNowPlaying: () => setIsNowPlayingOpen(false),
+  });
 
   // Automatically close sidebars when Now Playing is opened
   useEffect(() => {

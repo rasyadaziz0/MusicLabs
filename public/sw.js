@@ -16,10 +16,11 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   
   // Bypass Service Worker untuk request lintas origin (seperti API Supabase, YouTube, dll)
-  // serta route internal Vercel, API, dan range requests (audio streaming)
+  // serta route internal Vercel, Next.js chunks/HMR, API, dan range requests (audio streaming)
   if (
     url.origin !== self.location.origin || 
     url.pathname.startsWith('/_vercel') ||
+    url.pathname.startsWith('/_next/') ||
     url.pathname.startsWith('/api/') ||
     event.request.headers.has('range')
   ) {

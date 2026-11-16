@@ -6,6 +6,7 @@ import AddToQueueButton from '@/components/ui/AddToQueueButton';
 import { AppleMusicHeader } from '@/components/ui/AppleMusicHeader';
 import { AppleMusicTrackList } from '@/components/ui/AppleMusicTrackList';
 import TrackLikeButton from '@/components/ui/TrackLikeButton';
+import { useSetPlaylistTheme } from '@/context/PlaylistThemeContext';
 import { usePlayer } from '@/context/PlayerContext';
 import { escapeHtmlAttr } from '@/lib/utils/escapeHtml';
 import { gooeyToast as toast } from 'goey-toast';
@@ -39,6 +40,13 @@ export default function AlbumPageClient({
   const { playTrack, shufflePlay } = usePlayer();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Dynamic Apple Music album background based on cover photo
+  useSetPlaylistTheme({
+    coverUrl,
+    playlistName: albumTitle,
+    playlistId: albumId,
+  });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

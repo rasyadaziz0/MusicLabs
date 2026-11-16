@@ -16,6 +16,7 @@ import { ChevronLeft, Loader2, Save } from 'lucide-react';
 // Import newly extracted section components
 import { AboutSettings } from '@/components/settings/AboutSettings';
 import { AccountSettings } from '@/components/settings/AccountSettings';
+import { KeyboardShortcutsSettings } from '@/components/settings/KeyboardShortcutsSettings';
 import { LyricsSettings } from '@/components/settings/LyricsSettings';
 import { PrivacySocialSettings } from '@/components/settings/PrivacySocialSettings';
 import { SearchDiscoverySettings } from '@/components/settings/SearchDiscoverySettings';
@@ -94,6 +95,7 @@ export default function SettingsPage() {
       showRecentlyPlayed,
       lyricsFontSize: lyricsFontSize as 'small' | 'medium' | 'large',
       romanizationEnabled,
+      shortcuts: settings.shortcuts,
     });
 
     if (updateError) {
@@ -211,6 +213,11 @@ export default function SettingsPage() {
         setRomanizationEnabled={setRomanizationEnabled}
         fontSizeOptions={fontSizeOptions}
       />
+
+      {/* ═══════════════════════════════════════════════════════════
+          SECTION 3.5: KEYBOARD SHORTCUTS
+         ═══════════════════════════════════════════════════════════ */}
+      <KeyboardShortcutsSettings />
 
       {/* ═══════════════════════════════════════════════════════════
           SECTION 4: PRIVACY & SOCIAL

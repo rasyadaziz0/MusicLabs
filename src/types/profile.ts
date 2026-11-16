@@ -13,6 +13,7 @@ export interface UserProfile {
   show_recently_played: boolean;
   lyrics_font_size: 'small' | 'medium' | 'large';
   romanization_enabled: boolean;
+  keyboard_shortcuts?: Record<string, string> | null;
   timezone?: string | null;
   created_at: string;
 }

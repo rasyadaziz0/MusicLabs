@@ -163,11 +163,13 @@ export class AuthService {
     isPublic?: boolean; showNowPlaying?: boolean; showRecentlyPlayed?: boolean;
     lyricsFontSize?: 'small' | 'medium' | 'large';
     romanizationEnabled?: boolean;
+    shortcuts?: any;
     timezone?: string;
   }): Promise<{ error: string | null; user?: any }> {
     const authUpdateData: any = {};
     if (data.name !== undefined) authUpdateData.name = data.name;
     if (data.avatarUrl !== undefined) authUpdateData.avatar_url = data.avatarUrl;
+    if (data.shortcuts !== undefined) authUpdateData.keyboard_shortcuts = data.shortcuts;
 
     const { data: userData, error: authError } = await supabase.auth.updateUser({
       data: authUpdateData
@@ -213,6 +215,7 @@ export class AuthService {
       if (data.showRecentlyPlayed !== undefined) profileUpdates.show_recently_played = data.showRecentlyPlayed;
       if (data.lyricsFontSize !== undefined) profileUpdates.lyrics_font_size = data.lyricsFontSize;
       if (data.romanizationEnabled !== undefined) profileUpdates.romanization_enabled = data.romanizationEnabled;
+      if (data.shortcuts !== undefined) profileUpdates.keyboard_shortcuts = data.shortcuts;
       if (data.timezone !== undefined) profileUpdates.timezone = data.timezone;
 
       try {

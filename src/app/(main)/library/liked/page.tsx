@@ -8,7 +8,9 @@ import TrackLikeButton from '@/components/ui/TrackLikeButton';
 import { useAuth } from '@/context/AuthContext';
 import { useTranslation } from '@/context/LanguageContext';
 import { usePlayer } from '@/context/PlayerContext';
+import { useSetPlaylistTheme } from '@/context/PlaylistThemeContext';
 import { useLikedSongs } from '@/hooks/library/useLikedSongs';
+import { ImageHelper } from '@/lib/utils/ImageHelper';
 import { Heart, Link2, MoreHorizontal, Play, Share, Shuffle } from 'lucide-react';
 import Link from 'next/link';
 
@@ -23,6 +25,13 @@ export default function LikedSongsPage() {
   
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const firstTrackCover = likedSongs[0] ? ImageHelper.getBestImageUrl(likedSongs[0].image) : null;
+  useSetPlaylistTheme({
+    coverUrl: firstTrackCover,
+    playlistName: 'Favourite Songs',
+    playlistId: 'liked-songs',
+  });
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

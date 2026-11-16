@@ -41,20 +41,23 @@ export default function RadioPage() {
   // GSAP entrance animation
   useEffect(() => {
     if (!isLoading && containerRef.current) {
-      gsap.fromTo(
-        containerRef.current.querySelectorAll('.radio-card'),
-        { y: 30, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 0.5,
-          stagger: 0.04,
-          ease: 'power3.out',
-          clearProps: 'all',
-        }
-      );
+      const cards = containerRef.current.querySelectorAll('.radio-card');
+      if (cards.length > 0) {
+        gsap.fromTo(
+          cards,
+          { y: 30, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.5,
+            stagger: 0.04,
+            ease: 'power3.out',
+            clearProps: 'all',
+          }
+        );
+      }
     }
-  }, [isLoading, activeCategory, searchQuery]);
+  }, [isLoading, activeCategory, searchQuery, filteredStations.length]);
 
   return (
     <div ref={containerRef} className="pb-12 pt-2 space-y-8">

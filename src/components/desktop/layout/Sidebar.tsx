@@ -68,10 +68,10 @@ export default function Sidebar() {
   const isGuest = !user;
 
   const navLinkClass = (isActive: boolean) => StyleHelper.cn(
-    "flex items-center gap-3 md:portrait:gap-2 px-3 md:portrait:px-2 py-1.5 mx-2 md:portrait:mx-1 rounded-md transition-colors text-[13px] md:portrait:text-[12px] font-medium border",
+    "flex items-center gap-3 md:portrait:gap-2 px-3 md:portrait:px-2 py-1.5 mx-2 md:portrait:mx-1 rounded-lg transition-colors text-[13px] md:portrait:text-[12px] font-medium border",
     isActive
-      ? "bg-[#FA243C]/20 text-white border-[#FA243C]"
-      : "text-white/80 hover:bg-white/5 border-transparent"
+      ? "bg-white/15 text-white border-white/20 shadow-sm font-semibold"
+      : "text-white/75 hover:text-white hover:bg-white/5 border-transparent"
   );
 
   const handleSignOut = async () => {

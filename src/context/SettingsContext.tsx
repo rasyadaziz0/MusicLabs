@@ -4,9 +4,7 @@ import { SettingsService } from '@/lib/services/SettingsService';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { useAuth } from './AuthContext';
 
-import { UserSettings } from '@/types/context/settings';
-
-import { SettingsContextType } from '@/types/context/settings';
+import { DEFAULT_KEYBOARD_SHORTCUTS, KeyboardShortcutsConfig, UserSettings, SettingsContextType } from '@/types/context/settings';
 
 const DEFAULT_SETTINGS: UserSettings = {
   lyricsFontSize: 'medium',
@@ -14,6 +12,7 @@ const DEFAULT_SETTINGS: UserSettings = {
   isPublic: true,
   showNowPlaying: true,
   showRecentlyPlayed: true,
+  shortcuts: DEFAULT_KEYBOARD_SHORTCUTS,
 };
 
 const STORAGE_KEY = 'userSettings';
@@ -21,6 +20,8 @@ const STORAGE_KEY = 'userSettings';
 const SettingsContext = createContext<SettingsContextType>({
   settings: DEFAULT_SETTINGS,
   updateSettings: () => {},
+  updateShortcuts: () => {},
+  resetShortcuts: () => {},
   isLoaded: false,
 });
 
@@ -65,8 +66,48 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
+  const updateShortcuts = useCallback((partial: Partial<KeyboardShortcutsConfig>) => {
+    setSettings(prev => {
+      const nextShortcuts = {
+        ...(prev.shortcuts || DEFAULT_KEYBOARD_SHORTCUTS),
+        ...partial,
+      };
+      const next: UserSettings = {
+        ...prev,
+        shortcuts: nextShortcuts,
+      };
+      SettingsService.getInstance().saveLocalSettings(next);
+      if (user) {
+        SettingsService.getInstance().syncShortcutsToRemote(nextShortcuts);
+      }
+      return next;
+    });
+  }, [user]);
+
+  const resetShortcuts = useCallback(() => {
+    setSettings(prev => {
+      const next: UserSettings = {
+        ...prev,
+        shortcuts: DEFAULT_KEYBOARD_SHORTCUTS,
+      };
+      SettingsService.getInstance().saveLocalSettings(next);
+      if (user) {
+        SettingsService.getInstance().syncShortcutsToRemote(DEFAULT_KEYBOARD_SHORTCUTS);
+      }
+      return next;
+    });
+  }, [user]);
+
   return (
-    <SettingsContext.Provider value={{ settings, updateSettings, isLoaded }}>
+    <SettingsContext.Provider
+      value={{
+        settings,
+        updateSettings,
+        updateShortcuts,
+        resetShortcuts,
+        isLoaded,
+      }}
+    >
       {children}
     </SettingsContext.Provider>
   );
